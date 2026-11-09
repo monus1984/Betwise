@@ -15,6 +15,7 @@ const selectionSchema = z.object({
   selection: z.string().trim().min(1).max(60),
   cote: z.number().gt(1).lte(1000),
   origin_source_id: z.string().uuid(),
+  prediction_id: z.string().uuid().nullable().optional(),
 }).refine((s) => s.match_id || s.match_libre, { message: "Match requis" });
 
 const placeSchema = z.object({

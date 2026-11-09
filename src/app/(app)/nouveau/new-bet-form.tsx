@@ -1,14 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { MatchPicker, SELECTIONS, labelSel, toNum, type MatchHit } from "@/components/match-picker";
 import { placeBet } from "@/lib/bets/actions";
 import { Button, Chip, Field, Input, Notice, RISK_CLASS, RISK_LABEL, fcfa, riskFromOdds } from "@/components/ui";
 
 type Source = { id: string; nom: string; type: string };
 type Market = { code: string; libelle_fr: string; a_parametre: boolean };
-type MatchHit = { id: string; kickoff_at: string; statut: string; home: string; away: string; competition: string };
-
 type Line = {
   key: number;
   query: string;
@@ -18,21 +17,10 @@ type Line = {
   selection: string;
   cote: string;
   origin: string | null;
+  predictionId: string | null;
 };
 
-const SELECTIONS: Record<string, string[]> = {
-  "1X2": ["1", "N", "2"],
-  DC: ["1N", "12", "N2"],
-  DNB: ["1", "2"],
-  OU: ["Plus", "Moins"],
-  BTTS: ["Oui", "Non"],
-  AH: ["1", "2"],
-  CS: [],
-};
-
-const toNum = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
-
-type Prefill = { match: MatchHit | null; market?: string; param?: string; sel?: string; cote?: string };
+type Prefill = { match: MatchHit | null; market?: string; param?: string; sel?: string; cote?: string; origin?: string; prediction?: string };
 
 export function NewBetForm({ sources, markets, defaultOrigin, prefill }: { sources: Source[]; markets: Market[]; defaultOrigin: string | null; prefill?: Prefill }) {
   const router = useRouter();
@@ -45,6 +33,8 @@ export function NewBetForm({ sources, markets, defaultOrigin, prefill }: { sourc
     if (prefill?.market) { l.market = prefill.market; l.param = prefill.param ?? (prefill.market === "OU" ? "2.5" : ""); }
     if (prefill?.sel) l.selection = prefill.sel;
     if (prefill?.cote) l.cote = prefill.cote;
+    if (prefill?.origin) l.origin = prefill.origin;
+    if (prefill?.prediction) l.predictionId = prefill.prediction;
     return [l];
   });
   const [, setTick] = useState(0);
@@ -69,6 +59,7 @@ export function NewBetForm({ sources, markets, defaultOrigin, prefill }: { sourc
         selection: l.selection.trim(),
         cote: toNum(l.cote),
         origin_source_id: l.origin ?? "",
+        prediction_id: l.predictionId,
       })),
     };
     start(async () => {
@@ -89,7 +80,7 @@ export function NewBetForm({ sources, markets, defaultOrigin, prefill }: { sourc
             </div>
           )}
 
-          <MatchPicker line={l} onChange={(patch) => update(l.key, patch)} />
+          <MatchPicker line={{ query: l.query, match: l.match }} onChange={(patch) => update(l.key, patch)} />
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Marché">
@@ -166,81 +157,10 @@ export function NewBetForm({ sources, markets, defaultOrigin, prefill }: { sourc
 }
 
 function newLine(key: number, origin: string | null): Line {
-  return { key, query: "", match: null, market: "1X2", param: "", selection: "", cote: "", origin };
+  return { key, query: "", match: null, market: "1X2", param: "", selection: "", cote: "", origin, predictionId: null };
 }
 
 function ready(lines: Line[], mise: number) {
   return mise > 0 && lines.every((l) => (l.match || l.query.trim().length >= 2) && l.selection.trim() && toNum(l.cote) > 1 && l.origin);
 }
 
-function labelSel(market: string, s: string, m: MatchHit | null) {
-  if (market === "1X2" || market === "DNB" || market === "AH") {
-    if (s === "1") return m ? short(m.home) : "Domicile";
-    if (s === "2") return m ? short(m.away) : "Extérieur";
-    return "Nul";
-  }
-  if (market === "DC") return { "1N": "Dom. ou nul", "12": "Dom. ou ext.", N2: "Nul ou ext." }[s] ?? s;
-  return s;
-}
-const short = (n: string) => n.replace(/\s?(FC|CF|SC|AC|AS|US|SV|RB|SSC|Calcio|Club de Fútbol|Football Club)\b\.?/g, "").trim().slice(0, 16);
-
-function MatchPicker({ line, onChange }: { line: Line; onChange: (p: Partial<Line>) => void }) {
-  const [hits, setHits] = useState<MatchHit[]>([]);
-  const [open, setOpen] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (line.match || line.query.trim().length < 2) { setHits([]); return; }
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(async () => {
-      const r = await fetch(`/api/matches/search?q=${encodeURIComponent(line.query.trim())}`);
-      const j = await r.json();
-      setHits(j.matches ?? []);
-      setOpen(true);
-    }, 250);
-    return () => { if (timer.current) clearTimeout(timer.current); };
-  }, [line.query, line.match]);
-
-  if (line.match) {
-    const m = line.match;
-    return (
-      <Field label="Match">
-        <div className="flex items-center justify-between rounded-lg border border-slate-900 bg-slate-50 px-3 py-2.5">
-          <div className="text-sm">
-            <p className="font-medium">{m.home} – {m.away}</p>
-            <p className="text-xs text-slate-500">{m.competition} · {fmtDate(m.kickoff_at)}</p>
-          </div>
-          <button type="button" className="text-xs text-slate-600 underline" onClick={() => onChange({ match: null, query: "" })}>Changer</button>
-        </div>
-      </Field>
-    );
-  }
-
-  return (
-    <Field label="Match" hint="Tape un nom d’équipe. Si le match n’est pas trouvé, le texte sera gardé tel quel.">
-      <div className="relative">
-        <Input value={line.query} onChange={(e) => onChange({ query: e.target.value })} onFocus={() => setOpen(true)} placeholder="ex. PSG, Real, Arsenal…" autoComplete="off" />
-        {open && hits.length > 0 && (
-          <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
-            {hits.map((h) => (
-              <li key={h.id}>
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-between px-3 py-2.5 text-left text-sm hover:bg-slate-50"
-                  onClick={() => { onChange({ match: h, query: `${h.home} – ${h.away}` }); setOpen(false); }}
-                >
-                  <span>{h.home} – {h.away}</span>
-                  <span className="ml-2 shrink-0 text-xs text-slate-500">{h.competition} · {fmtDate(h.kickoff_at)}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </Field>
-  );
-}
-
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleString("fr-FR", { weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" });
-}

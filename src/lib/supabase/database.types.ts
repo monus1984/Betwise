@@ -976,6 +976,26 @@ export type Database = {
       }
     }
     Views: {
+      source_trend: {
+        Row: {
+          source_id: string | null
+          nb_declares: number | null
+          nb_verifies: number | null
+          nb_regles: number | null
+          nb_gagnes: number | null
+          nb_perdus: number | null
+          unites_nettes: number | null
+          nb_avec_cote: number | null
+          prudent_regles: number | null
+          prudent_gagnes: number | null
+          moyen_regles: number | null
+          moyen_gagnes: number | null
+          risque_regles: number | null
+          risque_gagnes: number | null
+          dernier_prono: string | null
+        }
+        Relationships: []
+      }
       my_bankroll_summary: {
         Row: {
           bankroll_id: string | null
@@ -1003,7 +1023,7 @@ export type Database = {
       }
       ensure_profile: {
         Args: {
-          p_pseudo?: string
+          p_pseudo?: string | null
         }
         Returns: Database["betwise"]["Tables"]["profiles"]["Row"]
       }
@@ -1011,10 +1031,10 @@ export type Database = {
         Args: {
           p_mise: number
           p_selections: Json
-          p_source_import?: Database["betwise"]["Enums"]["import_channel"]
-          p_raw_text?: string
-          p_upload_id?: string
-          p_placed_at?: string
+          p_source_import?: Database["betwise"]["Enums"]["import_channel"] | null
+          p_raw_text?: string | null
+          p_upload_id?: string | null
+          p_placed_at?: string | null
         }
         Returns: string
       }
@@ -1022,7 +1042,7 @@ export type Database = {
         Args: {
           p_type: Database["betwise"]["Enums"]["tx_type"]
           p_montant: number
-          p_note?: string
+          p_note?: string | null
         }
         Returns: Database["betwise"]["Tables"]["bankroll_transactions"]["Row"]
       }
@@ -1032,6 +1052,42 @@ export type Database = {
           p_result: Database["betwise"]["Enums"]["settle_result"]
         }
         Returns: Database["betwise"]["Tables"]["bets"]["Row"]
+      }
+      settle_selection: {
+        Args: {
+          p_market: string
+          p_param: number
+          p_selection: string
+          p_home: number
+          p_away: number
+        }
+        Returns: Database["betwise"]["Enums"]["settle_result"]
+      }
+      settle_pending: {
+        Args: Record<PropertyKey, never>
+        Returns: { matchs: number; selections_reglees: number; pronos_regles: number; paris_finalises: number }[]
+      }
+      log_prediction: {
+        Args: {
+          p_source_id: string
+          p_market_code: string
+          p_selection: string
+          p_match_id?: string | null
+          p_match_libre?: string | null
+          p_market_param?: number | null
+          p_cote_annoncee?: number | null
+          p_risque_annonce?: Database["betwise"]["Enums"]["risk_category"] | null
+          p_published_at?: string | null
+          p_upload_id?: string | null
+        }
+        Returns: { prediction_id: string; created: boolean; statut: Database["betwise"]["Enums"]["prediction_status"] }[]
+      }
+      cancel_prediction: {
+        Args: {
+          p_id: string
+          p_motif: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

@@ -27,6 +27,14 @@ async function main() {
     }
   }
   console.log(`Total : ${total} matchs, ${failures.length} échec(s)${failures.length ? ` (${failures.join(", ")})` : ""}`);
+
+  // Règlement automatique de tout ce qui attend un score désormais connu
+  const { data: settled, error: settleErr } = await db.rpc("settle_pending");
+  if (settleErr) console.error("Règlement :", settleErr.message);
+  else {
+    const r = Array.isArray(settled) ? settled[0] : settled;
+    console.log(`Règlement : ${r?.matchs ?? 0} match(s), ${r?.selections_reglees ?? 0} sélection(s), ${r?.pronos_regles ?? 0} prono(s), ${r?.paris_finalises ?? 0} pari(s) finalisé(s)`);
+  }
   if (failures.length === codes.length) process.exit(1);
 }
 

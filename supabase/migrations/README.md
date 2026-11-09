@@ -13,3 +13,4 @@ appartient à Kehiwa : aucune migration BETWISE ne doit y toucher.
 Réglage requis côté tableau de bord : Project Settings → Data API → Exposed schemas → ajouter `betwise`.
 | 0004_place_and_settle_bet.sql | 2026-11-09 | `place_bet()`, `settle_bet()`, `bankroll_move()` (transactions atomiques), vue `my_bankroll_summary` |
 | 0005_place_bet_records_odds.sql | 2026-11-09 | `place_bet()` journalise la cote de chaque sélection rapprochée dans `odds_observations` (origine `ticket`) |
+| 0006_settlement_and_predictions.sql | 2026-11-09 | `settle_selection()` (règles par marché), `settle_by_match()`, `settle_pending()`, `finalize_bet()`, `log_prediction()`, `cancel_prediction()`, vue `source_trend` |

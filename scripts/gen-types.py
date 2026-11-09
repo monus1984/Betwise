@@ -50,6 +50,7 @@ TABLES = {
 }
 
 VIEWS = {
+    "source_trend": "source_id:uuid? nb_declares:int8? nb_verifies:int8? nb_regles:int8? nb_gagnes:int8? nb_perdus:int8? unites_nettes:numeric? nb_avec_cote:int8? prudent_regles:int8? prudent_gagnes:int8? moyen_regles:int8? moyen_gagnes:int8? risque_regles:int8? risque_gagnes:int8? dernier_prono:timestamptz?",
     "my_bankroll_summary": "bankroll_id:uuid? user_id:uuid? devise:text? solde:numeric? exposition:numeric? resultat_net:numeric? nb_regles:int8? nb_gagnes:int8?",
 }
 
@@ -92,6 +93,10 @@ FUNCTIONS = {
     "place_bet": ([("p_mise", "numeric", False), ("p_selections", "jsonb", False), ("p_source_import", "enum:import_channel", True), ("p_raw_text", "text", True), ("p_upload_id", "uuid", True), ("p_placed_at", "timestamptz", True)], "uuid"),
     "bankroll_move": ([("p_type", "enum:tx_type", False), ("p_montant", "numeric", False), ("p_note", "text", True)], "row:bankroll_transactions"),
     "settle_bet": ([("p_bet_id", "uuid", False), ("p_result", "enum:settle_result", False)], "row:bets"),
+    "settle_selection": ([("p_market", "text", False), ("p_param", "numeric", False), ("p_selection", "text", False), ("p_home", "int4", False), ("p_away", "int4", False)], "enum:settle_result"),
+    "settle_pending": ([], "setof:matchs:int4,selections_reglees:int4,pronos_regles:int4,paris_finalises:int4"),
+    "log_prediction": ([("p_source_id", "uuid", False), ("p_market_code", "text", False), ("p_selection", "text", False), ("p_match_id", "uuid", True), ("p_match_libre", "text", True), ("p_market_param", "numeric", True), ("p_cote_annoncee", "numeric", True), ("p_risque_annonce", "enum:risk_category", True), ("p_published_at", "timestamptz", True), ("p_upload_id", "uuid", True)], "setof:prediction_id:uuid,created:bool,statut:enum:prediction_status"),
+    "cancel_prediction": ([("p_id", "uuid", False), ("p_motif", "text", False)], "void"),
 }
 
 TS = {"uuid": "string", "text": "string", "bool": "boolean", "int2": "number", "int4": "number", "int8": "number",
@@ -171,12 +176,20 @@ def view_block(name, spec):
 
 def fn_block(name, args, ret):
     if args:
-        a = "\n".join(f"          {n}{'?' if opt else ''}: {ts_type(t)}" for n, t, opt in args)
+        a = "\n".join(f"          {n}{'?' if opt else ''}: {ts_type(t)}{' | null' if opt else ''}" for n, t, opt in args)
         args_s = f"        Args: {{\n{a}\n        }}"
     else:
         args_s = "        Args: Record<PropertyKey, never>"
     if ret.startswith("row:"):
         r = f'Database["betwise"]["Tables"]["{ret[4:]}"]["Row"]'
+    elif ret == "void":
+        r = "undefined"
+    elif ret.startswith("setof:"):
+        fields = []
+        for f in ret[6:].split(","):
+            n, t = f.split(":", 1)
+            fields.append(f"{n}: {ts_type(t)}")
+        r = "{ " + "; ".join(fields) + " }[]"
     else:
         r = ts_type(ret)
     return f"      {name}: {{\n{args_s}\n        Returns: {r}\n      }}"

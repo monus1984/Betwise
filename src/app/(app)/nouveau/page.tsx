@@ -4,7 +4,7 @@ import { NewBetForm } from "./new-bet-form";
 
 export const dynamic = "force-dynamic";
 
-type Prefill = { match?: string; market?: string; param?: string; sel?: string; cote?: string };
+type Prefill = { match?: string; market?: string; param?: string; sel?: string; cote?: string; origin?: string; prediction?: string };
 
 export default async function NouveauPage({ searchParams }: { searchParams: Promise<Prefill> }) {
   const sp = await searchParams;
@@ -54,7 +54,7 @@ export default async function NouveauPage({ searchParams }: { searchParams: Prom
   return (
     <>
       <PageHeader title="Nouveau pari" subtitle="Trois champs, et l’origine de ton choix." />
-      <NewBetForm sources={ordered} markets={markets ?? []} defaultOrigin={mine?.id ?? null} prefill={{ match: prefillMatch, market: sp.market, param: sp.param, sel: sp.sel, cote: sp.cote }} />
+      <NewBetForm sources={ordered} markets={markets ?? []} defaultOrigin={mine?.id ?? null} prefill={{ match: prefillMatch, market: sp.market, param: sp.param, sel: sp.sel, cote: sp.cote, origin: sp.origin, prediction: sp.prediction }} />
     </>
   );
 }
