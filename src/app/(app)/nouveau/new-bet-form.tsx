@@ -32,12 +32,21 @@ const SELECTIONS: Record<string, string[]> = {
 
 const toNum = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
 
-export function NewBetForm({ sources, markets, defaultOrigin }: { sources: Source[]; markets: Market[]; defaultOrigin: string | null }) {
+type Prefill = { match: MatchHit | null; market?: string; param?: string; sel?: string; cote?: string };
+
+export function NewBetForm({ sources, markets, defaultOrigin, prefill }: { sources: Source[]; markets: Market[]; defaultOrigin: string | null; prefill?: Prefill }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [mise, setMise] = useState("");
-  const [lines, setLines] = useState<Line[]>([newLine(0, defaultOrigin)]);
+  const [lines, setLines] = useState<Line[]>(() => {
+    const l = newLine(0, defaultOrigin);
+    if (prefill?.match) { l.match = prefill.match; l.query = `${prefill.match.home} – ${prefill.match.away}`; }
+    if (prefill?.market) { l.market = prefill.market; l.param = prefill.param ?? (prefill.market === "OU" ? "2.5" : ""); }
+    if (prefill?.sel) l.selection = prefill.sel;
+    if (prefill?.cote) l.cote = prefill.cote;
+    return [l];
+  });
   const [, setTick] = useState(0);
 
   const coteTotale = useMemo(() => lines.reduce((acc, l) => acc * (toNum(l.cote) > 1 ? toNum(l.cote) : 1), 1), [lines]);

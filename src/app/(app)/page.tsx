@@ -55,6 +55,8 @@ export default async function Home() {
       </section>
 
       <section className="mt-5 grid grid-cols-2 gap-3">
+        <Link href="/matchs" className="rounded-xl border border-slate-200 bg-white p-4 text-sm font-medium active:bg-slate-50">Matchs et cotes</Link>
+        <Link href="/coach" className="rounded-xl border border-slate-200 bg-white p-4 text-sm font-medium active:bg-slate-50">Coach <span className="text-xs font-normal text-slate-500">(bientôt)</span></Link>
         <Link href="/nouveau" className="rounded-xl border border-slate-200 bg-white p-4 text-sm font-medium active:bg-slate-50">+ Nouveau pari</Link>
         <Link href="/paris" className="rounded-xl border border-slate-200 bg-white p-4 text-sm font-medium active:bg-slate-50">Mes paris en cours</Link>
       </section>

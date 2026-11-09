@@ -1,0 +1,28 @@
+name: Cotes de référence
+
+on:
+  schedule:
+    # 07:00 UTC chaque jour, après l'import des matchs
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: import-odds
+  cancel-in-progress: false
+
+jobs:
+  odds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run import:odds
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

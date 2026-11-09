@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "import:matches": "tsx scripts/import-matches.ts",
-    "db:types": "python3 scripts/gen-types.py"
+    "db:types": "python3 scripts/gen-types.py",
+    "import:odds": "tsx scripts/import-odds.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

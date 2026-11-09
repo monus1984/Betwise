@@ -8,7 +8,7 @@ const TABS = [
   { href: "/paris", label: "Paris", icon: TicketIcon },
   { href: "/nouveau", label: "", icon: PlusIcon, central: true },
   { href: "/sources", label: "Sources", icon: UsersIcon },
-  { href: "/coach", label: "Coach", icon: ChatIcon },
+  { href: "/matchs", label: "Matchs", icon: BallIcon },
 ] as const;
 
 export function TabBar() {
@@ -58,5 +58,5 @@ const P = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLineca
 function HomeIcon() { return <svg {...P}><path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-7h-6v7H4a1 1 0 01-1-1z" /></svg>; }
 function TicketIcon() { return <svg {...P}><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 100 4v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a2 2 0 100-4z" /><path d="M13 6v12" strokeDasharray="2 2" /></svg>; }
 function UsersIcon() { return <svg {...P}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0113 0" /><circle cx="17" cy="9" r="2.5" /><path d="M16 14.5a5 5 0 015.5 5.5" /></svg>; }
-function ChatIcon() { return <svg {...P}><path d="M4 5h16v11H8l-4 4z" /></svg>; }
+function BallIcon() { return <svg {...P}><circle cx="12" cy="12" r="9" /><path d="M12 7l3.5 2.5-1.3 4h-4.4l-1.3-4z" /><path d="M12 3v4M5.3 8.5l3.5 1M18.7 8.5l-3.5 1M7.8 17.5l2-4M16.2 17.5l-2-4" /></svg>; }
 function PlusIcon() { return <svg {...P} strokeWidth={2.2}><path d="M12 5v14M5 12h14" /></svg>; }
