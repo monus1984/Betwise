@@ -1,0 +1,13 @@
+# Migrations BETWISE
+
+Les migrations sont appliquées sur le projet Supabase **arbitre-finance**
+(`iewowqgnjxnitkeqbxpm`), dans le schéma dédié `betwise`. Le schéma `public`
+appartient à Kehiwa : aucune migration BETWISE ne doit y toucher.
+
+| Fichier | Appliquée le | Contenu |
+| --- | --- | --- |
+| 0001_schema.sql | 2026-11-09 | 22 tables, 12 types, marchés, triggers, RLS, bucket `betwise-uploads`, source « Modèle BETWISE » |
+| 0002_fix_search_path.sql | 2026-11-09 | `search_path` fixé sur `risk_from_odds` (avis sécurité Supabase) |
+| 0003_ensure_profile_kehiwa_pseudo.sql | 2026-11-09 | `ensure_profile()` reprend le `display_name` Kehiwa par défaut |
+
+Réglage requis côté tableau de bord : Project Settings → Data API → Exposed schemas → ajouter `betwise`.

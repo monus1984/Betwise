@@ -1,0 +1,30 @@
+name: Import des matchs
+
+on:
+  schedule:
+    # 06:00 UTC chaque jour : calendrier J+7 et résultats J-2
+    - cron: "0 6 * * *"
+    # Toutes les heures de 12:00 à 23:00 UTC : scores finaux de la journée
+    - cron: "0 12-23 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: import-matches
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run import:matches
+        env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

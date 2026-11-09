@@ -1,0 +1,15 @@
+# dépendances et build
+node_modules/
+.next/
+out/
+coverage/
+
+# secrets — jamais versionnés
+.env
+.env.*
+!.env.example
+
+# divers
+.DS_Store
+*.log
+.vercel
