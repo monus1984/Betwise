@@ -11,10 +11,10 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "import:matches": "tsx scripts/import-matches.ts",
-    "db:types": "supabase gen types typescript --project-id iewowqgnjxnitkeqbxpm --schema betwise > src/lib/supabase/database.types.ts"
+    "db:types": "python3 scripts/gen-types.py"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.5.2",
+    "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.49.1",
     "next": "^15.5.29",
     "react": "19.1.0",

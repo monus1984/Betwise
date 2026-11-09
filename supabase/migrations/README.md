@@ -11,3 +11,4 @@ appartient à Kehiwa : aucune migration BETWISE ne doit y toucher.
 | 0003_ensure_profile_kehiwa_pseudo.sql | 2026-11-09 | `ensure_profile()` reprend le `display_name` Kehiwa par défaut |
 
 Réglage requis côté tableau de bord : Project Settings → Data API → Exposed schemas → ajouter `betwise`.
+| 0004_place_and_settle_bet.sql | 2026-11-09 | `place_bet()`, `settle_bet()`, `bankroll_move()` (transactions atomiques), vue `my_bankroll_summary` |
