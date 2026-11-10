@@ -26,7 +26,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   let q = supabase
     .from("matches")
     .select("id, kickoff_at, statut, score_home, score_away, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe)")
-    .limit(80);
+    .limit(250);
   q = filter === "a_venir"
     ? q.in("statut", ["programme", "en_cours"]).gte("kickoff_at", new Date(Date.now() - 3 * 3600000).toISOString()).order("kickoff_at")
     : q.eq("statut", "termine").gte("kickoff_at", new Date(Date.now() - 7 * 86400000).toISOString()).order("kickoff_at", { ascending: false });
@@ -49,7 +49,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <PageHeader title="Matchs" subtitle="Les 6 compétitions européennes couvertes en automatique." />
+      <PageHeader title="Matchs" subtitle="Les 6 compétitions européennes et la Ligue des nations, sur 14 jours." />
       <div className="mb-4 flex gap-2">
         <Tab href="/matchs" active={filter === "a_venir"}>À venir</Tab>
         <Tab href="/matchs?f=resultats" active={filter === "resultats"}>Résultats</Tab>

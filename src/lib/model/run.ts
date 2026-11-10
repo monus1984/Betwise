@@ -25,7 +25,7 @@ export async function importHistory(db: Db, comp: string) {
   return n;
 }
 
-/** 2) Estimations pour les matchs des 8 prochains jours + 3) prono « Modèle BETWISE ». */
+/** 2) Estimations pour les matchs des 14 prochains jours + 3) prono « Modèle BETWISE ». */
 export async function estimateCompetition(db: Db, comp: string, modelSourceId: string) {
   const ligue = LEAGUE_CODES[comp];
   if (!ligue) return { matches: 0, estimates: 0, pronos: 0, unmatched: [] as string[] };
@@ -53,7 +53,7 @@ export async function estimateCompetition(db: Db, comp: string, modelSourceId: s
   const { data: matches } = await db.from("matches")
     .select("id, kickoff_at, home_team_id, away_team_id")
     .eq("competition_id", c.id).eq("statut", "programme")
-    .gte("kickoff_at", new Date().toISOString()).lte("kickoff_at", new Date(Date.now() + 8 * 86400000).toISOString());
+    .gte("kickoff_at", new Date().toISOString()).lte("kickoff_at", new Date(Date.now() + 14 * 86400000).toISOString());
 
   const unmatched: string[] = [];
   let estimates = 0, pronos = 0;

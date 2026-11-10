@@ -16,6 +16,7 @@ export const SPORT_KEYS: Record<string, string> = {
   BL1: "soccer_germany_bundesliga",
   FL1: "soccer_france_ligue_one",
   CL: "soccer_uefa_champs_league",
+  UNL: "soccer_uefa_nations_league",
 };
 
 export type OddsSport = { key: string; group: string; title: string; description: string; active: boolean; has_outrights: boolean };
@@ -65,6 +66,16 @@ export class OddsApiClient {
     const key = SPORT_KEYS[fdCode];
     if (!key) return null;
     return sports.some((s) => s.key === key && s.active) ? key : null;
+  }
+
+  /** Calendrier d'une compétition (gratuit). */
+  events(sportKey: string) {
+    return this.get<{ id: string; commence_time: string; home_team: string; away_team: string }[]>(`/sports/${sportKey}/events`, { dateFormat: "iso" });
+  }
+
+  /** Scores des matchs en cours et terminés depuis daysFrom jours (2 crédits avec daysFrom). */
+  scores(sportKey: string, daysFrom = 3) {
+    return this.get<unknown[]>(`/sports/${sportKey}/scores`, { daysFrom: String(daysFrom), dateFormat: "iso" });
   }
 
   /** Cotes d'une compétition : 1X2 (h2h) et plus/moins (totals), bookmakers européens, décimales. */

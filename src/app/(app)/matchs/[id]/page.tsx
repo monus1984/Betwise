@@ -83,7 +83,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
           { sel: "Moins", name: "− de 2,5", o: ref("OU", "Moins", 2.5) },
         ]} market="OU" param={2.5} upcoming={upcoming} href={parierHref} />
         {!ref("1X2", "1") && (
-          <p className="mt-2 text-xs text-slate-500">Pas encore de cote de référence pour ce match : elles arrivent chaque matin à partir de J-8.</p>
+          <p className="mt-2 text-xs text-slate-500">Pas encore de cote de référence pour ce match : elles arrivent chaque matin à partir de J-14.</p>
         )}
         {ref("1X2", "1") && (
           <p className="mt-2 text-[11px] text-slate-400">Mise à jour {fmtRel(ref("1X2", "1")!.observed_at)}. La probabilité implicite est 1 / cote, marge du bookmaker comprise.</p>
@@ -112,7 +112,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
           {modelSrc && <Link href={`/sources/${modelSrc.id}`} className="text-[11px] text-slate-500 underline">voir son bilan</Link>}
         </div>
         {!est?.length ? (
-          <p className="text-xs text-slate-500">Pas d’estimation pour ce match : le modèle couvre les 5 grands championnats à partir de J-8 (pas encore la Ligue des champions).</p>
+          <p className="text-xs text-slate-500">Pas d’estimation pour ce match : le modèle couvre les 5 grands championnats à partir de J-14, pas encore la Ligue des champions ni les sélections nationales.</p>
         ) : (
           <>
             <EstimateRow label="1X2" cells={[

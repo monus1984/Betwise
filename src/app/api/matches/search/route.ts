@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Recherche de matchs pour l'autocomplétion : nom ou alias d'équipe, fenêtre J-2 → J+10.
+ * Recherche de matchs pour l'autocomplétion : nom ou alias d'équipe, fenêtre J-2 → J+14.
  * Retourne au plus 8 résultats, les plus proches dans le temps d'abord.
  */
 export async function GET(req: NextRequest) {
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
 
   const supabase = await createClient();
   const from = new Date(Date.now() - 2 * 86400000).toISOString();
-  const to = new Date(Date.now() + 10 * 86400000).toISOString();
+  const to = new Date(Date.now() + 14 * 86400000).toISOString();
 
   // Équipes dont le nom ou un alias contient la saisie (insensible à la casse)
   const { data: teams } = await supabase
