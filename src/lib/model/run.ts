@@ -8,13 +8,13 @@ type Db = SupabaseClient<Database, "betwise">;
 export const MODEL_VERSION = "poisson-v1";
 const REF = "ref:eu-median";
 
-/** 1) Historique : saison en cours + précédente, upsert idempotent. */
+/** 1) Historique : saison en cours + deux précédentes, upsert idempotent. */
 export async function importHistory(db: Db, comp: string) {
   const ligue = LEAGUE_CODES[comp];
   if (!ligue) return 0;
   const cur = seasonCode();
   let n = 0;
-  for (const s of [previousSeason(cur), cur]) {
+  for (const s of [previousSeason(previousSeason(cur)), previousSeason(cur), cur]) {
     const rows = await fetchSeason(ligue, s);
     for (let i = 0; i < rows.length; i += 500) {
       const { error } = await db.from("match_history").upsert(rows.slice(i, i + 500), { onConflict: "ligue,played_on,home_nom,away_nom" });
@@ -30,7 +30,7 @@ export async function estimateCompetition(db: Db, comp: string, modelSourceId: s
   const ligue = LEAGUE_CODES[comp];
   if (!ligue) return { matches: 0, estimates: 0, pronos: 0, unmatched: [] as string[] };
 
-  const since = new Date(Date.now() - 500 * 86400000).toISOString().slice(0, 10);
+  const since = new Date(Date.now() - 800 * 86400000).toISOString().slice(0, 10);
   const hist: HistoryRow[] = [];
   for (let from = 0; ; from += 1000) {
     const { data, error } = await db.from("match_history").select("*").eq("ligue", ligue).gte("played_on", since).order("played_on").range(from, from + 999);

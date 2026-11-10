@@ -34,3 +34,10 @@ describe("modèle Poisson", () => {
     expect(r.homeAdv).toBeGreaterThan(1.3);
   });
 });
+
+describe("égalités", () => {
+  it("Paris FC ne se confond pas avec le PSG aliasé « Paris »", () => {
+    const teams = [{ id: "psg", nom: "Paris Saint-Germain FC", alias: ["PSG", "Paris"] }, { id: "pfc", nom: "Paris FC", alias: [] }];
+    expect([...buildTeamMap(["Paris FC", "Paris SG"], teams).values()]).toEqual(["pfc", "psg"]);
+  });
+});

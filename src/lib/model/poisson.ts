@@ -11,10 +11,10 @@ export type Ratings = {
   mu: number; homeAdv: number; teams: Map<string, { att: number; def: number; n: number }>;
 };
 
-const HALF_LIFE_DAYS = 150;
-const PRIOR_MATCHES = 4;
+export const DEFAULTS = { halfLifeDays: 150, priorMatches: 4 };
 
-export function fitRatings(matches: HistMatch[], asOf = new Date()): Ratings {
+export function fitRatings(matches: HistMatch[], asOf = new Date(), opts = DEFAULTS): Ratings {
+  const HALF_LIFE_DAYS = opts.halfLifeDays, PRIOR_MATCHES = opts.priorMatches;
   const w = (d: Date) => Math.pow(0.5, Math.max(0, (asOf.getTime() - d.getTime()) / 86400000) / HALF_LIFE_DAYS);
   const names = new Set<string>();
   for (const m of matches) { names.add(m.home); names.add(m.away); }

@@ -42,8 +42,12 @@ export function buildTeamMap(historyNames: string[], dbTeams: { id: string; nom:
     const best: { id: string; score: number }[] = [];
     for (const t of sigs) {
       // 1) nom complet contenu (ex. "internazionale" dans "fc internazionale milano")
-      // signature identique (ex. "barcelona" = FC Barcelona, pas RCD Espanyol de Barcelona)
-      if (t.sigs.some((sg) => sg.size > 0 && sg.size === want.size && [...want].every((x) => sg.has(x)))) { best.push({ id: t.id, score: 100 }); continue; }
+      // nom identique (ex. "Paris FC", alors que le PSG porte l'alias « Paris »)
+      if (t.fulls.some((f) => f === wantFull)) { best.push({ id: t.id, score: 120 }); continue; }
+      // signature identique (ex. "barcelona" = FC Barcelona, pas RCD Espanyol de Barcelona) ; le nom officiel passe avant les alias
+      const same = (sg: Set<string>) => sg.size > 0 && sg.size === want.size && [...want].every((x) => sg.has(x));
+      if (same(t.sigs[0])) { best.push({ id: t.id, score: 100 }); continue; }
+      if (t.sigs.slice(1).some(same)) { best.push({ id: t.id, score: 95 }); continue; }
       if (t.fulls.some((f) => f.includes(wantFull))) { best.push({ id: t.id, score: 80 }); continue; }
       for (const sg of t.sigs) {
         if (sg.size === 0 || want.size === 0) continue;
