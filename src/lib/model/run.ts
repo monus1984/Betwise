@@ -44,7 +44,11 @@ export async function estimateCompetition(db: Db, comp: string, modelSourceId: s
 
   const { data: c } = await db.from("competitions").select("id").eq("code_externe", comp).maybeSingle();
   if (!c) return { matches: 0, estimates: 0, pronos: 0, unmatched: [] };
-  const { data: teams } = await db.from("teams").select("id, nom, alias").eq("competition_id", c.id);
+  // Équipes qui jouent dans cette compétition (et pas teams.competition_id : un club de C1 y est rattaché à la C1)
+  const { data: compMatches } = await db.from("matches").select("home_team_id, away_team_id").eq("competition_id", c.id)
+    .gte("kickoff_at", new Date(Date.now() - 60 * 86400000).toISOString()).limit(1000);
+  const teamIds = [...new Set((compMatches ?? []).flatMap((m) => [m.home_team_id, m.away_team_id]))];
+  const { data: teams } = teamIds.length ? await db.from("teams").select("id, nom, alias").in("id", teamIds) : { data: [] as { id: string; nom: string; alias: string[] }[] };
   const histNames = [...ratings.teams.keys()];
   const map = buildTeamMap(histNames, teams ?? []);
   const byTeamId = new Map<string, string>();
@@ -61,7 +65,7 @@ export async function estimateCompetition(db: Db, comp: string, modelSourceId: s
     const hn = byTeamId.get(m.home_team_id), an = byTeamId.get(m.away_team_id);
     if (!hn || !an) {
       const miss = [!hn && teams?.find((t) => t.id === m.home_team_id)?.nom, !an && teams?.find((t) => t.id === m.away_team_id)?.nom].filter(Boolean);
-      unmatched.push(...(miss as string[]));
+      unmatched.push(...(miss.length ? (miss as string[]) : [`match ${m.id}`]));
       continue;
     }
     const p = predict(ratings, hn, an);
