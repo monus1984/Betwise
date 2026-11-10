@@ -8,7 +8,6 @@ type MatchStatus = Database["betwise"]["Enums"]["match_status"];
 /** Alias français courants pour le rapprochement des saisies libres. */
 const FR_ALIASES: Record<string, string[]> = {
   "Manchester City FC": ["Man City", "City"],
-  "Manchester United FC": ["Man United", "Man U", "MU"],
   "Paris Saint-Germain FC": ["PSG", "Paris"],
   "Olympique de Marseille": ["OM", "Marseille"],
   "Olympique Lyonnais": ["OL", "Lyon"],
@@ -23,7 +22,6 @@ const FR_ALIASES: Record<string, string[]> = {
   "Tottenham Hotspur FC": ["Tottenham", "Spurs"],
   "Arsenal FC": ["Arsenal"],
   "Chelsea FC": ["Chelsea"],
-  "Liverpool FC": ["Liverpool"],
   // Noms français ≠ noms officiels
   "1. FC Köln": ["Cologne", "Köln", "FC Cologne"],
   "Bayer 04 Leverkusen": ["Leverkusen", "Bayer Leverkusen"],
