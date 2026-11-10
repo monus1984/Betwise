@@ -15,3 +15,5 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0005_place_bet_records_odds.sql | 2026-11-09 | `place_bet()` journalise la cote de chaque sélection rapprochée dans `odds_observations` (origine `ticket`) |
 | 0006_settlement_and_predictions.sql | 2026-11-09 | `settle_selection()` (règles par marché), `settle_by_match()`, `settle_pending()`, `finalize_bet()`, `log_prediction()`, `cancel_prediction()`, vue `source_trend` |
 | 0007_combined_markets_and_ticket_columns.sql | 2026-11-10 | marchés `DC_OU` et `1X2_OU` (règlement : deux conditions), colonnes `bets.nb_selections / detail_complet / coupon_externe / bookmaker`, `place_bet()` accepte un ticket résumé et un statut connu (`p_summary`) |
+| 0008_fix_place_bet_type_cast.sql | 2026-11-10 | correction du cast `bet_type` (régression 0007) — remplacée par 0009, non archivée séparément |
+| 0009_fix_place_bet_alias.sql | 2026-11-10 | version en service de `place_bet()` : cast explicite, alias JSON distincts ; testée sur les tickets Betclic (combiné 3 et replié 10) |
