@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description: "Comprends, mesure et maîtrise tes décisions de pari.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "default", title: "BETWISE" },
+  icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = {
