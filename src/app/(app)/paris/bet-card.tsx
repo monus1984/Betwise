@@ -2,7 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { deleteDuplicateBet, settleBet } from "@/lib/bets/actions";
+import Link from "next/link";
 import { RISK_CLASS, RISK_LABEL, fcfa } from "@/components/ui";
+import { OriginPicker, type SourceOpt } from "./origin-picker";
 
 type Named = { nom: string } | { nom: string }[] | null;
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
@@ -28,6 +30,7 @@ export type BetRow = {
     cote: number;
     resultat: string;
     risque_calcule: "prudent" | "moyen" | "risque" | null;
+    origin_source_id: string;
     origin: Named;
     match: { kickoff_at: string; home: Named; away: Named } | { kickoff_at: string; home: Named; away: Named }[] | null;
   }[];
@@ -41,7 +44,7 @@ const STATUT: Record<BetRow["statut"], { label: string; cls: string }> = {
   annule: { label: "Annulé", cls: "bg-slate-100 text-slate-500" },
 };
 
-export function BetCard({ bet }: { bet: BetRow }) {
+export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] }) {
   const [pending, start] = useTransition();
   const [err, setErr] = useState<string | null>(null);
   const [confirmDel, setConfirmDel] = useState(false);
@@ -72,7 +75,10 @@ export function BetCard({ bet }: { bet: BetRow }) {
             )}
           </p>
         </div>
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${st.cls}`}>{st.label}</span>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${st.cls}`}>{st.label}</span>
+          <Link href={`/paris/${bet.id}`} className="text-[11px] text-slate-500 underline">Modifier</Link>
+        </div>
       </div>
 
       <ul className="space-y-2">
@@ -84,7 +90,7 @@ export function BetCard({ bet }: { bet: BetRow }) {
               <div className="min-w-0">
                 <p className="truncate font-medium">{label}</p>
                 <p className="text-xs text-slate-500">
-                  {marketLabel(s.market_code, s.market_param, s.selection)} · cote {Number(s.cote).toFixed(2)} · <span className="text-slate-700">{one(s.origin)?.nom ?? "—"}</span>
+                  {marketLabel(s.market_code, s.market_param, s.selection)} · cote {Number(s.cote).toFixed(2)} · <OriginPicker selectionId={s.id} current={s.origin_source_id} currentName={one(s.origin)?.nom ?? "—"} sources={sources} />
                 </p>
               </div>
               {s.risque_calcule && (

@@ -1,0 +1,4 @@
+-- 0011 : modification d'un pari après saisie, avec journal des changements (table bet_versions).
+-- Fonctions : set_selection_origin(), update_selection(), update_bet(). Appliquée le 2026-11-10.
+-- Règles : l'origine se change toujours ; cote, marché, mise seulement sur un pari en cours ; chaque changement est journalisé.
+-- Corps : voir supabase_migrations.schema_migrations (version 20261110…).

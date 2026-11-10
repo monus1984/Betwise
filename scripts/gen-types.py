@@ -47,6 +47,7 @@ TABLES = {
     "conversations": "id:uuid= user_id:uuid titre:text? created_at:timestamptz=",
     "messages": "id:uuid= conversation_id:uuid role:text contenu:text? fonctions:jsonb? tokens_in:int4? tokens_out:int4? created_at:timestamptz=",
     "feedback": "id:uuid= user_id:uuid? ecran:text? message:text created_at:timestamptz=",
+    "bet_versions": "id:uuid= bet_id:uuid selection_id:uuid? changes:jsonb changed_by:uuid? changed_at:timestamptz=",
 }
 
 VIEWS = {
@@ -83,6 +84,8 @@ FKS = [
     ("model_estimates_market_code_fkey", "model_estimates", "market_code", "markets", "code", False),
     ("model_estimates_prediction_id_fkey", "model_estimates", "prediction_id", "predictions", "id", False),
     ("messages_conversation_id_fkey", "messages", "conversation_id", "conversations", "id", False),
+    ("bet_versions_bet_id_fkey", "bet_versions", "bet_id", "bets", "id", False),
+    ("bet_versions_selection_id_fkey", "bet_versions", "selection_id", "bet_selections", "id", False),
 ]
 
 # nom -> (args [(nom, type, optionnel)], retour)   retour : type scalaire ou "row:<table>"
@@ -98,6 +101,9 @@ FUNCTIONS = {
     "log_prediction": ([("p_source_id", "uuid", False), ("p_market_code", "text", False), ("p_selection", "text", False), ("p_match_id", "uuid", True), ("p_match_libre", "text", True), ("p_market_param", "numeric", True), ("p_cote_annoncee", "numeric", True), ("p_risque_annonce", "enum:risk_category", True), ("p_published_at", "timestamptz", True), ("p_upload_id", "uuid", True)], "setof:prediction_id:uuid,created:bool,statut:enum:prediction_status"),
     "cancel_prediction": ([("p_id", "uuid", False), ("p_motif", "text", False)], "void"),
     "delete_duplicate_bet": ([("p_bet_id", "uuid", False)], "void"),
+    "set_selection_origin": ([("p_selection_id", "uuid", False), ("p_source_id", "uuid", False)], "void"),
+    "update_selection": ([("p_selection_id", "uuid", False), ("p_cote", "numeric", True), ("p_match_id", "uuid", True), ("p_match_libre", "text", True), ("p_market_code", "text", True), ("p_market_param", "numeric", True), ("p_selection", "text", True), ("p_clear_match", "bool", True)], "void"),
+    "update_bet": ([("p_bet_id", "uuid", False), ("p_mise", "numeric", True), ("p_bookmaker", "text", True), ("p_placed_at", "timestamptz", True)], "void"),
 }
 
 TS = {"uuid": "string", "text": "string", "bool": "boolean", "int2": "number", "int4": "number", "int8": "number",

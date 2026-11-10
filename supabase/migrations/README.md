@@ -18,3 +18,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0008_fix_place_bet_type_cast.sql | 2026-11-10 | correction du cast `bet_type` (régression 0007) — remplacée par 0009, non archivée séparément |
 | 0009_fix_place_bet_alias.sql | 2026-11-10 | version en service de `place_bet()` : cast explicite, alias JSON distincts ; testée sur les tickets Betclic (combiné 3 et replié 10) |
 | 0010_duplicate_ticket_guard.sql | 2026-11-10 | empreinte `ticket_fingerprint` (bookmaker, minute, mise, cote) + index unique, refus explicite du doublon dans `place_bet()`, `delete_duplicate_bet()` sous 24 h |
+| 0011_bet_editing.sql | 2026-11-10 | `bet_versions` (journal), `set_selection_origin()`, `update_selection()`, `update_bet()` |

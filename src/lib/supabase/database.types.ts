@@ -989,6 +989,48 @@ export type Database = {
         }
         Relationships: []
       }
+      bet_versions: {
+        Row: {
+          id: string
+          bet_id: string
+          selection_id: string | null
+          changes: Json
+          changed_by: string | null
+          changed_at: string
+        }
+        Insert: {
+          id?: string
+          bet_id: string
+          selection_id?: string | null
+          changes: Json
+          changed_by?: string | null
+          changed_at?: string
+        }
+        Update: {
+          id?: string
+          bet_id?: string
+          selection_id?: string | null
+          changes?: Json
+          changed_by?: string | null
+          changed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bet_versions_bet_id_fkey"
+            columns: ["bet_id"]
+            isOneToOne: false
+            referencedRelation: "bets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bet_versions_selection_id_fkey"
+            columns: ["selection_id"]
+            isOneToOne: false
+            referencedRelation: "bet_selections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       source_trend: {
@@ -1108,6 +1150,35 @@ export type Database = {
       delete_duplicate_bet: {
         Args: {
           p_bet_id: string
+        }
+        Returns: undefined
+      }
+      set_selection_origin: {
+        Args: {
+          p_selection_id: string
+          p_source_id: string
+        }
+        Returns: undefined
+      }
+      update_selection: {
+        Args: {
+          p_selection_id: string
+          p_cote?: number | null
+          p_match_id?: string | null
+          p_match_libre?: string | null
+          p_market_code?: string | null
+          p_market_param?: number | null
+          p_selection?: string | null
+          p_clear_match?: boolean | null
+        }
+        Returns: undefined
+      }
+      update_bet: {
+        Args: {
+          p_bet_id: string
+          p_mise?: number | null
+          p_bookmaker?: string | null
+          p_placed_at?: string | null
         }
         Returns: undefined
       }
