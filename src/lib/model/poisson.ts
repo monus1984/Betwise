@@ -1,8 +1,10 @@
 /**
  * Modèle BETWISE v1 : Poisson à forces d'attaque/défense pondérées dans le temps.
- * - Pondération exponentielle (demi-vie 150 jours) : les matchs récents comptent plus.
- * - Lissage vers la moyenne (k matchs fictifs) pour les promus et les débuts de saison.
- * - Pas de correction Dixon-Coles des scores serrés (v2), pas de blessures ni de calendrier.
+ * - Pondération exponentielle (demi-vie 700 jours) et lissage fort vers la moyenne (40 matchs fictifs) :
+ *   réglages retenus sur un backtest de 1 953 matchs (oct. 2025 → nov. 2026, 5 ligues), log-loss 1X2
+ *   1,006 contre 0,973 pour les cotes moyennes du marché. Le modèle ne voit que les buts.
+ * - Nul rehaussé de 10 % (Poisson indépendant les sous-estime : 23 % prédits, 25 % observés).
+ * - Pas de blessures, compositions ni calendrier. Piste v2 : tirs cadrés (colonnes HST/AST du même CSV).
  * Les probabilités sont ensuite comparées aux cotes de référence pour juger le modèle comme une source.
  */
 
@@ -11,7 +13,8 @@ export type Ratings = {
   mu: number; homeAdv: number; teams: Map<string, { att: number; def: number; n: number }>;
 };
 
-export const DEFAULTS = { halfLifeDays: 150, priorMatches: 4 };
+export const DEFAULTS = { halfLifeDays: 700, priorMatches: 40 };
+const DRAW_BOOST = 0.1;
 
 export function fitRatings(matches: HistMatch[], asOf = new Date(), opts = DEFAULTS): Ratings {
   const HALF_LIFE_DAYS = opts.halfLifeDays, PRIOR_MATCHES = opts.priorMatches;
@@ -73,8 +76,9 @@ export function predict(r: Ratings, home: string, away: string): MatchProbs | nu
     if (i > 0 && j > 0) pBtts += p;
     if (p > best) { best = p; topScore = `${i}-${j}`; }
   }
-  const tot = p1 + pN + p2; // renormalisation (queue tronquée à 10 buts)
-  return { lambdaHome: lh, lambdaAway: la, p1: p1 / tot, pN: pN / tot, p2: p2 / tot, pPlus25: pPlus / tot, pMoins25: 1 - pPlus / tot, pBttsOui: pBtts / tot, pBttsNon: 1 - pBtts / tot, topScore };
+  const tot = p1 + pN + p2; // queue tronquée à 10 buts
+  const t1x2 = p1 + pN * (1 + DRAW_BOOST) + p2;
+  return { lambdaHome: lh, lambdaAway: la, p1: p1 / t1x2, pN: (pN * (1 + DRAW_BOOST)) / t1x2, p2: p2 / t1x2, pPlus25: pPlus / tot, pMoins25: 1 - pPlus / tot, pBttsOui: pBtts / tot, pBttsNon: 1 - pBtts / tot, topScore };
 }
 
 /** Niveau de risque 1 (très sûr) → 5 (très incertain) d'après la probabilité de la sélection. */

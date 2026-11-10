@@ -126,7 +126,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
               </p>
             )}
             <p className="mt-2 text-[11px] text-slate-400">
-              Modèle statistique (Poisson) sur les deux dernières saisons, matchs récents pondérés davantage. Il ignore blessures, rotations et motivation.
+              Modèle statistique (Poisson) sur trois saisons de résultats. Il ne voit que les buts : ni blessures, ni compositions, ni motivation. Sur le passé il reste un peu moins précis que les cotes du marché.
               L’écart (en points) compare sa probabilité à celle de la cote de référence. Case encadrée : l’issue enregistrée comme prono du modèle, notée comme n’importe quelle source. Mis à jour {fmtRel(est[0].updated_at)}.
             </p>
           </>
