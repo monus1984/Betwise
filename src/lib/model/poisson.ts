@@ -1,8 +1,10 @@
 /**
  * Modèle BETWISE v1 : Poisson à forces d'attaque/défense pondérées dans le temps.
- * - Pondération exponentielle (demi-vie 700 jours) et lissage fort vers la moyenne (40 matchs fictifs) :
- *   réglages retenus sur un backtest de 1 953 matchs (oct. 2025 → nov. 2026, 5 ligues), log-loss 1X2
- *   1,006 contre 0,973 pour les cotes moyennes du marché. Le modèle ne voit que les buts.
+ * - Pondération exponentielle (demi-vie 365 jours) et lissage vers un point de départ (6 matchs fictifs) :
+ *   la moyenne de la ligue, ou un niveau « promu » (attaque 0,8, défense 1,2) pour une équipe absente
+ *   de la première saison de l'historique. Réglages retenus sur un backtest de 1 953 matchs
+ *   (oct. 2025 → nov. 2026, 5 ligues) : log-loss 1X2 0,9995 contre 0,973 pour le marché.
+ *   Le modèle ne voit que les buts et reste un peu moins affirmatif que le marché sur les favoris.
  * - Nul rehaussé de 10 % (Poisson indépendant les sous-estime : 23 % prédits, 25 % observés).
  * - Pas de blessures, compositions ni calendrier. Piste v2 : tirs cadrés (colonnes HST/AST du même CSV).
  * Les probabilités sont ensuite comparées aux cotes de référence pour juger le modèle comme une source.
@@ -13,16 +15,27 @@ export type Ratings = {
   mu: number; homeAdv: number; teams: Map<string, { att: number; def: number; n: number }>;
 };
 
-export const DEFAULTS = { halfLifeDays: 700, priorMatches: 40 };
+export const DEFAULTS = { halfLifeDays: 365, priorMatches: 6, promotedAtt: 0.8, promotedDef: 1.2 };
 const DRAW_BOOST = 0.1;
 
-export function fitRatings(matches: HistMatch[], asOf = new Date(), opts = DEFAULTS): Ratings {
+export function fitRatings(matches: HistMatch[], asOf = new Date(), o: Partial<typeof DEFAULTS> = {}): Ratings {
+  const opts = { ...DEFAULTS, ...o };
   const HALF_LIFE_DAYS = opts.halfLifeDays, PRIOR_MATCHES = opts.priorMatches;
+  // Promu : équipe absente de la première saison de l'historique → point de départ plus faible que la moyenne
+  const minT = Math.min(...matches.map((m) => m.date.getTime()));
+  const firstSeen = new Map<string, number>();
+  for (const m of matches) for (const n of [m.home, m.away]) firstSeen.set(n, Math.min(firstSeen.get(n) ?? Infinity, m.date.getTime()));
+  const promoted = (n: string) => (firstSeen.get(n) ?? minT) - minT > 200 * 86400000;
   const w = (d: Date) => Math.pow(0.5, Math.max(0, (asOf.getTime() - d.getTime()) / 86400000) / HALF_LIFE_DAYS);
   const names = new Set<string>();
   for (const m of matches) { names.add(m.home); names.add(m.away); }
   const teams = new Map<string, { att: number; def: number; n: number }>();
-  for (const n of names) teams.set(n, { att: 1, def: 1, n: 0 });
+  const priorAtt = new Map<string, number>(), priorDef = new Map<string, number>();
+  for (const n of names) {
+    const p = promoted(n);
+    priorAtt.set(n, p ? opts.promotedAtt : 1); priorDef.set(n, p ? opts.promotedDef : 1);
+    teams.set(n, { att: priorAtt.get(n)!, def: priorDef.get(n)!, n: 0 });
+  }
 
   let sw = 0, sg = 0;
   for (const m of matches) { const k = w(m.date); sw += k; sg += k * (m.hg + m.ag); teams.get(m.home)!.n += k; teams.get(m.away)!.n += k; }
@@ -44,8 +57,9 @@ export function fitRatings(matches: HistMatch[], asOf = new Date(), opts = DEFAU
     let sa = 0, sd = 0;
     for (const [n, t] of teams) {
       // lissage : PRIOR_MATCHES matchs fictifs à la moyenne
-      t.att = t.att * ((gf.get(n) ?? 0) + PRIOR_MATCHES * mu) / ((ef.get(n) ?? 0) + PRIOR_MATCHES * mu);
-      t.def = t.def * ((ga.get(n) ?? 0) + PRIOR_MATCHES * mu) / ((ea.get(n) ?? 0) + PRIOR_MATCHES * mu);
+      // lissage : PRIOR_MATCHES matchs fictifs joués au niveau du point de départ (moyenne, ou promu)
+      t.att = t.att * ((gf.get(n) ?? 0) + PRIOR_MATCHES * mu * priorAtt.get(n)!) / ((ef.get(n) ?? 0) + PRIOR_MATCHES * mu * t.att);
+      t.def = t.def * ((ga.get(n) ?? 0) + PRIOR_MATCHES * mu * priorDef.get(n)!) / ((ea.get(n) ?? 0) + PRIOR_MATCHES * mu * t.def);
       sa += t.att; sd += t.def;
     }
     const na = sa / teams.size, nd = sd / teams.size;
