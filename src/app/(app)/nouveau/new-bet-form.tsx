@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { MatchPicker, SELECTIONS, labelSel, toNum, type MatchHit } from "@/components/match-picker";
 import { placeBet } from "@/lib/bets/actions";
+import { SourceChooser } from "@/components/source-chooser";
 import { Button, Chip, Field, Input, Notice, RISK_CLASS, RISK_LABEL, fcfa, riskFromOdds } from "@/components/ui";
 
 type Source = { id: string; nom: string; type: string };
@@ -23,6 +24,7 @@ type Line = {
 type Prefill = { match: MatchHit | null; market?: string; param?: string; sel?: string; cote?: string; origin?: string; prediction?: string };
 
 export function NewBetForm({ sources, markets, defaultOrigin, prefill }: { sources: Source[]; markets: Market[]; defaultOrigin: string | null; prefill?: Prefill }) {
+  const [srcList, setSrcList] = useState<{ id: string; nom: string; type?: string }[]>(sources);
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -123,11 +125,7 @@ export function NewBetForm({ sources, markets, defaultOrigin, prefill }: { sourc
           </Field>
 
           <Field label="Origine du choix">
-            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-              {sources.map((s) => (
-                <Chip key={s.id} active={l.origin === s.id} onClick={() => update(l.key, { origin: s.id })}>{s.nom}</Chip>
-              ))}
-            </div>
+            <SourceChooser sources={srcList} value={l.origin} onChange={(id) => update(l.key, { origin: id })} onCreated={(s) => setSrcList((x) => [...x, s])} />
           </Field>
         </section>
       ))}

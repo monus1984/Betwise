@@ -79,7 +79,16 @@ export async function estimateCompetition(db: Db, comp: string, modelSourceId: s
       return o ? Number(o.cote) : null;
     };
 
+    // Forme (5 derniers matchs) et face-à-face (5 dernières confrontations), depuis l'historique
+    const played = (n: string) => hist.filter((h) => h.home_nom === n || h.away_nom === n).slice(-5).reverse().map((h) => {
+      const home = h.home_nom === n, gf = home ? h.home_goals : h.away_goals, ga = home ? h.away_goals : h.home_goals;
+      return { date: h.played_on, adv: home ? h.away_nom : h.home_nom, lieu: home ? "D" : "E", score: `${gf}-${ga}`, r: gf > ga ? "V" : gf === ga ? "N" : "D" };
+    });
+    const h2h = hist.filter((h) => (h.home_nom === hn && h.away_nom === an) || (h.home_nom === an && h.away_nom === hn)).slice(-5).reverse()
+      .map((h) => ({ date: h.played_on, dom: h.home_nom === hn ? "home" : "away", score: `${h.home_goals}-${h.away_goals}` }));
+
     const base = {
+      forme_dom: played(hn), forme_ext: played(an), h2h,
       lambda_dom: round(p.lambdaHome, 2), lambda_ext: round(p.lambdaAway, 2), score_probable: p.topScore,
       attaque_dom: round(hs.att, 2), defense_dom: round(hs.def, 2), attaque_ext: round(as.att, 2), defense_ext: round(as.def, 2),
       matchs_historique_dom: Math.round(hs.n), matchs_historique_ext: Math.round(as.n),

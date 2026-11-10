@@ -38,7 +38,7 @@ export async function placeBet(input: PlaceBetInput): Promise<PlaceBetResult> {
   });
   if (error) return { ok: false, error: humanize(error.message) };
   revalidatePath("/");
-  revalidatePath("/paris");
+  revalidatePath("/paris", "layout");
   return { ok: true, betId: data as string };
 }
 
@@ -47,7 +47,7 @@ export async function settleBet(betId: string, result: "gagne" | "perdu" | "remb
   const { error } = await supabase.rpc("settle_bet", { p_bet_id: betId, p_result: result });
   if (error) return { ok: false as const, error: humanize(error.message) };
   revalidatePath("/");
-  revalidatePath("/paris");
+  revalidatePath("/paris", "layout");
   return { ok: true as const };
 }
 
@@ -76,7 +76,7 @@ export async function deleteDuplicateBet(betId: string) {
   const supabase = await createClient();
   const { error } = await supabase.rpc("delete_duplicate_bet", { p_bet_id: betId });
   if (error) return { ok: false as const, error: error.message.includes("24 h") ? "Suppression possible seulement dans les 24 h après la saisie." : error.message };
-  revalidatePath("/"); revalidatePath("/paris");
+  revalidatePath("/"); revalidatePath("/paris", "layout");
   return { ok: true as const };
 }
 
@@ -84,7 +84,7 @@ export async function setSelectionOrigin(selectionId: string, sourceId: string) 
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_selection_origin", { p_selection_id: selectionId, p_source_id: sourceId });
   if (error) return { ok: false as const, error: humanize(error.message) };
-  revalidatePath("/paris"); revalidatePath("/");
+  revalidatePath("/paris", "layout"); revalidatePath("/"); revalidatePath("/sources", "layout");
   return { ok: true as const };
 }
 
@@ -101,7 +101,7 @@ export async function updateSelection(input: { selectionId: string; cote?: numbe
     p_clear_match: input.clearMatch ?? false,
   });
   if (error) return { ok: false as const, error: humanize(error.message) };
-  revalidatePath("/paris"); revalidatePath("/");
+  revalidatePath("/paris", "layout"); revalidatePath("/");
   return { ok: true as const };
 }
 
@@ -109,6 +109,6 @@ export async function updateBet(input: { betId: string; mise?: number; bookmaker
   const supabase = await createClient();
   const { error } = await supabase.rpc("update_bet", { p_bet_id: input.betId, p_mise: input.mise ?? null, p_bookmaker: input.bookmaker ?? null, p_placed_at: input.placedAt ?? null });
   if (error) return { ok: false as const, error: humanize(error.message) };
-  revalidatePath("/paris"); revalidatePath("/");
+  revalidatePath("/paris", "layout"); revalidatePath("/");
   return { ok: true as const };
 }

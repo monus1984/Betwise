@@ -15,7 +15,7 @@ export function TabBar() {
   const path = usePathname();
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/95 backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-white/95 backdrop-blur"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="Navigation principale"
     >
@@ -29,7 +29,7 @@ export function TabBar() {
                 <Link
                   href={t.href}
                   aria-label="Ajouter un pari ou un prono"
-                  className="-mt-5 flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg active:scale-95"
+                  className="-mt-5 flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-lg shadow-brand/30 transition active:scale-95"
                 >
                   <Icon />
                 </Link>
@@ -40,9 +40,10 @@ export function TabBar() {
             <li key={t.href}>
               <Link
                 href={t.href}
-                className={`flex flex-col items-center gap-0.5 py-2 text-[11px] ${active ? "text-slate-900" : "text-slate-500"}`}
+                className={`relative flex flex-col items-center gap-0.5 py-2 text-[11px] transition-colors ${active ? "font-semibold text-brand" : "text-ink-muted"}`}
                 aria-current={active ? "page" : undefined}
               >
+                {active && <span className="absolute top-0 h-0.5 w-8 rounded-full bg-brand" />}
                 <Icon />
                 {t.label}
               </Link>

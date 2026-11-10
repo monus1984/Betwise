@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/page-header";
 import { createClient } from "@/lib/supabase/server";
+import { loadSourceOptions } from "@/lib/sources/options";
 import { ImportFlow } from "./import-flow";
 
 export const dynamic = "force-dynamic";
@@ -8,9 +9,9 @@ export const dynamic = "force-dynamic";
 export default async function ImportPage({ searchParams }: { searchParams: Promise<{ text?: string; url?: string; title?: string; ok?: string; next?: string }> }) {
   const sp = await searchParams;
   const supabase = await createClient();
-  const { data: sources } = await supabase.from("sources").select("id, nom, type").neq("type", "modele_betwise").order("created_at");
-  const mine = (sources ?? []).find((s) => s.type === "perso");
-  const ordered = [...(mine ? [mine] : []), ...(sources ?? []).filter((s) => s.type !== "perso")];
+  const { data: { user } } = await supabase.auth.getUser();
+  const ordered = await loadSourceOptions(supabase, user!.id);
+  const mine = ordered.find((s) => s.type === "perso");
   const sharedText = [sp.title, sp.text, sp.url].filter(Boolean).join("\n");
 
   return (

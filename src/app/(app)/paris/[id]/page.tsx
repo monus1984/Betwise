@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { createClient } from "@/lib/supabase/server";
+import { loadSourceOptions } from "@/lib/sources/options";
 import { BetEditor, type EditableBet } from "./editor";
 
 export const dynamic = "force-dynamic";
@@ -20,9 +21,8 @@ export default async function BetPage({ params }: { params: Promise<{ id: string
     .maybeSingle();
   if (!data) notFound();
 
-  const { data: srcs } = await supabase.from("sources").select("id, nom, type").neq("type", "modele_betwise").order("created_at");
-  const mine = (srcs ?? []).find((x) => x.type === "perso");
-  const sources = [...(mine ? [mine] : []), ...(srcs ?? []).filter((x) => x.type !== "perso")].map((x) => ({ id: x.id, nom: x.nom }));
+  const { data: { user } } = await supabase.auth.getUser();
+  const sources = await loadSourceOptions(supabase, user!.id);
   const { data: markets } = await supabase.from("markets").select("code, libelle_fr, a_parametre").order("code");
   const { data: versions } = await supabase.from("bet_versions").select("changes, changed_at, selection_id").eq("bet_id", id).order("changed_at", { ascending: false }).limit(30);
 

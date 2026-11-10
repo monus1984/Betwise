@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { createClient } from "@/lib/supabase/server";
+import { loadSourceOptions } from "@/lib/sources/options";
 import { BetCard, type BetRow } from "./bet-card";
 
 export const dynamic = "force-dynamic";
@@ -18,9 +19,8 @@ export default async function ParisPage({ searchParams }: { searchParams: Promis
   q = filter === "en_cours" ? q.eq("statut", "en_cours") : q.neq("statut", "en_cours");
   const { data, error } = await q;
   const bets = (data ?? []) as unknown as BetRow[];
-  const { data: srcs } = await supabase.from("sources").select("id, nom, type").neq("type", "modele_betwise").order("created_at");
-  const mine = (srcs ?? []).find((x) => x.type === "perso");
-  const sources = [...(mine ? [mine] : []), ...(srcs ?? []).filter((x) => x.type !== "perso")].map((x) => ({ id: x.id, nom: x.nom }));
+  const { data: { user } } = await supabase.auth.getUser();
+  const sources = await loadSourceOptions(supabase, user!.id);
 
   return (
     <>

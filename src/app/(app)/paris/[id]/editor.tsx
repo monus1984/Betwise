@@ -31,18 +31,23 @@ export function BetEditor({ bet, sources, markets }: { bet: EditableBet; sources
     setMsg(null);
     start(async () => {
       const r = await updateBet({ betId: bet.id, mise: locked ? undefined : toNum(mise), bookmaker, placedAt: placedAt ? new Date(placedAt).toISOString() : undefined });
-      setMsg(r.ok ? { kind: "info", text: "Enregistré." } : { kind: "error", text: r.error });
+      setMsg(r.ok ? { kind: "info", text: "✓ Informations du ticket enregistrées." } : { kind: "error", text: r.error });
       if (r.ok) router.refresh();
     });
   }
 
   return (
     <div className="space-y-4">
+      {locked && (
+        <Notice kind="info">Pari réglé : la mise, les cotes et les sélections sont figées pour garder la bankroll juste. Tu peux toujours corriger le match, l’origine de chaque choix, le bookmaker et la date.</Notice>
+      )}
       <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Mise (F CFA)" hint={locked ? "Pari réglé : la mise ne se modifie plus." : undefined}>
-            <Input inputMode="numeric" value={mise} onChange={(e) => setMise(e.target.value)} disabled={locked} />
-          </Field>
+          {locked ? (
+            <div><p className="mb-1 text-sm font-medium text-ink-soft">Mise</p><p className="py-3 text-base font-semibold">{Number(bet.mise).toLocaleString("fr-FR")} F</p></div>
+          ) : (
+            <Field label="Mise (F CFA)"><Input inputMode="numeric" value={mise} onChange={(e) => setMise(e.target.value)} /></Field>
+          )}
           <Field label="Bookmaker">
             <Input value={bookmaker} onChange={(e) => setBookmaker(e.target.value)} placeholder="Betclic, 1xBet…" />
           </Field>
@@ -50,7 +55,7 @@ export function BetEditor({ bet, sources, markets }: { bet: EditableBet; sources
         <Field label="Date et heure du ticket">
           <Input type="datetime-local" value={placedAt} onChange={(e) => setPlacedAt(e.target.value)} />
         </Field>
-        <Button variant="ghost" onClick={saveHeader} disabled={pending}>Enregistrer ces informations</Button>
+        <Button variant="ghost" onClick={saveHeader} disabled={pending}>{pending ? "Enregistrement…" : "Enregistrer ces informations"}</Button>
       </section>
 
       {!bet.detail_complet && (
@@ -66,9 +71,19 @@ export function BetEditor({ bet, sources, markets }: { bet: EditableBet; sources
   );
 }
 
+const COMBO_FIRST: Record<string, { v: string; label: string }[]> = {
+  DC_OU: [{ v: "1N", label: "1 ou N" }, { v: "12", label: "1 ou 2" }, { v: "N2", label: "N ou 2" }],
+  "1X2_OU": [{ v: "1", label: "1" }, { v: "N", label: "N" }, { v: "2", label: "2" }],
+};
+const RESULT_LABEL: Record<string, { t: string; c: string }> = {
+  en_attente: { t: "en attente", c: "bg-surface-2 text-ink-muted" }, gagne: { t: "gagnée", c: "bg-emerald-50 text-gain" },
+  perdu: { t: "perdue", c: "bg-red-50 text-loss" }, rembourse: { t: "remboursée", c: "bg-amber-50 text-draw" },
+};
+
 function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index: number; s: EditableBet["selections"][number]; locked: boolean; sources: SourceOpt[]; markets: Market[]; onDone: () => void }) {
   const [pending, start] = useTransition();
   const [err, setErr] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const [cote, setCote] = useState(String(s.cote));
   const [market, setMarket] = useState(s.market_code);
   const [param, setParam] = useState(s.market_param !== null ? String(s.market_param) : "");
@@ -77,9 +92,12 @@ function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index
   const [match, setMatch] = useState<MatchHit | null>(s.match ? { id: s.match.id, kickoff_at: s.match.kickoff_at, statut: s.match.statut, home: s.match.home, away: s.match.away, competition: s.match.competition } : null);
   const hasParam = markets.find((m) => m.code === market)?.a_parametre;
   const combined = market === "DC_OU" || market === "1X2_OU";
+  const [comboA, comboB] = selection.split("|");
+  const dirty = (match?.id ?? null) !== (s.match?.id ?? null) || (!match && query.trim() !== (s.match_libre ?? "")) ||
+    (!locked && (Number(toNum(cote)) !== Number(s.cote) || market !== s.market_code || selection !== s.selection || (hasParam ? toNum(param) : null) !== (s.market_param !== null ? Number(s.market_param) : null)));
 
   function save() {
-    setErr(null);
+    setErr(null); setSaved(false);
     start(async () => {
       const r = await updateSelection({
         selectionId: s.id,
@@ -91,49 +109,68 @@ function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index
         marketParam: locked ? undefined : hasParam ? toNum(param) : null,
         selection: locked ? undefined : selection.trim(),
       });
-      if (!r.ok) setErr(r.error); else onDone();
+      if (!r.ok) setErr(r.error); else { setSaved(true); onDone(); }
     });
   }
+
+  const res = RESULT_LABEL[s.resultat] ?? RESULT_LABEL.en_attente;
+  const marketName = markets.find((m) => m.code === s.market_code)?.libelle_fr ?? s.market_code;
 
   return (
     <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
       <div className="flex items-center justify-between">
         <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Sélection {index + 1}</p>
-        <span className="text-[11px] text-slate-500">{s.resultat === "en_attente" ? "en attente" : s.resultat}</span>
+        <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${res.c}`}>{res.t}</span>
       </div>
 
       <MatchPicker line={{ query, match }} onChange={(p) => { if (p.query !== undefined) setQuery(p.query); if (p.match !== undefined) setMatch(p.match); }} hint="Retrouve le match pour activer le règlement automatique." />
 
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Marché">
-          <select value={market} disabled={locked} onChange={(e) => { setMarket(e.target.value); setSelection(""); setParam(e.target.value.includes("OU") ? "2.5" : ""); }} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base disabled:opacity-60">
-            {markets.map((m) => <option key={m.code} value={m.code}>{m.libelle_fr}</option>)}
-          </select>
-        </Field>
-        {hasParam && (
-          <Field label="Ligne / handicap"><Input inputMode="decimal" value={param} disabled={locked} onChange={(e) => setParam(e.target.value)} /></Field>
-        )}
-      </div>
-
-      <Field label="Sélection" hint={combined ? "Format : double chance ou résultat, barre verticale, Plus ou Moins (ex. N2|Plus)." : undefined}>
-        {!combined && SELECTIONS[market]?.length ? (
-          <div className="flex flex-wrap gap-2">
-            {SELECTIONS[market].map((v) => <Chip key={v} active={selection === v} disabled={locked} onClick={() => setSelection(v)}>{labelSel(market, v, match)}</Chip>)}
+      {locked ? (
+        <div className="grid grid-cols-3 gap-2 rounded-lg bg-surface-2 p-3 text-sm">
+          <div><p className="text-[11px] text-ink-muted">Marché</p><p className="font-medium">{marketName}{s.market_param !== null ? ` ${s.market_param}` : ""}</p></div>
+          <div><p className="text-[11px] text-ink-muted">Choix</p><p className="font-medium">{s.selection.replace("|", " + ")}</p></div>
+          <div><p className="text-[11px] text-ink-muted">Cote</p><p className="font-medium tabular-nums">{Number(s.cote).toFixed(2)}</p></div>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Marché">
+              <select value={market} onChange={(e) => { setMarket(e.target.value); setSelection(""); setParam(e.target.value.includes("OU") ? "2.5" : ""); }} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base">
+                {markets.map((m) => <option key={m.code} value={m.code}>{m.libelle_fr}</option>)}
+              </select>
+            </Field>
+            {hasParam && (
+              <Field label="Ligne / handicap"><Input inputMode="decimal" value={param} onChange={(e) => setParam(e.target.value)} /></Field>
+            )}
           </div>
-        ) : (
-          <Input value={selection} disabled={locked} onChange={(e) => setSelection(e.target.value)} />
-        )}
-      </Field>
 
-      <div className="flex items-end gap-3">
-        <Field label="Cote"><Input inputMode="decimal" value={cote} disabled={locked} onChange={(e) => setCote(e.target.value)} className="max-w-[7rem]" /></Field>
-        {toNum(cote) > 1 && <span className={`mb-3 rounded-full border px-2 py-1 text-[11px] ${RISK_CLASS[riskFromOdds(toNum(cote))]}`}>{RISK_LABEL[riskFromOdds(toNum(cote))]}</span>}
-      </div>
+          <Field label="Sélection">
+            {combined ? (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">{COMBO_FIRST[market].map((o) => <Chip key={o.v} active={comboA === o.v} onClick={() => setSelection(`${o.v}|${comboB ?? "Plus"}`)}>{o.label}</Chip>)}</div>
+                <div className="flex flex-wrap gap-2">{["Plus", "Moins"].map((o) => <Chip key={o} active={comboB === o} onClick={() => setSelection(`${comboA ?? COMBO_FIRST[market][0].v}|${o}`)}>{o === "Plus" ? "+" : "−"} de {param || "2.5"} buts</Chip>)}</div>
+              </div>
+            ) : SELECTIONS[market]?.length ? (
+              <div className="flex flex-wrap gap-2">
+                {SELECTIONS[market].map((v) => <Chip key={v} active={selection === v} onClick={() => setSelection(v)}>{labelSel(market, v, match)}</Chip>)}
+              </div>
+            ) : (
+              <Input value={selection} onChange={(e) => setSelection(e.target.value)} placeholder="ex. 2-1" />
+            )}
+          </Field>
 
-      <p className="text-xs text-slate-600">Origine : <OriginPicker selectionId={s.id} current={s.origin_source_id} currentName={sources.find((x) => x.id === s.origin_source_id)?.nom ?? "—"} sources={sources} /></p>
+          <div className="flex items-end gap-3">
+            <Field label="Cote"><Input inputMode="decimal" value={cote} onChange={(e) => setCote(e.target.value)} className="max-w-[7rem]" /></Field>
+            {toNum(cote) > 1 && <span className={`mb-3 rounded-full border px-2 py-1 text-[11px] ${RISK_CLASS[riskFromOdds(toNum(cote))]}`}>{RISK_LABEL[riskFromOdds(toNum(cote))]}</span>}
+          </div>
+        </>
+      )}
+
+      <div className="text-xs text-slate-600">Origine : <OriginPicker selectionId={s.id} current={s.origin_source_id} currentName={sources.find((x) => x.id === s.origin_source_id)?.nom ?? "—"} sources={sources} /></div>
 
       {err && <Notice>{err}</Notice>}
-      <Button variant="ghost" onClick={save} disabled={pending}>Enregistrer cette sélection</Button>
+      {(dirty || pending) && <Button variant="ghost" onClick={save} disabled={pending}>{pending ? "Enregistrement…" : "Enregistrer cette sélection"}</Button>}
+      {saved && !dirty && !pending && <p className="text-xs text-gain">✓ Sélection enregistrée.</p>}
     </section>
   );
 }

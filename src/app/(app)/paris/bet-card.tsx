@@ -89,9 +89,9 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
             <li key={s.id} className="flex items-start justify-between gap-3 text-sm">
               <div className="min-w-0">
                 <p className="truncate font-medium">{label}</p>
-                <p className="text-xs text-slate-500">
+                <div className="text-xs text-slate-500">
                   {marketLabel(s.market_code, s.market_param, s.selection)} · cote {Number(s.cote).toFixed(2)} · <OriginPicker selectionId={s.id} current={s.origin_source_id} currentName={one(s.origin)?.nom ?? "—"} sources={sources} />
-                </p>
+                </div>
               </div>
               {s.risque_calcule && (
                 <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] ${RISK_CLASS[s.risque_calcule]}`}>{RISK_LABEL[s.risque_calcule]}</span>

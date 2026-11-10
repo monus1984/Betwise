@@ -4,9 +4,23 @@
 
 :root {
   color-scheme: light;
+  --font-sans: "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* Zone sûre sur les téléphones à encoche */
 body {
   padding-bottom: env(safe-area-inset-bottom);
+  -webkit-tap-highlight-color: transparent;
 }
+
+/* Défilements horizontaux (jours, filtres, onglets) sans barre visible */
+nav.overflow-x-auto { scrollbar-width: none; }
+nav.overflow-x-auto::-webkit-scrollbar { display: none; }
+
+/* Retour tactile homogène */
+a, button { touch-action: manipulation; }
+
+@keyframes bw-pulse { 0%, 100% { opacity: 1 } 50% { opacity: .45 } }
+.skeleton { background: #e8ecf1; border-radius: .75rem; animation: bw-pulse 1.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }

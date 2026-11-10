@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { placeImportedBet } from "@/lib/bets/import-actions";
+import { SourceChooser } from "@/components/source-chooser";
 import { Button, Chip, Field, Input, Notice, RISK_CLASS, RISK_LABEL, fcfa, riskFromOdds } from "@/components/ui";
 import type { ExtractedTicket, MatchedSelection } from "@/lib/extract/ticket";
 
@@ -22,6 +23,7 @@ const OUTCOME: Record<MatchedSelection["outcome"], { label: string; cls: string 
 const toNum = (s: string) => Number(String(s).replace(/\s/g, "").replace(",", "."));
 
 export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nextTab }: { sources: Source[]; defaultOrigin: string | null; initialText: string; justSaved?: boolean; nextTab?: string }) {
+  const [srcList, setSrcList] = useState<{ id: string; nom: string; type?: string }[]>(sources);
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState(initialText);
@@ -177,9 +179,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
           <p className="text-sm text-amber-900">Ticket replié : le détail des sélections n’est pas visible. On enregistre le résumé (mise, cote totale, résultat) pour que ta bankroll soit juste. Tu pourras ajouter le détail plus tard.</p>
           <p className="text-sm">Cote totale <strong>{raw.total_odds ?? "—"}</strong> · {raw.nb_selections_declared ?? "?"} sélections</p>
           <Field label="Origine de ce ticket (pour l’ensemble)">
-            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-              {sources.map((s) => <Chip key={s.id} active={summaryOrigin === s.id} onClick={() => setSummaryOrigin(s.id)}>{s.nom}</Chip>)}
-            </div>
+            <SourceChooser sources={srcList} value={summaryOrigin} onChange={setSummaryOrigin} onCreated={(s) => setSrcList((x) => [...x, s])} />
           </Field>
         </section>
       ) : (
@@ -203,9 +203,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
               <label className="ml-auto mt-5 flex items-center gap-1 text-xs text-slate-600"><input type="checkbox" checked={l.include} onChange={(e) => update(l.key, { include: e.target.checked })} /> inclure</label>
             </div>
             <Field label="Origine du choix">
-              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-                {sources.map((s) => <Chip key={s.id} active={l.origin === s.id} onClick={() => update(l.key, { origin: s.id })}>{s.nom}</Chip>)}
-              </div>
+              <SourceChooser size="sm" sources={srcList} value={l.origin} onChange={(id) => update(l.key, { origin: id })} onCreated={(s) => setSrcList((x) => [...x, s])} />
             </Field>
           </section>
         ))

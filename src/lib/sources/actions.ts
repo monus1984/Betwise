@@ -117,3 +117,25 @@ export async function cancelPrediction(id: string, motif: string, sourceId: stri
   revalidatePath(`/sources/${sourceId}`);
   return { ok: true as const };
 }
+
+/** Création express depuis un pari ou un import : nom + type. Réutilise une source visible du même nom. */
+export async function quickCreateSource(input: { nom: string; type: string }): Promise<{ ok: true; source: { id: string; nom: string; type: string } } | { ok: false; error: string }> {
+  const nom = input.nom.trim().replace(/\s+/g, " ");
+  if (nom.length < 2 || nom.length > 60) return { ok: false, error: "Le nom doit faire entre 2 et 60 caractères." };
+  const type = (SOURCE_TYPES as readonly string[]).includes(input.type) ? (input.type as (typeof SOURCE_TYPES)[number]) : "tipster";
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Session expirée." };
+
+  const { data: existing } = await supabase.from("sources").select("id, nom, type").ilike("nom", nom).not("type", "in", "(perso,modele_betwise)").limit(1).maybeSingle();
+  if (existing) {
+    await supabase.from("source_follows").upsert({ user_id: user.id, source_id: existing.id });
+    revalidatePath("/sources");
+    return { ok: true, source: existing };
+  }
+  const { data, error } = await supabase.from("sources").insert({ type, nom, visibilite: "partagee", created_by: user.id }).select("id, nom, type").single();
+  if (error) return { ok: false, error: "Création impossible : " + error.message };
+  await supabase.from("source_follows").upsert({ user_id: user.id, source_id: data.id });
+  revalidatePath("/sources");
+  return { ok: true, source: data };
+}
