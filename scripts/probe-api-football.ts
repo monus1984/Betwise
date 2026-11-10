@@ -38,34 +38,26 @@ async function main() {
   const sub = (status.json as { response?: { subscription?: { plan: string; end: string }; requests?: { current: number; limit_day: number } } }).response;
   console.log(`Plan : ${sub?.subscription?.plan ?? "?"} · requêtes aujourd'hui : ${sub?.requests?.current ?? "?"}/${sub?.requests?.limit_day ?? "?"}`);
 
-  const year = new Date().getUTCFullYear();
-  const seasons = [year, year - 1];
-  console.log(`\nSaisons sondées : ${seasons.join(", ")}\n`);
-  console.log("| Compétition | Saison | Matchs renvoyés | Prochain match | Verdict |");
-  console.log("| --- | --- | --- | --- | --- |");
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
+  const from = iso(new Date(Date.now() - 3 * 86400000)), to = iso(new Date(Date.now() + 14 * 86400000));
+  const errText = (errs: unknown) => !errs ? "" : Array.isArray(errs) ? (errs.length ? JSON.stringify(errs) : "") : Object.entries(errs as Record<string, string>).map(([k, v]) => `${k}: ${v}`).join(" ; ");
 
+  // 1) Contrôle : une saison passée doit marcher si la clé est valide
+  const ctl = await get(`/fixtures?league=5&season=2024&from=2024-11-14&to=2024-11-20`);
+  console.log(`\nContrôle saison 2024 (Ligue des nations, nov. 2024) : ${(ctl.json.response ?? []).length} matchs · erreurs : ${errText(ctl.json.errors) || "aucune"}`);
+
+  // 2) Saisons en cours, par dates (sans le paramètre next)
+  console.log(`\nFenêtre ${from} → ${to}\n`);
+  console.log("| Compétition | Saison | Matchs | Premier match | Message brut de l'API |");
+  console.log("| --- | --- | --- | --- | --- |");
   for (const t of TARGETS) {
-    let verdict = "aucune donnée";
-    let line = `| ${t.label} (${t.id}) |`;
-    let printed = false;
-    for (const season of seasons) {
-      const r = await get(`/fixtures?league=${t.id}&season=${season}&next=3`);
-      const errs = r.json.errors;
-      const hasErr = errs && (Array.isArray(errs) ? errs.length > 0 : Object.keys(errs).length > 0);
+    for (const season of [2026, 2025]) {
+      const r = await get(`/fixtures?league=${t.id}&season=${season}&from=${from}&to=${to}`);
       const fixtures = (r.json.response ?? []) as { fixture: { date: string } }[];
-      if (hasErr) {
-        const msg = Array.isArray(errs) ? JSON.stringify(errs) : Object.values(errs as Record<string, string>).join(" ");
-        verdict = msg.toLowerCase().includes("plan") || msg.toLowerCase().includes("season") ? "saison hors plan gratuit" : `erreur : ${msg.slice(0, 60)}`;
-        continue;
-      }
-      if (fixtures.length > 0) {
-        console.log(`${line} ${season} | ${fixtures.length} | ${fixtures[0].fixture.date.slice(0, 16).replace("T", " ")} | ✅ servie |`);
-        printed = true;
-        break;
-      }
-      verdict = "0 match à venir (hors période ?)";
+      const e = errText(r.json.errors);
+      console.log(`| ${t.label} (${t.id}) | ${season} | ${fixtures.length} | ${fixtures[0]?.fixture.date.slice(0, 16).replace("T", " ") ?? "—"} | ${e.slice(0, 140) || "—"} |`);
+      if (fixtures.length) break;
     }
-    if (!printed) console.log(`${line} ${seasons.join("/")} | 0 | — | ${verdict} |`);
   }
 
   const after = await get("/status");
