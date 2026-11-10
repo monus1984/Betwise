@@ -68,3 +68,12 @@ function humanize(msg: string) {
   if (msg.includes("déjà réglé")) return "Ce pari est déjà réglé.";
   return "Enregistrement impossible : " + msg;
 }
+
+/** Suppression d'un pari saisi en double (autorisée 24 h après la saisie, sur ses propres paris). */
+export async function deleteDuplicateBet(betId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_duplicate_bet", { p_bet_id: betId });
+  if (error) return { ok: false as const, error: error.message.includes("24 h") ? "Suppression possible seulement dans les 24 h après la saisie." : error.message };
+  revalidatePath("/"); revalidatePath("/paris");
+  return { ok: true as const };
+}

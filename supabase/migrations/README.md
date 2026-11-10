@@ -17,3 +17,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0007_combined_markets_and_ticket_columns.sql | 2026-11-10 | marchés `DC_OU` et `1X2_OU` (règlement : deux conditions), colonnes `bets.nb_selections / detail_complet / coupon_externe / bookmaker`, `place_bet()` accepte un ticket résumé et un statut connu (`p_summary`) |
 | 0008_fix_place_bet_type_cast.sql | 2026-11-10 | correction du cast `bet_type` (régression 0007) — remplacée par 0009, non archivée séparément |
 | 0009_fix_place_bet_alias.sql | 2026-11-10 | version en service de `place_bet()` : cast explicite, alias JSON distincts ; testée sur les tickets Betclic (combiné 3 et replié 10) |
+| 0010_duplicate_ticket_guard.sql | 2026-11-10 | empreinte `ticket_fingerprint` (bookmaker, minute, mise, cote) + index unique, refus explicite du doublon dans `place_bet()`, `delete_duplicate_bet()` sous 24 h |

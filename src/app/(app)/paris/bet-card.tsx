@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { settleBet } from "@/lib/bets/actions";
+import { deleteDuplicateBet, settleBet } from "@/lib/bets/actions";
 import { RISK_CLASS, RISK_LABEL, fcfa } from "@/components/ui";
 
 type Named = { nom: string } | { nom: string }[] | null;
@@ -16,6 +16,9 @@ export type BetRow = {
   gain_net: number | null;
   placed_at: string;
   settled_at: string | null;
+  created_at: string;
+  bookmaker: string | null;
+  detail_complet: boolean;
   bet_selections: {
     id: string;
     match_libre: string | null;
@@ -41,7 +44,9 @@ const STATUT: Record<BetRow["statut"], { label: string; cls: string }> = {
 export function BetCard({ bet }: { bet: BetRow }) {
   const [pending, start] = useTransition();
   const [err, setErr] = useState<string | null>(null);
+  const [confirmDel, setConfirmDel] = useState(false);
   const st = STATUT[bet.statut];
+  const recent = Date.now() - Date.parse(bet.created_at) < 24 * 3600000;
 
   function settle(r: "gagne" | "perdu" | "rembourse") {
     setErr(null);
@@ -56,7 +61,7 @@ export function BetCard({ bet }: { bet: BetRow }) {
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <p className="text-sm text-slate-500">
-            {bet.type === "combine" ? `Combiné × ${Number(bet.cote_totale).toFixed(2)}` : `Simple × ${Number(bet.cote_totale).toFixed(2)}`} · {fmt(bet.placed_at)}
+            {bet.type === "combine" ? `Combiné × ${Number(bet.cote_totale).toFixed(2)}` : `Simple × ${Number(bet.cote_totale).toFixed(2)}`} · {fmt(bet.placed_at)}{bet.bookmaker ? ` · ${bet.bookmaker}` : ""}
           </p>
           <p className="text-base font-semibold">
             Mise {fcfa(Number(bet.mise))}
@@ -95,6 +100,21 @@ export function BetCard({ bet }: { bet: BetRow }) {
           <button disabled={pending} onClick={() => settle("gagne")} className="rounded-lg bg-emerald-600 py-2 text-sm font-medium text-white disabled:opacity-50">Gagné</button>
           <button disabled={pending} onClick={() => settle("perdu")} className="rounded-lg bg-red-600 py-2 text-sm font-medium text-white disabled:opacity-50">Perdu</button>
           <button disabled={pending} onClick={() => settle("rembourse")} className="rounded-lg bg-slate-200 py-2 text-sm font-medium text-slate-800 disabled:opacity-50">Remboursé</button>
+        </div>
+      )}
+      {!bet.detail_complet && <p className="mt-2 text-[11px] text-amber-700">Détail des sélections non lu (ticket replié) : compte dans la bankroll, pas dans la notation des sources.</p>}
+      {recent && (
+        <div className="mt-2 text-right">
+          {!confirmDel ? (
+            <button onClick={() => setConfirmDel(true)} className="text-[11px] text-slate-400 underline">Saisi en double ? Supprimer</button>
+          ) : (
+            <span className="text-[11px] text-slate-600">
+              Supprimer ce pari et ses mouvements ?{" "}
+              <button disabled={pending} onClick={() => start(async () => { const r = await deleteDuplicateBet(bet.id); if (!r.ok) setErr(r.error); })} className="font-medium text-red-700 underline">Oui</button>
+              {" · "}
+              <button onClick={() => setConfirmDel(false)} className="underline">Non</button>
+            </span>
+          )}
         </div>
       )}
       {err && <p className="mt-2 text-xs text-red-700">{err}</p>}

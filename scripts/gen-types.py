@@ -38,7 +38,7 @@ TABLES = {
     "predictions": "id:uuid= source_id:uuid match_id:uuid? match_libre:text? market_code:text market_param:numeric? selection:text cote_annoncee:numeric? probabilite_annoncee:numeric? risque_annonce:enum:risk_category? risque_calcule:enum:risk_category? published_at:timestamptz? logged_at:timestamptz= statut:enum:prediction_status= motif_annulation:text? submitted_by:uuid? upload_id:uuid? resultat:enum:settle_result= settled_at:timestamptz? dedupe_key:text?",
     "prediction_versions": "id:uuid= prediction_id:uuid changes:jsonb changed_by:uuid? changed_at:timestamptz=",
     "odds_observations": "id:uuid= match_id:uuid? market_code:text market_param:numeric? selection:text cote:numeric bookmaker:text? origine:text observed_at:timestamptz= observed_by:uuid?",
-    "bets": "id:uuid= user_id:uuid bankroll_id:uuid type:enum:bet_type= mise:numeric cote_totale:numeric? statut:enum:bet_status= gain_net:numeric? placed_at:timestamptz= source_import:enum:import_channel= raw_text:text? upload_id:uuid? settled_at:timestamptz? created_at:timestamptz= nb_selections:int2? detail_complet:bool= coupon_externe:text? bookmaker:text?",
+    "bets": "id:uuid= user_id:uuid bankroll_id:uuid type:enum:bet_type= mise:numeric cote_totale:numeric? statut:enum:bet_status= gain_net:numeric? placed_at:timestamptz= source_import:enum:import_channel= raw_text:text? upload_id:uuid? settled_at:timestamptz? created_at:timestamptz= nb_selections:int2? detail_complet:bool= coupon_externe:text? bookmaker:text? ticket_fingerprint:text?",
     "bet_selections": "id:uuid= bet_id:uuid match_id:uuid? match_libre:text? market_code:text market_param:numeric? selection:text cote:numeric cote_observed_at:timestamptz= origin_source_id:uuid prediction_id:uuid? risque_calcule:enum:risk_category? resultat:enum:settle_result= settled_at:timestamptz?",
     "bankroll_transactions": "id:uuid= bankroll_id:uuid type:enum:tx_type montant:numeric bet_id:uuid? note:text? at:timestamptz=",
     "source_metrics": "source_id:uuid periode:text nb_declares:int4= nb_verifies:int4= nb_gagnes:int4= nb_regles:int4= taux_reussite:numeric? rendement:numeric? ic_bas:numeric? ic_haut:numeric? pire_serie:numeric? statut_eval:enum:eval_status= computed_at:timestamptz=",
@@ -97,6 +97,7 @@ FUNCTIONS = {
     "settle_pending": ([], "setof:matchs:int4,selections_reglees:int4,pronos_regles:int4,paris_finalises:int4"),
     "log_prediction": ([("p_source_id", "uuid", False), ("p_market_code", "text", False), ("p_selection", "text", False), ("p_match_id", "uuid", True), ("p_match_libre", "text", True), ("p_market_param", "numeric", True), ("p_cote_annoncee", "numeric", True), ("p_risque_annonce", "enum:risk_category", True), ("p_published_at", "timestamptz", True), ("p_upload_id", "uuid", True)], "setof:prediction_id:uuid,created:bool,statut:enum:prediction_status"),
     "cancel_prediction": ([("p_id", "uuid", False), ("p_motif", "text", False)], "void"),
+    "delete_duplicate_bet": ([("p_bet_id", "uuid", False)], "void"),
 }
 
 TS = {"uuid": "string", "text": "string", "bool": "boolean", "int2": "number", "int4": "number", "int8": "number",

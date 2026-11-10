@@ -52,6 +52,7 @@ export async function placeImportedBet(input: ImportedBetInput): Promise<{ ok: t
   });
   if (error) {
     if (error.message.includes("coupon déjà importé")) return { ok: false, error: "Ce coupon a déjà été importé." };
+    if (error.message.includes("ticket déjà importé")) return { ok: false, error: "Ce " + error.message.replace(/^.*?ticket déjà importé/, "ticket a déjà été importé") + ". Rien n’a été ajouté." };
     return { ok: false, error: "Enregistrement impossible : " + error.message };
   }
   revalidatePath("/"); revalidatePath("/paris");

@@ -12,7 +12,7 @@ export default async function ParisPage({ searchParams }: { searchParams: Promis
 
   let q = supabase
     .from("bets")
-    .select("id, type, mise, cote_totale, statut, gain_net, placed_at, settled_at, bet_selections(id, match_libre, market_code, market_param, selection, cote, resultat, risque_calcule, origin:sources!bet_selections_origin_source_id_fkey(nom), match:matches(kickoff_at, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom)))")
+    .select("id, type, mise, cote_totale, statut, gain_net, placed_at, settled_at, created_at, bookmaker, detail_complet, bet_selections(id, match_libre, market_code, market_param, selection, cote, resultat, risque_calcule, origin:sources!bet_selections_origin_source_id_fkey(nom), match:matches(kickoff_at, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom)))")
     .order("placed_at", { ascending: false })
     .limit(50);
   q = filter === "en_cours" ? q.eq("statut", "en_cours") : q.neq("statut", "en_cours");

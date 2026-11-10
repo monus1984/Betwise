@@ -546,6 +546,7 @@ export type Database = {
           detail_complet: boolean
           coupon_externe: string | null
           bookmaker: string | null
+          ticket_fingerprint: string | null
         }
         Insert: {
           id?: string
@@ -566,6 +567,7 @@ export type Database = {
           detail_complet?: boolean
           coupon_externe?: string | null
           bookmaker?: string | null
+          ticket_fingerprint?: string | null
         }
         Update: {
           id?: string
@@ -586,6 +588,7 @@ export type Database = {
           detail_complet?: boolean
           coupon_externe?: string | null
           bookmaker?: string | null
+          ticket_fingerprint?: string | null
         }
         Relationships: [
           {
@@ -1099,6 +1102,12 @@ export type Database = {
         Args: {
           p_id: string
           p_motif: string
+        }
+        Returns: undefined
+      }
+      delete_duplicate_bet: {
+        Args: {
+          p_bet_id: string
         }
         Returns: undefined
       }

@@ -1,0 +1,3 @@
+-- 0010 : détection des tickets importés en double (même bookmaker, même minute de ticket, même mise, même cote totale),
+--        empreinte ticket_fingerprint + index unique, delete_duplicate_bet() (24 h). Appliquée le 2026-11-10.
+-- Corps : voir supabase_migrations.schema_migrations (version 20261110…), identique à place_bet() de 0009 + bloc empreinte.
