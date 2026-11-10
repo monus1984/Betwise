@@ -8,13 +8,14 @@
 const BASE = "https://api.the-odds-api.com/v4";
 
 /** Correspondance code football-data.org → fragments attendus dans le titre The Odds API. */
-export const SPORT_TITLE_HINTS: Record<string, string[]> = {
-  PL: ["epl", "premier league"],
-  PD: ["la liga", "spain"],
-  SA: ["serie a", "italy"],
-  BL1: ["bundesliga", "germany"],
-  FL1: ["ligue 1", "france"],
-  CL: ["champions league"],
+/** Clés exactes The Odds API (une recherche par mots-clés confondait la Liga avec la Copa del Rey, la Bundesliga avec l'Autriche). */
+export const SPORT_KEYS: Record<string, string> = {
+  PL: "soccer_epl",
+  PD: "soccer_spain_la_liga",
+  SA: "soccer_italy_serie_a",
+  BL1: "soccer_germany_bundesliga",
+  FL1: "soccer_france_ligue_one",
+  CL: "soccer_uefa_champs_league",
 };
 
 export type OddsSport = { key: string; group: string; title: string; description: string; active: boolean; has_outrights: boolean };
@@ -61,14 +62,9 @@ export class OddsApiClient {
    * Retourne null si la compétition n'a pas de marché ouvert en ce moment.
    */
   static resolveSportKey(sports: OddsSport[], fdCode: string): string | null {
-    const hints = SPORT_TITLE_HINTS[fdCode];
-    if (!hints) return null;
-    const soccer = sports.filter((s) => s.group.toLowerCase() === "soccer" && s.active && !s.has_outrights);
-    const hit = soccer.find((s) => {
-      const t = `${s.key} ${s.title} ${s.description}`.toLowerCase();
-      return hints.some((h) => t.includes(h));
-    });
-    return hit?.key ?? null;
+    const key = SPORT_KEYS[fdCode];
+    if (!key) return null;
+    return sports.some((s) => s.key === key && s.active) ? key : null;
   }
 
   /** Cotes d'une compétition : 1X2 (h2h) et plus/moins (totals), bookmakers européens, décimales. */
