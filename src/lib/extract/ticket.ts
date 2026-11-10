@@ -194,7 +194,7 @@ export async function extractTicket(db: Db, input: { images?: LlmImage[]; text?:
   const llm = getLlm();
   const user = input.images?.length
     ? (input.images.length > 1
-        ? `Ce ticket de pari est une longue capture découpée en ${input.images.length} morceaux qui se suivent de haut en bas, avec un léger chevauchement : ne compte pas deux fois une sélection présente à la jonction. Remplis la structure en copiant les libellés tels quels.`
+        ? `Ces ${input.images.length} images sont les morceaux d'UN SEUL ticket de pari, dans l'ordre de haut en bas (captures successives ou découpage d'une capture longue), avec de possibles chevauchements : une sélection visible deux fois à une jonction ne compte qu'une fois. Remplis une seule structure pour l'ensemble, en copiant les libellés tels quels.`
         : "Lis ce ticket de pari et remplis la structure. Copie les libellés tels quels.")
     : `Lis ce ticket de pari partagé en texte et remplis la structure. Copie les libellés tels quels.\n\n${input.text ?? ""}`;
   const res = await llm.extract({ system: SYSTEM, user, images: input.images, schema: SCHEMA as unknown as Record<string, unknown>, maxTokens: 4096 });

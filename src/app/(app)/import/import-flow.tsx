@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { placeImportedBet } from "@/lib/bets/import-actions";
 import { Button, Chip, Field, Input, Notice, RISK_CLASS, RISK_LABEL, fcfa, riskFromOdds } from "@/components/ui";
 import type { ExtractedTicket, MatchedSelection } from "@/lib/extract/ticket";
@@ -21,7 +21,7 @@ const OUTCOME: Record<MatchedSelection["outcome"], { label: string; cls: string 
 };
 const toNum = (s: string) => Number(String(s).replace(/\s/g, "").replace(",", "."));
 
-export function ImportFlow({ sources, defaultOrigin, initialText }: { sources: Source[]; defaultOrigin: string | null; initialText: string }) {
+export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nextTab }: { sources: Source[]; defaultOrigin: string | null; initialText: string; justSaved?: boolean; nextTab?: string }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState(initialText);
@@ -34,6 +34,25 @@ export function ImportFlow({ sources, defaultOrigin, initialText }: { sources: S
   const [status, setStatus] = useState<"en_cours" | "gagne" | "perdu" | "rembourse">("en_cours");
   const [summaryOrigin, setSummaryOrigin] = useState<string | null>(defaultOrigin);
   const [pending, start] = useTransition();
+
+  // Fichiers arrivés par la feuille de partage Android (voir /import/share)
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has("shared")) return;
+    try {
+      const raw = sessionStorage.getItem("betwise.shared");
+      if (!raw) return;
+      sessionStorage.removeItem("betwise.shared");
+      const parts = JSON.parse(raw) as { name: string; type: string; b64: string }[];
+      const fd = new FormData();
+      for (const p of parts) {
+        const bin = atob(p.b64); const arr = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        fd.append("image", new File([arr], p.name || "capture.jpg", { type: p.type }));
+      }
+      run(fd);
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function run(fd: FormData) {
     setBusy(true); setError(null); setResult(null);
@@ -53,9 +72,12 @@ export function ImportFlow({ sources, defaultOrigin, initialText }: { sources: S
     }
   }
 
-  function onFile(f: File | null) {
-    if (!f) return;
-    const fd = new FormData(); fd.set("image", f); if (coupon) fd.set("link", coupon.url);
+  function onFiles(list: FileList | null) {
+    const files = Array.from(list ?? []).filter((f) => f.size > 0);
+    if (files.length === 0) return;
+    const fd = new FormData();
+    for (const f of files) fd.append("image", f);
+    if (coupon) fd.set("link", coupon.url);
     run(fd);
   }
   function onText() {
@@ -96,7 +118,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText }: { sources: S
         })),
       });
       if (!res.ok) { setError(res.error); return; }
-      router.push("/paris?ajout=1" + (status === "en_cours" ? "" : "&f=regles"));
+      router.push("/import?ok=1&next=" + (status === "en_cours" ? "paris" : "regles"));
     });
   }
 
@@ -104,14 +126,21 @@ export function ImportFlow({ sources, defaultOrigin, initialText }: { sources: S
   if (!result) {
     return (
       <div className="space-y-4">
+        {justSaved && (
+          <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+            <span>Ticket enregistré.</span>
+            <a href={nextTab === "regles" ? "/paris?f=regles" : "/paris"} className="font-medium underline">Voir mes paris</a>
+          </div>
+        )}
         {coupon && (
           <Notice kind="info">Lien {coupon.bookmaker} reconnu (coupon {coupon.code}). Il ne contient pas les sélections : ajoute une capture ou le texte du coupon.</Notice>
         )}
         <section className="rounded-xl border border-slate-200 bg-white p-4">
           <h2 className="mb-2 text-sm font-semibold">Capture d’écran</h2>
-          <p className="mb-3 text-xs text-slate-500">Déplie le ticket avant la capture pour que chaque sélection soit lisible. Une capture longue est acceptée.</p>
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => onFile(e.target.files?.[0] ?? null)} />
-          <Button variant="ghost" onClick={() => fileRef.current?.click()} disabled={busy}>{busy ? "Lecture en cours…" : "Choisir une capture"}</Button>
+          <p className="mb-3 text-xs text-slate-500">Déplie le ticket avant la capture. Un ticket long peut être envoyé en plusieurs captures : sélectionne-les toutes, dans l’ordre (6 max).</p>
+          <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { onFiles(e.target.files); e.target.value = ""; }} />
+          <Button variant="ghost" onClick={() => fileRef.current?.click()} disabled={busy}>{busy ? "Lecture en cours…" : "Choisir une ou plusieurs captures"}</Button>
+          <p className="mt-2 text-[11px] text-slate-400">Betclic ne partage pas ses tickets : la capture d’écran est le seul moyen. Sur iPhone : Photos. Sur Android : Galerie ou Fichiers.</p>
         </section>
         <section className="rounded-xl border border-slate-200 bg-white p-4">
           <h2 className="mb-2 text-sm font-semibold">Texte partagé ou lien</h2>

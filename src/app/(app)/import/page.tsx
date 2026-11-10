@@ -5,7 +5,7 @@ import { ImportFlow } from "./import-flow";
 export const dynamic = "force-dynamic";
 
 /** Cible de partage Android (manifest share_target) et point d'entrée « Importer un ticket ». */
-export default async function ImportPage({ searchParams }: { searchParams: Promise<{ text?: string; url?: string; title?: string }> }) {
+export default async function ImportPage({ searchParams }: { searchParams: Promise<{ text?: string; url?: string; title?: string; ok?: string; next?: string }> }) {
   const sp = await searchParams;
   const supabase = await createClient();
   const { data: sources } = await supabase.from("sources").select("id, nom, type").neq("type", "modele_betwise").order("created_at");
@@ -15,8 +15,8 @@ export default async function ImportPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <PageHeader title="Importer un ticket" subtitle="Capture, texte partagé ou lien. Tu vérifies, puis tu enregistres." />
-      <ImportFlow sources={ordered} defaultOrigin={mine?.id ?? null} initialText={sharedText} />
+      <PageHeader title="Importer un ticket" subtitle="Une capture d’écran suffit. Tu vérifies, puis tu enregistres." />
+      <ImportFlow sources={ordered} defaultOrigin={mine?.id ?? null} initialText={sharedText} justSaved={!!sp.ok} nextTab={sp.next} />
     </>
   );
 }

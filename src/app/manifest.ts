@@ -16,9 +16,10 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     // Cible de partage (Android) : texte partagé depuis une app de paris → /import
     share_target: {
-      action: "/import",
-      method: "GET",
-      params: { title: "title", text: "text", url: "url" },
+      action: "/import/share",
+      method: "POST",
+      enctype: "multipart/form-data",
+      params: { title: "title", text: "text", url: "url", files: [{ name: "image", accept: ["image/*"] }] },
     },
   } as MetadataRoute.Manifest;
 }

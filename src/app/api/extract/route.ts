@@ -18,7 +18,8 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "non authentifié" }, { status: 401 });
 
   const form = await req.formData();
-  const file = form.get("image");
+  const files = form.getAll("image").filter((f): f is File => f instanceof File && f.size > 0);
+  const file = files[0] ?? null;
   const text = String(form.get("text") ?? "").trim();
   const link = String(form.get("link") ?? "").trim();
 
@@ -30,11 +31,17 @@ export async function POST(req: NextRequest) {
   if (!file && !text) return NextResponse.json({ error: "Aucune capture ni texte" }, { status: 400 });
 
   let images, storagePath: string | null = null, truncated = false;
-  if (file && file instanceof File) {
-    if (file.size > MAX_BYTES) return NextResponse.json({ error: "Image trop lourde (8 Mo max)" }, { status: 413 });
-    const buf = Buffer.from(await file.arrayBuffer());
-    const prep = await prepareTicketImage(buf);
-    images = prep.images; truncated = prep.truncated;
+  if (file) {
+    if (files.length > 6) return NextResponse.json({ error: "6 captures maximum pour un même ticket" }, { status: 400 });
+    const total = files.reduce((a, f) => a + f.size, 0);
+    if (total > MAX_BYTES * 2) return NextResponse.json({ error: "Images trop lourdes (16 Mo max au total)" }, { status: 413 });
+    images = [];
+    for (const f of files) {
+      const prep = await prepareTicketImage(Buffer.from(await f.arrayBuffer()));
+      images.push(...prep.images);
+      truncated = truncated || prep.truncated;
+    }
+    if (images.length > 10) { images = images.slice(0, 10); truncated = true; }
 
     // Conservation de la première tuile seulement (pas l'original : il peut contenir le solde du compte)
     storagePath = `${user.id}/${Date.now()}.jpg`;
