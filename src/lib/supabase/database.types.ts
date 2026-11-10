@@ -850,6 +850,7 @@ export type Database = {
           model_version: string
           prediction_id: string | null
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
@@ -864,6 +865,7 @@ export type Database = {
           model_version: string
           prediction_id?: string | null
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
@@ -878,6 +880,7 @@ export type Database = {
           model_version?: string
           prediction_id?: string | null
           created_at?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -902,6 +905,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      match_history: {
+        Row: {
+          id: string
+          ligue: string
+          saison: string
+          played_on: string
+          home_nom: string
+          away_nom: string
+          home_goals: number
+          away_goals: number
+          cote_1: number | null
+          cote_n: number | null
+          cote_2: number | null
+          cote_plus25: number | null
+          cote_moins25: number | null
+          imported_at: string
+        }
+        Insert: {
+          id?: string
+          ligue: string
+          saison: string
+          played_on: string
+          home_nom: string
+          away_nom: string
+          home_goals: number
+          away_goals: number
+          cote_1?: number | null
+          cote_n?: number | null
+          cote_2?: number | null
+          cote_plus25?: number | null
+          cote_moins25?: number | null
+          imported_at?: string
+        }
+        Update: {
+          id?: string
+          ligue?: string
+          saison?: string
+          played_on?: string
+          home_nom?: string
+          away_nom?: string
+          home_goals?: number
+          away_goals?: number
+          cote_1?: number | null
+          cote_n?: number | null
+          cote_2?: number | null
+          cote_plus25?: number | null
+          cote_moins25?: number | null
+          imported_at?: string
+        }
+        Relationships: []
       }
       conversations: {
         Row: {

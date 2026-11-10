@@ -43,7 +43,8 @@ TABLES = {
     "bankroll_transactions": "id:uuid= bankroll_id:uuid type:enum:tx_type montant:numeric bet_id:uuid? note:text? at:timestamptz=",
     "source_metrics": "source_id:uuid periode:text nb_declares:int4= nb_verifies:int4= nb_gagnes:int4= nb_regles:int4= taux_reussite:numeric? rendement:numeric? ic_bas:numeric? ic_haut:numeric? pire_serie:numeric? statut_eval:enum:eval_status= computed_at:timestamptz=",
     "source_metrics_by_axis": "source_id:uuid periode:text axe:enum:metric_axis valeur:text nb_declares:int4= nb_gagnes:int4= rendement:numeric? computed_at:timestamptz=",
-    "model_estimates": "id:uuid= match_id:uuid market_code:text market_param:numeric? selection:text probabilite:numeric cote_reference:numeric? niveau_risque:int2? justification:jsonb? model_version:text prediction_id:uuid? created_at:timestamptz=",
+    "model_estimates": "id:uuid= match_id:uuid market_code:text market_param:numeric? selection:text probabilite:numeric cote_reference:numeric? niveau_risque:int2? justification:jsonb? model_version:text prediction_id:uuid? created_at:timestamptz= updated_at:timestamptz=",
+    "match_history": "id:uuid= ligue:text saison:text played_on:date home_nom:text away_nom:text home_goals:int2 away_goals:int2 cote_1:numeric? cote_n:numeric? cote_2:numeric? cote_plus25:numeric? cote_moins25:numeric? imported_at:timestamptz=",
     "conversations": "id:uuid= user_id:uuid titre:text? created_at:timestamptz=",
     "messages": "id:uuid= conversation_id:uuid role:text contenu:text? fonctions:jsonb? tokens_in:int4? tokens_out:int4? created_at:timestamptz=",
     "feedback": "id:uuid= user_id:uuid? ecran:text? message:text created_at:timestamptz=",
@@ -109,7 +110,7 @@ FUNCTIONS = {
 }
 
 TS = {"uuid": "string", "text": "string", "bool": "boolean", "int2": "number", "int4": "number", "int8": "number",
-      "numeric": "number", "timestamptz": "string", "jsonb": "Json", "text[]": "string[]"}
+      "numeric": "number", "timestamptz": "string", "date": "string", "jsonb": "Json", "text[]": "string[]"}
 
 
 def ts_type(t: str) -> str:

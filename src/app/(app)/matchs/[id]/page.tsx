@@ -40,6 +40,15 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
     latest.get(`${code}|${param ?? ""}|${sel}|ref:eu-median`) ?? null;
   const userObs = [...latest.values()].filter((o) => o.origine !== "api");
 
+  const { data: est } = await supabase
+    .from("model_estimates")
+    .select("market_code, market_param, selection, probabilite, cote_reference, niveau_risque, justification, updated_at, prediction_id")
+    .eq("match_id", id)
+    .eq("model_version", "poisson-v1");
+  const { data: modelSrc } = await supabase.from("sources").select("id").eq("type", "modele_betwise").limit(1).maybeSingle();
+  const e = (code: string, sel: string) => (est ?? []).find((x) => x.market_code === code && x.selection === sel) ?? null;
+  const just = (est?.[0]?.justification ?? null) as { lambda_dom?: number; lambda_ext?: number; score_probable?: string; matchs_historique_dom?: number; matchs_historique_ext?: number } | null;
+
   const upcoming = m.statut === "programme" || m.statut === "en_cours";
   const parierHref = (market: string, sel: string, cote?: number, param?: number) =>
     `/nouveau?match=${m.id}&market=${market}${param !== undefined ? `&param=${param}` : ""}&sel=${encodeURIComponent(sel)}${cote ? `&cote=${cote}` : ""}`;
@@ -97,9 +106,31 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
         )}
       </section>
 
-      <section className="mb-5 rounded-xl border border-dashed border-slate-300 bg-white p-4">
-        <h2 className="text-sm font-semibold">Indicateur de risque BETWISE</h2>
-        <p className="mt-1 text-xs text-slate-500">Arrive en phase 2 : estimation statistique par issue, comparée à la cote de référence, et notée comme n’importe quelle source.</p>
+      <section className="mb-5 rounded-xl border border-slate-200 bg-white p-4">
+        <div className="mb-3 flex items-baseline justify-between">
+          <h2 className="text-sm font-semibold">Indicateur BETWISE</h2>
+          {modelSrc && <Link href={`/sources/${modelSrc.id}`} className="text-[11px] text-slate-500 underline">voir son bilan</Link>}
+        </div>
+        {!est?.length ? (
+          <p className="text-xs text-slate-500">Pas d’estimation pour ce match : le modèle couvre les 5 grands championnats à partir de J-8 (pas encore la Ligue des champions).</p>
+        ) : (
+          <>
+            <EstimateRow label="1X2" cells={[
+              { name: short(home), e: e("1X2", "1") }, { name: "Nul", e: e("1X2", "N") }, { name: short(away), e: e("1X2", "2") },
+            ]} />
+            <EstimateRow label="Buts" cells={[{ name: "+ de 2,5", e: e("OU", "Plus") }, { name: "− de 2,5", e: e("OU", "Moins") }]} />
+            <EstimateRow label="Les deux marquent" cells={[{ name: "Oui", e: e("BTTS", "Oui") }, { name: "Non", e: e("BTTS", "Non") }]} />
+            {just && (
+              <p className="mt-1 text-xs text-slate-600">
+                Buts attendus : {fmtDec(just.lambda_dom)} – {fmtDec(just.lambda_ext)} · score le plus probable {just.score_probable}
+              </p>
+            )}
+            <p className="mt-2 text-[11px] text-slate-400">
+              Modèle statistique (Poisson) sur les deux dernières saisons, matchs récents pondérés davantage. Il ignore blessures, rotations et motivation.
+              L’écart (en points) compare sa probabilité à celle de la cote de référence. Case encadrée : l’issue enregistrée comme prono du modèle, notée comme n’importe quelle source. Mis à jour {fmtRel(est[0].updated_at)}.
+            </p>
+          </>
+        )}
       </section>
 
       {upcoming && (
@@ -145,6 +176,32 @@ function OddsRow({ label, cells, market, param, upcoming, href }: {
   );
 }
 
+const RISK_TXT = ["", "très probable", "probable", "incertain", "peu probable", "improbable"];
+function EstimateRow({ label, cells }: { label: string; cells: { name: string; e: { probabilite: number; cote_reference: number | null; niveau_risque: number | null; prediction_id: string | null } | null }[] }) {
+  return (
+    <div className="mb-3">
+      <p className="mb-1 text-[11px] uppercase tracking-wide text-slate-500">{label}</p>
+      <div className={`grid gap-2 ${cells.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
+        {cells.map((c) => {
+          const p = c.e ? Number(c.e.probabilite) : null;
+          const ref = c.e?.cote_reference ? Number(c.e.cote_reference) : null;
+          const gap = p !== null && ref ? Math.round((p - 1 / ref) * 100) : null;
+          return (
+            <div key={c.name} className={`rounded-lg border p-2 text-center ${c.e?.prediction_id ? "border-slate-900" : "border-slate-200"}`}>
+              <p className="truncate text-xs text-slate-600">{c.name}</p>
+              <p className="text-lg font-semibold tabular-nums">{p !== null ? `${Math.round(p * 100)} %` : "—"}</p>
+              <p className="text-[11px] text-slate-500">
+                {c.e?.niveau_risque ? RISK_TXT[c.e.niveau_risque] : ""}
+                {gap !== null && <> · <span className={gap >= 3 ? "text-emerald-700" : gap <= -3 ? "text-red-700" : ""}>{gap > 0 ? "+" : ""}{gap} pts</span></>}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+const fmtDec = (x?: number) => (x === undefined ? "?" : x.toFixed(1).replace(".", ","));
 const short = (n: string) => n.replace(/\s?(FC|CF|SC|AC|AS|US|SV|RB|SSC|Calcio)\b\.?/g, "").trim().slice(0, 14);
 function fmtRel(iso: string) {
   const h = Math.round((Date.now() - Date.parse(iso)) / 3600000);

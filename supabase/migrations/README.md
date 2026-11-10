@@ -22,3 +22,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0012_source_metrics_compute.sql | 2026-11-10 | `compute_source_metrics()` (rendement unitaire, IC 90 % bootstrap, pire série, détail marché/compétition/risque, 4 périodes), `source_cumulative()`, `max_drawdown()` |
 | 0013_pg_cron_schedule.sql | 2026-11-10 | pg_cron : `betwise-source-metrics` 03:00 UTC, `betwise-keepalive` 05:30 UTC |
 | 0014_fix_bootstrap_ci_types.sql | 2026-11-10 | `bootstrap_ci()` renvoie du numeric arrondi (erreur de type à la première exécution) |
+| 0015_match_history_and_model.sql | 2026-11-10 | `match_history` (résultats et cotes moyennes football-data.co.uk, lecture connectés), index unique des `model_estimates` par version, `updated_at` |

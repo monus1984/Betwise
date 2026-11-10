@@ -13,7 +13,8 @@
     "import:matches": "tsx scripts/import-matches.ts",
     "db:types": "python3 scripts/gen-types.py",
     "import:odds": "tsx scripts/import-odds.ts",
-    "probe:api-football": "tsx scripts/probe-api-football.ts"
+    "probe:api-football": "tsx scripts/probe-api-football.ts",
+    "model": "tsx scripts/run-model.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.7.0",

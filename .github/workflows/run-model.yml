@@ -1,0 +1,27 @@
+name: Modèle BETWISE
+
+on:
+  schedule:
+    # 07:30 UTC chaque jour, après l'import des matchs (06:00) et des cotes de référence (07:00)
+    - cron: "30 7 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: run-model
+  cancel-in-progress: false
+
+jobs:
+  model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run model
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
