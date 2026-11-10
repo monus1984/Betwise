@@ -1,0 +1,19 @@
+name: Sonde matchs internationaux (The Odds API)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsx scripts/probe-odds-international.ts
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
