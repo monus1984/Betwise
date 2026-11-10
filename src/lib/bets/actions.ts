@@ -4,13 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { MARKETS } from "./markets";
+import { MARKETS_ALL } from "./markets";
 
 
 const selectionSchema = z.object({
   match_id: z.string().uuid().nullable(),
   match_libre: z.string().trim().min(2).max(120).nullable(),
-  market_code: z.enum(MARKETS),
+  market_code: z.enum(MARKETS_ALL),
   market_param: z.number().nullable(),
   selection: z.string().trim().min(1).max(60),
   cote: z.number().gt(1).lte(1000),

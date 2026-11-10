@@ -542,6 +542,10 @@ export type Database = {
           upload_id: string | null
           settled_at: string | null
           created_at: string
+          nb_selections: number | null
+          detail_complet: boolean
+          coupon_externe: string | null
+          bookmaker: string | null
         }
         Insert: {
           id?: string
@@ -558,6 +562,10 @@ export type Database = {
           upload_id?: string | null
           settled_at?: string | null
           created_at?: string
+          nb_selections?: number | null
+          detail_complet?: boolean
+          coupon_externe?: string | null
+          bookmaker?: string | null
         }
         Update: {
           id?: string
@@ -574,6 +582,10 @@ export type Database = {
           upload_id?: string | null
           settled_at?: string | null
           created_at?: string
+          nb_selections?: number | null
+          detail_complet?: boolean
+          coupon_externe?: string | null
+          bookmaker?: string | null
         }
         Relationships: [
           {
@@ -1035,6 +1047,7 @@ export type Database = {
           p_raw_text?: string | null
           p_upload_id?: string | null
           p_placed_at?: string | null
+          p_summary?: Json | null
         }
         Returns: string
       }

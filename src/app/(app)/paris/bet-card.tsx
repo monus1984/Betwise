@@ -111,6 +111,8 @@ function marketLabel(code: string, param: number | null, sel: string) {
     case "BTTS": return `Les deux marquent : ${sel}`;
     case "AH": return `Handicap ${param ?? ""} · ${sel === "1" ? "dom." : "ext."}`;
     case "CS": return `Score exact ${sel}`;
+    case "DC_OU": { const [dc, ou] = sel.split("|"); return `Double chance ${dc} & ${ou} de ${param ?? ""} buts`; }
+    case "1X2_OU": { const [r, ou] = sel.split("|"); return `${({ "1": "Dom.", N: "Nul", "2": "Ext." } as Record<string,string>)[r] ?? r} & ${ou} de ${param ?? ""} buts`; }
     default: return `${code} ${sel}`;
   }
 }

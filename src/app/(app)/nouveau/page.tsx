@@ -53,7 +53,7 @@ export default async function NouveauPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHeader title="Nouveau pari" subtitle="Trois champs, et l’origine de ton choix." />
+      <PageHeader title="Nouveau pari" subtitle="Trois champs, et l’origine de ton choix." action={<a href="/import" className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium">Importer un ticket</a>} />
       <NewBetForm sources={ordered} markets={markets ?? []} defaultOrigin={mine?.id ?? null} prefill={{ match: prefillMatch, market: sp.market, param: sp.param, sel: sp.sel, cote: sp.cote, origin: sp.origin, prediction: sp.prediction }} />
     </>
   );
