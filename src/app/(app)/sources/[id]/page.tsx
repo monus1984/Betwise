@@ -5,13 +5,14 @@ import { RISK_CLASS, RISK_LABEL } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 import { evalStatus, labelType } from "../source-ui";
 import { FollowButton, PredictionRow } from "./client";
+import { CumulChart, type CumulPoint } from "./cumul-chart";
 
 export const dynamic = "force-dynamic";
 
 type Named = { nom: string } | { nom: string }[] | null;
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
 
-export default async function SourcePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ existante?: string; ajout?: string; doublon?: string }> }) {
+export default async function SourcePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ existante?: string; ajout?: string; doublon?: string; p?: string }> }) {
   const { id } = await params;
   const sp = await searchParams;
   const supabase = await createClient();
@@ -21,6 +22,12 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
   if (!s) notFound();
   const { data: t } = await supabase.from("source_trend").select("*").eq("source_id", id).maybeSingle();
   const { data: f } = await supabase.from("source_follows").select("source_id").eq("source_id", id).eq("user_id", user!.id).maybeSingle();
+  const periode = (["30j", "90j", "180j", "total"] as const).includes(sp.p as never) ? (sp.p as "30j" | "90j" | "180j" | "total") : "total";
+  const since = periode === "total" ? null : new Date(Date.now() - Number(periode.replace("j", "")) * 86400000).toISOString();
+  const { data: met } = await supabase.from("source_metrics").select("*").eq("source_id", id).eq("periode", periode).maybeSingle();
+  const { data: axes } = await supabase.from("source_metrics_by_axis").select("*").eq("source_id", id).eq("periode", periode);
+  const { data: cumul } = await supabase.rpc("source_cumulative", { p_source_id: id, p_since: since });
+  const points = ((cumul ?? []) as unknown as CumulPoint[]);
 
   const { data: preds } = await supabase
     .from("predictions")
@@ -61,6 +68,61 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
         </div>
         {declares > 0 && declares < 30 && <p className="mt-3 text-[11px] text-slate-400">Moins de 30 pronos : une tendance, pas un jugement. Le compte est affiché pour que tu juges toi-même.</p>}
       </section>
+
+      <div className="mt-4 flex gap-2">
+        {(["30j", "90j", "180j", "total"] as const).map((k) => (
+          <Link key={k} href={`/sources/${id}?p=${k}`} className={`rounded-full px-3 py-1 text-xs ${periode === k ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700"}`}>{k === "total" ? "Depuis le début" : k.replace("j", " jours")}</Link>
+        ))}
+      </div>
+
+      <section className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
+        <div className="mb-2 flex items-baseline justify-between">
+          <h2 className="text-sm font-semibold">Rendement cumulé</h2>
+          <span className="text-[11px] text-slate-500">mise fixe de 1 unité par prono</span>
+        </div>
+        <CumulChart points={points} />
+        <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
+          <div>
+            <p className="text-[11px] uppercase tracking-wide text-slate-500">Rendement moyen</p>
+            <p className="font-semibold tabular-nums">{met?.rendement !== null && met?.rendement !== undefined ? `${Number(met.rendement) >= 0 ? "+" : ""}${(Number(met.rendement) * 100).toFixed(1)} %` : "—"}</p>
+            {met?.ic_bas !== null && met?.ic_bas !== undefined && (
+              <p className={`text-[11px] ${Number(met.ic_bas) > 0 ? "text-emerald-700" : Number(met.ic_haut) < 0 ? "text-red-700" : "text-slate-500"}`}>
+                {Number(met.ic_bas) > 0 ? "établi positif" : Number(met.ic_haut) < 0 ? "établi négatif" : "non établi"} · 90 % entre {(Number(met.ic_bas) * 100).toFixed(0)} et {(Number(met.ic_haut) * 100).toFixed(0)} %
+              </p>
+            )}
+          </div>
+          <div>
+            <p className="text-[11px] uppercase tracking-wide text-slate-500">Pire série</p>
+            <p className="font-semibold tabular-nums">{met?.pire_serie !== null && met?.pire_serie !== undefined && Number(met.nb_regles) > 0 ? `−${Number(met.pire_serie).toFixed(1)} u` : "—"}</p>
+            <p className="text-[11px] text-slate-500">plus forte baisse</p>
+          </div>
+          <div>
+            <p className="text-[11px] uppercase tracking-wide text-slate-500">Seuil de rentabilité</p>
+            <p className="font-semibold tabular-nums">{points.length ? `${Math.round(100 / avgOdds(points))} %` : "—"}</p>
+            <p className="text-[11px] text-slate-500">réussite à atteindre à cette cote moyenne</p>
+          </div>
+        </div>
+        <p className="mt-3 text-[11px] text-slate-400">Calculé chaque nuit sur les pronos réglés avec cote, période choisie ci-dessus. « Non établi » : l’intervalle de confiance contient zéro, l’échantillon ne permet pas de conclure.</p>
+      </section>
+
+      {(axes ?? []).some((a) => a.axe === "competition") && (
+        <section className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
+          <h2 className="mb-2 text-sm font-semibold">Par compétition et par marché</h2>
+          <table className="w-full text-xs">
+            <thead><tr className="text-left text-slate-500"><th className="py-1 font-medium">Axe</th><th className="py-1 text-right font-medium">Pronos</th><th className="py-1 text-right font-medium">Gagnés</th><th className="py-1 text-right font-medium">Rendement</th></tr></thead>
+            <tbody>
+              {(axes ?? []).filter((a) => a.axe !== "risque" && Number(a.nb_declares) > 0).sort((a, b) => Number(b.nb_declares) - Number(a.nb_declares)).map((a) => (
+                <tr key={`${a.axe}-${a.valeur}`} className="border-t border-slate-100">
+                  <td className="py-1">{a.axe === "competition" ? compLabel(a.valeur) : a.valeur}</td>
+                  <td className="py-1 text-right tabular-nums">{Number(a.nb_declares)}</td>
+                  <td className="py-1 text-right tabular-nums">{Number(a.nb_gagnes)}</td>
+                  <td className={`py-1 text-right tabular-nums ${a.rendement === null ? "text-slate-400" : Number(a.rendement) >= 0 ? "text-emerald-700" : "text-red-700"}`}>{a.rendement === null ? "—" : `${Number(a.rendement) >= 0 ? "+" : ""}${(Number(a.rendement) * 100).toFixed(0)} %`}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
 
       <section className="mt-4 grid grid-cols-3 gap-2">
         {(["prudent", "moyen", "risque"] as const).map((k) => {
@@ -115,4 +177,13 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
       </section>
     </>
   );
+}
+
+function avgOdds(points: CumulPoint[]) {
+  const odds = points.filter((p) => p.resultat !== "rembourse").map((p) => (p.resultat === "gagne" ? Number(p.gain) + 1 : null)).filter((x): x is number => x !== null);
+  // les cotes des pronos perdus ne sont pas dans la série ; approximation par les cotes gagnantes si rien d'autre
+  return odds.length ? odds.reduce((a, b) => a + b, 0) / odds.length : 1.8;
+}
+function compLabel(code: string) {
+  return ({ PL: "Premier League", PD: "Liga", SA: "Serie A", BL1: "Bundesliga", FL1: "Ligue 1", CL: "Ligue des champions", autre: "Hors référentiel" } as Record<string, string>)[code] ?? code;
 }

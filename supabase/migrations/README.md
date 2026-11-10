@@ -19,3 +19,6 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0009_fix_place_bet_alias.sql | 2026-11-10 | version en service de `place_bet()` : cast explicite, alias JSON distincts ; testée sur les tickets Betclic (combiné 3 et replié 10) |
 | 0010_duplicate_ticket_guard.sql | 2026-11-10 | empreinte `ticket_fingerprint` (bookmaker, minute, mise, cote) + index unique, refus explicite du doublon dans `place_bet()`, `delete_duplicate_bet()` sous 24 h |
 | 0011_bet_editing.sql | 2026-11-10 | `bet_versions` (journal), `set_selection_origin()`, `update_selection()`, `update_bet()` |
+| 0012_source_metrics_compute.sql | 2026-11-10 | `compute_source_metrics()` (rendement unitaire, IC 90 % bootstrap, pire série, détail marché/compétition/risque, 4 périodes), `source_cumulative()`, `max_drawdown()` |
+| 0013_pg_cron_schedule.sql | 2026-11-10 | pg_cron : `betwise-source-metrics` 03:00 UTC, `betwise-keepalive` 05:30 UTC |
+| 0014_fix_bootstrap_ci_types.sql | 2026-11-10 | `bootstrap_ci()` renvoie du numeric arrondi (erreur de type à la première exécution) |

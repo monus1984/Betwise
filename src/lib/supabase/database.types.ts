@@ -1153,6 +1153,17 @@ export type Database = {
         }
         Returns: undefined
       }
+      source_cumulative: {
+        Args: {
+          p_source_id: string
+          p_since?: string | null
+        }
+        Returns: { at: string; gain: number; cumul: number; resultat: Database["betwise"]["Enums"]["settle_result"]; libelle: string }[]
+      }
+      compute_source_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: { sources_calculees: number }[]
+      }
       set_selection_origin: {
         Args: {
           p_selection_id: string

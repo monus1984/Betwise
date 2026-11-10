@@ -101,6 +101,8 @@ FUNCTIONS = {
     "log_prediction": ([("p_source_id", "uuid", False), ("p_market_code", "text", False), ("p_selection", "text", False), ("p_match_id", "uuid", True), ("p_match_libre", "text", True), ("p_market_param", "numeric", True), ("p_cote_annoncee", "numeric", True), ("p_risque_annonce", "enum:risk_category", True), ("p_published_at", "timestamptz", True), ("p_upload_id", "uuid", True)], "setof:prediction_id:uuid,created:bool,statut:enum:prediction_status"),
     "cancel_prediction": ([("p_id", "uuid", False), ("p_motif", "text", False)], "void"),
     "delete_duplicate_bet": ([("p_bet_id", "uuid", False)], "void"),
+    "source_cumulative": ([("p_source_id", "uuid", False), ("p_since", "timestamptz", True)], "setof:at:timestamptz,gain:numeric,cumul:numeric,resultat:enum:settle_result,libelle:text"),
+    "compute_source_metrics": ([], "setof:sources_calculees:int4"),
     "set_selection_origin": ([("p_selection_id", "uuid", False), ("p_source_id", "uuid", False)], "void"),
     "update_selection": ([("p_selection_id", "uuid", False), ("p_cote", "numeric", True), ("p_match_id", "uuid", True), ("p_match_libre", "text", True), ("p_market_code", "text", True), ("p_market_param", "numeric", True), ("p_selection", "text", True), ("p_clear_match", "bool", True)], "void"),
     "update_bet": ([("p_bet_id", "uuid", False), ("p_mise", "numeric", True), ("p_bookmaker", "text", True), ("p_placed_at", "timestamptz", True)], "void"),
