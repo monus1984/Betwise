@@ -1,0 +1,25 @@
+name: Historique xG (API-Football)
+
+on:
+  workflow_dispatch:
+    inputs:
+      saisons:
+        description: "Saisons (ex. 2024 2025 2026)"
+        default: "2024 2025 2026"
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsx scripts/backfill-af-history.ts ${{ inputs.saisons }}
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

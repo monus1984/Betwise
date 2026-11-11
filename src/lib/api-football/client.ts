@@ -6,6 +6,7 @@ export type AfFixture = {
   league: { id: number; season: number; round?: string };
   teams: { home: { id: number; name: string }; away: { id: number; name: string } };
   goals: { home: number | null; away: number | null };
+  statistics?: { team: { id: number }; statistics: { type: string; value: number | string | null }[] }[];
   score: { fulltime: { home: number | null; away: number | null } };
 };
 export type AfOdds = {
@@ -35,6 +36,7 @@ export class ApiFootball {
   fixtures(league: number, season: number, from: string, to: string) {
     return this.get<AfFixture>(`/fixtures?league=${league}&season=${season}&from=${from}&to=${to}`).then((j) => j.response);
   }
+  season(league: number, season: number) { return this.get<AfFixture>(`/fixtures?league=${league}&season=${season}&status=FT-AET-PEN`).then((j) => j.response); }
   live() { return this.get<AfFixture>(`/fixtures?live=all`).then((j) => j.response); }
   /** Jusqu'à 20 matchs par identifiant (scores finaux des matchs sortis du direct). */
   byIds(ids: number[]) { return this.get<AfFixture>(`/fixtures?ids=${ids.slice(0, 20).join("-")}`).then((j) => j.response); }

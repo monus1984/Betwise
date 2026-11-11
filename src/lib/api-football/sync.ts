@@ -76,7 +76,7 @@ export async function syncAfCompetition(db: Db, api: ApiFootball, code: string) 
     const statut = mapStatus(f.fixture.status.short);
     const done = statut === "termine";
     return {
-      code_externe: `af:${f.fixture.id}`, af_fixture_id: f.fixture.id, competition_id: comp.id,
+      code_externe: `af:${f.fixture.id}`, af_fixture_id: f.fixture.id, af_home_id: f.teams.home.id, af_away_id: f.teams.away.id, competition_id: comp.id,
       home_team_id: tid.get(teamRow(f.teams.home).code_externe)!, away_team_id: tid.get(teamRow(f.teams.away).code_externe)!,
       kickoff_at: f.fixture.date, statut,
       // score à la fin du temps réglementaire : c'est lui qui règle les paris
@@ -134,29 +134,34 @@ export async function linkAfFixtures(db: Db, api: ApiFootball, code: string) {
     .select("id, kickoff_at, home:teams!matches_home_team_id_fkey(nom, alias), away:teams!matches_away_team_id_fkey(nom, alias)")
     .eq("competition_id", comp.id).is("af_fixture_id", null).neq("statut", "termine")
     .gte("kickoff_at", new Date(Date.now() - 86400000).toISOString()).lte("kickoff_at", new Date(Date.now() + 15 * 86400000).toISOString());
-  if (!ms?.length) return { linked: 0, pending: 0 };
+  const { data: noTeams } = await db.from("matches").select("id, af_fixture_id").eq("competition_id", comp.id).not("af_fixture_id", "is", null).is("af_home_id", null).limit(200);
+  if (!ms?.length && !noTeams?.length) return { linked: 0, pending: 0 };
   const c = AF_LINKED[code];
   const fx = await api.fixtures(c.league, c.season, iso(new Date(Date.now() - 86400000)), iso(new Date(Date.now() + 15 * 86400000)));
   type T = { nom: string; alias: string[] };
   const one = (v: T | T[] | null) => (Array.isArray(v) ? v[0] : v);
   const sim = (name: string, t: T | null | undefined) => (t ? Math.max(...[t.nom, ...t.alias].map((x) => teamSimilarity(NATION_CANON[name] ?? name, x))) : 0);
+  for (const m of noTeams ?? []) {
+    const f = fx.find((x) => x.fixture.id === m.af_fixture_id);
+    if (f) await db.from("matches").update({ af_home_id: f.teams.home.id, af_away_id: f.teams.away.id }).eq("id", m.id);
+  }
   let linked = 0;
-  const used = new Set<number>();
-  for (const m of ms) {
-    let best: { id: number; score: number } | null = null;
+  const used = new Set<number>((noTeams ?? []).map((m) => m.af_fixture_id!));
+  for (const m of ms ?? []) {
+    let best: { id: number; score: number; h: number; a: number } | null = null;
     for (const f of fx) {
       if (used.has(f.fixture.id) || Math.abs(Date.parse(f.fixture.date) - Date.parse(m.kickoff_at)) > 4 * 3600000) continue;
       const sh = sim(f.teams.home.name, one(m.home as T | T[] | null)), sa = sim(f.teams.away.name, one(m.away as T | T[] | null));
       // les deux équipes doivent se ressembler ; un seul côté suffit si l'autre est sans ambiguïté et l'heure identique
       const score = Math.min(sh, sa) >= 0.34 ? (sh + sa) / 2 : Math.max(sh, sa) >= 0.99 && f.fixture.date.slice(0, 16) === new Date(m.kickoff_at).toISOString().slice(0, 16) ? 0.6 : 0;
-      if (score >= 0.5 && (!best || score > best.score)) best = { id: f.fixture.id, score };
+      if (score >= 0.5 && (!best || score > best.score)) best = { id: f.fixture.id, score, h: f.teams.home.id, a: f.teams.away.id };
     }
     if (!best) continue;
     used.add(best.id);
-    const { error } = await db.from("matches").update({ af_fixture_id: best.id }).eq("id", m.id);
+    const { error } = await db.from("matches").update({ af_fixture_id: best.id, af_home_id: best.h, af_away_id: best.a }).eq("id", m.id);
     if (!error) linked++;
   }
-  return { linked, pending: ms.length - linked };
+  return { linked, pending: (ms?.length ?? 0) - linked };
 }
 
 /** Applique des matchs API-Football (direct ou terminés) aux matchs suivis. Renvoie le nombre de matchs passés à « terminé ». */

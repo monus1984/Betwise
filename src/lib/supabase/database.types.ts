@@ -92,6 +92,8 @@ export type Database = {
           source_resultat: string | null
           result_at: string | null
           af_fixture_id: number | null
+          af_home_id: number | null
+          af_away_id: number | null
           minute: number | null
           live_at: string | null
           created_at: string
@@ -110,6 +112,8 @@ export type Database = {
           source_resultat?: string | null
           result_at?: string | null
           af_fixture_id?: number | null
+          af_home_id?: number | null
+          af_away_id?: number | null
           minute?: number | null
           live_at?: string | null
           created_at?: string
@@ -128,6 +132,8 @@ export type Database = {
           source_resultat?: string | null
           result_at?: string | null
           af_fixture_id?: number | null
+          af_home_id?: number | null
+          af_away_id?: number | null
           minute?: number | null
           live_at?: string | null
           created_at?: string
@@ -942,6 +948,69 @@ export type Database = {
           injuries_at?: string | null
           stats?: Json | null
           stats_at?: string | null
+        }
+        Relationships: []
+      }
+      af_history: {
+        Row: {
+          fixture_id: number
+          league: number
+          season: number
+          played_at: string
+          home_id: number
+          home_nom: string
+          away_id: number
+          away_nom: string
+          home_goals: number
+          away_goals: number
+          xg_home: number | null
+          xg_away: number | null
+          shots_home: number | null
+          shots_away: number | null
+          sot_home: number | null
+          sot_away: number | null
+          stats_checked: boolean
+          imported_at: string
+        }
+        Insert: {
+          fixture_id: number
+          league: number
+          season: number
+          played_at: string
+          home_id: number
+          home_nom: string
+          away_id: number
+          away_nom: string
+          home_goals: number
+          away_goals: number
+          xg_home?: number | null
+          xg_away?: number | null
+          shots_home?: number | null
+          shots_away?: number | null
+          sot_home?: number | null
+          sot_away?: number | null
+          stats_checked?: boolean
+          imported_at?: string
+        }
+        Update: {
+          fixture_id?: number
+          league?: number
+          season?: number
+          played_at?: string
+          home_id?: number
+          home_nom?: string
+          away_id?: number
+          away_nom?: string
+          home_goals?: number
+          away_goals?: number
+          xg_home?: number | null
+          xg_away?: number | null
+          shots_home?: number | null
+          shots_away?: number | null
+          sot_home?: number | null
+          sot_away?: number | null
+          stats_checked?: boolean
+          imported_at?: string
         }
         Relationships: []
       }

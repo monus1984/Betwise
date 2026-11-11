@@ -27,7 +27,7 @@ ENUMS = {
 TABLES = {
     "competitions": "id:uuid= code_externe:text? nom:text pays:text? saison:text couverte_auto:bool= created_at:timestamptz=",
     "teams": "id:uuid= code_externe:text? nom:text alias:text[]= competition_id:uuid? created_at:timestamptz=",
-    "matches": "id:uuid= code_externe:text? competition_id:uuid home_team_id:uuid away_team_id:uuid kickoff_at:timestamptz statut:enum:match_status= score_home:int2? score_away:int2? source_resultat:text? result_at:timestamptz? af_fixture_id:int4? minute:int2? live_at:timestamptz? created_at:timestamptz= updated_at:timestamptz=",
+    "matches": "id:uuid= code_externe:text? competition_id:uuid home_team_id:uuid away_team_id:uuid kickoff_at:timestamptz statut:enum:match_status= score_home:int2? score_away:int2? source_resultat:text? result_at:timestamptz? af_fixture_id:int4? af_home_id:int4? af_away_id:int4? minute:int2? live_at:timestamptz? created_at:timestamptz= updated_at:timestamptz=",
     "markets": "code:text libelle_fr:text a_parametre:bool= version:int2=",
     "profiles": "user_id:uuid pseudo:text devise:text= role:text= created_at:timestamptz=",
     "bankrolls": "id:uuid= user_id:uuid capital_initial:numeric= devise:text= active:bool= created_at:timestamptz=",
@@ -45,6 +45,7 @@ TABLES = {
     "source_metrics_by_axis": "source_id:uuid periode:text axe:enum:metric_axis valeur:text nb_declares:int4= nb_gagnes:int4= rendement:numeric? computed_at:timestamptz=",
     "model_estimates": "id:uuid= match_id:uuid market_code:text market_param:numeric? selection:text probabilite:numeric cote_reference:numeric? niveau_risque:int2? justification:jsonb? model_version:text prediction_id:uuid? created_at:timestamptz= updated_at:timestamptz=",
     "match_extras": "match_id:uuid lineups:jsonb? lineups_at:timestamptz? injuries:jsonb? injuries_at:timestamptz? stats:jsonb? stats_at:timestamptz?",
+    "af_history": "fixture_id:int4 league:int4 season:int4 played_at:timestamptz home_id:int4 home_nom:text away_id:int4 away_nom:text home_goals:int2 away_goals:int2 xg_home:numeric? xg_away:numeric? shots_home:int2? shots_away:int2? sot_home:int2? sot_away:int2? stats_checked:bool= imported_at:timestamptz=",
     "match_history": "id:uuid= ligue:text saison:text played_on:date home_nom:text away_nom:text home_goals:int2 away_goals:int2 cote_1:numeric? cote_n:numeric? cote_2:numeric? cote_plus25:numeric? cote_moins25:numeric? imported_at:timestamptz=",
     "conversations": "id:uuid= user_id:uuid titre:text? created_at:timestamptz=",
     "messages": "id:uuid= conversation_id:uuid role:text contenu:text? fonctions:jsonb? tokens_in:int4? tokens_out:int4? created_at:timestamptz=",
