@@ -4,6 +4,7 @@ import { RISK_CLASS, RISK_LABEL, riskFromOdds } from "@/components/ui";
 import { COMP_FLAG, COMP_SHORT, TeamBadge, confidenceLabel, marketProbs, shortName } from "@/components/match-ui";
 import { createClient } from "@/lib/supabase/server";
 import { LiveRefresh } from "@/components/live-refresh";
+import { getExtras, type Extras } from "@/lib/api-football/extras";
 import { probOf } from "@/lib/probs/grid";
 import { loadSignals, pickLabel, picksOf } from "@/lib/probs/signals";
 
@@ -14,22 +15,22 @@ const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? nul
 type Form = { date: string; adv: string; lieu: "D" | "E"; score: string; r: "V" | "N" | "D" }[];
 type Just = { lambda_dom?: number; lambda_ext?: number; score_probable?: string; forme_dom?: Form; forme_ext?: Form; h2h?: { date: string; dom: "home" | "away"; score: string }[] };
 const TABS = [
-  { k: "analyse", t: "Analyse" }, { k: "cotes", t: "Cotes" }, { k: "forme", t: "Forme" }, { k: "h2h", t: "Face-à-face" }, { k: "pronos", t: "Pronos" },
+  { k: "analyse", t: "Analyse" }, { k: "cotes", t: "Cotes" }, { k: "forme", t: "Forme" }, { k: "equipes", t: "Équipes" }, { k: "pronos", t: "Pronos" },
 ] as const;
 const TZ = "Africa/Abidjan";
 
 export default async function MatchPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ t?: string }> }) {
   const { id } = await params;
   const sp = await searchParams;
-  const tab = TABS.some((x) => x.k === sp.t) ? sp.t! : "analyse";
+  const tab = sp.t === "h2h" ? "forme" : TABS.some((x) => x.k === sp.t) ? sp.t! : "analyse";
   const supabase = await createClient();
 
   const { data } = await supabase
     .from("matches")
-    .select("id, kickoff_at, statut, score_home, score_away, minute, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe)")
+    .select("id, kickoff_at, statut, score_home, score_away, minute, af_fixture_id, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe)")
     .eq("id", id).maybeSingle();
   if (!data) notFound();
-  const m = data as unknown as { id: string; kickoff_at: string; statut: string; score_home: number | null; score_away: number | null; minute: number | null; home: Named; away: Named; competition: { nom: string; code_externe: string | null } | { nom: string; code_externe: string | null }[] | null };
+  const m = data as unknown as { id: string; kickoff_at: string; statut: string; score_home: number | null; score_away: number | null; minute: number | null; af_fixture_id: number | null; home: Named; away: Named; competition: { nom: string; code_externe: string | null } | { nom: string; code_externe: string | null }[] | null };
   const home = one(m.home)?.nom ?? "", away = one(m.away)?.nom ?? "";
   const comp = one(m.competition);
   const upcoming = m.statut === "programme" || m.statut === "en_cours";
@@ -49,6 +50,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const just = (est?.[0]?.justification ?? null) as Just | null;
   const model = e("1X2", "1") ? { p1: Number(e("1X2", "1")!.probabilite), pN: Number(e("1X2", "N")!.probabilite), p2: Number(e("1X2", "2")!.probabilite) } : null;
   const market = marketProbs(ref("1X2", "1")?.cote, ref("1X2", "N")?.cote, ref("1X2", "2")?.cote);
+  const extras: Extras | null = tab === "equipes" ? await getExtras({ id: m.id, af_fixture_id: m.af_fixture_id, kickoff_at: m.kickoff_at, statut: m.statut }) : null;
   const sg = (await loadSignals(supabase, [id])).get(id) ?? null;
   const mk = sg?.market ?? null;
   const picks = sg ? picksOf(sg).filter((p) => p.p >= 0.6 && p.p <= 0.95).slice(0, 4) : [];
@@ -172,8 +174,8 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         ) : <Card><p className="text-sm text-ink-muted">Forme disponible pour les 5 grands championnats, avec l’estimation du modèle (J-14).</p></Card>
       )}
 
-      {tab === "h2h" && (
-        <Card title="Dernières confrontations">
+      {tab === "forme" && (
+        <div className="mt-3"><Card title="Dernières confrontations">
           {!just?.h2h ? <p className="text-sm text-ink-muted">Disponible pour les 5 grands championnats, avec l’estimation du modèle.</p>
             : just.h2h.length === 0 ? <p className="text-sm text-ink-muted">Pas de confrontation en championnat sur les trois dernières saisons.</p> : (
               <ul className="divide-y divide-line">
@@ -191,7 +193,68 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
                 })}
               </ul>
             )}
-        </Card>
+        </Card></div>
+      )}
+
+
+      {tab === "equipes" && extras && (
+        <div className="space-y-3">
+          {!extras.disponible && <Card><p className="text-sm text-ink-muted">Compositions et absents indisponibles pour ce match pour l’instant.</p></Card>}
+          {extras.stats && extras.stats.length === 2 && (
+            <Card title="Statistiques du match" note={m.statut === "en_cours" ? "en direct" : undefined}>
+              {([["Buts attendus (xG)", "xg"], ["Tirs", "tirs"], ["Tirs cadrés", "cadres"], ["Possession", "possession"], ["Corners", "corners"], ["Cartons jaunes", "jaunes"]] as const).map(([lab, k]) => {
+                const a = extras.stats![0][k], b = extras.stats![1][k];
+                if (a === null && b === null) return null;
+                const na = parseFloat(String(a ?? 0)), nb = parseFloat(String(b ?? 0)), tot = na + nb || 1;
+                return (
+                  <div key={k} className="mb-2.5">
+                    <div className="mb-1 flex justify-between text-sm tabular-nums"><b>{a ?? "–"}</b><span className="text-xs text-ink-muted">{lab}</span><b>{b ?? "–"}</b></div>
+                    <div className="flex h-1.5 gap-0.5 overflow-hidden rounded-full"><div className="bg-brand" style={{ width: `${(na / tot) * 100}%` }} /><div className="flex-1 bg-ink" /></div>
+                  </div>
+                );
+              })}
+              <p className="mt-1 flex justify-between text-[11px] text-ink-muted"><span>{shortName(home)}</span><span>{shortName(away)}</span></p>
+            </Card>
+          )}
+          {extras.disponible && (
+            <Card title="Compositions">
+              {!extras.lineups?.length ? (
+                <p className="text-sm text-ink-muted">{m.statut === "programme" ? "Elles sortent environ une heure avant le coup d’envoi. Reviens à ce moment-là : la page les récupère toute seule." : "Compositions non communiquées pour ce match."}</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  {extras.lineups.slice(0, 2).map((l) => (
+                    <div key={l.equipe} className="min-w-0">
+                      <p className="truncate text-sm font-semibold">{l.equipe}</p>
+                      <p className="mb-2 text-[11px] text-ink-muted">{l.schema ?? "schéma ?"}{l.entraineur ? ` · ${l.entraineur}` : ""}</p>
+                      <ol className="space-y-1 text-sm">
+                        {l.titulaires.map((p) => <li key={p.nom} className="flex gap-2"><span className="w-5 shrink-0 text-right text-xs tabular-nums text-ink-muted">{p.numero ?? ""}</span><span className="truncate">{p.nom}</span></li>)}
+                      </ol>
+                      {l.remplacants.length > 0 && <p className="mt-2 text-[11px] leading-relaxed text-ink-muted">Banc : {l.remplacants.join(", ")}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          )}
+          {extras.disponible && m.statut === "programme" && (
+            <Card title="Absents annoncés" note="blessés et suspendus">
+              {extras.injuries === null ? <p className="text-sm text-ink-muted">Disponibles dans les 7 jours avant le match.</p>
+                : extras.injuries.length === 0 ? <p className="text-sm text-ink-muted">Aucun absent signalé pour l’instant. Cette information n’est pas suivie pour toutes les compétitions (sélections nationales notamment).</p> : (
+                  <div className="space-y-3">
+                    {[...new Set(extras.injuries.map((x) => x.equipe))].map((t) => (
+                      <div key={t}>
+                        <p className="mb-1 text-sm font-semibold">{t} <span className="font-normal text-ink-muted">· {extras.injuries!.filter((x) => x.equipe === t).length}</span></p>
+                        <ul className="space-y-0.5 text-sm">
+                          {extras.injuries!.filter((x) => x.equipe === t).map((x) => <li key={x.joueur} className="flex justify-between gap-2"><span className="truncate">{x.joueur}</span><span className="shrink-0 text-xs text-ink-muted">{x.type === "Questionable" ? "incertain" : "absent"}{x.motif ? ` · ${x.motif}` : ""}</span></li>)}
+                        </ul>
+                      </div>
+                    ))}
+                    <p className="text-[11px] text-ink-muted">Le modèle BETWISE ne tient pas encore compte de ces absences : à toi d’en juger le poids.</p>
+                  </div>
+                )}
+            </Card>
+          )}
+        </div>
       )}
 
       {tab === "pronos" && (

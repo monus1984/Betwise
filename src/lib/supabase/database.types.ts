@@ -915,6 +915,36 @@ export type Database = {
           },
         ]
       }
+      match_extras: {
+        Row: {
+          match_id: string
+          lineups: Json | null
+          lineups_at: string | null
+          injuries: Json | null
+          injuries_at: string | null
+          stats: Json | null
+          stats_at: string | null
+        }
+        Insert: {
+          match_id: string
+          lineups?: Json | null
+          lineups_at?: string | null
+          injuries?: Json | null
+          injuries_at?: string | null
+          stats?: Json | null
+          stats_at?: string | null
+        }
+        Update: {
+          match_id?: string
+          lineups?: Json | null
+          lineups_at?: string | null
+          injuries?: Json | null
+          injuries_at?: string | null
+          stats?: Json | null
+          stats_at?: string | null
+        }
+        Relationships: []
+      }
       match_history: {
         Row: {
           id: string
