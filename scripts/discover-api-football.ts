@@ -14,16 +14,15 @@ async function get<T = any>(path: string): Promise<{ response: T[]; errors: unkn
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 
 async function main() {
-  console.log("## Compétitions en cours (recherche)");
-  const seen = new Set<number>();
-  for (const q of ["search=africa", "search=ivory", "country=Ivory-Coast", "search=CAF", "search=nations", "search=friendlies", "search=world cup", "search=champions league", "search=europa", "search=conference"]) {
-    const r = await get(`/leagues?${q.replace(/ /g, "%20")}&current=true`);
-    for (const l of r.response ?? []) {
-      if (seen.has(l.league.id)) continue; seen.add(l.league.id);
-      const s = (l.seasons ?? []).find((x: any) => x.current) ?? {};
-      const c = s.coverage ?? {};
-      console.log(`${l.league.id} | ${l.league.name} | ${l.country?.name} | ${l.league.type} | saison ${s.year} (${s.start}→${s.end}) | évén.${c.fixtures?.events ? "✓" : "✗"} compos${c.fixtures?.lineups ? "✓" : "✗"} stats${c.fixtures?.statistics_fixtures ? "✓" : "✗"} cotes${c.odds ? "✓" : "✗"} prédictions${c.predictions ? "✓" : "✗"} blessures${c.injuries ? "✓" : "✗"} classement${c.standings ? "✓" : "✗"}`);
-    }
+  const all = await get(`/leagues?current=true`);
+  const ls = all.response ?? [];
+  const countries = new Set(ls.map((l: any) => l.country?.name));
+  console.log(`## ${ls.length} compétitions en cours dans ${countries.size} pays · Afrique de l'Ouest : ${["Ivory-Coast", "Senegal", "Ghana", "Nigeria", "Mali", "Burkina-Faso", "Cameroon", "Morocco", "Algeria", "Tunisia", "Egypt", "South-Africa"].filter((c) => countries.has(c)).join(", ")}`);
+  const want = ls.filter((l: any) => (l.country?.name === "World" && /africa|caf |caf$|nations|friendl|world cup|champions league|europa|conference|euro|olympi|club world/i.test(l.league.name)) || l.country?.name === "Ivory-Coast" || [39, 140, 135, 78, 61].includes(l.league.id));
+  for (const l of want) {
+    const s = (l.seasons ?? []).find((x: any) => x.current) ?? {};
+    const c = s.coverage ?? {};
+    console.log(`${l.league.id} | ${l.league.name} | ${l.country?.name} | saison ${s.year} (${s.start}→${s.end}) | évén.${c.fixtures?.events ? "✓" : "✗"} compos${c.fixtures?.lineups ? "✓" : "✗"} stats${c.fixtures?.statistics_fixtures ? "✓" : "✗"} cotes${c.odds ? "✓" : "✗"} préd.${c.predictions ? "✓" : "✗"} bless.${c.injuries ? "✓" : "✗"}`);
   }
 
   console.log("\n## Match à venir témoin (Ligue des nations)");
