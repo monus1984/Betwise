@@ -6,7 +6,7 @@
 import "dotenv/config";
 import { createAdminClient } from "../src/lib/supabase/admin";
 import { LEAGUE_CODES } from "../src/lib/model/history";
-import { estimateCompetition, importHistory } from "../src/lib/model/run";
+import { estimateCompetition } from "../src/lib/model/run";
 
 async function main() {
   const db = createAdminClient();
@@ -16,7 +16,7 @@ async function main() {
 
   for (const comp of Object.keys(LEAGUE_CODES)) {
     try {
-      const h = skipHistory ? 0 : await importHistory(db, comp);
+      const h = 0; void skipHistory; // historique : af_history, mis à jour par backfill-af-history.ts juste avant
       const r = await estimateCompetition(db, comp, src.id);
       console.log(`[${comp}] historique ${h} lignes · ${r.matches} matchs à venir · ${r.estimates} estimations · ${r.pronos} pronos${r.unmatched.length ? ` · non rapprochés : ${r.unmatched.join(", ")}` : ""}`);
     } catch (e) {

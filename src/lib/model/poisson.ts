@@ -1,21 +1,21 @@
 /**
  * Modèle BETWISE v1 : Poisson à forces d'attaque/défense pondérées dans le temps.
- * - Pondération exponentielle (demi-vie 365 jours) et lissage vers un point de départ (6 matchs fictifs) :
- *   la moyenne de la ligue, ou un niveau « promu » (attaque 0,8, défense 1,2) pour une équipe absente
- *   de la première saison de l'historique. Réglages retenus sur un backtest de 1 953 matchs
- *   (oct. 2025 → nov. 2026, 5 ligues) : log-loss 1X2 0,9995 contre 0,973 pour le marché.
- *   Le modèle ne voit que les buts et reste un peu moins affirmatif que le marché sur les favoris.
- * - Nul rehaussé de 10 % (Poisson indépendant les sous-estime : 23 % prédits, 25 % observés).
- * - Pas de blessures, compositions ni calendrier. Piste v2 : tirs cadrés (colonnes HST/AST du même CSV).
- * Les probabilités sont ensuite comparées aux cotes de référence pour juger le modèle comme une source.
+ * v2 (réglages dans run.ts, backtest de 1 954 matchs, oct. 2025 → nov. 2026, 5 ligues, log-loss 1X2) :
+ * - performance d'un match = 70 % xG + 30 % buts ; demi-vie 365 jours ; lissage de 6 matchs fictifs vers la moyenne
+ *   de la ligue ou un niveau « promu » ; forces écartées de la moyenne (exposant 1,25) ; nul rehaussé de 10 %.
+ * - résultat : 0,9951 (v1 sur les seuls buts : 0,9996 ; cotes du marché : 0,9735 ; hasard : 1,0986).
+ * - à savoir : mélangé aux cotes, le modèle ne les améliore pas, et parier là où il voyait plus de 8 % de
+ *   rendement attendu aurait perdu 15 % sur 1 152 paris. Il sert de second avis et de repli quand il n'y a
+ *   pas de cote, jamais de preuve qu'une cote est « bonne ».
  */
 
-export type HistMatch = { date: Date; home: string; away: string; hg: number; ag: number };
+/** xh / xa : buts attendus (xG) du match, quand ils existent. */
+export type HistMatch = { date: Date; home: string; away: string; hg: number; ag: number; xh?: number | null; xa?: number | null };
 export type Ratings = {
-  mu: number; homeAdv: number; teams: Map<string, { att: number; def: number; n: number }>;
+  mu: number; homeAdv: number; stretch: number; teams: Map<string, { att: number; def: number; n: number }>;
 };
 
-export const DEFAULTS = { halfLifeDays: 365, priorMatches: 6, promotedAtt: 0.8, promotedDef: 1.2 };
+export const DEFAULTS = { halfLifeDays: 365, priorMatches: 6, promotedAtt: 0.8, promotedDef: 1.2, xgWeight: 0, stretch: 1 };
 const DRAW_BOOST = 0.1;
 
 export function fitRatings(matches: HistMatch[], asOf = new Date(), o: Partial<typeof DEFAULTS> = {}): Ratings {
@@ -26,6 +26,9 @@ export function fitRatings(matches: HistMatch[], asOf = new Date(), o: Partial<t
   const firstSeen = new Map<string, number>();
   for (const m of matches) for (const n of [m.home, m.away]) firstSeen.set(n, Math.min(firstSeen.get(n) ?? Infinity, m.date.getTime()));
   const promoted = (n: string) => (firstSeen.get(n) ?? minT) - minT > 200 * 86400000;
+  // Performance retenue pour chaque match : mélange des buts marqués et des xG (plus stables que les buts)
+  const xw = opts.xgWeight;
+  matches = matches.map((m) => (xw > 0 && m.xh != null && m.xa != null ? { ...m, hg: xw * m.xh + (1 - xw) * m.hg, ag: xw * m.xa + (1 - xw) * m.ag } : m));
   const w = (d: Date) => Math.pow(0.5, Math.max(0, (asOf.getTime() - d.getTime()) / 86400000) / HALF_LIFE_DAYS);
   const names = new Set<string>();
   for (const m of matches) { names.add(m.home); names.add(m.away); }
@@ -66,7 +69,7 @@ export function fitRatings(matches: HistMatch[], asOf = new Date(), o: Partial<t
     for (const t of teams.values()) { t.att /= na; t.def /= nd; }
     homeAdv = homeAdv * hg / he;
   }
-  return { mu, homeAdv, teams };
+  return { mu, homeAdv, stretch: opts.stretch, teams };
 }
 
 function poissonPmf(l: number, k: number) { let p = Math.exp(-l); for (let i = 1; i <= k; i++) p *= l / i; return p; }
@@ -80,7 +83,9 @@ export type MatchProbs = {
 export function predict(r: Ratings, home: string, away: string): MatchProbs | null {
   const h = r.teams.get(home), a = r.teams.get(away);
   if (!h || !a) return null;
-  const lh = r.mu * r.homeAdv * h.att * a.def, la = r.mu * a.att * h.def;
+  // stretch > 1 : écarte les forces de la moyenne (le lissage et les xG les resserrent trop par rapport au marché)
+  const k = r.stretch ?? 1;
+  const lh = r.mu * r.homeAdv * Math.pow(h.att * a.def, k), la = r.mu * Math.pow(a.att * h.def, k);
   const MAX = 10;
   let p1 = 0, pN = 0, p2 = 0, pPlus = 0, pBtts = 0, best = 0, topScore = "";
   for (let i = 0; i <= MAX; i++) for (let j = 0; j <= MAX; j++) {

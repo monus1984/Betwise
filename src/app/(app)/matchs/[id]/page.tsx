@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { RISK_CLASS, RISK_LABEL, riskFromOdds } from "@/components/ui";
 import { COMP_FLAG, COMP_SHORT, TeamBadge, confidenceLabel, marketProbs, shortName } from "@/components/match-ui";
 import { createClient } from "@/lib/supabase/server";
+import { MODEL_VERSION } from "@/lib/model/version";
 import { LiveRefresh } from "@/components/live-refresh";
 import { getExtras, type Extras } from "@/lib/api-football/extras";
 import { probOf } from "@/lib/probs/grid";
@@ -12,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 type Named = { nom: string } | { nom: string }[] | null;
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
-type Form = { date: string; adv: string; lieu: "D" | "E"; score: string; r: "V" | "N" | "D" }[];
+type Form = { date: string; adv: string; lieu: "D" | "E"; score: string; r: "V" | "N" | "D"; xg?: string | null }[];
 type Just = { lambda_dom?: number; lambda_ext?: number; score_probable?: string; forme_dom?: Form; forme_ext?: Form; h2h?: { date: string; dom: "home" | "away"; score: string }[] };
 const TABS = [
   { k: "analyse", t: "Analyse" }, { k: "cotes", t: "Cotes" }, { k: "forme", t: "Forme" }, { k: "equipes", t: "Équipes" }, { k: "pronos", t: "Pronos" },
@@ -37,7 +38,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
   const [{ data: odds }, { data: est }, { data: modelSrc }, { data: preds }] = await Promise.all([
     supabase.from("odds_observations").select("market_code, market_param, selection, cote, bookmaker, origine, observed_at").eq("match_id", id).order("observed_at", { ascending: false }).limit(200),
-    supabase.from("model_estimates").select("market_code, market_param, selection, probabilite, cote_reference, niveau_risque, justification, updated_at, prediction_id").eq("match_id", id).eq("model_version", "poisson-v1"),
+    supabase.from("model_estimates").select("market_code, market_param, selection, probabilite, cote_reference, niveau_risque, justification, updated_at, prediction_id").eq("match_id", id).eq("model_version", MODEL_VERSION),
     supabase.from("sources").select("id").eq("type", "modele_betwise").limit(1).maybeSingle(),
     supabase.from("predictions").select("id, market_code, market_param, selection, cote_annoncee, statut, resultat, logged_at, source:sources(id, nom, type)").eq("match_id", id).neq("statut", "annule").order("logged_at", { ascending: false }).limit(30),
   ]);
@@ -75,8 +76,8 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         </div>
         {(model || market) && (
           <div className="mt-4">
-            <ProbBar p={model ?? market!} light />
-            <p className="mt-1.5 text-center text-[11px] text-white/60">{model ? "Modèle BETWISE" : "Cotes de référence (marge retirée)"}</p>
+            <ProbBar p={market ?? model!} light />
+            <p className="mt-1.5 text-center text-[11px] text-white/60">{market ? "Cotes de référence (marge retirée)" : "Modèle BETWISE"}</p>
           </div>
         )}
       </header>
@@ -101,12 +102,12 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
                   <li key={`${p.market}${p.param}${p.sel}`}>
                     <Link href={upcoming ? parier(p.market, p.sel, p.cote ?? undefined, p.param ?? undefined) : "#"} className="flex items-center justify-between gap-3 py-2 text-sm active:bg-surface-2">
                       <span className="truncate">{pickLabel(p.market, p.param, p.sel, shortName(home), shortName(away))}</span>
-                      <span className="shrink-0 tabular-nums"><b>{Math.round(p.p * 100)} %</b> <span className="text-xs text-ink-muted">{p.cote ? `cote ${p.cote.toFixed(2)}` : `cote juste ${(1 / p.p).toFixed(2)}`}</span>{p.valeur !== null && Math.abs(p.valeur) >= 0.03 && <span className={`ml-1 text-xs ${p.valeur > 0 ? "text-gain" : "text-loss"}`}>{p.valeur > 0 ? "+" : ""}{Math.round(p.valeur * 100)} %</span>}</span>
+                      <span className="shrink-0 tabular-nums"><b>{Math.round(p.p * 100)} %</b> <span className="text-xs text-ink-muted">{p.cote ? `cote ${p.cote.toFixed(2)}` : `cote juste ${(1 / p.p).toFixed(2)}`}</span>{p.pModele !== null && <span className="ml-1 text-xs text-brand">· modèle {Math.round(p.pModele * 100)} %</span>}</span>
                     </Link>
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 text-[11px] text-ink-muted">« Cote juste » : la cote sans marge du bookmaker. En dessous, le pari perd de l’argent sur la durée, même s’il passe souvent.</p>
+              <p className="mt-2 text-[11px] text-ink-muted">« Cote juste » : la cote sans marge du bookmaker. Si ton bookmaker propose moins, le pari perd de l’argent sur la durée, même s’il passe souvent ; s’il propose plus, c’est une bonne affaire.</p>
             </Card>
           )}
           {!model ? (
@@ -138,7 +139,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
                 {just && <p className="mt-2 text-xs text-ink-soft">Buts attendus <b className="tabular-nums">{fmtDec(just.lambda_dom)} – {fmtDec(just.lambda_ext)}</b> · score le plus probable <b>{just.score_probable}</b>{mk && <> · selon le marché <b className="tabular-nums">{fmtDec(mk.lh)} – {fmtDec(mk.la)}</b></>}</p>}
               </Card>
               <p className="px-1 text-[11px] leading-relaxed text-ink-muted">
-                Barre pleine : le modèle (Poisson sur trois saisons de résultats). Trait noir : le marché. Le modèle ne voit ni blessures ni compositions et reste un peu moins précis que les cotes sur le passé. Ses pronos sont notés comme ceux de n’importe quelle source{modelSrc ? <> — <Link href={`/sources/${modelSrc.id}`} className="underline">voir son bilan</Link></> : null}.
+                Barre pleine : le modèle (buts et xG des trois dernières saisons). Trait noir : le marché. Sur 1 954 matchs passés, les cotes ont été plus justes que le modèle ; lis-le comme un second avis, pas comme la preuve qu’une cote est bonne. Ses pronos sont notés comme ceux de n’importe quelle source{modelSrc ? <> — <Link href={`/sources/${modelSrc.id}`} className="underline">voir son bilan</Link></> : null}.
               </p>
             </>
           )}
@@ -331,6 +332,7 @@ function Verdict({ model, market, home, away }: { model: { p1: number; pN: numbe
     <p className="mt-3 rounded-lg bg-surface-2 p-3 text-sm text-ink-soft">
       Issue la plus probable pour le modèle : <b>{top.n === "le nul" ? "match nul" : top.n}</b> à {Math.round(top.p * 100)} % — <span className={conf.c}>{conf.t}</span>.
       {gap !== null && (Math.abs(gap) < 3 ? " Il est d’accord avec le marché." : gap > 0 ? ` Il y croit ${gap} points de plus que le marché.` : ` Il y croit ${-gap} points de moins que le marché.`)}
+      {gap !== null && Math.abs(gap) >= 8 && " Quand l’écart est aussi grand, c’est le plus souvent le marché qui a raison : il connaît les absents et les compositions, pas le modèle."}
     </p>
   );
 }
@@ -347,11 +349,11 @@ function FormCard({ team, form }: { team: string; form: Form }) {
         {form.map((f, i) => (
           <li key={i} className="flex items-center justify-between py-1.5">
             <span className="truncate"><span className="mr-2 text-[10px] text-ink-muted">{fmtDate(f.date)}</span>{f.lieu === "D" ? "vs" : "à"} {f.adv}</span>
-            <span className="tabular-nums font-medium">{f.score}</span>
+            <span className="shrink-0 tabular-nums font-medium">{f.xg && <span className="mr-2 text-[10px] font-normal text-ink-muted">xG {f.xg.replace(/\./g, ",")}</span>}{f.score}</span>
           </li>
         ))}
       </ul>
-      <p className="mt-2 text-[11px] text-ink-muted">{pts} points sur 15 · championnat uniquement</p>
+      <p className="mt-2 text-[11px] text-ink-muted">{pts} points sur 15 · championnat uniquement · xG : buts attendus d’après la qualité des occasions</p>
     </section>
   );
 }

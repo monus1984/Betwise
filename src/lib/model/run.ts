@@ -1,11 +1,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../supabase/database.types";
-import { fetchSeason, LEAGUE_CODES, previousSeason, seasonCode, type HistoryRow } from "./history";
+import { fetchSeason, LEAGUE_CODES, previousSeason, seasonCode } from "./history";
 import { fitRatings, predict, riskLevel, type HistMatch } from "./poisson";
-import { buildTeamMap } from "./teams";
+import { AF_LINKED } from "../api-football/sync";
 
 type Db = SupabaseClient<Database, "betwise">;
-export const MODEL_VERSION = "poisson-v1";
+export { MODEL_VERSION } from "./version";
+import { MODEL_VERSION } from "./version";
 const REF = "ref:eu-median";
 
 /** 1) Historique : saison en cours + deux précédentes, upsert idempotent. */
@@ -25,51 +26,40 @@ export async function importHistory(db: Db, comp: string) {
   return n;
 }
 
-/** 2) Estimations pour les matchs des 14 prochains jours + 3) prono « Modèle BETWISE ». */
-export async function estimateCompetition(db: Db, comp: string, modelSourceId: string) {
-  const ligue = LEAGUE_CODES[comp];
-  if (!ligue) return { matches: 0, estimates: 0, pronos: 0, unmatched: [] as string[] };
+/** Réglages retenus sur backtest (1 954 matchs, oct. 2025 → nov. 2026) : voir poisson.ts. */
+export const MODEL_OPTS = { xgWeight: 0.7, stretch: 1.25, halfLifeDays: 365, priorMatches: 6 };
 
-  const since = new Date(Date.now() - 800 * 86400000).toISOString().slice(0, 10);
-  const hist: HistoryRow[] = [];
+/** 2) Estimations pour les matchs des 14 prochains jours + 3) prono « Modèle BETWISE ». Historique : af_history (résultats + xG). */
+export async function estimateCompetition(db: Db, comp: string, modelSourceId: string) {
+  const league = AF_LINKED[comp]?.league;
+  if (!league || !LEAGUE_CODES[comp]) return { matches: 0, estimates: 0, pronos: 0, unmatched: [] as string[] };
+
+  type H = { played_on: string; home_nom: string; away_nom: string; home_goals: number; away_goals: number; hid: string; aid: string; xh: number | null; xa: number | null };
+  const since = new Date(Date.now() - 800 * 86400000).toISOString();
+  const hist: H[] = [];
   for (let from = 0; ; from += 1000) {
-    const { data, error } = await db.from("match_history").select("*").eq("ligue", ligue).gte("played_on", since).order("played_on").range(from, from + 999);
+    const { data, error } = await db.from("af_history").select("played_at, home_id, home_nom, away_id, away_nom, home_goals, away_goals, xg_home, xg_away").eq("league", league).gte("played_at", since).order("played_at").range(from, from + 999);
     if (error) throw error;
-    hist.push(...(data as HistoryRow[]));
+    hist.push(...(data ?? []).map((r) => ({ played_on: r.played_at.slice(0, 10), home_nom: r.home_nom, away_nom: r.away_nom, home_goals: r.home_goals, away_goals: r.away_goals, hid: String(r.home_id), aid: String(r.away_id), xh: r.xg_home === null ? null : Number(r.xg_home), xa: r.xg_away === null ? null : Number(r.xg_away) })));
     if (!data || data.length < 1000) break;
   }
   if (hist.length < 100) return { matches: 0, estimates: 0, pronos: 0, unmatched: [`historique insuffisant (${hist.length} matchs)`] };
 
-  const ratings = fitRatings(hist.map<HistMatch>((h) => ({ date: new Date(h.played_on), home: h.home_nom, away: h.away_nom, hg: h.home_goals, ag: h.away_goals })));
+  const ratings = fitRatings(hist.map<HistMatch>((h) => ({ date: new Date(h.played_on), home: h.hid, away: h.aid, hg: h.home_goals, ag: h.away_goals, xh: h.xh, xa: h.xa })), new Date(), MODEL_OPTS);
 
   const { data: c } = await db.from("competitions").select("id").eq("code_externe", comp).maybeSingle();
   if (!c) return { matches: 0, estimates: 0, pronos: 0, unmatched: [] };
-  // Équipes qui jouent dans cette compétition (et pas teams.competition_id : un club de C1 y est rattaché à la C1)
-  const { data: compMatches } = await db.from("matches").select("home_team_id, away_team_id").eq("competition_id", c.id)
-    .gte("kickoff_at", new Date(Date.now() - 60 * 86400000).toISOString()).limit(1000);
-  const teamIds = [...new Set((compMatches ?? []).flatMap((m) => [m.home_team_id, m.away_team_id]))];
-  const { data: teams } = teamIds.length ? await db.from("teams").select("id, nom, alias").in("id", teamIds) : { data: [] as { id: string; nom: string; alias: string[] }[] };
-  const histNames = [...ratings.teams.keys()];
-  const map = buildTeamMap(histNames, teams ?? []);
-  const byTeamId = new Map<string, string>();
-  for (const [h, id] of map) if (id) byTeamId.set(id, h);
-
   const { data: matches } = await db.from("matches")
-    .select("id, kickoff_at, home_team_id, away_team_id")
+    .select("id, kickoff_at, af_home_id, af_away_id")
     .eq("competition_id", c.id).eq("statut", "programme")
     .gte("kickoff_at", new Date().toISOString()).lte("kickoff_at", new Date(Date.now() + 14 * 86400000).toISOString());
 
   const unmatched: string[] = [];
   let estimates = 0, pronos = 0;
   for (const m of matches ?? []) {
-    const hn = byTeamId.get(m.home_team_id), an = byTeamId.get(m.away_team_id);
-    if (!hn || !an) {
-      const miss = [!hn && teams?.find((t) => t.id === m.home_team_id)?.nom, !an && teams?.find((t) => t.id === m.away_team_id)?.nom].filter(Boolean);
-      unmatched.push(...(miss.length ? (miss as string[]) : [`match ${m.id}`]));
-      continue;
-    }
-    const p = predict(ratings, hn, an);
-    if (!p) continue;
+    const hn = m.af_home_id ? String(m.af_home_id) : null, an = m.af_away_id ? String(m.af_away_id) : null;
+    const p = hn && an ? predict(ratings, hn, an) : null;
+    if (!hn || !an || !p) { unmatched.push(`match ${m.id}`); continue; }
     const hs = ratings.teams.get(hn)!, as = ratings.teams.get(an)!;
 
     const { data: odds } = await db.from("odds_observations").select("market_code, market_param, selection, cote, observed_at")
@@ -80,12 +70,12 @@ export async function estimateCompetition(db: Db, comp: string, modelSourceId: s
     };
 
     // Forme (5 derniers matchs) et face-à-face (5 dernières confrontations), depuis l'historique
-    const played = (n: string) => hist.filter((h) => h.home_nom === n || h.away_nom === n).slice(-5).reverse().map((h) => {
-      const home = h.home_nom === n, gf = home ? h.home_goals : h.away_goals, ga = home ? h.away_goals : h.home_goals;
-      return { date: h.played_on, adv: home ? h.away_nom : h.home_nom, lieu: home ? "D" : "E", score: `${gf}-${ga}`, r: gf > ga ? "V" : gf === ga ? "N" : "D" };
+    const played = (n: string) => hist.filter((h) => h.hid === n || h.aid === n).slice(-5).reverse().map((h) => {
+      const home = h.hid === n, gf = home ? h.home_goals : h.away_goals, ga = home ? h.away_goals : h.home_goals;
+      return { date: h.played_on, adv: home ? h.away_nom : h.home_nom, lieu: home ? "D" : "E", score: `${gf}-${ga}`, r: gf > ga ? "V" : gf === ga ? "N" : "D", xg: h.xh !== null && h.xa !== null ? `${(home ? h.xh : h.xa).toFixed(1)}-${(home ? h.xa : h.xh).toFixed(1)}` : null };
     });
-    const h2h = hist.filter((h) => (h.home_nom === hn && h.away_nom === an) || (h.home_nom === an && h.away_nom === hn)).slice(-5).reverse()
-      .map((h) => ({ date: h.played_on, dom: h.home_nom === hn ? "home" : "away", score: `${h.home_goals}-${h.away_goals}` }));
+    const h2h = hist.filter((h) => (h.hid === hn && h.aid === an) || (h.hid === an && h.aid === hn)).slice(-5).reverse()
+      .map((h) => ({ date: h.played_on, dom: h.hid === hn ? "home" : "away", score: `${h.home_goals}-${h.away_goals}` }));
 
     const base = {
       forme_dom: played(hn), forme_ext: played(an), h2h,

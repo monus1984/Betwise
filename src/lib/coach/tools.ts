@@ -23,7 +23,7 @@ function since(p: unknown) {
 }
 
 export const COACH_TOOLS: ChatTool[] = [
-  { name: "selections_probables", description: "Les sélections les plus probables d'une journée, tous marchés confondus (victoire, double chance, plus/moins de buts, les deux marquent), au-dessus d'un seuil de probabilité. Donne pour chacune la probabilité, la cote de référence ou la cote juste, l'origine du chiffre (modèle BETWISE ou cotes) et le rendement attendu quand il est calculable. Donne aussi la probabilité d'un combiné des premières. À utiliser pour « les meilleurs paris du jour », « des paris fiables à 85 % », « quoi jouer demain ».", input_schema: { type: "object", properties: { jour: { type: "string", description: "« aujourdhui », « demain » ou une date AAAA-MM-JJ. Par défaut aujourdhui." }, seuil_pct: { type: "number", description: "Probabilité minimale en %, entre 50 et 95. Par défaut 80." }, max: { type: "number", description: "Nombre maximal de sélections, par défaut 8." } } } },
+  { name: "selections_probables", description: "Les sélections les plus probables d'une journée, tous marchés confondus (victoire, double chance, plus/moins de buts, les deux marquent), au-dessus d'un seuil de probabilité. Donne pour chacune la probabilité (tirée des cotes du marché, sinon du modèle), la cote de référence ou la cote juste, et l'avis du modèle quand il existe. Donne aussi la probabilité d'un combiné des premières. À utiliser pour « les meilleurs paris du jour », « des paris fiables à 85 % », « quoi jouer demain ».", input_schema: { type: "object", properties: { jour: { type: "string", description: "« aujourdhui », « demain » ou une date AAAA-MM-JJ. Par défaut aujourdhui." }, seuil_pct: { type: "number", description: "Probabilité minimale en %, entre 50 et 95. Par défaut 80." }, max: { type: "number", description: "Nombre maximal de sélections, par défaut 8." } } } },
   { name: "bilan_paris", description: "Bilan des paris réglés de l'utilisateur sur une période : nombre, réussite, rendement (ROI), résultat en unités, cote moyenne, et détail selon un regroupement.", input_schema: { type: "object", properties: { periode: PERIODE, regroupement: { type: "string", enum: ["aucun", "type", "nb_selections", "risque", "bookmaker", "marche"], description: "Découpage du bilan. type = simple/combiné." } } } },
   { name: "bilan_par_origine", description: "Réussite des sélections selon leur origine (choix perso, tipster, page, modèle BETWISE…), comparée à la probabilité implicite des cotes jouées. Indique aussi combien de combinés ont été perdus à cause d'une seule sélection.", input_schema: { type: "object", properties: { periode: PERIODE } } },
   { name: "etat_bankroll", description: "État de la bankroll en pourcentages : évolution depuis le capital initial, exposition sur les paris en cours, séries, comportement de mise après une perte, respect des limites que l'utilisateur s'est fixées.", input_schema: { type: "object", properties: {} } },
@@ -99,8 +99,8 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
         return picksOf(sg).filter((p) => p.p >= seuil && p.p <= 0.95 && !seen.has(p.market) && seen.add(p.market)).slice(0, 2).map((p) => ({
           match: `${h} – ${a}`, competition: one(m.competition as One<{ nom: string }>)?.nom, coup_envoi: m.kickoff_at,
           selection: pickLabel(p.market, p.param, p.sel, h, a), probabilite_pct: pct(p.p),
-          cote_reference: p.cote, cote_juste: r2(1 / p.p), origine: sg.source === "modele" ? "modèle BETWISE" : "déduit des cotes du marché",
-          rendement_attendu_pct: p.valeur !== null ? pct(p.valeur) : null, _p: p.p,
+          cote_reference: p.cote, cote_juste: r2(1 / p.p), origine: sg.source === "modele" ? "modèle BETWISE (pas de cote disponible)" : "cotes du marché, marge retirée",
+          avis_du_modele_pct: p.pModele !== null ? pct(p.pModele) : null, _p: p.p,
         }));
       }).sort((x, y) => y._p - x._p).slice(0, max);
       const comb = (n: number) => sels.length >= n ? pct(sels.slice(0, n).reduce((a, s) => a * s._p, 1)) : null;
@@ -109,9 +109,9 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
         selections: sels.map(({ _p, ...s }) => s),
         combine_des_3_premieres_pct: comb(3), combine_des_5_premieres_pct: comb(5),
         rappels: [
-          "une probabilité « déduite des cotes » ne bat pas le bookmaker : rendement attendu légèrement négatif une fois la marge comptée",
-          "rendement_attendu_pct n'existe que lorsque le modèle et une cote de référence portent sur la même sélection",
-          "le modèle ne voit ni blessures ni compositions et reste un peu moins précis que le marché sur le passé",
+          "la probabilité vient des cotes du marché quand elles existent : c'est la meilleure estimation disponible",
+          "une sélection n'est une bonne affaire que si le bookmaker de l'utilisateur propose PLUS que cote_juste ; à cote_juste ou moins, elle perd de l'argent sur la durée",
+          "avis_du_modele_pct est un second avis : sur 1 954 matchs passés le modèle a été moins juste que le marché, et parier sur ses désaccords avec le marché aurait perdu 15 %",
         ],
       };
     }

@@ -62,7 +62,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <LiveRefresh active={rows.some((r) => r.statut === "en_cours" || (r.statut === "programme" && Math.abs(Date.parse(r.kickoff_at) - Date.now()) < 15 * 60000))} />
-      <PageHeader title="Matchs" subtitle="Sur chaque match, l’issue la plus probable : en bleu selon le modèle BETWISE, en noir selon les cotes." />
+      <PageHeader title="Matchs" subtitle="Sur chaque match, l’issue la plus probable d’après les cotes de référence ; en bleu, d’après le modèle quand il n’y a pas de cote." />
 
       {/* Bandeau des jours */}
       <nav className="-mx-4 mb-3 overflow-x-auto px-4 pb-1" aria-label="Jours">
@@ -126,7 +126,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
                           <span className="block truncate text-sm font-medium">{pickLabel(p.market, p.param, p.sel, h, a)}</span>
                           <span className="block truncate text-xs text-ink-muted">{COMP_FLAG[one(r.competition)?.code_externe ?? ""] ?? "⚽"} {h} – {a} · {fmtTime(r.kickoff_at)}</span>
                         </span>
-                        <PickBadge label={sg.source === "modele" ? "Modèle" : "Marché"} p={p.p} cote={p.cote} source={sg.source} valeur={p.valeur} />
+                        <PickBadge label={sg.source === "modele" ? "Modèle" : "Marché"} p={p.p} cote={p.cote} source={sg.source} pModele={p.pModele} />
                       </Link>
                     </li>
                   );
@@ -166,7 +166,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
                       <span className="flex items-center gap-2 text-sm"><TeamBadge name={h} size={18} /><span className={`truncate ${homeWin ? "font-semibold" : ""}`}>{shortName(h)}</span>{(done || live) && <span className={`ml-auto pl-2 font-semibold tabular-nums ${live ? "text-loss" : ""}`}>{m.score_home}</span>}</span>
                       <span className="flex items-center gap-2 text-sm"><TeamBadge name={a} size={18} /><span className={`truncate ${awayWin ? "font-semibold" : ""}`}>{shortName(a)}</span>{(done || live) && <span className={`ml-auto pl-2 font-semibold tabular-nums ${live ? "text-loss" : ""}`}>{m.score_away}</span>}</span>
                     </span>
-                    {!done && !live && (() => { const sg = signals.get(m.id); if (!sg) return <span className="w-[120px] shrink-0 text-right text-[11px] text-ink-muted">pas encore de cote</span>; const p = bestPick(sg); return <PickBadge label={pickLabel(p.market, p.param, p.sel, shortName(h), shortName(a))} p={p.p} cote={p.cote} source={sg.source} valeur={p.valeur} />; })()}
+                    {!done && !live && (() => { const sg = signals.get(m.id); if (!sg) return <span className="w-[120px] shrink-0 text-right text-[11px] text-ink-muted">pas encore de cote</span>; const p = bestPick(sg); return <PickBadge label={pickLabel(p.market, p.param, p.sel, shortName(h), shortName(a))} p={p.p} cote={p.cote} source={sg.source} pModele={p.pModele} />; })()}
                   </Link>
                 </li>
               );

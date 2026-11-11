@@ -10,6 +10,10 @@ export type TicketAnalysis = {
 
 const MARGE_SUPPOSEE = 0.05; // quand ni modèle ni cotes de référence : on retire 5 % de marge à la cote jouée
 
+/**
+ * Les probabilités viennent des cotes de référence (marge retirée) quand elles existent, du modèle sinon.
+ * Le rendement attendu compare donc la cote obtenue chez le bookmaker au prix juste du marché.
+ */
 /** Probabilité réelle d'un ticket : produit des sélections (supposées indépendantes), cote juste, espérance. */
 export function analyzeTicket(sels: TicketSel[], signals: Map<string, Signal>, coteTotale: number): TicketAnalysis | null {
   if (!sels.length) return null;
