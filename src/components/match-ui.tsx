@@ -22,9 +22,9 @@ export function TeamBadge({ name, size = 22 }: { name: string; size?: number }) 
   );
 }
 
-export const COMP_FLAG: Record<string, string> = { PL: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", PD: "🇪🇸", SA: "🇮🇹", BL1: "🇩🇪", FL1: "🇫🇷", CL: "⭐", UNL: "🇪🇺" };
-export const COMP_SHORT: Record<string, string> = { PL: "Premier League", PD: "Liga", SA: "Serie A", BL1: "Bundesliga", FL1: "Ligue 1", CL: "Ligue des champions", UNL: "Ligue des nations" };
-export const COMP_ORDER = ["UNL", "CL", "PL", "PD", "SA", "BL1", "FL1"];
+export const COMP_FLAG: Record<string, string> = { PL: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", PD: "🇪🇸", SA: "🇮🇹", BL1: "🇩🇪", FL1: "🇫🇷", CL: "⭐", UNL: "🇪🇺", CANQ: "🌍", AMI: "🤝", CAFCL: "🏆", CAFCC: "🏆", CIV1: "🇨🇮" };
+export const COMP_SHORT: Record<string, string> = { PL: "Premier League", PD: "Liga", SA: "Serie A", BL1: "Bundesliga", FL1: "Ligue 1", CL: "Ligue des champions", UNL: "Ligue des nations", CANQ: "Éliminatoires CAN", AMI: "Amicaux internationaux", CAFCL: "Ligue des champions CAF", CAFCC: "Coupe de la confédération", CIV1: "Ligue 1 ivoirienne" };
+export const COMP_ORDER = ["CANQ", "CIV1", "UNL", "CL", "CAFCL", "CAFCC", "PL", "PD", "SA", "BL1", "FL1", "AMI"];
 
 export type Probs = { p1: number; pN: number; p2: number; source: "modele" | "marche" };
 

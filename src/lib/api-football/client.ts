@@ -1,0 +1,46 @@
+/** Client API-Football v3 (offre Pro : 7 500 requêtes/jour, toutes compétitions). */
+const BASE = "https://v3.football.api-sports.io";
+
+export type AfFixture = {
+  fixture: { id: number; date: string; status: { short: string; elapsed: number | null } };
+  league: { id: number; season: number; round?: string };
+  teams: { home: { id: number; name: string }; away: { id: number; name: string } };
+  goals: { home: number | null; away: number | null };
+  score: { fulltime: { home: number | null; away: number | null } };
+};
+export type AfOdds = {
+  fixture: { id: number };
+  bookmakers: { name: string; bets: { name: string; values: { value: string; odd: string }[] }[] }[];
+};
+
+export class ApiFootball {
+  calls = 0; remaining: string | null = null;
+  constructor(private key: string) {}
+
+  private async get<T>(path: string): Promise<{ response: T[]; paging?: { current: number; total: number }; errors?: unknown }> {
+    this.calls++;
+    const r = await fetch(`${BASE}${path}`, { headers: { "x-apisports-key": this.key } });
+    this.remaining = r.headers.get("x-ratelimit-requests-remaining");
+    if (!r.ok) throw new Error(`API-Football ${path} → HTTP ${r.status}`);
+    const j = (await r.json()) as { response: T[]; paging?: { current: number; total: number }; errors?: unknown };
+    const errs = j.errors && (Array.isArray(j.errors) ? j.errors.length : Object.keys(j.errors as object).length);
+    if (errs) throw new Error(`API-Football ${path} → ${JSON.stringify(j.errors)}`);
+    return j;
+  }
+
+  fixtures(league: number, season: number, from: string, to: string) {
+    return this.get<AfFixture>(`/fixtures?league=${league}&season=${season}&from=${from}&to=${to}`).then((j) => j.response);
+  }
+  live() { return this.get<AfFixture>(`/fixtures?live=all`).then((j) => j.response); }
+
+  /** Cotes d'avant-match d'une compétition (10 matchs par page). */
+  async odds(league: number, season: number, maxPages = 6) {
+    const out: AfOdds[] = [];
+    for (let page = 1; page <= maxPages; page++) {
+      const j = await this.get<AfOdds>(`/odds?league=${league}&season=${season}&page=${page}`);
+      out.push(...j.response);
+      if (!j.paging || page >= j.paging.total) break;
+    }
+    return out;
+  }
+}
