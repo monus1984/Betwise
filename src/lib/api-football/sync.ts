@@ -49,7 +49,9 @@ const iso = (d: Date) => d.toISOString().slice(0, 10);
 /** Calendrier J-3 → J+14 et scores d'une compétition. Une requête. */
 export async function syncAfCompetition(db: Db, api: ApiFootball, code: string) {
   const c = AF_COMPETITIONS[code];
-  const fx = await api.fixtures(c.league, c.season, iso(new Date(Date.now() - 3 * 86400000)), iso(new Date(Date.now() + 14 * 86400000)));
+  const all = await api.fixtures(c.league, c.season, iso(new Date(Date.now() - 3 * 86400000)), iso(new Date(Date.now() + 14 * 86400000)));
+  // Amicaux : on écarte les sélections de jeunes (U17 à U23), trop nombreuses et peu jouées
+  const fx = c.nations ? all.filter((f) => !/\bU\d{2}\b/.test(`${f.teams.home.name} ${f.teams.away.name}`)) : all;
   if (!fx.length) return { matches: 0, finished: 0 };
 
   const { data: comp, error: ce } = await db.from("competitions")
