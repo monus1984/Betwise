@@ -4,6 +4,7 @@
  * d'envoi (toutes les 5 min jusqu'à ce qu'elles sortent) ; statistiques une fois le match terminé.
  */
 import { createAdminClient } from "../supabase/admin";
+import { cleanKey } from "./client";
 import type { Json } from "../supabase/database.types";
 
 const BASE = "https://v3.football.api-sports.io";
@@ -13,7 +14,7 @@ export type TeamStats = { equipe: string; xg: number | null; tirs: number | null
 export type Extras = { lineups: Lineup[] | null; injuries: Absent[] | null; stats: TeamStats[] | null; disponible: boolean };
 
 async function af<T>(path: string): Promise<T[]> {
-  const r = await fetch(`${BASE}${path}`, { headers: { "x-apisports-key": process.env.API_FOOTBALL_KEY! }, cache: "no-store" });
+  const r = await fetch(`${BASE}${path}`, { headers: { "x-apisports-key": cleanKey(process.env.API_FOOTBALL_KEY!) }, cache: "no-store" });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return ((await r.json()) as { response: T[] }).response ?? [];
 }

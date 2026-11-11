@@ -13,9 +13,13 @@ export type AfOdds = {
   bookmakers: { name: string; bets: { name: string; values: { value: string; odd: string }[] }[] }[];
 };
 
+export const cleanKey = (k: string) => k.trim().replace(/^["']|["']$/g, "").trim();
+
 export class ApiFootball {
   calls = 0; remaining: string | null = null;
-  constructor(private key: string) {}
+  private key: string;
+  /** La clé est nettoyée : un espace, un retour à la ligne ou des guillemets collés par erreur la rendent invalide. */
+  constructor(key: string) { this.key = cleanKey(key); }
 
   private async get<T>(path: string): Promise<{ response: T[]; paging?: { current: number; total: number }; errors?: unknown }> {
     this.calls++;

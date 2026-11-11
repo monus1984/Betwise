@@ -18,7 +18,13 @@ async function run(req: Request) {
 
   const db = createAdminClient();
   const api = new ApiFootball(process.env.API_FOOTBALL_KEY);
-  const live = await api.live();
+  let live;
+  try { live = await api.live(); }
+  catch (e) {
+    const k = process.env.API_FOOTBALL_KEY;
+    // diagnostic sans dévoiler la clé : longueur et forme seulement
+    return NextResponse.json({ error: e instanceof Error ? e.message.slice(0, 160) : "erreur", cle: { longueur: k.length, longueur_nettoyee: k.trim().replace(/^["']|["']$/g, "").length, hexadecimale: /^[0-9a-f]+$/i.test(k.trim().replace(/^["']|["']$/g, "")) } }, { status: 502 });
+  }
   const a = await applyFixtures(db, live);
 
   // Matchs suivis qui devraient être en cours mais ne sont plus dans le direct : terminés (ou pas encore commencés)
