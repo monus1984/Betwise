@@ -58,3 +58,21 @@ export function marketProbs(c1?: number | null, cN?: number | null, c2?: number 
   const a = 1 / c1, b = 1 / cN, c = 1 / c2, s = a + b + c;
   return { p1: a / s, pN: b / s, p2: c / s, source: "marche" };
 }
+
+/** Pastille « issue la plus probable » : libellé, probabilité, cote (de référence, sinon cote juste). */
+export function PickBadge({ label, p, cote, source, valeur }: { label: string; p: number; cote: number | null; source: "modele" | "marche"; valeur?: number | null }) {
+  const strong = p >= 0.75;
+  return (
+    <span className={`flex w-[120px] shrink-0 flex-col rounded-lg px-2 py-1.5 leading-tight ${source === "modele" ? (strong ? "bg-brand text-white" : "bg-brand-soft text-brand") : strong ? "bg-ink text-white" : "bg-surface-2 text-ink-soft"}`}
+      title={source === "modele" ? "Modèle BETWISE" : "Déduit des cotes de référence"}>
+      <span className="line-clamp-2 text-[11px] font-semibold">{label}</span>
+      <span className="mt-0.5 flex items-baseline justify-between text-[11px] tabular-nums">
+        <span className="text-[13px] font-bold">{Math.round(p * 100)} %</span>
+        <span className="opacity-80">{cote ? cote.toFixed(2).replace(".", ",") : `≈ ${(1 / p).toFixed(2).replace(".", ",")}`}</span>
+      </span>
+      {valeur !== null && valeur !== undefined && Math.abs(valeur) >= 0.03 && (
+        <span className={`mt-0.5 text-[10px] font-medium ${strong ? "text-white/85" : valeur > 0 ? "text-gain" : "text-loss"}`}>{valeur > 0 ? "▲" : "▼"} {valeur > 0 ? "+" : ""}{Math.round(valeur * 100)} % attendu</span>
+      )}
+    </span>
+  );
+}

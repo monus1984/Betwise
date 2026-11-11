@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { createClient } from "@/lib/supabase/server";
 import { loadSourceOptions } from "@/lib/sources/options";
+import { loadSignals } from "@/lib/probs/signals";
+import { analyzeTicket } from "@/lib/probs/ticket";
+import { TicketAnalysisCard } from "./ticket-analysis";
 import { BetEditor, type EditableBet } from "./editor";
 
 export const dynamic = "force-dynamic";
@@ -41,10 +44,14 @@ export default async function BetPage({ params }: { params: Promise<{ id: string
     }),
   };
 
+  const signals = await loadSignals(supabase, bet.selections.map((x) => x.match?.id).filter((x): x is string => !!x));
+  const analysis = bet.detail_complet ? analyzeTicket(bet.selections.map((x) => ({ match_id: x.match?.id ?? null, market_code: x.market_code, market_param: x.market_param, selection: x.selection, cote: x.cote, home: x.match?.home, away: x.match?.away, libre: x.match_libre })), signals, bet.cote_totale) : null;
+
   return (
     <>
       <Link href="/paris" className="mb-3 inline-block text-sm text-slate-600">‹ Mes paris</Link>
-      <PageHeader title="Modifier le pari" subtitle={`${b.type === "combine" ? "Combiné" : "Simple"} · ${b.statut === "en_cours" ? "en cours" : "réglé"} · saisi le ${new Date(b.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", timeZone: "Africa/Abidjan" })}`} />
+      <PageHeader title="Détail du pari" subtitle={`${b.type === "combine" ? "Combiné" : "Simple"} · ${b.statut === "en_cours" ? "en cours" : "réglé"} · saisi le ${new Date(b.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", timeZone: "Africa/Abidjan" })}`} />
+      {analysis && <TicketAnalysisCard a={analysis} />}
       <BetEditor bet={bet} sources={sources} markets={markets ?? []} />
 
       <section className="mt-6">

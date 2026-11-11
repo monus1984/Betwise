@@ -6,6 +6,8 @@
  */
 import type { createClient } from "../supabase/server";
 import type { ChatTool } from "../llm/provider";
+import { loadSignals, pickLabel, picksOf } from "../probs/signals";
+import { analyzeTicket } from "../probs/ticket";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
 type One<T> = T | T[] | null;
@@ -21,6 +23,7 @@ function since(p: unknown) {
 }
 
 export const COACH_TOOLS: ChatTool[] = [
+  { name: "selections_probables", description: "Les sélections les plus probables d'une journée, tous marchés confondus (victoire, double chance, plus/moins de buts, les deux marquent), au-dessus d'un seuil de probabilité. Donne pour chacune la probabilité, la cote de référence ou la cote juste, l'origine du chiffre (modèle BETWISE ou cotes) et le rendement attendu quand il est calculable. Donne aussi la probabilité d'un combiné des premières. À utiliser pour « les meilleurs paris du jour », « des paris fiables à 85 % », « quoi jouer demain ».", input_schema: { type: "object", properties: { jour: { type: "string", description: "« aujourdhui », « demain » ou une date AAAA-MM-JJ. Par défaut aujourdhui." }, seuil_pct: { type: "number", description: "Probabilité minimale en %, entre 50 et 95. Par défaut 80." }, max: { type: "number", description: "Nombre maximal de sélections, par défaut 8." } } } },
   { name: "bilan_paris", description: "Bilan des paris réglés de l'utilisateur sur une période : nombre, réussite, rendement (ROI), résultat en unités, cote moyenne, et détail selon un regroupement.", input_schema: { type: "object", properties: { periode: PERIODE, regroupement: { type: "string", enum: ["aucun", "type", "nb_selections", "risque", "bookmaker", "marche"], description: "Découpage du bilan. type = simple/combiné." } } } },
   { name: "bilan_par_origine", description: "Réussite des sélections selon leur origine (choix perso, tipster, page, modèle BETWISE…), comparée à la probabilité implicite des cotes jouées. Indique aussi combien de combinés ont été perdus à cause d'une seule sélection.", input_schema: { type: "object", properties: { periode: PERIODE } } },
   { name: "etat_bankroll", description: "État de la bankroll en pourcentages : évolution depuis le capital initial, exposition sur les paris en cours, séries, comportement de mise après une perte, respect des limites que l'utilisateur s'est fixées.", input_schema: { type: "object", properties: {} } },
@@ -74,6 +77,45 @@ function summarize(bets: BetRow[], u: number) {
 
 export async function runCoachTool(db: Db, name: string, input: Record<string, unknown>): Promise<unknown> {
   switch (name) {
+    case "selections_probables": {
+      const TZ = "Africa/Abidjan";
+      const key = (d: Date | string) => new Date(d).toLocaleDateString("en-CA", { timeZone: TZ });
+      const j = String(input.jour ?? "aujourdhui").toLowerCase();
+      let day = /^\d{4}-\d{2}-\d{2}$/.test(j) ? j : key(new Date(Date.now() + (j.startsWith("dem") ? 86400000 : 0)));
+      const seuil = Math.min(95, Math.max(50, Number(input.seuil_pct) || 80)) / 100;
+      const max = Math.min(15, Math.max(1, Number(input.max) || 8));
+      const { data: ms } = await db.from("matches")
+        .select("id, kickoff_at, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom)")
+        .eq("statut", "programme").gte("kickoff_at", new Date().toISOString()).lte("kickoff_at", new Date(Date.now() + 15 * 86400000).toISOString()).order("kickoff_at").limit(400);
+      const all = ms ?? [];
+      let rows = all.filter((m) => key(m.kickoff_at) === day);
+      let note: string | null = null;
+      if (!rows.length && all.length) { day = key(all[0].kickoff_at); rows = all.filter((m) => key(m.kickoff_at) === day); note = `aucun match le jour demandé ; prochaine journée avec des matchs : ${day}`; }
+      const signals = await loadSignals(db, rows.map((m) => m.id));
+      const sels = rows.flatMap((m) => {
+        const sg = signals.get(m.id); if (!sg) return [];
+        const h = one(m.home as One<{ nom: string }>)?.nom ?? "", a = one(m.away as One<{ nom: string }>)?.nom ?? "";
+        const seen = new Set<string>();
+        return picksOf(sg).filter((p) => p.p >= seuil && p.p <= 0.95 && !seen.has(p.market) && seen.add(p.market)).slice(0, 2).map((p) => ({
+          match: `${h} – ${a}`, competition: one(m.competition as One<{ nom: string }>)?.nom, coup_envoi: m.kickoff_at,
+          selection: pickLabel(p.market, p.param, p.sel, h, a), probabilite_pct: pct(p.p),
+          cote_reference: p.cote, cote_juste: r2(1 / p.p), origine: sg.source === "modele" ? "modèle BETWISE" : "déduit des cotes du marché",
+          rendement_attendu_pct: p.valeur !== null ? pct(p.valeur) : null, _p: p.p,
+        }));
+      }).sort((x, y) => y._p - x._p).slice(0, max);
+      const comb = (n: number) => sels.length >= n ? pct(sels.slice(0, n).reduce((a, s) => a * s._p, 1)) : null;
+      return {
+        jour: day, seuil_pct: seuil * 100, matchs_ce_jour: rows.length, matchs_avec_chiffres: signals.size, note,
+        selections: sels.map(({ _p, ...s }) => s),
+        combine_des_3_premieres_pct: comb(3), combine_des_5_premieres_pct: comb(5),
+        rappels: [
+          "une probabilité « déduite des cotes » ne bat pas le bookmaker : rendement attendu légèrement négatif une fois la marge comptée",
+          "rendement_attendu_pct n'existe que lorsque le modèle et une cote de référence portent sur la même sélection",
+          "le modèle ne voit ni blessures ni compositions et reste un peu moins précis que le marché sur le passé",
+        ],
+      };
+    }
+
     case "bilan_paris": {
       const [bets, u] = await Promise.all([allBets(db, since(input.periode)), unit(db)]);
       const g = (input.regroupement as string) ?? "aucun";
@@ -166,20 +208,19 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
       const bets = (data ?? []) as unknown as BetRow[];
       const u = await unit(db);
       const ids = [...new Set(bets.flatMap((b) => b.bet_selections.map((s) => s.match_id)).filter(Boolean))] as string[];
-      const { data: est } = ids.length ? await db.from("model_estimates").select("match_id, market_code, market_param, selection, probabilite").in("match_id", ids) : { data: [] };
-      const prob = (s: BetRow["bet_selections"][number]) => (est ?? []).find((e) => e.match_id === s.match_id && e.market_code === s.market_code && e.selection === s.selection && (e.market_param === null || Number(e.market_param) === Number(s.market_param)))?.probabilite;
+      const signals = await loadSignals(db, ids);
       return bets.map((b) => {
-        const sels = b.bet_selections.map((s) => {
-          const m = one(s.match); const p = prob(s);
-          return { match: matchName(s), coup_envoi: m?.kickoff_at ?? null, statut_match: m?.statut ?? null, marche: `${s.market_code}${s.market_param ? ` ${s.market_param}` : ""}`, selection: s.selection, cote: Number(s.cote), proba_implicite_pct: pct(1 / Number(s.cote)), proba_modele_pct: p !== undefined ? pct(Number(p)) : null, origine: originName(one(s.origin)), resultat: s.resultat };
-        });
-        const allModel = sels.every((s) => s.proba_modele_pct !== null);
-        const pTicket = allModel ? sels.reduce((a, s) => a * (s.proba_modele_pct! / 100), 1) : null;
+        const an = analyzeTicket(b.bet_selections.map((s) => { const m = one(s.match); return { match_id: s.match_id, market_code: s.market_code, market_param: s.market_param, selection: s.selection, cote: Number(s.cote), home: one(m?.home ?? null)?.nom, away: one(m?.away ?? null)?.nom, libre: s.match_libre }; }), signals, Number(b.cote_totale));
         return {
-          type: b.type, mise_unites: r2(Number(b.mise) / u), cote_totale: Number(b.cote_totale), place_le: b.placed_at, selections: sels,
-          proba_ticket_modele_pct: pTicket !== null ? pct(pTicket) : null,
-          esperance_modele_pct: pTicket !== null && b.cote_totale ? pct(pTicket * Number(b.cote_totale) - 1) : null,
-          note: allModel ? "probabilité du ticket = produit des sélections, en les supposant indépendantes" : "le modèle ne couvre pas toutes les sélections de ce ticket",
+          type: b.type, mise_unites: r2(Number(b.mise) / u), cote_obtenue: Number(b.cote_totale), place_le: b.placed_at,
+          selections: b.bet_selections.map((s, i) => ({
+            match: matchName(s), coup_envoi: one(s.match)?.kickoff_at ?? null, selection: an?.lignes[i].label, cote: Number(s.cote),
+            probabilite_pct: an ? pct(an.lignes[i].p) : null, origine_probabilite: an ? { modele: "modèle BETWISE", marche: "cotes du marché", estime: "estimée (match non couvert)" }[an.lignes[i].origine] : null,
+            origine_du_choix: originName(one(s.origin)), resultat: s.resultat,
+          })),
+          chances_de_passer_pct: an ? pct(an.pTicket) : null, cote_juste: an ? r2(an.coteJuste) : null, rendement_attendu_pct: an ? pct(an.esperance) : null,
+          maillon_faible: an?.maillonFaible ? `${an.maillonFaible.label} (${an.maillonFaible.match})` : null,
+          note: an?.memeMatch ? "des sélections portent sur le même match : indépendance approximative" : "probabilité du ticket = produit des sélections, supposées indépendantes",
         };
       });
     }

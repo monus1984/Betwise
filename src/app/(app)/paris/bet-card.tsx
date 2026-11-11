@@ -77,7 +77,7 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
           <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${st.cls}`}>{st.label}</span>
-          <Link href={`/paris/${bet.id}`} className="text-[11px] text-slate-500 underline">Modifier</Link>
+          <Link href={`/paris/${bet.id}`} className="text-[11px] font-medium text-brand">Analyser · modifier ›</Link>
         </div>
       </div>
 

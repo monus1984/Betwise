@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
-import { COMP_FLAG, COMP_ORDER, COMP_SHORT, ProbCells, TeamBadge, marketProbs, shortName, type Probs } from "@/components/match-ui";
+import { COMP_FLAG, COMP_ORDER, COMP_SHORT, PickBadge, TeamBadge, shortName } from "@/components/match-ui";
+import { bestPick, loadSignals, pickLabel, picksOf } from "@/lib/probs/signals";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,7 @@ const TZ = "Africa/Abidjan";
 const dayKey = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { timeZone: TZ }); // AAAA-MM-JJ
 const todayKey = () => dayKey(new Date().toISOString());
 
-export default async function MatchsPage({ searchParams }: { searchParams: Promise<{ d?: string; c?: string }> }) {
+export default async function MatchsPage({ searchParams }: { searchParams: Promise<{ d?: string; c?: string; top?: string }> }) {
   const sp = await searchParams;
   const supabase = await createClient();
 
@@ -40,32 +41,26 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   const rows = all.filter((r) => dayKey(r.kickoff_at) === day && (!comp || one(r.competition)?.code_externe === comp));
   const ids = rows.map((r) => r.id);
 
-  const [{ data: est }, { data: odds }] = ids.length
-    ? await Promise.all([
-        supabase.from("model_estimates").select("match_id, selection, probabilite").eq("market_code", "1X2").in("match_id", ids),
-        supabase.from("odds_observations").select("match_id, selection, cote, observed_at").eq("market_code", "1X2").eq("bookmaker", "ref:eu-median").in("match_id", ids).order("observed_at", { ascending: false }),
-      ])
-    : [{ data: [] }, { data: [] }];
-  const probsOf = (id: string): Probs | null => {
-    const e = (est ?? []).filter((x) => x.match_id === id);
-    if (e.length === 3) {
-      const g = (k: string) => Number(e.find((x) => x.selection === k)!.probabilite);
-      return { p1: g("1"), pN: g("N"), p2: g("2"), source: "modele" };
-    }
-    const o = (k: string) => (odds ?? []).find((x) => x.match_id === id && x.selection === k)?.cote;
-    return marketProbs(o("1") ? Number(o("1")) : null, o("N") ? Number(o("N")) : null, o("2") ? Number(o("2")) : null);
-  };
+  const signals = await loadSignals(supabase, ids);
+  const seuil = [70, 80, 85].includes(Number(sp.top)) ? Number(sp.top) : null;
+
+  // Vue « Les plus probables » : au plus deux sélections par match, de marchés différents, au-dessus du seuil
+  const top = seuil === null ? [] : rows.filter((r) => r.statut === "programme").flatMap((r) => {
+    const sg = signals.get(r.id); if (!sg) return [];
+    const seen = new Set<string>();
+    return picksOf(sg).filter((p) => p.p >= seuil / 100 && p.p <= 0.95 && !seen.has(p.market) && seen.add(p.market)).slice(0, 2).map((p) => ({ r, sg, p }));
+  }).sort((x, y) => y.p.p - x.p.p);
 
   // Groupes par compétition, dans un ordre fixe
   const groups = new Map<string, Row[]>();
   for (const r of rows) { const k = one(r.competition)?.code_externe ?? "?"; groups.set(k, [...(groups.get(k) ?? []), r]); }
   const ordered = [...groups.entries()].sort((a, b) => COMP_ORDER.indexOf(a[0]) - COMP_ORDER.indexOf(b[0]));
   const compsOfDay = [...new Set(all.filter((r) => dayKey(r.kickoff_at) === day).map((r) => one(r.competition)?.code_externe ?? "?"))].sort((a, b) => COMP_ORDER.indexOf(a) - COMP_ORDER.indexOf(b));
-  const q = (d: string, c: string | null) => `/matchs?d=${d}${c ? `&c=${c}` : ""}`;
+  const q = (d: string, c: string | null, t: number | null = seuil) => `/matchs?d=${d}${c ? `&c=${c}` : ""}${t ? `&top=${t}` : ""}`;
 
   return (
     <>
-      <PageHeader title="Matchs" subtitle="Probabilités 1 · N · 2 : en bleu le modèle BETWISE, en noir le marché quand le modèle ne couvre pas." />
+      <PageHeader title="Matchs" subtitle="Sur chaque match, l’issue la plus probable : en bleu selon le modèle BETWISE, en noir selon les cotes." />
 
       {/* Bandeau des jours */}
       <nav className="-mx-4 mb-3 overflow-x-auto px-4 pb-1" aria-label="Jours">
@@ -85,6 +80,15 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
         </div>
       </nav>
 
+      {/* Tous les matchs / Les plus probables */}
+      <div className="mb-3 flex items-center gap-1.5 overflow-x-auto">
+        <Link href={q(day, comp, null)} scroll={false} className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium ${seuil === null ? "border-brand bg-brand text-white" : "border-line bg-white text-ink-soft"}`}>Tous les matchs</Link>
+        <Link href={q(day, comp, seuil ?? 80)} scroll={false} className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium ${seuil !== null ? "border-brand bg-brand text-white" : "border-line bg-white text-ink-soft"}`}>⚡ Les plus probables</Link>
+        {seuil !== null && [70, 80, 85].map((t) => (
+          <Link key={t} href={q(day, comp, t)} scroll={false} className={`shrink-0 rounded-full border px-2.5 py-1.5 text-xs tabular-nums ${seuil === t ? "border-ink bg-ink text-white" : "border-line bg-white text-ink-soft"}`}>≥ {t} %</Link>
+        ))}
+      </div>
+
       {/* Filtre compétition */}
       {compsOfDay.length > 1 && (
         <nav className="-mx-4 mb-4 overflow-x-auto px-4" aria-label="Compétitions">
@@ -103,7 +107,39 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
         </div>
       )}
 
-      {ordered.map(([code, list]) => (
+      {seuil !== null && rows.length > 0 && (
+        <section className="mb-4">
+          {top.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-line bg-white p-6 text-center text-sm text-ink-muted">Aucune sélection à {seuil} % ou plus ce jour-là. Essaie un seuil plus bas.</div>
+          ) : (
+            <>
+              <ul className="overflow-hidden rounded-xl border border-line bg-white shadow-card">
+                {top.map(({ r, sg, p }, i) => {
+                  const h = shortName(one(r.home)?.nom ?? ""), a = shortName(one(r.away)?.nom ?? "");
+                  return (
+                    <li key={`${r.id}-${p.market}-${p.sel}`} className={i ? "border-t border-line" : ""}>
+                      <Link href={`/matchs/${r.id}`} className="flex items-center gap-3 px-3 py-2.5 active:bg-surface-2">
+                        <span className="w-7 shrink-0 text-center text-xs font-semibold text-ink-muted">{i + 1}</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium">{pickLabel(p.market, p.param, p.sel, h, a)}</span>
+                          <span className="block truncate text-xs text-ink-muted">{COMP_FLAG[one(r.competition)?.code_externe ?? ""] ?? "⚽"} {h} – {a} · {fmtTime(r.kickoff_at)}</span>
+                        </span>
+                        <PickBadge label={sg.source === "modele" ? "Modèle" : "Marché"} p={p.p} cote={p.cote} source={sg.source} valeur={p.valeur} />
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="mt-2 px-1 text-[11px] leading-relaxed text-ink-muted">
+                Probable ne veut pas dire rentable : à {seuil} %, la cote tourne autour de {(100 / seuil).toFixed(2)}. « ≈ » signale une cote juste calculée, faute de cote de référence sur ce marché.
+                {top.length >= 3 && <> Combinées, les {Math.min(top.length, 5)} premières n’ont plus que <b>{Math.round(top.slice(0, 5).reduce((x, t) => x * t.p.p, 1) * 100)} %</b> de chances de passer ensemble.</>}
+              </p>
+            </>
+          )}
+        </section>
+      )}
+
+      {seuil === null && ordered.map(([code, list]) => (
         <section key={code} className="mb-4 overflow-hidden rounded-xl border border-line bg-white shadow-card">
           <h2 className="flex items-center justify-between border-b border-line bg-surface-2 px-3 py-2 text-xs font-semibold text-ink-soft">
             <span>{COMP_FLAG[code] ?? "⚽"} {COMP_SHORT[code] ?? one(list[0].competition)?.nom}</span>
@@ -127,7 +163,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
                       <span className="flex items-center gap-2 text-sm"><TeamBadge name={h} size={18} /><span className={`truncate ${homeWin ? "font-semibold" : ""}`}>{shortName(h)}</span>{done && <span className="ml-auto pl-2 font-semibold tabular-nums">{m.score_home}</span>}</span>
                       <span className="flex items-center gap-2 text-sm"><TeamBadge name={a} size={18} /><span className={`truncate ${awayWin ? "font-semibold" : ""}`}>{shortName(a)}</span>{done && <span className="ml-auto pl-2 font-semibold tabular-nums">{m.score_away}</span>}</span>
                     </span>
-                    {!done && <ProbCells probs={probsOf(m.id)} />}
+                    {!done && (() => { const sg = signals.get(m.id); if (!sg) return <span className="w-[120px] shrink-0 text-right text-[11px] text-ink-muted">pas encore de cote</span>; const p = bestPick(sg); return <PickBadge label={pickLabel(p.market, p.param, p.sel, shortName(h), shortName(a))} p={p.p} cote={p.cote} source={sg.source} valeur={p.valeur} />; })()}
                   </Link>
                 </li>
               );

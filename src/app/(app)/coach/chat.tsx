@@ -7,7 +7,7 @@ import { Notice } from "@/components/ui";
 export type ChatMsg = { id?: string; role: "user" | "assistant"; text: string; fonctions?: string[] };
 
 const FN_LABEL: Record<string, string> = {
-  bilan_paris: "bilan des paris", bilan_par_origine: "réussite par origine", etat_bankroll: "état de la bankroll",
+  selections_probables: "sélections du jour", bilan_paris: "bilan des paris", bilan_par_origine: "réussite par origine", etat_bankroll: "état de la bankroll",
   paris_en_cours: "paris en cours", sources_suivies: "sources suivies", detail_source: "détail d’une source", analyse_match: "analyse de match",
 };
 
@@ -54,7 +54,7 @@ export function CoachChat({ initialId, initial, suggestions }: { initialId: stri
           {suggestions.map((s) => (
             <button key={s} onClick={() => send(s)} disabled={busy} className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-left text-sm active:bg-slate-50">{s}</button>
           ))}
-          <p className="pt-2 text-[11px] text-slate-400">Le coach ne reçoit ni ton nom ni tes montants en F CFA : il raisonne en unités (ta mise habituelle) et en pourcentages. Il ne donne pas de « pari du jour ».</p>
+          <p className="pt-2 text-[11px] text-slate-400">Le coach ne reçoit ni ton nom ni tes montants en F CFA : il raisonne en unités (ta mise habituelle) et en pourcentages.</p>
         </div>
       )}
 

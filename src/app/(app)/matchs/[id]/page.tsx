@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { RISK_CLASS, RISK_LABEL, riskFromOdds } from "@/components/ui";
 import { COMP_FLAG, COMP_SHORT, TeamBadge, confidenceLabel, marketProbs, shortName } from "@/components/match-ui";
 import { createClient } from "@/lib/supabase/server";
+import { probOf } from "@/lib/probs/grid";
+import { loadSignals, pickLabel, picksOf } from "@/lib/probs/signals";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +48,9 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const just = (est?.[0]?.justification ?? null) as Just | null;
   const model = e("1X2", "1") ? { p1: Number(e("1X2", "1")!.probabilite), pN: Number(e("1X2", "N")!.probabilite), p2: Number(e("1X2", "2")!.probabilite) } : null;
   const market = marketProbs(ref("1X2", "1")?.cote, ref("1X2", "N")?.cote, ref("1X2", "2")?.cote);
+  const sg = (await loadSignals(supabase, [id])).get(id) ?? null;
+  const mk = sg?.market ?? null;
+  const picks = sg ? picksOf(sg).filter((p) => p.p >= 0.6 && p.p <= 0.95).slice(0, 4) : [];
   const parier = (market: string, sel: string, cote?: number, param?: number) => `/nouveau?match=${m.id}&market=${market}${param !== undefined ? `&param=${param}` : ""}&sel=${encodeURIComponent(sel)}${cote ? `&cote=${cote}` : ""}`;
 
   return (
@@ -84,8 +89,36 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
       {tab === "analyse" && (
         <div className="space-y-3">
+          {picks.length > 0 && (
+            <Card title="Les issues les plus probables" note={sg!.source === "modele" ? "modèle BETWISE" : "d’après les cotes"}>
+              <ul className="divide-y divide-line">
+                {picks.map((p) => (
+                  <li key={`${p.market}${p.param}${p.sel}`}>
+                    <Link href={upcoming ? parier(p.market, p.sel, p.cote ?? undefined, p.param ?? undefined) : "#"} className="flex items-center justify-between gap-3 py-2 text-sm active:bg-surface-2">
+                      <span className="truncate">{pickLabel(p.market, p.param, p.sel, shortName(home), shortName(away))}</span>
+                      <span className="shrink-0 tabular-nums"><b>{Math.round(p.p * 100)} %</b> <span className="text-xs text-ink-muted">{p.cote ? `cote ${p.cote.toFixed(2)}` : `cote juste ${(1 / p.p).toFixed(2)}`}</span>{p.valeur !== null && Math.abs(p.valeur) >= 0.03 && <span className={`ml-1 text-xs ${p.valeur > 0 ? "text-gain" : "text-loss"}`}>{p.valeur > 0 ? "+" : ""}{Math.round(p.valeur * 100)} %</span>}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-[11px] text-ink-muted">« Cote juste » : la cote sans marge du bookmaker. En dessous, le pari perd de l’argent sur la durée, même s’il passe souvent.</p>
+            </Card>
+          )}
           {!model ? (
-            <Card><p className="text-sm text-ink-muted">Le modèle ne couvre pas ce match : il couvre les 5 grands championnats à J-14, pas encore la Ligue des champions ni les sélections nationales.{market ? " Les probabilités affichées en haut viennent des cotes de référence." : ""}</p></Card>
+            mk ? (
+              <>
+                <Card title="Ce que disent les cotes" note="marge du bookmaker retirée">
+                  <Compare label={shortName(home)} m={probOf(mk.grid, "1X2", null, "1")!} />
+                  <Compare label="Match nul" m={probOf(mk.grid, "1X2", null, "N")!} />
+                  <Compare label={shortName(away)} m={probOf(mk.grid, "1X2", null, "2")!} />
+                  <Compare label="+ de 1,5 but" m={probOf(mk.grid, "OU", 1.5, "Plus")!} />
+                  <Compare label="+ de 2,5 buts" m={probOf(mk.grid, "OU", 2.5, "Plus")!} />
+                  <Compare label="Les deux marquent" m={probOf(mk.grid, "BTTS", null, "Oui")!} />
+                  <p className="mt-2 text-xs text-ink-soft">Buts attendus selon le marché <b className="tabular-nums">{fmtDec(mk.lh)} – {fmtDec(mk.la)}</b> (total {fmtDec(mk.lh + mk.la)})</p>
+                </Card>
+                <p className="px-1 text-[11px] leading-relaxed text-ink-muted">Le modèle BETWISE ne couvre pas encore ce match (sélections nationales, Ligue des champions). Ces chiffres sont déduits des cotes de référence : victoire, nul et plus/moins de 2,5 buts sont repris tels quels, les autres marchés en sont calculés.</p>
+              </>
+            ) : <Card><p className="text-sm text-ink-muted">Pas encore de cote ni d’estimation pour ce match. Elles arrivent chaque matin à partir de J-14.</p></Card>
           ) : (
             <>
               <Card title="Qui l’emporte ?">
@@ -97,7 +130,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
               <Card title="Buts">
                 <Compare label="+ de 2,5 buts" m={Number(e("OU", "Plus")?.probabilite ?? 0)} k={ref("OU", "Plus", 2.5) && ref("OU", "Moins", 2.5) ? (1 / ref("OU", "Plus", 2.5)!.cote) / (1 / ref("OU", "Plus", 2.5)!.cote + 1 / ref("OU", "Moins", 2.5)!.cote) : undefined} />
                 <Compare label="Les deux marquent" m={Number(e("BTTS", "Oui")?.probabilite ?? 0)} />
-                {just && <p className="mt-2 text-xs text-ink-soft">Buts attendus <b className="tabular-nums">{fmtDec(just.lambda_dom)} – {fmtDec(just.lambda_ext)}</b> · score le plus probable <b>{just.score_probable}</b></p>}
+                {just && <p className="mt-2 text-xs text-ink-soft">Buts attendus <b className="tabular-nums">{fmtDec(just.lambda_dom)} – {fmtDec(just.lambda_ext)}</b> · score le plus probable <b>{just.score_probable}</b>{mk && <> · selon le marché <b className="tabular-nums">{fmtDec(mk.lh)} – {fmtDec(mk.la)}</b></>}</p>}
               </Card>
               <p className="px-1 text-[11px] leading-relaxed text-ink-muted">
                 Barre pleine : le modèle (Poisson sur trois saisons de résultats). Trait noir : le marché. Le modèle ne voit ni blessures ni compositions et reste un peu moins précis que les cotes sur le passé. Ses pronos sont notés comme ceux de n’importe quelle source{modelSrc ? <> — <Link href={`/sources/${modelSrc.id}`} className="underline">voir son bilan</Link></> : null}.
