@@ -6,7 +6,7 @@
 import "dotenv/config";
 import { createAdminClient } from "../src/lib/supabase/admin";
 import { ApiFootball } from "../src/lib/api-football/client";
-import { AF_COMPETITIONS, syncAfCompetition, syncAfOdds } from "../src/lib/api-football/sync";
+import { AF_COMPETITIONS, AF_LINKED, linkAfFixtures, syncAfCompetition, syncAfOdds } from "../src/lib/api-football/sync";
 
 async function main() {
   if (!process.env.API_FOOTBALL_KEY) { console.error("API_FOOTBALL_KEY manquant"); process.exit(1); }
@@ -21,6 +21,11 @@ async function main() {
       if (withOdds) { const o = await syncAfOdds(db, api, code); line += ` · cotes : ${o.matches} matchs, ${o.rows} lignes`; }
       console.log(line);
     } catch (e) { failures++; console.error(`[${code}] échec :`, e instanceof Error ? e.message : e); }
+  }
+  // Rattachement des matchs venus d'autres sources (championnats, Ligue des nations) pour le direct
+  for (const code of Object.keys(AF_LINKED)) {
+    try { const r = await linkAfFixtures(db, api, code); if (r.linked || r.pending) console.log(`[${code}] direct : ${r.linked} rattachés, ${r.pending} sans correspondance`); }
+    catch (e) { console.error(`[${code}] rattachement :`, e instanceof Error ? e.message : e); }
   }
   const { data: settled, error } = await db.rpc("settle_pending");
   if (error) console.error("Règlement :", error.message);

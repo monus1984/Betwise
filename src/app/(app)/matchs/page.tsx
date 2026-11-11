@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/page-header";
 import { COMP_FLAG, COMP_ORDER, COMP_SHORT, PickBadge, TeamBadge, shortName } from "@/components/match-ui";
 import { bestPick, loadSignals, pickLabel, picksOf } from "@/lib/probs/signals";
 import { createClient } from "@/lib/supabase/server";
+import { LiveRefresh } from "@/components/live-refresh";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ type Named = { nom: string } | { nom: string }[] | null;
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
 type Row = {
   id: string; kickoff_at: string; statut: "programme" | "en_cours" | "termine" | "reporte" | "annule";
-  score_home: number | null; score_away: number | null; home: Named; away: Named;
+  score_home: number | null; score_away: number | null; minute: number | null; home: Named; away: Named;
   competition: { nom: string; code_externe: string | null } | { nom: string; code_externe: string | null }[] | null;
 };
 
@@ -25,7 +26,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   const from = new Date(Date.now() - 3 * 86400000), to = new Date(Date.now() + 15 * 86400000);
   const { data } = await supabase
     .from("matches")
-    .select("id, kickoff_at, statut, score_home, score_away, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe)")
+    .select("id, kickoff_at, statut, score_home, score_away, minute, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe)")
     .gte("kickoff_at", from.toISOString()).lte("kickoff_at", to.toISOString())
     .neq("statut", "annule").order("kickoff_at").limit(400);
   const all = (data ?? []) as unknown as Row[];
@@ -60,6 +61,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
+      <LiveRefresh active={rows.some((r) => r.statut === "en_cours" || (r.statut === "programme" && Math.abs(Date.parse(r.kickoff_at) - Date.now()) < 15 * 60000))} />
       <PageHeader title="Matchs" subtitle="Sur chaque match, l’issue la plus probable : en bleu selon le modèle BETWISE, en noir selon les cotes." />
 
       {/* Bandeau des jours */}
@@ -149,21 +151,22 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
             {list.map((m) => {
               const h = one(m.home)?.nom ?? "", a = one(m.away)?.nom ?? "";
               const done = m.statut === "termine";
+              const live = m.statut === "en_cours" && m.score_home !== null;
               const homeWin = done && (m.score_home ?? 0) > (m.score_away ?? 0), awayWin = done && (m.score_away ?? 0) > (m.score_home ?? 0);
               return (
                 <li key={m.id}>
                   <Link href={`/matchs/${m.id}`} className="flex items-center gap-3 px-3 py-2.5 active:bg-surface-2">
                     <span className="w-10 shrink-0 text-center text-xs tabular-nums">
                       {done ? <span className="font-medium text-ink-muted">Fin</span>
-                        : m.statut === "en_cours" ? <span className="font-semibold text-loss">● Live</span>
+                        : m.statut === "en_cours" ? <span className="font-semibold text-loss">● {m.minute ? `${m.minute}’` : "Live"}</span>
                         : m.statut === "reporte" ? <span className="text-draw">Rep.</span>
                         : <span className="font-medium text-ink-soft">{fmtTime(m.kickoff_at)}</span>}
                     </span>
                     <span className="min-w-0 flex-1 space-y-1">
-                      <span className="flex items-center gap-2 text-sm"><TeamBadge name={h} size={18} /><span className={`truncate ${homeWin ? "font-semibold" : ""}`}>{shortName(h)}</span>{done && <span className="ml-auto pl-2 font-semibold tabular-nums">{m.score_home}</span>}</span>
-                      <span className="flex items-center gap-2 text-sm"><TeamBadge name={a} size={18} /><span className={`truncate ${awayWin ? "font-semibold" : ""}`}>{shortName(a)}</span>{done && <span className="ml-auto pl-2 font-semibold tabular-nums">{m.score_away}</span>}</span>
+                      <span className="flex items-center gap-2 text-sm"><TeamBadge name={h} size={18} /><span className={`truncate ${homeWin ? "font-semibold" : ""}`}>{shortName(h)}</span>{(done || live) && <span className={`ml-auto pl-2 font-semibold tabular-nums ${live ? "text-loss" : ""}`}>{m.score_home}</span>}</span>
+                      <span className="flex items-center gap-2 text-sm"><TeamBadge name={a} size={18} /><span className={`truncate ${awayWin ? "font-semibold" : ""}`}>{shortName(a)}</span>{(done || live) && <span className={`ml-auto pl-2 font-semibold tabular-nums ${live ? "text-loss" : ""}`}>{m.score_away}</span>}</span>
                     </span>
-                    {!done && (() => { const sg = signals.get(m.id); if (!sg) return <span className="w-[120px] shrink-0 text-right text-[11px] text-ink-muted">pas encore de cote</span>; const p = bestPick(sg); return <PickBadge label={pickLabel(p.market, p.param, p.sel, shortName(h), shortName(a))} p={p.p} cote={p.cote} source={sg.source} valeur={p.valeur} />; })()}
+                    {!done && !live && (() => { const sg = signals.get(m.id); if (!sg) return <span className="w-[120px] shrink-0 text-right text-[11px] text-ink-muted">pas encore de cote</span>; const p = bestPick(sg); return <PickBadge label={pickLabel(p.market, p.param, p.sel, shortName(h), shortName(a))} p={p.p} cote={p.cote} source={sg.source} valeur={p.valeur} />; })()}
                   </Link>
                 </li>
               );

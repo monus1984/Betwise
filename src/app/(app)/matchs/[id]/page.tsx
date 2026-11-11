@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { RISK_CLASS, RISK_LABEL, riskFromOdds } from "@/components/ui";
 import { COMP_FLAG, COMP_SHORT, TeamBadge, confidenceLabel, marketProbs, shortName } from "@/components/match-ui";
 import { createClient } from "@/lib/supabase/server";
+import { LiveRefresh } from "@/components/live-refresh";
 import { probOf } from "@/lib/probs/grid";
 import { loadSignals, pickLabel, picksOf } from "@/lib/probs/signals";
 
@@ -25,10 +26,10 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
   const { data } = await supabase
     .from("matches")
-    .select("id, kickoff_at, statut, score_home, score_away, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe)")
+    .select("id, kickoff_at, statut, score_home, score_away, minute, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe)")
     .eq("id", id).maybeSingle();
   if (!data) notFound();
-  const m = data as unknown as { id: string; kickoff_at: string; statut: string; score_home: number | null; score_away: number | null; home: Named; away: Named; competition: { nom: string; code_externe: string | null } | { nom: string; code_externe: string | null }[] | null };
+  const m = data as unknown as { id: string; kickoff_at: string; statut: string; score_home: number | null; score_away: number | null; minute: number | null; home: Named; away: Named; competition: { nom: string; code_externe: string | null } | { nom: string; code_externe: string | null }[] | null };
   const home = one(m.home)?.nom ?? "", away = one(m.away)?.nom ?? "";
   const comp = one(m.competition);
   const upcoming = m.statut === "programme" || m.statut === "en_cours";
@@ -55,6 +56,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
   return (
     <div className="pb-20">
+      <LiveRefresh active={m.statut === "en_cours"} />
       <Link href="/matchs" className="mb-3 inline-flex items-center gap-1 text-sm text-ink-muted">‹ Matchs</Link>
 
       {/* En-tête façon tableau d'affichage */}
@@ -64,6 +66,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
           <div className="flex flex-col items-center gap-1.5 text-center"><TeamBadge name={home} size={44} /><span className="text-sm font-medium leading-tight">{shortName(home)}</span></div>
           <div className="text-center">
             {m.statut === "termine" ? <p className="text-3xl font-semibold tabular-nums">{m.score_home} – {m.score_away}</p>
+              : m.statut === "en_cours" && m.score_home !== null ? <><p className="text-3xl font-semibold tabular-nums">{m.score_home} – {m.score_away}</p><p className="text-[11px] font-semibold text-red-300">● {m.minute ? `${m.minute}’` : "en direct"}</p></>
               : <><p className="text-2xl font-semibold tabular-nums">{new Date(m.kickoff_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: TZ })}</p><p className="text-[11px] text-white/60">{countdown(m.kickoff_at)}</p></>}
           </div>
           <div className="flex flex-col items-center gap-1.5 text-center"><TeamBadge name={away} size={44} /><span className="text-sm font-medium leading-tight">{shortName(away)}</span></div>

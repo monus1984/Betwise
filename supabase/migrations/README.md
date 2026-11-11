@@ -23,3 +23,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0013_pg_cron_schedule.sql | 2026-11-10 | pg_cron : `betwise-source-metrics` 03:00 UTC, `betwise-keepalive` 05:30 UTC |
 | 0014_fix_bootstrap_ci_types.sql | 2026-11-10 | `bootstrap_ci()` renvoie du numeric arrondi (erreur de type à la première exécution) |
 | 0015_match_history_and_model.sql | 2026-11-10 | `match_history` (résultats et cotes moyennes football-data.co.uk, lecture connectés), index unique des `model_estimates` par version, `updated_at` |
+| 0016_live_scores.sql | 2026-11-11 | Direct : `af_fixture_id`, `minute`, `live_at` sur matches ; pg_net ; `tick_live()` appelée chaque minute par pg_cron quand un match suivi est en cours |

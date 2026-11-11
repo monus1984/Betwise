@@ -32,6 +32,8 @@ export class ApiFootball {
     return this.get<AfFixture>(`/fixtures?league=${league}&season=${season}&from=${from}&to=${to}`).then((j) => j.response);
   }
   live() { return this.get<AfFixture>(`/fixtures?live=all`).then((j) => j.response); }
+  /** Jusqu'à 20 matchs par identifiant (scores finaux des matchs sortis du direct). */
+  byIds(ids: number[]) { return this.get<AfFixture>(`/fixtures?ids=${ids.slice(0, 20).join("-")}`).then((j) => j.response); }
 
   /** Cotes d'avant-match d'une compétition (10 matchs par page). */
   async odds(league: number, season: number, maxPages = 6) {

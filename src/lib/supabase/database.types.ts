@@ -91,6 +91,9 @@ export type Database = {
           score_away: number | null
           source_resultat: string | null
           result_at: string | null
+          af_fixture_id: number | null
+          minute: number | null
+          live_at: string | null
           created_at: string
           updated_at: string
         }
@@ -106,6 +109,9 @@ export type Database = {
           score_away?: number | null
           source_resultat?: string | null
           result_at?: string | null
+          af_fixture_id?: number | null
+          minute?: number | null
+          live_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -121,6 +127,9 @@ export type Database = {
           score_away?: number | null
           source_resultat?: string | null
           result_at?: string | null
+          af_fixture_id?: number | null
+          minute?: number | null
+          live_at?: string | null
           created_at?: string
           updated_at?: string
         }

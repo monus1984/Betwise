@@ -7,6 +7,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../supabase/database.types";
 import { NATION_FR } from "../odds-api/international";
+import { teamSimilarity } from "../odds-api/client";
 import type { AfFixture, ApiFootball } from "./client";
 
 type Db = SupabaseClient<Database, "betwise">;
@@ -37,7 +38,7 @@ const NATION_FR_EXTRA: Record<string, string> = {
   Paraguay: "Paraguay", China: "Chine", India: "Inde", "New Zealand": "Nouvelle-Zélande", Jordan: "Jordanie", Iraq: "Irak", "United Arab Emirates": "Émirats arabes unis",
 };
 
-function mapStatus(s: string): Status {
+export function mapStatus(s: string): Status {
   if (["FT", "AET", "PEN"].includes(s)) return "termine";
   if (["1H", "HT", "2H", "ET", "BT", "P", "LIVE", "INT", "SUSP"].includes(s)) return "en_cours";
   if (s === "PST") return "reporte";
@@ -75,7 +76,7 @@ export async function syncAfCompetition(db: Db, api: ApiFootball, code: string) 
     const statut = mapStatus(f.fixture.status.short);
     const done = statut === "termine";
     return {
-      code_externe: `af:${f.fixture.id}`, competition_id: comp.id,
+      code_externe: `af:${f.fixture.id}`, af_fixture_id: f.fixture.id, competition_id: comp.id,
       home_team_id: tid.get(teamRow(f.teams.home).code_externe)!, away_team_id: tid.get(teamRow(f.teams.away).code_externe)!,
       kickoff_at: f.fixture.date, statut,
       // score à la fin du temps réglementaire : c'est lui qui règle les paris
@@ -117,4 +118,68 @@ export async function syncAfOdds(db: Db, api: ApiFootball, code: string) {
   }
   if (rows.length) { const { error } = await db.from("odds_observations").insert(rows); if (error) throw error; }
   return { rows: rows.length, matches: matched };
+}
+
+
+/** Compétitions dont le calendrier vient d'une autre source : on leur rattache l'identifiant API-Football pour le direct. */
+export const AF_LINKED: Record<string, { league: number; season: number }> = {
+  UNL: { league: 5, season: 2026 }, CL: { league: 2, season: 2026 }, PL: { league: 39, season: 2026 }, PD: { league: 140, season: 2026 },
+  SA: { league: 135, season: 2026 }, BL1: { league: 78, season: 2026 }, FL1: { league: 61, season: 2026 },
+};
+
+export async function linkAfFixtures(db: Db, api: ApiFootball, code: string) {
+  const { data: comp } = await db.from("competitions").select("id").eq("code_externe", code).maybeSingle();
+  if (!comp) return { linked: 0, pending: 0 };
+  const { data: ms } = await db.from("matches")
+    .select("id, kickoff_at, home:teams!matches_home_team_id_fkey(nom, alias), away:teams!matches_away_team_id_fkey(nom, alias)")
+    .eq("competition_id", comp.id).is("af_fixture_id", null).neq("statut", "termine")
+    .gte("kickoff_at", new Date(Date.now() - 86400000).toISOString()).lte("kickoff_at", new Date(Date.now() + 15 * 86400000).toISOString());
+  if (!ms?.length) return { linked: 0, pending: 0 };
+  const c = AF_LINKED[code];
+  const fx = await api.fixtures(c.league, c.season, iso(new Date(Date.now() - 86400000)), iso(new Date(Date.now() + 15 * 86400000)));
+  type T = { nom: string; alias: string[] };
+  const one = (v: T | T[] | null) => (Array.isArray(v) ? v[0] : v);
+  const sim = (name: string, t: T | null | undefined) => (t ? Math.max(...[t.nom, ...t.alias].map((x) => teamSimilarity(NATION_CANON[name] ?? name, x))) : 0);
+  let linked = 0;
+  const used = new Set<number>();
+  for (const m of ms) {
+    let best: { id: number; score: number } | null = null;
+    for (const f of fx) {
+      if (used.has(f.fixture.id) || Math.abs(Date.parse(f.fixture.date) - Date.parse(m.kickoff_at)) > 4 * 3600000) continue;
+      const sh = sim(f.teams.home.name, one(m.home as T | T[] | null)), sa = sim(f.teams.away.name, one(m.away as T | T[] | null));
+      // les deux équipes doivent se ressembler ; un seul côté suffit si l'autre est sans ambiguïté et l'heure identique
+      const score = Math.min(sh, sa) >= 0.34 ? (sh + sa) / 2 : Math.max(sh, sa) >= 0.99 && f.fixture.date.slice(0, 16) === new Date(m.kickoff_at).toISOString().slice(0, 16) ? 0.6 : 0;
+      if (score >= 0.5 && (!best || score > best.score)) best = { id: f.fixture.id, score };
+    }
+    if (!best) continue;
+    used.add(best.id);
+    const { error } = await db.from("matches").update({ af_fixture_id: best.id }).eq("id", m.id);
+    if (!error) linked++;
+  }
+  return { linked, pending: ms.length - linked };
+}
+
+/** Applique des matchs API-Football (direct ou terminés) aux matchs suivis. Renvoie le nombre de matchs passés à « terminé ». */
+export async function applyFixtures(db: Db, fixtures: AfFixture[]) {
+  if (!fixtures.length) return { updated: 0, finished: 0 };
+  const { data: ms } = await db.from("matches").select("id, af_fixture_id, statut, score_home, score_away, minute").in("af_fixture_id", fixtures.map((f) => f.fixture.id));
+  let updated = 0, finished = 0;
+  const now = new Date().toISOString();
+  for (const m of ms ?? []) {
+    if (m.statut === "termine") continue;
+    const f = fixtures.find((x) => x.fixture.id === m.af_fixture_id)!;
+    const statut = mapStatus(f.fixture.status.short);
+    if (statut === "programme") continue;
+    const done = statut === "termine";
+    const sh = done ? f.score.fulltime.home ?? f.goals.home : f.goals.home, sa = done ? f.score.fulltime.away ?? f.goals.away : f.goals.away;
+    const minute = statut === "en_cours" ? f.fixture.status.elapsed : null;
+    if (m.statut === statut && m.score_home === sh && m.score_away === sa && m.minute === minute) continue;
+    const { error } = await db.from("matches").update({
+      statut, score_home: sh, score_away: sa, minute, live_at: now, updated_at: now,
+      ...(done ? { source_resultat: "api-football", result_at: now } : {}),
+    }).eq("id", m.id);
+    if (error) throw error;
+    updated++; if (done) finished++;
+  }
+  return { updated, finished };
 }

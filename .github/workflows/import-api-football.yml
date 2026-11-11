@@ -2,8 +2,8 @@ name: Matchs API-Football (Afrique, amicaux)
 
 on:
   schedule:
-    # scores et calendrier : toutes les 15 minutes ; cotes de référence : 07:10 UTC
-    - cron: "*/15 * * * *"
+    # calendrier et rattachement au direct : toutes les 3 heures (les scores arrivent par /api/cron/live) ; cotes : 07:10 UTC
+    - cron: "40 */3 * * *"
     - cron: "10 7 * * *"
   workflow_dispatch:
     inputs:

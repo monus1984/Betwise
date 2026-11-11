@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/connexion", "/inscription", "/auth", "/api/health", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
+const PUBLIC_PATHS = ["/connexion", "/inscription", "/auth", "/api/health", "/api/cron", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
 /** Rafraîchit la session Supabase et protège les pages privées. */
 export async function middleware(request: NextRequest) {

@@ -27,7 +27,7 @@ ENUMS = {
 TABLES = {
     "competitions": "id:uuid= code_externe:text? nom:text pays:text? saison:text couverte_auto:bool= created_at:timestamptz=",
     "teams": "id:uuid= code_externe:text? nom:text alias:text[]= competition_id:uuid? created_at:timestamptz=",
-    "matches": "id:uuid= code_externe:text? competition_id:uuid home_team_id:uuid away_team_id:uuid kickoff_at:timestamptz statut:enum:match_status= score_home:int2? score_away:int2? source_resultat:text? result_at:timestamptz? created_at:timestamptz= updated_at:timestamptz=",
+    "matches": "id:uuid= code_externe:text? competition_id:uuid home_team_id:uuid away_team_id:uuid kickoff_at:timestamptz statut:enum:match_status= score_home:int2? score_away:int2? source_resultat:text? result_at:timestamptz? af_fixture_id:int4? minute:int2? live_at:timestamptz? created_at:timestamptz= updated_at:timestamptz=",
     "markets": "code:text libelle_fr:text a_parametre:bool= version:int2=",
     "profiles": "user_id:uuid pseudo:text devise:text= role:text= created_at:timestamptz=",
     "bankrolls": "id:uuid= user_id:uuid capital_initial:numeric= devise:text= active:bool= created_at:timestamptz=",
