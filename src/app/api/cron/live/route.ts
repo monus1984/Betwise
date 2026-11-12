@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { ApiFootball } from "@/lib/api-football/client";
 import { applyFixtures, fillDetails } from "@/lib/api-football/sync";
 import { sendPending } from "@/lib/push/server";
+import { relinkFreeMatches } from "@/lib/bets/relink";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -42,12 +43,16 @@ async function run(req: Request) {
   let details = 0;
   try { details = (await fillDetails(db, api)).filled; } catch { /* réessayé à la minute suivante */ }
 
+  // Paris saisis en « match libre » : rattachés dès que le match existe dans le référentiel, pour être réglés comme les autres
+  let relies = 0;
+  try { relies = (await relinkFreeMatches(db)).relies; } catch { /* réessayé à la minute suivante */ }
+
   let settled: unknown = null;
-  if (a.finished + b.finished + details > 0) { const r = await db.rpc("settle_pending"); settled = r.error ? r.error.message : r.data; }
+  if (a.finished + b.finished + details + relies > 0) { const r = await db.rpc("settle_pending"); settled = r.error ? r.error.message : r.data; }
   // Notifications du direct (but, mi-temps, fin) : envoyées tout de suite, sans attendre la minute suivante
   let notifs = 0;
   try { notifs = (await sendPending(db)).envois; } catch { /* la file sera reprise par tick_notify */ }
-  return NextResponse.json({ ok: true, notifications: notifs, en_direct_monde: live.length, mis_a_jour: a.updated + b.updated, termines: a.finished + b.finished, details_completes: details, reglement: settled, requetes: api.calls });
+  return NextResponse.json({ ok: true, notifications: notifs, en_direct_monde: live.length, mis_a_jour: a.updated + b.updated, termines: a.finished + b.finished, details_completes: details, matchs_rattaches: relies, reglement: settled, requetes: api.calls });
 }
 export const POST = run;
 export const GET = run;

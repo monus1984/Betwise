@@ -415,7 +415,7 @@ export async function extractTickets(db: Db, input: { images?: LlmImage[]; text?
   return out;
 }
 
-const canon = (name: string) => ABBR[name.toLowerCase().replace(/[.’']/g, "").trim()] ?? name;
+export const canon = (name: string) => ABBR[name.toLowerCase().replace(/[.’']/g, "").trim()] ?? name;
 
 /** Match d'une équipe nommée seule (pronos de tipster) : le plus proche de la date de publication, à venir de préférence. */
 function bestMatchOne(teamRaw: string, pool: Parameters<typeof bestMatch>[2], refIso: string) {
