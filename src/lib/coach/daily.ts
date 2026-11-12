@@ -67,6 +67,13 @@ export async function generateDailyPicks(db: Db, parCategorie = 3, refaire = fal
         cote_annoncee: c.cote ?? coteJuste, probabilite_annoncee: Math.round(c.p * 10000) / 10000, risque_annonce: RISK[c.cat], published_at: new Date().toISOString(),
       }).select("id").maybeSingle();
       predictionId = pr?.id ?? null;
+      if (!predictionId) {
+        // même sélection déjà publiée puis annulée lors d'un remplacement : on la réactive plutôt que d'en créer une autre
+        let q = db.from("predictions").select("id").eq("source_id", src.id).eq("match_id", c.match_id).eq("market_code", c.market).eq("selection", c.sel);
+        q = c.param === null ? q.is("market_param", null) : q.eq("market_param", c.param);
+        const { data: ex } = await q.order("logged_at", { ascending: false }).limit(1).maybeSingle();
+        if (ex) { await db.from("predictions").update({ statut: "verifie" }).eq("id", ex.id); predictionId = ex.id; }
+      }
     }
     const { error } = await db.from("daily_picks").insert({
       jour, match_id: c.match_id, market_code: c.market, market_param: c.param, selection: c.sel, categorie: c.cat, rang: c.rang,
