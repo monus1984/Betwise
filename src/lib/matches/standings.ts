@@ -5,5 +5,5 @@ export type StandingRow = { comp_code: string; groupe: string; af_team_id: numbe
 /** Garde la dernière mise à jour de chaque équipe (une ligne d'un ancien découpage en groupes peut subsister en base). */
 export function latestStandings(rows: StandingRow[]): StandingRow[] {
   const max = rows.reduce((x, r) => Math.max(x, Date.parse(r.updated_at)), 0);
-  return rows.filter((r) => max - Date.parse(r.updated_at) < 30 * 60000);
+  return rows.filter((r) => max - Date.parse(r.updated_at) < 60000);
 }
