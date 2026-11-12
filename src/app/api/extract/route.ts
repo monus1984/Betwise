@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prepareTicketImage } from "@/lib/extract/image";
-import { extractTicket, parseCouponLink } from "@/lib/extract/ticket";
+import { extractTickets, parseCouponLink } from "@/lib/extract/ticket";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
   let images, storagePath: string | null = null, truncated = false;
   if (file) {
-    if (files.length > 8) return NextResponse.json({ error: "8 captures maximum pour un même ticket" }, { status: 400 });
+    if (files.length > 8) return NextResponse.json({ error: "8 captures maximum par envoi" }, { status: 400 });
     const total = files.reduce((a, f) => a + f.size, 0);
     if (total > MAX_BYTES * 2) return NextResponse.json({ error: "Images trop lourdes (16 Mo max au total)" }, { status: 413 });
     images = [];
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       images.push(...prep.images);
       truncated = truncated || prep.truncated;
     }
-    if (images.length > 10) { images = images.slice(0, 10); truncated = true; }
+    if (images.length > 16) { images = images.slice(0, 16); truncated = true; } // 8 écrans de téléphone récent = 16 morceaux
 
     // Conservation de la première tuile seulement (pas l'original : il peut contenir le solde du compte)
     storagePath = `${user.id}/${Date.now()}.jpg`;
@@ -50,17 +50,23 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const result = await extractTicket(supabase, { images, text: text || undefined });
-    if (coupon && !result.raw.coupon_code) result.raw.coupon_code = coupon.code;
-    if (coupon && !result.raw.bookmaker) result.raw.bookmaker = coupon.bookmaker;
+    const tickets = await extractTickets(supabase, { images, text: text || undefined });
+    if (coupon && tickets.length === 1) {
+      if (!tickets[0].raw.coupon_code) tickets[0].raw.coupon_code = coupon.code;
+      if (!tickets[0].raw.bookmaker) tickets[0].raw.bookmaker = coupon.bookmaker;
+    }
 
-    const { data: up } = await supabase
-      .from("uploads")
-      .insert({ user_id: user.id, storage_path: storagePath ?? "(texte)", kind: "ticket", json_extrait: JSON.parse(JSON.stringify(result.raw)), confiance: { selections: result.selections.map((s) => s.confidence), checks: result.checks, usage: result.usage } })
-      .select("id")
-      .single();
-
-    return NextResponse.json({ ...result, upload_id: up?.id ?? null, truncated });
+    // Une ligne d'upload par ticket lu (même image source), pour tracer chaque import
+    const out = [];
+    for (const t of tickets) {
+      const { data: up } = await supabase
+        .from("uploads")
+        .insert({ user_id: user.id, storage_path: storagePath ?? "(texte)", kind: "ticket", json_extrait: JSON.parse(JSON.stringify(t.raw)), confiance: { selections: t.selections.map((s) => s.confidence), checks: t.checks, usage: t.usage, tickets_dans_l_envoi: tickets.length } })
+        .select("id")
+        .single();
+      out.push({ ...t, upload_id: up?.id ?? null, truncated });
+    }
+    return NextResponse.json({ tickets: out });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     const status = msg.includes("ANTHROPIC_API_KEY") ? 503 : 500;

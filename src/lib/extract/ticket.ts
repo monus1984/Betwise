@@ -81,10 +81,20 @@ const SCHEMA = {
   },
 } as const;
 
+/** Plusieurs tickets possibles dans un même envoi (vidéo d'écran, liste « Mes paris », captures mélangées). */
+const SCHEMA_MULTI = {
+  type: "object",
+  additionalProperties: false,
+  required: ["tickets"],
+  properties: { tickets: { type: "array", description: "Un élément par ticket distinct, dans l'ordre d'apparition", items: SCHEMA } },
+} as const;
+const rawMulti = z.object({ tickets: z.array(rawTicket).min(1) });
+
 const SYSTEM = `Tu lis des tickets de paris sportifs (captures d'écran ou texte) d'applications de bookmakers utilisées en Côte d'Ivoire : Betclic, 1xBet, Premier Bet, Betway, etc.
 Tu copies ce qui est affiché, tu n'inventes rien et tu ne calcules rien. Si une information n'est pas visible, renvoie null.
 Conventions : l'équipe à gauche du score est à domicile, celle à droite à l'extérieur. Un nom de sélection en vert avec une coche signifie gagnée, en rouge avec une croix perdue. Les cotes utilisent la virgule décimale en français : "1,47" vaut 1.47. Les montants "5 000 F" valent 5000.
-Pour un combiné, une ligne par sélection, dans l'ordre affiché. Si le ticket est replié (pas de détail des lignes), selections est vide et is_collapsed vaut true.`;
+Pour un combiné, une ligne par sélection, dans l'ordre affiché. Si le ticket est replié (pas de détail des lignes), selections est vide et is_collapsed vaut true.
+Plusieurs tickets peuvent apparaître : chacun a son en-tête (type, nombre de sélections) et son pied (mise, cote totale, gains, horodatage). Ne fusionne jamais deux tickets : un élément de tickets par ticket distinct. Une sélection n'appartient qu'à un ticket.`;
 
 // ---------- Normalisation marché / sélection ----------
 export type NormalizedSelection = {
@@ -190,15 +200,16 @@ export type ExtractedTicket = {
   usage: { tokensIn: number; tokensOut: number; model: string };
 };
 
-export async function extractTicket(db: Db, input: { images?: LlmImage[]; text?: string }): Promise<ExtractedTicket> {
+export async function extractTickets(db: Db, input: { images?: LlmImage[]; text?: string }): Promise<ExtractedTicket[]> {
   const llm = getLlm();
-  const user = input.images?.length
-    ? (input.images.length > 1
-        ? `Ces ${input.images.length} images sont les morceaux d'UN SEUL ticket de pari, dans l'ordre de haut en bas (captures successives ou découpage d'une capture longue), avec de possibles chevauchements : une sélection visible deux fois à une jonction ne compte qu'une fois. Remplis une seule structure pour l'ensemble, en copiant les libellés tels quels.`
-        : "Lis ce ticket de pari et remplis la structure. Copie les libellés tels quels.")
-    : `Lis ce ticket de pari partagé en texte et remplis la structure. Copie les libellés tels quels.\n\n${input.text ?? ""}`;
-  const res = await llm.extract({ system: SYSTEM, user, images: input.images, schema: SCHEMA as unknown as Record<string, unknown>, maxTokens: 4096 });
-  const raw = rawTicket.parse(res.json);
+  const n = input.images?.length ?? 0;
+  const user = n
+    ? (n > 1
+        ? `Ces ${n} images se suivent dans l'ordre (captures successives, morceaux d'une capture longue ou images d'une vidéo d'écran qui défile), avec des chevauchements : une sélection visible deux fois à une jonction ne compte qu'une fois. Elles peuvent contenir un ou plusieurs tickets. Remplis un élément de tickets par ticket distinct, en copiant les libellés tels quels.`
+        : "Lis le ou les tickets de pari de cette image et remplis un élément de tickets par ticket. Copie les libellés tels quels.")
+    : `Lis le ou les tickets de pari partagés en texte et remplis un élément de tickets par ticket. Copie les libellés tels quels.\n\n${input.text ?? ""}`;
+  const res = await llm.extract({ system: SYSTEM, user, images: input.images, schema: SCHEMA_MULTI as unknown as Record<string, unknown>, maxTokens: 8192 });
+  const raws = rawMulti.parse(res.json).tickets.slice(0, 6);
 
   // Fenêtre de recherche des matchs : ±10 jours autour d'aujourd'hui (les tickets importés sont récents)
   const from = new Date(Date.now() - 10 * 86400000).toISOString();
@@ -210,27 +221,28 @@ export async function extractTicket(db: Db, input: { images?: LlmImage[]; text?:
   type M = { id: string; kickoff_at: string; score_home: number | null; score_away: number | null; home: { nom: string; alias: string[] } | null; away: { nom: string; alias: string[] } | null; competition: { code_externe: string | null } | null };
   const matches = ((pool ?? []) as unknown as M[]).filter((x) => x.home && x.away);
 
-  const selections: MatchedSelection[] = raw.selections.map((s) => {
-    const norm = normalizePick(s.market_text, s.pick_text, s.home_team, s.away_team);
-    const best = bestMatch(s.home_team, s.away_team, matches);
-    const scoreDb = best && best.score_home !== null ? `${best.score_home}-${best.score_away}` : null;
-    const scoreTicket = s.score ? s.score.replace(/\s/g, "") : null;
-    return {
-      ...norm,
-      home_team: s.home_team, away_team: s.away_team, odds: s.odds, outcome: s.outcome, score: s.score, confidence: s.confidence,
-      match: best ? { id: best.id, home: best.home!.nom, away: best.away!.nom, kickoff_at: best.kickoff_at, competition: best.competition?.code_externe ?? "", score: scoreDb } : null,
-      score_consistent: scoreDb && scoreTicket ? scoreDb === scoreTicket : null,
+  return raws.map((raw, k) => {
+    const selections: MatchedSelection[] = raw.selections.map((s) => {
+      const norm = normalizePick(s.market_text, s.pick_text, s.home_team, s.away_team);
+      const best = bestMatch(s.home_team, s.away_team, matches);
+      const scoreDb = best && best.score_home !== null ? `${best.score_home}-${best.score_away}` : null;
+      const scoreTicket = s.score ? s.score.replace(/\s/g, "") : null;
+      return {
+        ...norm,
+        home_team: s.home_team, away_team: s.away_team, odds: s.odds, outcome: s.outcome, score: s.score, confidence: s.confidence,
+        match: best ? { id: best.id, home: best.home!.nom, away: best.away!.nom, kickoff_at: best.kickoff_at, competition: best.competition?.code_externe ?? "", score: scoreDb } : null,
+        score_consistent: scoreDb && scoreTicket ? scoreDb === scoreTicket : null,
+      };
+    });
+    const odds = selections.map((s) => s.odds).filter((o): o is number => !!o && o > 1);
+    const product = odds.length ? odds.reduce((a, b) => a * b, 1) : null;
+    const checks = {
+      odds_product_ok: product && raw.total_odds ? Math.abs(product - raw.total_odds) <= 0.02 * Math.max(1, raw.total_odds / 10) : null,
+      count_ok: raw.nb_selections_declared !== null && !raw.is_collapsed ? raw.selections.length === raw.nb_selections_declared : null,
     };
+    // Coût de l'appel compté une fois, sur le premier ticket
+    return { raw, selections, checks, placed_at_iso: parseFrDate(raw.placed_at), usage: { tokensIn: k ? 0 : res.tokensIn, tokensOut: k ? 0 : res.tokensOut, model: res.model } };
   });
-
-  const odds = selections.map((s) => s.odds).filter((o): o is number => !!o && o > 1);
-  const product = odds.length ? odds.reduce((a, b) => a * b, 1) : null;
-  const checks = {
-    odds_product_ok: product && raw.total_odds ? Math.abs(product - raw.total_odds) <= 0.02 * Math.max(1, raw.total_odds / 10) : null,
-    count_ok: raw.nb_selections_declared !== null && !raw.is_collapsed ? raw.selections.length === raw.nb_selections_declared : null,
-  };
-
-  return { raw, selections, checks, placed_at_iso: parseFrDate(raw.placed_at), usage: { tokensIn: res.tokensIn, tokensOut: res.tokensOut, model: res.model } };
 }
 
 function bestMatch(home: string | null, away: string | null, pool: { id: string; kickoff_at: string; score_home: number | null; score_away: number | null; home: { nom: string; alias: string[] } | null; away: { nom: string; alias: string[] } | null; competition: { code_externe: string | null } | null }[]) {

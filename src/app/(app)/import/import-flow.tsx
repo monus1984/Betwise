@@ -31,6 +31,8 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Extracted | null>(null);
+  const [queue, setQueue] = useState<Extracted[]>([]);   // tickets lus dans le même envoi, en attente
+  const [done, setDone] = useState<{ n: number; total: number } | null>(null);
   const [coupon, setCoupon] = useState<CouponOnly["coupon"] | null>(null);
   const [lines, setLines] = useState<Line[]>([]);
   const [mise, setMise] = useState("");
@@ -77,17 +79,33 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function load(t: Extracted) {
+    setResult(t);
+    setLines(t.selections.map((s, i) => ({ ...s, key: i, origin: lines[0]?.origin ?? defaultOrigin, coteStr: s.odds ? String(s.odds) : "", include: true })));
+    setMise(t.raw.stake ? String(t.raw.stake) : test ? "1000" : "");
+    setStatus(t.raw.status === "won" ? "gagne" : t.raw.status === "lost" ? "perdu" : t.raw.status === "void" ? "rembourse" : "en_cours");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  /** Ticket suivant du même envoi, ou fin. */
+  function next(saved: boolean) {
+    const total = done?.total ?? 1;
+    const n = (done?.n ?? 0) + (saved ? 1 : 0);
+    if (queue.length) { setDone({ n, total }); load(queue[0]); setQueue(queue.slice(1)); return true; }
+    setDone(total > 1 ? { n, total } : null);
+    return false;
+  }
+
   async function run(fd: FormData) {
     setBusy(true); setError(null); setResult(null);
     try {
       const r = await fetch("/api/extract", { method: "POST", body: fd });
-      const j = (await r.json()) as Extracted | CouponOnly | { error: string };
+      const j = (await r.json()) as { tickets: Extracted[] } | CouponOnly | { error: string };
       if ("error" in j) { setError(j.error); return; }
       if ("coupon_only" in j) { setCoupon(j.coupon); setError(null); return; }
-      setResult(j);
-      setLines(j.selections.map((s, i) => ({ ...s, key: i, origin: defaultOrigin, coteStr: s.odds ? String(s.odds) : "", include: true })));
-      setMise(j.raw.stake ? String(j.raw.stake) : "");
-      setStatus(j.raw.status === "won" ? "gagne" : j.raw.status === "lost" ? "perdu" : j.raw.status === "void" ? "rembourse" : "en_cours");
+      if (!j.tickets.length) { setError("Aucun ticket lisible."); return; }
+      setDone(j.tickets.length > 1 ? { n: 0, total: j.tickets.length } : null);
+      load(j.tickets[0]);
+      setQueue(j.tickets.slice(1));
     } catch {
       setError("Connexion impossible. Réessaie.");
     } finally {
@@ -159,6 +177,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
         })),
       });
       if (!res.ok) { setError(res.error); return; }
+      if (next(true)) return;
       router.push(test ? "/paris?vue=tests&ajout=1" : "/import?ok=1&next=" + (status === "en_cours" ? "paris" : "regles"));
     });
   }
@@ -201,6 +220,12 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
         <button type="button" role="radio" aria-checked={!test} onClick={() => setTest(false)} className={`rounded-lg py-2 ${!test ? "bg-white shadow-card" : "text-ink-muted"}`}>J’ai parié</button>
         <button type="button" role="radio" aria-checked={test} onClick={() => { setTest(true); if (!toNum(mise)) setMise("1000"); }} className={`rounded-lg py-2 ${test ? "bg-white shadow-card" : "text-ink-muted"}`}>Tester sans miser</button>
       </div>
+      {done && (
+        <div className="flex items-center justify-between rounded-xl border border-brand/30 bg-brand/5 px-3 py-2.5 text-sm">
+          <span><b>Ticket {done.total - queue.length} sur {done.total}</b>{done.n > 0 && <span className="text-ink-muted"> · {done.n} déjà enregistré{done.n > 1 ? "s" : ""}</span>}</span>
+          {queue.length > 0 && <button type="button" onClick={() => next(false)} className="text-xs font-medium text-brand">Passer ›</button>}
+        </div>
+      )}
       {videoNote && <Notice kind="info">{videoNote}</Notice>}
       {test && <Notice kind="info">Coupon ou pronos chargés comme test : suivis et réglés automatiquement, sans toucher à ta bankroll. Choisis bien l’origine (toi ou le tipster) : c’est elle qui sera notée.</Notice>}
       <section className="rounded-xl border border-slate-200 bg-white p-4">
@@ -209,7 +234,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
             <p className="text-sm font-semibold">{raw.bookmaker ?? "Bookmaker inconnu"} · {raw.ticket_type === "combo" ? `Combiné (${raw.nb_selections_declared ?? lines.length})` : "Simple"}</p>
             <p className="text-xs text-slate-500">{raw.placed_at ? `Ticket du ${raw.placed_at}` : "Date du ticket non lue"}{raw.coupon_code ? ` · coupon ${raw.coupon_code}` : ""}</p>
           </div>
-          <button className="text-xs text-slate-600 underline" onClick={() => { setResult(null); setLines([]); }}>Recommencer</button>
+          <button className="text-xs text-slate-600 underline" onClick={() => { setResult(null); setLines([]); setQueue([]); setDone(null); }}>Recommencer</button>
         </div>
         {result.truncated && <Notice>Capture trop longue : seules les premières lignes ont été lues. Vérifie et complète.</Notice>}
         {raw.notes && <p className="mt-2 text-xs text-amber-800">{raw.notes}</p>}
@@ -275,7 +300,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
       </section>
 
       {error && <Notice>{error}</Notice>}
-      <Button onClick={save} disabled={pending || !ready}>{pending ? "Enregistrement…" : test ? "Enregistrer le test" : "Enregistrer ce ticket"}</Button>
+      <Button onClick={save} disabled={pending || !ready}>{pending ? "Enregistrement…" : `${test ? "Enregistrer le test" : "Enregistrer ce ticket"}${queue.length ? " et passer au suivant" : ""}`}</Button>
     </div>
   );
 }
