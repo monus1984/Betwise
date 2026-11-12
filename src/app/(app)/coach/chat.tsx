@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Notice } from "@/components/ui";
+import { pickVoice, spoken } from "@/lib/coach/voice";
 
 export type ChatMsg = { id?: string; role: "user" | "assistant"; text: string; fonctions?: string[] };
 
@@ -29,6 +30,7 @@ export function CoachChat({ initialId, initial, suggestions }: { initialId: stri
   useEffect(() => {
     setCanListen(!!recCtor());
     setCanSpeak("speechSynthesis" in window);
+    try { window.speechSynthesis?.getVoices(); } catch { /* la liste des voix se charge en arrière-plan */ }
     try { const on = localStorage.getItem("betwise.coach.voix") === "1"; setVoiceOut(on); voiceOutRef.current = on; } catch { /* ignore */ }
     return () => { try { rec.current?.abort(); window.speechSynthesis?.cancel(); } catch { /* ignore */ } };
   }, []);
@@ -144,21 +146,19 @@ function recCtor(): (new () => SpeechRec) | null {
 function unlockSpeech() {
   try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; window.speechSynthesis.speak(u); } catch { /* ignore */ }
 }
-/** Texte prêt à être lu : sans mise en forme, chiffres et unités dits naturellement. */
-export function spoken(text: string) {
-  return text.replace(/\*\*/g, "").replace(/^\s*[-•*]\s+/gm, "").replace(/^#+\s*/gm, "")
-    .replace(/(\d)[\u202f\u00a0 ](\d{3})\b/g, "$1$2").replace(/\bF CFA\b|\bFCFA\b/g, "francs").replace(/(\d)\s?F\b/g, "$1 francs")
-    .replace(/(\d),(\d)/g, "$1 virgule $2").replace(/\s?%/g, " pour cent").replace(/–|—/g, ", ").replace(/\n+/g, ". ").replace(/\s+/g, " ").trim();
-}
+/** Phrases courtes dites une à une : le débit respire mieux qu'un bloc lu d'une traite. */
 function speak(text: string) {
   try {
     const synth = window.speechSynthesis; if (!synth) return;
     synth.cancel();
-    const u = new SpeechSynthesisUtterance(spoken(text));
-    u.lang = "fr-FR"; u.rate = 1.02;
-    const v = synth.getVoices().find((x) => x.lang?.toLowerCase().startsWith("fr"));
-    if (v) u.voice = v;
-    synth.speak(u);
+    const voice = pickVoice(synth.getVoices());
+    const parts = spoken(text).split(/(?<=[.!?:])\s+/).map((x) => x.trim()).filter(Boolean);
+    for (const part of parts) {
+      const u = new SpeechSynthesisUtterance(part);
+      u.lang = voice?.lang ?? "fr-FR"; u.rate = 1.08; u.pitch = 1.12; // un peu plus vif et plus clair que le réglage d'usine
+      if (voice) u.voice = voice as SpeechSynthesisVoice;
+      synth.speak(u);
+    }
   } catch { /* ignore */ }
 }
 
