@@ -8,6 +8,7 @@ import { loadDashboard, type Group } from "@/lib/stats/dashboard";
 import { createClient } from "@/lib/supabase/server";
 import { loadGoal } from "@/lib/coach/goal";
 import { jourAbidjan } from "@/lib/coach/daily";
+import { NotificationsCard } from "@/components/notifications-card";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +33,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
     supabase.from("source_follows").select("source_id, source:sources(id, nom, type)").eq("user_id", user!.id),
   ]);
   const solde = Number(summary?.solde ?? 0), exposition = Number(summary?.exposition ?? 0);
-  const [goal, { count: nbCoups }] = await Promise.all([loadGoal(supabase, solde), supabase.from("daily_picks").select("id", { count: "exact", head: true }).eq("jour", jourAbidjan())]);
+  const [goal, { count: nbCoups }, { data: np }] = await Promise.all([loadGoal(supabase, solde), supabase.from("daily_picks").select("id", { count: "exact", head: true }).eq("jour", jourAbidjan()), supabase.from("notification_prefs").select("resultats, coup_envoi, coups_du_jour, sources").maybeSingle()]);
   const ids = (follows ?? []).map((f) => f.source_id);
   const [{ data: trends }, { data: metrics }] = ids.length
     ? await Promise.all([
@@ -166,6 +167,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
         </form>
         <p className="mt-2 text-xs text-ink-muted">Le solde part de 0 : enregistre ton capital de départ comme premier dépôt.</p>
       </details>
+
+      <NotificationsCard prefs={{ resultats: np?.resultats ?? true, coup_envoi: np?.coup_envoi ?? true, coups_du_jour: np?.coups_du_jour ?? true, sources: np?.sources ?? true }} />
 
       <section className="mt-3 grid grid-cols-2 gap-2">
         <Link href="/coach?v=discussion" className="rounded-xl border border-line bg-white p-3 text-sm font-medium active:bg-surface-2">💬 Demander au Coach</Link>

@@ -1065,6 +1065,123 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+          user_agent: string | null
+          created_at: string
+          last_ok_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+          user_agent?: string | null
+          created_at?: string
+          last_ok_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          endpoint?: string
+          p256dh?: string
+          auth?: string
+          user_agent?: string | null
+          created_at?: string
+          last_ok_at?: string | null
+        }
+        Relationships: []
+      }
+      notification_prefs: {
+        Row: {
+          user_id: string
+          resultats: boolean
+          coup_envoi: boolean
+          coups_du_jour: boolean
+          sources: boolean
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          resultats?: boolean
+          coup_envoi?: boolean
+          coups_du_jour?: boolean
+          sources?: boolean
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          resultats?: boolean
+          coup_envoi?: boolean
+          coups_du_jour?: boolean
+          sources?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          cle: string
+          titre: string
+          corps: string
+          url: string
+          created_at: string
+          sent_at: string | null
+          lu_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          cle: string
+          titre: string
+          corps: string
+          url?: string
+          created_at?: string
+          sent_at?: string | null
+          lu_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: string
+          cle?: string
+          titre?: string
+          corps?: string
+          url?: string
+          created_at?: string
+          sent_at?: string | null
+          lu_at?: string | null
+        }
+        Relationships: []
+      }
+      app_secrets: {
+        Row: {
+          name: string
+          value: Json
+          created_at: string
+        }
+        Insert: {
+          name: string
+          value: Json
+          created_at?: string
+        }
+        Update: {
+          name?: string
+          value?: Json
+          created_at?: string
+        }
+        Relationships: []
+      }
       daily_picks: {
         Row: {
           id: string

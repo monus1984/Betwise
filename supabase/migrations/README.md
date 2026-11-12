@@ -32,3 +32,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0022_update_bet_test_fingerprint.sql | 2026-11-12 | `update_bet` garde le préfixe de test dans l'empreinte d'un ticket de test |
 | 0023_more_markets.sql | 2026-11-12 | Marchés de mi-temps, 2e mi-temps, mi-temps/fin, pair/impair, tranches de buts, handicap européen, gagne sans encaisser ; `matches.ht_home/ht_away` ; règlement étendu |
 | 0024_stats_markets.sql | 2026-11-12 | Corners, cartons, tirs, buteurs, prolongation / tirs au but / qualification, score exact mi-temps ; `matches.details` ; `settle_sel` (règlement sur la fiche complète) ; `tick_live` complète le détail après le match |
+| 0025_notifications.sql | 2026-11-12 | Notifications push : `push_subscriptions`, `notification_prefs`, `notifications` (file d'attente), `app_secrets` ; déclencheurs (pari réglé, prono d'une source suivie), `tick_notify()` chaque minute |
