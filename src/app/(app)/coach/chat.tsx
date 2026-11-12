@@ -19,6 +19,43 @@ export function CoachChat({ initialId, initial, suggestions }: { initialId: stri
   const [err, setErr] = useState<string | null>(null);
   const [left, setLeft] = useState<number | null>(null);
   const end = useRef<HTMLDivElement>(null);
+  // Voix : dictée de la question (reconnaissance vocale du téléphone) et lecture des réponses à voix haute
+  const [listening, setListening] = useState(false);
+  const [voiceOut, setVoiceOut] = useState(false);
+  const [canListen, setCanListen] = useState(false);
+  const [canSpeak, setCanSpeak] = useState(false);
+  const rec = useRef<SpeechRec | null>(null);
+  const voiceOutRef = useRef(false);
+  useEffect(() => {
+    setCanListen(!!recCtor());
+    setCanSpeak("speechSynthesis" in window);
+    try { const on = localStorage.getItem("betwise.coach.voix") === "1"; setVoiceOut(on); voiceOutRef.current = on; } catch { /* ignore */ }
+    return () => { try { rec.current?.abort(); window.speechSynthesis?.cancel(); } catch { /* ignore */ } };
+  }, []);
+  function setVoice(on: boolean) {
+    setVoiceOut(on); voiceOutRef.current = on;
+    try { localStorage.setItem("betwise.coach.voix", on ? "1" : "0"); } catch { /* ignore */ }
+    if (on) unlockSpeech(); else window.speechSynthesis?.cancel();
+  }
+  function listen() {
+    const Ctor = recCtor();
+    if (!Ctor || busy) return;
+    if (listening) { rec.current?.stop(); return; }
+    window.speechSynthesis?.cancel();
+    unlockSpeech(); // sur iPhone, la lecture à voix haute doit être autorisée par un geste
+    const r = new Ctor();
+    r.lang = "fr-FR"; r.interimResults = true; r.continuous = false;
+    let final = "";
+    r.onresult = (e) => {
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) { const t = e.results[i][0].transcript; if (e.results[i].isFinal) final += t; else interim += t; }
+      setText((final + interim).trim());
+    };
+    r.onerror = (e) => { setListening(false); if (e.error === "not-allowed" || e.error === "service-not-allowed") setErr("Micro refusé : autorise le micro pour BETWISE dans les réglages du navigateur."); else if (e.error !== "aborted" && e.error !== "no-speech") setErr("La dictée n’a pas fonctionné. Réessaie ou écris ta question."); };
+    r.onend = () => { setListening(false); const q = final.trim(); if (q) { if (!voiceOutRef.current) setVoice(true); send(q); } };
+    rec.current = r; setErr(null); setListening(true);
+    try { r.start(); } catch { setListening(false); }
+  }
   useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [msgs, busy]);
 
   async function send(q: string) {
@@ -32,6 +69,7 @@ export function CoachChat({ initialId, initial, suggestions }: { initialId: stri
       if (j.conversationId) setId(j.conversationId);
       if (!r.ok) { setErr(j.error ?? "Erreur."); return; }
       setMsgs((m) => [...m, { id: j.reply.id, role: "assistant", text: j.reply.text, fonctions: j.reply.fonctions }]);
+      if (voiceOutRef.current) speak(j.reply.text);
       if (typeof j.restant === "number") setLeft(j.restant);
     } catch {
       setErr("Pas de connexion. Réessaie.");
@@ -42,11 +80,14 @@ export function CoachChat({ initialId, initial, suggestions }: { initialId: stri
 
   return (
     <div className="pb-28">
-      {msgs.length > 0 && (
-        <div className="mb-3 flex justify-end">
-          <Link href="/coach?nouvelle=1" className="text-xs text-slate-600 underline">Nouvelle conversation</Link>
-        </div>
-      )}
+      <div className="mb-3 flex items-center justify-between gap-3">
+        {canSpeak ? (
+          <button type="button" onClick={() => setVoice(!voiceOut)} aria-pressed={voiceOut} className={`rounded-full border px-3 py-1 text-xs font-medium ${voiceOut ? "border-brand bg-brand text-white" : "border-line bg-white text-ink-soft"}`}>
+            {voiceOut ? "🔊 Réponses à voix haute" : "🔈 Voix coupée"}
+          </button>
+        ) : <span />}
+        {msgs.length > 0 && <Link href="/coach?nouvelle=1" className="text-xs text-slate-600 underline">Nouvelle conversation</Link>}
+      </div>
 
       {msgs.length === 0 && (
         <div className="mb-4 space-y-2">
@@ -62,7 +103,8 @@ export function CoachChat({ initialId, initial, suggestions }: { initialId: stri
         {msgs.map((m, i) => (
           <div key={m.id ?? i} className={m.role === "user" ? "flex justify-end" : ""}>
             <div className={m.role === "user" ? "max-w-[85%] rounded-2xl rounded-br-sm bg-slate-900 px-3.5 py-2.5 text-sm text-white" : "rounded-2xl rounded-bl-sm border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800"}>
-              {m.role === "assistant" ? <Rich text={m.text} /> : m.text}
+              {m.role === "assistant" ? <Rich text={m.text || "Réponse vide : repose ta question."} /> : m.text}
+              {m.role === "assistant" && canSpeak && !!m.text && <button type="button" onClick={() => speak(m.text)} className="mt-1.5 text-[11px] font-medium text-brand">🔊 Écouter</button>}
               {m.role === "assistant" && !!m.fonctions?.length && (
                 <p className="mt-2 border-t border-slate-100 pt-1.5 text-[11px] text-slate-400">Données consultées : {[...new Set(m.fonctions)].map((f) => FN_LABEL[f] ?? f).join(", ")}</p>
               )}
@@ -76,7 +118,11 @@ export function CoachChat({ initialId, initial, suggestions }: { initialId: stri
 
       <form onSubmit={(e) => { e.preventDefault(); send(text); }} className="fixed inset-x-0 bottom-16 z-10 border-t border-slate-200 bg-slate-50/95 px-4 py-2 backdrop-blur" style={{ marginBottom: "env(safe-area-inset-bottom)" }}>
         <div className="mx-auto flex max-w-xl items-end gap-2">
-          <textarea value={text} onChange={(e) => setText(e.target.value)} rows={1} maxLength={1500} placeholder="Pose ta question…"
+          {canListen && (
+            <button type="button" onClick={listen} disabled={busy} aria-label={listening ? "Arrêter la dictée" : "Poser la question à la voix"} aria-pressed={listening}
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-lg disabled:opacity-40 ${listening ? "animate-pulse border-loss bg-loss text-white" : "border-slate-300 bg-white"}`}>🎙️</button>
+          )}
+          <textarea value={text} onChange={(e) => setText(e.target.value)} rows={1} maxLength={1500} placeholder={listening ? "Je t’écoute…" : "Pose ta question…"}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(text); } }}
             className="max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-base" />
           <button type="submit" disabled={busy || !text.trim()} className="h-11 rounded-xl bg-slate-900 px-4 text-sm font-medium text-white disabled:opacity-40">Envoyer</button>
@@ -85,6 +131,35 @@ export function CoachChat({ initialId, initial, suggestions }: { initialId: stri
       </form>
     </div>
   );
+}
+
+// ----- Voix (API du navigateur : rien n'est envoyé à un service tiers par BETWISE) -----
+type SpeechRecEvent = { resultIndex: number; results: { length: number; [i: number]: { isFinal: boolean; 0: { transcript: string } } } };
+type SpeechRec = { lang: string; interimResults: boolean; continuous: boolean; start(): void; stop(): void; abort(): void; onresult: ((e: SpeechRecEvent) => void) | null; onerror: ((e: { error: string }) => void) | null; onend: (() => void) | null };
+function recCtor(): (new () => SpeechRec) | null {
+  if (typeof window === "undefined") return null;
+  const w = window as unknown as { SpeechRecognition?: new () => SpeechRec; webkitSpeechRecognition?: new () => SpeechRec };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
+function unlockSpeech() {
+  try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; window.speechSynthesis.speak(u); } catch { /* ignore */ }
+}
+/** Texte prêt à être lu : sans mise en forme, chiffres et unités dits naturellement. */
+export function spoken(text: string) {
+  return text.replace(/\*\*/g, "").replace(/^\s*[-•*]\s+/gm, "").replace(/^#+\s*/gm, "")
+    .replace(/(\d)[\u202f\u00a0 ](\d{3})\b/g, "$1$2").replace(/\bF CFA\b|\bFCFA\b/g, "francs").replace(/(\d)\s?F\b/g, "$1 francs")
+    .replace(/(\d),(\d)/g, "$1 virgule $2").replace(/\s?%/g, " pour cent").replace(/–|—/g, ", ").replace(/\n+/g, ". ").replace(/\s+/g, " ").trim();
+}
+function speak(text: string) {
+  try {
+    const synth = window.speechSynthesis; if (!synth) return;
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(spoken(text));
+    u.lang = "fr-FR"; u.rate = 1.02;
+    const v = synth.getVoices().find((x) => x.lang?.toLowerCase().startsWith("fr"));
+    if (v) u.voice = v;
+    synth.speak(u);
+  } catch { /* ignore */ }
 }
 
 /** Rendu minimal : paragraphes, listes « - », gras **…**. Pas de HTML injecté. */

@@ -88,7 +88,18 @@ class ClaudeProvider implements LlmProvider {
       tokensIn += res.usage.input_tokens; tokensOut += res.usage.output_tokens; model = res.model;
       const uses = res.content.filter((c): c is Anthropic.ToolUseBlock => c.type === "tool_use");
       if (res.stop_reason !== "tool_use" || uses.length === 0) {
-        const text = res.content.filter((c): c is Anthropic.TextBlock => c.type === "text").map((c) => c.text).join("\n").trim();
+        let text = res.content.filter((c): c is Anthropic.TextBlock => c.type === "text").map((c) => c.text).join("\n").trim();
+        // Réponse vide (budget de sortie épuisé avant le texte, par exemple) : une seconde tentative, sans outil et avec plus de marge
+        if (!text) {
+          console.warn("llm.chat: réponse sans texte", { stop: res.stop_reason, blocs: res.content.map((c) => c.type), sortie: res.usage.output_tokens, tour: round });
+          const again = await this.client.messages.create({
+            model: MODELS.analyze, max_tokens: Math.max(3000, (call.maxTokens ?? 1500) * 2), system: call.system, messages,
+            tools: call.tools as Anthropic.Tool[], tool_choice: { type: "none" },
+          });
+          tokensIn += again.usage.input_tokens; tokensOut += again.usage.output_tokens;
+          text = again.content.filter((c): c is Anthropic.TextBlock => c.type === "text").map((c) => c.text).join("\n").trim();
+        }
+        if (!text) text = "Je n’ai pas réussi à formuler la réponse. Repose ta question, en une phrase si possible.";
         return { text, trace, tokensIn, tokensOut, model };
       }
       messages.push({ role: "assistant", content: res.content });
