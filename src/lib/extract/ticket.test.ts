@@ -50,8 +50,22 @@ describe("normalizePick — pronos de tipsters", () => {
     expect(normalizePick("", "+2,5 buts ✅", "Italie", "France")).toMatchObject({ market_code: "OU", market_param: 2.5, selection: "Plus", ok: true });
     expect(normalizePick("", "Italie ou nul ✅", "Italie", "France")).toMatchObject({ market_code: "DC", selection: "1N", ok: true });
   });
+  it("mi-temps et autres marchés", () => {
+    expect(normalizePick("", "1ère mi-temps ✅", "Ghana", "Somalie", "Ghana")).toMatchObject({ market_code: "HT_1X2", selection: "1", ok: true });
+    expect(normalizePick("Résultat mi-temps", "Nul", "Ghana", "Somalie")).toMatchObject({ market_code: "HT_1X2", selection: "N", ok: true });
+    expect(normalizePick("", "+0,5 but en 1ère mi-temps", "Ghana", "Somalie")).toMatchObject({ market_code: "HT_OU", market_param: 0.5, selection: "Plus", ok: true });
+    expect(normalizePick("2e mi-temps - Résultat", "Somalie", "Ghana", "Somalie")).toMatchObject({ market_code: "H2_1X2", selection: "2", ok: true });
+    expect(normalizePick("Mi-temps / Fin de match", "Nul / Ghana", "Ghana", "Somalie")).toMatchObject({ market_code: "HTFT", selection: "N/1", ok: true });
+    expect(normalizePick("Mi-temps/Fin de match", "1/2", "Ghana", "Somalie")).toMatchObject({ market_code: "HTFT", selection: "1/2", ok: true });
+    expect(normalizePick("Total de buts pair/impair", "Impair", "A", "B")).toMatchObject({ market_code: "OE", selection: "Impair", ok: true });
+    expect(normalizePick("Multi-buts", "2-4 buts", "A", "B")).toMatchObject({ market_code: "MG", selection: "2-4", ok: true });
+    expect(normalizePick("", "Ghana gagne sans encaisser", "Ghana", "Somalie")).toMatchObject({ market_code: "WTN", selection: "1", ok: true });
+    expect(normalizePick("Handicap européen", "Somalie (+1)", "Ghana", "Somalie")).toMatchObject({ market_code: "EH", market_param: -1, selection: "2", ok: true });
+    // les marchés existants ne sont pas détournés
+    expect(normalizePick("Nombre total de buts (t. rég)", "+ de 1,5", "Brighton", "Brentford")).toMatchObject({ market_code: "OU", market_param: 1.5 });
+    expect(normalizePick("Double chance & nombre de buts", "Liverpool / Nul & + de 1,5", "Crystal Palace", "Liverpool")).toMatchObject({ market_code: "DC_OU" });
+  });
   it("dit clairement ce qui n'est pas suivi ou pas visible", () => {
-    expect(normalizePick("", "1ère mi-temps", "Ghana", "Somalie", "Ghana")).toMatchObject({ ok: false, reason: expect.stringContaining("mi-temps") });
     expect(normalizePick("", "PÉPITE DU JOUR", "Angleterre", "Croatie").ok).toBe(false);
     expect(normalizePick("", "", "Côte d'Ivoire", "Gambie")).toMatchObject({ ok: false, reason: expect.stringContaining("oral") });
   });

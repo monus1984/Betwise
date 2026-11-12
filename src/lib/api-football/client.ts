@@ -7,7 +7,7 @@ export type AfFixture = {
   teams: { home: { id: number; name: string }; away: { id: number; name: string } };
   goals: { home: number | null; away: number | null };
   statistics?: { team: { id: number }; statistics: { type: string; value: number | string | null }[] }[];
-  score: { fulltime: { home: number | null; away: number | null } };
+  score: { fulltime: { home: number | null; away: number | null }; halftime?: { home: number | null; away: number | null } };
 };
 export type AfOdds = {
   fixture: { id: number };

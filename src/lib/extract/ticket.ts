@@ -161,10 +161,38 @@ export function normalizePick(marketText: string, pickText: string, home: string
 
   // Pronos de tipsters, libellés courts (avec l'équipe nommée seule ou dans le texte)
   const all = `${m} ${p}`;
-  if (/mi[- ]?temps|\bmt\b|\bht\b/.test(all)) return { market_code: "1X2", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Résultat à la mi-temps : marché pas encore suivi par BETWISE." };
+  const teamSide = team ? side(team) : null;
+  const who = (x: string): "1" | "N" | "2" | null => { const y = x.replace(/\b(victoire|gagne|vainqueur)\b/g, "").trim(); return isDraw(y) ? "N" : y ? side(y) : null; };
+  // Mi-temps / fin de match : « Italie / Nul », « 1/2 »
+  if (/mi[- ]?temps\s*[\/-]\s*fin|\b(ht|mt)\s*\/\s*ft\b/.test(all)) {
+    const parts = p.replace(/.*(fin de match|ft)\s*:?/i, "").split(/\s*\/\s*/).map((x) => x.trim()).filter(Boolean);
+    const code = (x: string) => (/^[12]$/.test(x) ? (x as "1" | "2") : /^[xn]$/.test(x) ? "N" : who(x));
+    const [x1, x2] = parts.length === 2 ? parts.map(code) : [null, null];
+    return x1 && x2 ? { market_code: "HTFT", market_param: null, selection: `${x1}/${x2}`, label_pick: pickText, ok: true } : { market_code: "HTFT", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Mi-temps / fin de match : choisis les deux résultats." };
+  }
+  // Marchés d'une mi-temps : « Ghana – 1ère mi-temps », « +0,5 but en 1ère mi-temps », « Nul à la mi-temps », « 2e mi-temps : Italie »
+  if (/mi[- ]?temps|\b(mt|ht)\b/.test(all)) {
+    const h2 = /\b(2e|2ème|2eme|2nde|seconde|deuxième)\b/.test(all);
+    const pre = h2 ? "H2_" : "HT_";
+    const q = p.replace(/(1(ère|ere|re)|première|premiere|2(e|ème|eme|nde)|seconde|deuxième)?\s*mi[- ]?temps|\b(mt|ht)\b|\b(à la|a la|en|de la|résultat)\b/g, " ").replace(/[:–—-]/g, " ").replace(/\s+/g, " ").trim();
+    const o = ouLine(p);
+    if (o && (/\b(buts?|over|under)\b/.test(p) || /^(\+|plus|moins)/.test(q))) return { market_code: `${pre}OU`, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
+    if (!h2 && /(2|deux) (équipes )?marquent|btts/.test(q)) return { market_code: "HT_BTTS", market_param: null, selection: non || /\bnon\b/.test(q) ? "Non" : "Oui", label_pick: pickText, ok: true };
+    if (!h2 && /\sou\s|\//.test(q)) { const dc = parseDoubleChance(q, side, isDraw); if (dc) return { market_code: "HT_DC", market_param: null, selection: dc, label_pick: pickText, ok: true }; }
+    const r = who(q) ?? (!q.replace(/victoire|gagne|vainqueur/g, "").trim() ? teamSide : null);
+    if (r) return { market_code: `${pre}1X2`, market_param: null, selection: r, label_pick: pickText, ok: true };
+    return { market_code: `${pre}1X2`, market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari de mi-temps : choisis le marché et le choix." };
+  }
+  if (/\bimpair\b|\bodd\b/.test(all)) return { market_code: "OE", market_param: null, selection: "Impair", label_pick: pickText, ok: true };
+  if (/\bpair\b|\beven\b/.test(all)) return { market_code: "OE", market_param: null, selection: "Pair", label_pick: pickText, ok: true };
+  if (/sans encaisser|win to nil/.test(all)) { const r = teamSide ?? side(p.replace(/gagne|sans encaisser( de but)?|win to nil/g, "").trim()); return { market_code: "WTN", market_param: null, selection: r ?? pickText, label_pick: pickText, ok: !!r }; }
+  { const r = p.match(/^(?:entre\s*)?(\d)\s*(?:-|à|a|et)\s*(\d)\s*buts?$/); if (r && Number(r[1]) <= Number(r[2])) return { market_code: "MG", market_param: null, selection: `${r[1]}-${r[2]}`, label_pick: pickText, ok: true }; }
+  if (m.includes("handicap") && /europ|3 issues|1x2|3 way/.test(m)) {
+    const r = p.match(/^(.*?)\s*\(?([+\-]\d+)\)?$/); const w = r ? who(r[1]) : null;
+    if (r && w) return { market_code: "EH", market_param: w === "2" ? -Number(r[2]) : Number(r[2]), selection: w, label_pick: pickText, ok: true };
+  }
   if (/(les )?(2|deux) (équipes )?marquent|btts/.test(all)) return { market_code: "BTTS", market_param: null, selection: non || /(ne )?marquent pas|\bnon\b|\bno\b/.test(p) ? "Non" : "Oui", label_pick: pickText, ok: true };
   if (!m.includes("handicap") && !all.includes("&") && (/\b(buts?|goals?|over|under)\b/.test(p) || /^(\+|-|plus|moins)/.test(p))) { const o = ouLine(p); if (o) return { market_code: "OU", market_param: o.line, selection: o.dir, label_pick: pickText, ok: true }; }
-  const teamSide = team ? side(team) : null;
   if (teamSide && /^(victoire|gagne|vainqueur|win|1|2)$/.test(p.replace(/[^a-zà-ü0-9 ]/g, "").trim())) return { market_code: "1X2", market_param: null, selection: teamSide, label_pick: `${team} gagne`, ok: true };
   if (teamSide && /ou nul|ou match nul|double chance/.test(p) && !p.includes("&")) return { market_code: "DC", market_param: null, selection: teamSide === "1" ? "1N" : "N2", label_pick: `${team} ou nul`, ok: true };
   if (/\s(ou|or)\s|\//.test(p) && !p.includes("&") && !m.includes("&")) { const dc = parseDoubleChance(p, side, isDraw); if (dc) return { market_code: "DC", market_param: null, selection: dc, label_pick: pickText, ok: true }; }

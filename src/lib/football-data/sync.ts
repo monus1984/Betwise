@@ -166,6 +166,8 @@ export async function syncCompetition(db: Db, fd: FootballDataClient, code: stri
       statut,
       score_home: statut === "termine" ? m.score.fullTime.home : null,
       score_away: statut === "termine" ? m.score.fullTime.away : null,
+      ht_home: statut === "termine" ? m.score.halfTime?.home ?? null : null,
+      ht_away: statut === "termine" ? m.score.halfTime?.away ?? null : null,
       source_resultat: statut === "termine" ? "football-data.org" : null,
       result_at: statut === "termine" ? now : null,
       updated_at: now,

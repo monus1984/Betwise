@@ -33,11 +33,11 @@ describe("pronos de tipsters, de bout en bout (lecture simulée)", async () => {
     expect(line(liste, 5)).toBe("Côte d'Ivoire–Gambie 1X2 1 ok");
     expect(line(liste, 7)).toBe("Guinée–Érythrée 1X2 1 ok");              // ni Guinée équatoriale ni Guinée-Bissau
     expect(line(liste, 8)).toBe("Saint-Marin–Biélorussie 1X2 2 ok");
-    expect(liste.selections.filter((s) => s.ok)).toHaveLength(10);
+    expect(liste.selections.filter((s) => s.ok)).toHaveLength(12);
   });
-  it("mi-temps signalée, ✅ jamais pris pour un résultat", () => {
-    expect(liste.selections[0]).toMatchObject({ ok: false, reason: expect.stringContaining("mi-temps") });
-    expect(liste.selections[0].match?.home).toBe("Ghana");
+  it("mi-temps comprise, ✅ jamais pris pour un résultat", () => {
+    expect(line(liste, 0)).toBe("Ghana–Somalie HT_1X2 1 ok");
+    expect(line(liste, 1)).toBe("Sénégal–Soudan HT_1X2 1 ok");
     expect([...liste.selections, ...combine.selections].every((s) => s.outcome === "unknown")).toBe(true);
   });
   it("combiné à cote totale", () => {

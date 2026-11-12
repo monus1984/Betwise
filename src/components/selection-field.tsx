@@ -21,7 +21,7 @@ export function SelectionField({ market, param, value, match, onChange }: { mark
   if (SELECTIONS[market]?.length) {
     return (
       <div className="flex flex-wrap gap-2">
-        {SELECTIONS[market].map((s) => <Chip key={s} active={value === s} onClick={() => onChange(s)}>{market === "OU" || market === "TT1" || market === "TT2" ? `${labelSel(market, s, match)} ${param || "?"}` : labelSel(market, s, match)}</Chip>)}
+        {SELECTIONS[market].map((s) => <Chip key={s} active={value === s} onClick={() => onChange(s)}>{["OU", "TT1", "TT2", "HT_OU", "H2_OU"].includes(market) ? `${labelSel(market, s, match)} ${param || "?"}` : labelSel(market, s, match)}</Chip>)}
       </div>
     );
   }

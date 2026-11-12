@@ -27,7 +27,7 @@ ENUMS = {
 TABLES = {
     "competitions": "id:uuid= code_externe:text? nom:text pays:text? saison:text couverte_auto:bool= created_at:timestamptz=",
     "teams": "id:uuid= code_externe:text? nom:text alias:text[]= competition_id:uuid? created_at:timestamptz=",
-    "matches": "id:uuid= code_externe:text? competition_id:uuid home_team_id:uuid away_team_id:uuid kickoff_at:timestamptz statut:enum:match_status= score_home:int2? score_away:int2? source_resultat:text? result_at:timestamptz? af_fixture_id:int4? af_home_id:int4? af_away_id:int4? minute:int2? live_at:timestamptz? created_at:timestamptz= updated_at:timestamptz=",
+    "matches": "id:uuid= code_externe:text? competition_id:uuid home_team_id:uuid away_team_id:uuid kickoff_at:timestamptz statut:enum:match_status= score_home:int2? score_away:int2? source_resultat:text? result_at:timestamptz? af_fixture_id:int4? af_home_id:int4? af_away_id:int4? minute:int2? live_at:timestamptz? ht_home:int2? ht_away:int2? created_at:timestamptz= updated_at:timestamptz=",
     "markets": "code:text libelle_fr:text a_parametre:bool= version:int2=",
     "profiles": "user_id:uuid pseudo:text devise:text= role:text= created_at:timestamptz=",
     "bankrolls": "id:uuid= user_id:uuid capital_initial:numeric= devise:text= active:bool= created_at:timestamptz=",
@@ -101,7 +101,7 @@ FUNCTIONS = {
     "place_bet": ([("p_mise", "numeric", False), ("p_selections", "jsonb", False), ("p_source_import", "enum:import_channel", True), ("p_raw_text", "text", True), ("p_upload_id", "uuid", True), ("p_placed_at", "timestamptz", True), ("p_summary", "jsonb", True), ("p_virtuel", "bool", True)], "uuid"),
     "bankroll_move": ([("p_type", "enum:tx_type", False), ("p_montant", "numeric", False), ("p_note", "text", True)], "row:bankroll_transactions"),
     "settle_bet": ([("p_bet_id", "uuid", False), ("p_result", "enum:settle_result", False)], "row:bets"),
-    "settle_selection": ([("p_market", "text", False), ("p_param", "numeric", False), ("p_selection", "text", False), ("p_home", "int4", False), ("p_away", "int4", False)], "enum:settle_result"),
+    "settle_selection": ([("p_market", "text", False), ("p_param", "numeric", False), ("p_selection", "text", False), ("p_home", "int4", False), ("p_away", "int4", False), ("p_ht_home", "int4", True), ("p_ht_away", "int4", True)], "enum:settle_result"),
     "settle_pending": ([], "setof:matchs:int4,selections_reglees:int4,pronos_regles:int4,paris_finalises:int4"),
     "log_prediction": ([("p_source_id", "uuid", False), ("p_market_code", "text", False), ("p_selection", "text", False), ("p_match_id", "uuid", True), ("p_match_libre", "text", True), ("p_market_param", "numeric", True), ("p_cote_annoncee", "numeric", True), ("p_risque_annonce", "enum:risk_category", True), ("p_published_at", "timestamptz", True), ("p_upload_id", "uuid", True)], "setof:prediction_id:uuid,created:bool,statut:enum:prediction_status"),
     "cancel_prediction": ([("p_id", "uuid", False), ("p_motif", "text", False)], "void"),

@@ -14,7 +14,7 @@ export const COMPETITIONS_V1 = ["PL", "PD", "SA", "BL1", "FL1", "CL"] as const;
 export const COMPETITIONS_EXTRA = ["ELC", "DED", "PPL", "BSA", "WC", "EC"] as const;
 
 export type FdTeam = { id: number; name: string; shortName: string | null; tla: string | null };
-export type FdScore = { fullTime: { home: number | null; away: number | null } };
+export type FdScore = { fullTime: { home: number | null; away: number | null }; halfTime?: { home: number | null; away: number | null } };
 export type FdMatch = {
   id: number;
   utcDate: string;

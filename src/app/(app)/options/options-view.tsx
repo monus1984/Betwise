@@ -15,7 +15,7 @@ const PRESETS = [
   { k: "ris", label: "Risqué", min: 53, max: 67 },
   { k: "mix", label: "Sûr + Audacieux", min: 67, max: 91 },
 ];
-const FAMS = [{ k: "", label: "Tout" }, { k: "resultat", label: "Résultat" }, { k: "buts", label: "Buts" }, { k: "combo", label: "Combos même match" }];
+const FAMS = [{ k: "", label: "Tout" }, { k: "resultat", label: "Résultat" }, { k: "buts", label: "Buts" }, { k: "mitemps", label: "Mi-temps" }, { k: "combo", label: "Combos même match" }];
 const CIBLES = [1.5, 2, 3, 5, 10];
 const C = (x: number) => x.toFixed(2).replace(".", ",");
 const pct = (x: number) => `${Math.round(x * 100)} %`;
@@ -162,7 +162,7 @@ function SingleRow({ o, first, tester, more }: { o: Option; first: boolean; test
     <li className={`flex items-center gap-2.5 px-3 py-2.5 ${first ? "" : "border-t border-line"}`}>
       <Link href={`/matchs/${o.matchId}`} className="min-w-0 flex-1">
         <span className="line-clamp-2 text-sm font-medium leading-snug">{o.label}</span>
-        <span className="mt-0.5 block truncate text-[11px] text-ink-muted">{COMP_FLAG[o.comp] ?? "⚽"} {shortName(o.home)} – {shortName(o.away)} · {time(o.kickoff)}{o.source === "modele" ? " · modèle" : ""}</span>
+        <span className="mt-0.5 block truncate text-[11px] text-ink-muted">{COMP_FLAG[o.comp] ?? "⚽"} {shortName(o.home)} – {shortName(o.away)} · {time(o.kickoff)}{o.source === "modele" ? " · modèle" : ""}{o.famille === "mitemps" ? " · % indicatif" : ""}</span>
       </Link>
       <span className="w-[68px] shrink-0 text-right tabular-nums">
         <span className="block text-sm font-bold">{pct(o.p)}</span>

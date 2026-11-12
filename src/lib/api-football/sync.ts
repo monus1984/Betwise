@@ -82,6 +82,7 @@ export async function syncAfCompetition(db: Db, api: ApiFootball, code: string) 
       // score à la fin du temps réglementaire : c'est lui qui règle les paris
       score_home: done ? f.score.fulltime.home ?? f.goals.home : statut === "en_cours" ? f.goals.home : null,
       score_away: done ? f.score.fulltime.away ?? f.goals.away : statut === "en_cours" ? f.goals.away : null,
+      ht_home: f.score.halftime?.home ?? null, ht_away: f.score.halftime?.away ?? null, // score à la pause : règle les paris de mi-temps
       source_resultat: done ? "api-football" : null, result_at: done ? now : null, updated_at: now,
     };
   });
@@ -167,7 +168,7 @@ export async function linkAfFixtures(db: Db, api: ApiFootball, code: string) {
 /** Applique des matchs API-Football (direct ou terminés) aux matchs suivis. Renvoie le nombre de matchs passés à « terminé ». */
 export async function applyFixtures(db: Db, fixtures: AfFixture[]) {
   if (!fixtures.length) return { updated: 0, finished: 0 };
-  const { data: ms } = await db.from("matches").select("id, af_fixture_id, statut, score_home, score_away, minute").in("af_fixture_id", fixtures.map((f) => f.fixture.id));
+  const { data: ms } = await db.from("matches").select("id, af_fixture_id, statut, score_home, score_away, minute, ht_home").in("af_fixture_id", fixtures.map((f) => f.fixture.id));
   let updated = 0, finished = 0;
   const now = new Date().toISOString();
   for (const m of ms ?? []) {
@@ -178,9 +179,11 @@ export async function applyFixtures(db: Db, fixtures: AfFixture[]) {
     const done = statut === "termine";
     const sh = done ? f.score.fulltime.home ?? f.goals.home : f.goals.home, sa = done ? f.score.fulltime.away ?? f.goals.away : f.goals.away;
     const minute = statut === "en_cours" ? f.fixture.status.elapsed : null;
-    if (m.statut === statut && m.score_home === sh && m.score_away === sa && m.minute === minute) continue;
+    const hth = f.score.halftime?.home ?? null, hta = f.score.halftime?.away ?? null;
+    if (m.statut === statut && m.score_home === sh && m.score_away === sa && m.minute === minute && (hth === null || m.ht_home !== null)) continue;
     const { error } = await db.from("matches").update({
       statut, score_home: sh, score_away: sa, minute, live_at: now, updated_at: now,
+      ...(hth !== null && hta !== null ? { ht_home: hth, ht_away: hta } : {}),
       ...(done ? { source_resultat: "api-football", result_at: now } : {}),
     }).eq("id", m.id);
     if (error) throw error;

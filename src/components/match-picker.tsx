@@ -15,6 +15,14 @@ export const SELECTIONS: Record<string, string[]> = {
   TT1: ["Plus", "Moins"],
   TT2: ["Plus", "Moins"],
   CS: [],
+  HT_1X2: ["1", "N", "2"], HT_DC: ["1N", "12", "N2"], HT_OU: ["Plus", "Moins"], HT_BTTS: ["Oui", "Non"],
+  H2_1X2: ["1", "N", "2"], H2_OU: ["Plus", "Moins"],
+  HTFT: ["1/1", "1/N", "1/2", "N/1", "N/N", "N/2", "2/1", "2/N", "2/2"],
+  HMG: ["1", "N", "2"],
+  OE: ["Pair", "Impair"],
+  MG: ["0-1", "1-2", "1-3", "2-3", "2-4", "3-4", "3-5", "4-6"],
+  EH: ["1", "N", "2"],
+  WTN: ["1", "2"],
 };
 
 /** Marchés combinés d'un même match : sélection « A|B ». */
@@ -26,18 +34,22 @@ export const COMBO_PARTS: Record<string, [string[], string[]]> = {
   OU_BTTS: [["Plus", "Moins"], ["Oui", "Non"]],
 };
 /** Ligne par défaut à la sélection d'un marché. */
-export const defaultParam = (market: string) => (market === "TT1" || market === "TT2" ? "0.5" : market.includes("OU") ? "2.5" : market === "AH" ? "-1.5" : "");
-export const paramLabel = (market: string) => (market === "AH" ? "Handicap" : market === "TT1" || market === "TT2" ? "Ligne (buts de l’équipe)" : "Ligne (buts)");
+export const defaultParam = (market: string) => (["TT1", "TT2", "HT_OU", "H2_OU"].includes(market) ? "0.5" : market.includes("OU") ? "2.5" : market === "AH" ? "-1.5" : market === "EH" ? "-1" : "");
+export const paramLabel = (market: string) => (market === "AH" ? "Handicap" : market === "EH" ? "Handicap (équipe à domicile)" : market === "TT1" || market === "TT2" ? "Ligne (buts de l’équipe)" : market === "HT_OU" || market === "H2_OU" ? "Ligne (buts de la mi-temps)" : "Ligne (buts)");
 
 export const toNum = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
 
 export function labelSel(market: string, s: string, m: MatchHit | null) {
-  if (market === "1X2" || market === "DNB" || market === "AH") {
+  const team = (x: string) => (x === "1" ? (m ? short(m.home) : "Dom.") : x === "2" ? (m ? short(m.away) : "Ext.") : "Nul");
+  if (market === "HTFT") { const [a, b] = s.split("/"); return `${team(a)} / ${team(b)}`; }
+  if (market === "HMG") return s === "1" ? "1re mi-temps" : s === "2" ? "2e mi-temps" : "Autant";
+  if (market === "MG") { const [a, b] = s.split("-"); return a === "0" ? `${b} au plus` : `${a} à ${b} buts`; }
+  if (["1X2", "DNB", "AH", "HT_1X2", "H2_1X2", "EH", "WTN"].includes(market)) {
     if (s === "1") return m ? short(m.home) : "Domicile";
     if (s === "2") return m ? short(m.away) : "Extérieur";
     return "Nul";
   }
-  if (market === "DC") return { "1N": "Dom. ou nul", "12": "Dom. ou ext.", N2: "Nul ou ext." }[s] ?? s;
+  if (market === "DC" || market === "HT_DC") return { "1N": "Dom. ou nul", "12": "Dom. ou ext.", N2: "Nul ou ext." }[s] ?? s;
   if (s === "Plus" || s === "Moins") return s === "Plus" ? "Plus de" : "Moins de";
   if (s === "Oui" || s === "Non") return s === "Oui" ? "Les deux marquent" : "Pas les deux";
   return s;

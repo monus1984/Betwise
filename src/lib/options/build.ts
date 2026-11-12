@@ -3,7 +3,7 @@ import { MARGE_SUPPOSEE } from "../coach/categories";
 /** Une option de pari sur un match à venir, avec sa probabilité (cotes de référence d'abord, modèle sinon). */
 export type Option = {
   matchId: string; kickoff: string; home: string; away: string; comp: string;
-  market: string; param: number | null; sel: string; label: string; famille: "resultat" | "buts" | "combo";
+  market: string; param: number | null; sel: string; label: string; famille: "resultat" | "buts" | "combo" | "mitemps";
   p: number; cote: number | null; source: "marche" | "modele";
 };
 /** Cote qu'on peut espérer chez un bookmaker : la cote de référence si elle existe, sinon la cote juste moins une marge moyenne. */

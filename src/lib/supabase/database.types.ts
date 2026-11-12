@@ -96,6 +96,8 @@ export type Database = {
           af_away_id: number | null
           minute: number | null
           live_at: string | null
+          ht_home: number | null
+          ht_away: number | null
           created_at: string
           updated_at: string
         }
@@ -116,6 +118,8 @@ export type Database = {
           af_away_id?: number | null
           minute?: number | null
           live_at?: string | null
+          ht_home?: number | null
+          ht_away?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -136,6 +140,8 @@ export type Database = {
           af_away_id?: number | null
           minute?: number | null
           live_at?: string | null
+          ht_home?: number | null
+          ht_away?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -1371,6 +1377,8 @@ export type Database = {
           p_selection: string
           p_home: number
           p_away: number
+          p_ht_home?: number | null
+          p_ht_away?: number | null
         }
         Returns: Database["betwise"]["Enums"]["settle_result"]
       }

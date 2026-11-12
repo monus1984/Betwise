@@ -64,7 +64,8 @@ export function probOfSignal(s: Signal, market: string, param: number | null, se
 }
 
 /** Toutes les sélections calculables d'un match : simples, buts par équipe, handicaps, combos même match. */
-const PO = ["Plus", "Moins"], ON = ["Oui", "Non"];
+const PO = ["Plus", "Moins"], ON = ["Oui", "Non"], R3 = ["1", "N", "2"];
+export const MG_RANGES = ["0-1", "1-2", "1-3", "2-3", "2-4", "3-4", "3-5", "4-6"];
 export const ALL_CANDIDATES: [string, number | null, string][] = [
   ...["1", "N", "2"].map((x) => ["1X2", null, x] as [string, null, string]),
   ...["1N", "N2", "12"].map((x) => ["DC", null, x] as [string, null, string]),
@@ -77,7 +78,20 @@ export const ALL_CANDIDATES: [string, number | null, string][] = [
   ...["1", "2"].flatMap((a) => [1.5, 2.5, 3.5].flatMap((l) => PO.map((b) => ["1X2_OU", l, `${a}|${b}`] as [string, number, string]))),
   ...["1N", "N2", "12"].flatMap((a) => ON.map((b) => ["DC_BTTS", null, `${a}|${b}`] as [string, null, string])),
   ...["1", "N", "2"].flatMap((a) => ON.map((b) => ["1X2_BTTS", null, `${a}|${b}`] as [string, null, string])),
-  ...[1.5, 2.5, 3.5].flatMap((l) => PO.flatMap((a) => ON.map((b) => ["OU_BTTS", l, `${a}|${b}`] as [string, number, string]))),
+  ...[1.5, 2.5, 3.5].flatMap((l) => PO.flatMap((a) => ON.map((b) => ["OU_BTTS", l, `${a}|${b}`] as [string, number, string]))),  // Mi-temps
+  ...R3.map((x) => ["HT_1X2", null, x] as [string, null, string]),
+  ...["1N", "N2", "12"].map((x) => ["HT_DC", null, x] as [string, null, string]),
+  ...[0.5, 1.5].flatMap((l) => PO.map((x) => ["HT_OU", l, x] as [string, number, string])),
+  ["HT_BTTS", null, "Oui"], ["HT_BTTS", null, "Non"],
+  ...R3.map((x) => ["H2_1X2", null, x] as [string, null, string]),
+  ...[0.5, 1.5].flatMap((l) => PO.map((x) => ["H2_OU", l, x] as [string, number, string])),
+  ...R3.flatMap((a) => R3.map((b) => ["HTFT", null, `${a}/${b}`] as [string, null, string])),
+  ...R3.map((x) => ["HMG", null, x] as [string, null, string]),
+  // Autres
+  ["OE", null, "Pair"], ["OE", null, "Impair"],
+  ...MG_RANGES.map((x) => ["MG", null, x] as [string, null, string]),
+  ...[-2, -1, 1, 2].flatMap((l) => R3.map((x) => ["EH", l, x] as [string, number, string])),
+  ["WTN", null, "1"], ["WTN", null, "2"],
 ];
 
 /** Sélections candidates d'un match, de la plus probable à la moins probable. « all » : la liste exhaustive. */
@@ -116,14 +130,29 @@ export function pickLabel(market: string, param: number | null, sel: string, hom
     }
     case "DC_OU": case "1X2_OU": { const [a, b] = sel.split("|"); return `${pickLabel(market === "DC_OU" ? "DC" : "1X2", null, a, home, away)} et ${buts(b)}`; }
     case "DC_BTTS": case "1X2_BTTS": { const [a, b] = sel.split("|"); return `${pickLabel(market === "DC_BTTS" ? "DC" : "1X2", null, a, home, away)} et ${btts(b)}`; }
+    case "HT_1X2": case "HT_DC": case "HT_OU": case "HT_BTTS": return `Mi-temps : ${pickLabel(market.slice(3), param, sel, home, away)}`;
+    case "H2_1X2": case "H2_OU": return `2e mi-temps : ${pickLabel(market.slice(3), param, sel, home, away)}`;
+    case "HTFT": { const [a, b] = sel.split("/"); const n = (x: string) => (x === "1" ? home : x === "2" ? away : "nul"); return `Mi-temps ${n(a)} / fin ${n(b)}`; }
+    case "HMG": return sel === "1" ? "Plus de buts en 1re mi-temps" : sel === "2" ? "Plus de buts en 2e mi-temps" : "Autant de buts dans les deux mi-temps";
+    case "OE": return `Nombre de buts ${sel === "Pair" ? "pair" : "impair"}`;
+    case "MG": { const [a, b] = sel.split("-"); return a === "0" ? `${b} but${b === "1" ? "" : "s"} au plus` : `Entre ${a} et ${b} buts`; }
+    case "EH": {
+      // Handicap européen (3 issues), handicap donné pour l'équipe à domicile : dit en clair ce qu'il faut pour gagner
+      const h = param ?? 0, pl = (n: number) => `${n} but${n > 1 ? "s" : ""}`;
+      const gagne = (team: string, k: number) => (k >= 1 ? `${team} gagne par ${pl(k + 1)} ou plus` : k === -1 ? `${team} ne perd pas` : `${team} ne perd pas par ${pl(-k)} ou plus`);
+      const txt = sel === "1" ? gagne(home, -h) : sel === "2" ? gagne(away, h) : `${h < 0 ? home : away} gagne par ${pl(Math.abs(h))} exactement`;
+      return `${txt} (handicap ${h > 0 ? "+" : ""}${h})`;
+    }
+    case "WTN": return `${sel === "1" ? home : away} gagne sans encaisser`;
     case "OU_BTTS": { const [a, b] = sel.split("|"); const x = buts(a); return `${x[0].toUpperCase() + x.slice(1)} et ${btts(b)}`; }
   }
   return `${market} ${sel}`;
 }
 
 /** Famille d'un marché, pour filtrer les options. */
-export function familleOf(market: string): "resultat" | "buts" | "combo" {
+export function familleOf(market: string): "resultat" | "buts" | "combo" | "mitemps" {
+  if (market.startsWith("HT_") || market.startsWith("H2_") || market === "HTFT" || market === "HMG") return "mitemps";
   if (["DC_OU", "1X2_OU", "DC_BTTS", "1X2_BTTS", "OU_BTTS"].includes(market)) return "combo";
-  if (["OU", "BTTS", "TT1", "TT2"].includes(market)) return "buts";
+  if (["OU", "BTTS", "TT1", "TT2", "OE", "MG"].includes(market)) return "buts";
   return "resultat";
 }

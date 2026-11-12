@@ -13,8 +13,27 @@ export function makeGrid(lh: number, la: number, drawBoost = 0): Grid {
   let tot = 0;
   for (let i = 0; i <= MAX; i++) { g[i] = []; for (let j = 0; j <= MAX; j++) { const p = pmf(lh, i) * pmf(la, j) * (i === j ? 1 + drawBoost : 1); g[i][j] = p; tot += p; } }
   for (let i = 0; i <= MAX; i++) for (let j = 0; j <= MAX; j++) g[i][j] /= tot;
+  LAMBDAS.set(g, { lh, la });
   return g;
 }
+
+/**
+ * Mi-temps : en moyenne 45 % des buts d'un match tombent avant la pause (ordre de grandeur constant d'un championnat
+ * à l'autre). Les deux mi-temps sont traitées comme indépendantes. Non vérifié sur notre historique, qui n'a pas les
+ * scores à la pause : probabilités indicatives.
+ */
+export const PART_1RE_MI_TEMPS = 0.45;
+const LAMBDAS = new WeakMap<Grid, { lh: number; la: number }>();
+const HALVES = new WeakMap<Grid, { ht: Grid; h2: Grid }>();
+function halves(g: Grid): { ht: Grid; h2: Grid } | null {
+  const cached = HALVES.get(g); if (cached) return cached;
+  const l = LAMBDAS.get(g); if (!l) return null;
+  const f = PART_1RE_MI_TEMPS;
+  const v = { ht: makeGrid(l.lh * f, l.la * f), h2: makeGrid(l.lh * (1 - f), l.la * (1 - f)) };
+  HALVES.set(g, v);
+  return v;
+}
+const res = (i: number, j: number) => (i > j ? "1" : i < j ? "2" : "N");
 const sum = (g: Grid, f: (i: number, j: number) => boolean) => { let s = 0; for (let i = 0; i <= MAX; i++) for (let j = 0; j <= MAX; j++) if (f(i, j)) s += g[i][j]; return s; };
 
 const R1X2: Record<string, (i: number, j: number) => boolean> = { "1": (i, j) => i > j, N: (i, j) => i === j, "2": (i, j) => i < j };
@@ -46,6 +65,32 @@ export function probOf(g: Grid, market: string, param: number | null, sel: strin
       if (param === null || (sel !== "1" && sel !== "2") || (param * 2) % 1 !== 0) return null;
       const adj = (i: number, j: number) => (sel === "1" ? i - j : j - i) + param;
       return sansRembourse(g, (i, j) => adj(i, j) > 0, (i, j) => adj(i, j) === 0);
+    }
+    case "OE": return sel === "Pair" ? sum(g, (i, j) => (i + j) % 2 === 0) : sel === "Impair" ? sum(g, (i, j) => (i + j) % 2 === 1) : null;
+    case "MG": { const r = sel.match(/^(\d+)-(\d+)$/); if (!r) return null; const lo = Number(r[1]), hi = Number(r[2]); return lo <= hi ? sum(g, (i, j) => i + j >= lo && i + j <= hi) : null; }
+    case "EH": {
+      if (param === null || !Number.isInteger(param) || !R1X2[sel]) return null;
+      return sum(g, (i, j) => res(i + param, j) === sel);
+    }
+    case "WTN": return sel === "1" ? sum(g, (i, j) => i > j && j === 0) : sel === "2" ? sum(g, (i, j) => j > i && i === 0) : null;
+    case "HT_1X2": case "HT_DC": case "HT_OU": case "HT_BTTS": { const h = halves(g); return h ? probOf(h.ht, market.slice(3), param, sel) : null; }
+    case "H2_1X2": case "H2_OU": { const h = halves(g); return h ? probOf(h.h2, market.slice(3), param, sel) : null; }
+    case "HTFT": {
+      const [a, b] = sel.split("/"); const h = halves(g);
+      if (!h || !R1X2[a] || !R1X2[b]) return null;
+      const M2 = 7; let p = 0; // au-delà de 7 buts par équipe et par mi-temps : négligeable
+      for (let i = 0; i <= M2; i++) for (let j = 0; j <= M2; j++) {
+        if (res(i, j) !== a) continue;
+        for (let k = 0; k <= M2; k++) for (let l = 0; l <= M2; l++) if (res(i + k, j + l) === b) p += h.ht[i][j] * h.h2[k][l];
+      }
+      return p;
+    }
+    case "HMG": {
+      const h = halves(g); if (!h || !R1X2[sel]) return null;
+      const tot = (x: Grid) => { const t = new Array(2 * MAX + 1).fill(0); for (let i = 0; i <= MAX; i++) for (let j = 0; j <= MAX; j++) t[i + j] += x[i][j]; return t as number[]; };
+      const t1 = tot(h.ht), t2 = tot(h.h2); let p = 0;
+      for (let x = 0; x < t1.length; x++) for (let y = 0; y < t2.length; y++) if (res(x, y) === sel) p += t1[x] * t2[y];
+      return p;
     }
     case "DC_OU": case "1X2_OU": {
       const [a, b] = sel.split("|"); const r: Rule | undefined = (market === "DC_OU" ? RDC : R1X2)[a];
