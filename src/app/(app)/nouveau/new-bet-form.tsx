@@ -2,10 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
-import { MatchPicker, SELECTIONS, labelSel, toNum, type MatchHit } from "@/components/match-picker";
+import { MatchPicker, defaultParam, paramLabel, toNum, type MatchHit } from "@/components/match-picker";
+import { SelectionField } from "@/components/selection-field";
 import { placeBet } from "@/lib/bets/actions";
 import { SourceChooser } from "@/components/source-chooser";
-import { Button, Chip, Field, Input, Notice, RISK_CLASS, RISK_LABEL, fcfa, riskFromOdds } from "@/components/ui";
+import { Button, Field, Input, Notice, RISK_CLASS, RISK_LABEL, fcfa, riskFromOdds } from "@/components/ui";
 
 type Source = { id: string; nom: string; type: string };
 type Market = { code: string; libelle_fr: string; a_parametre: boolean };
@@ -21,23 +22,26 @@ type Line = {
   predictionId: string | null;
 };
 
-type Prefill = { match: MatchHit | null; market?: string; param?: string; sel?: string; cote?: string; origin?: string; prediction?: string };
+export type PrefillLeg = { match: MatchHit; market?: string; param?: string; sel?: string; cote?: string; origin?: string; prediction?: string };
 
-export function NewBetForm({ sources, markets, defaultOrigin, prefill }: { sources: Source[]; markets: Market[]; defaultOrigin: string | null; prefill?: Prefill }) {
+export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest = false }: { sources: Source[]; markets: Market[]; defaultOrigin: string | null; legs: PrefillLeg[]; initialTest?: boolean }) {
   const [srcList, setSrcList] = useState<{ id: string; nom: string; type?: string }[]>(sources);
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [mise, setMise] = useState("");
+  const [test, setTest] = useState(initialTest);
+  const [mise, setMise] = useState(initialTest ? "1000" : "");
   const [lines, setLines] = useState<Line[]>(() => {
-    const l = newLine(0, defaultOrigin);
-    if (prefill?.match) { l.match = prefill.match; l.query = `${prefill.match.home} – ${prefill.match.away}`; }
-    if (prefill?.market) { l.market = prefill.market; l.param = prefill.param ?? (prefill.market === "OU" ? "2.5" : ""); }
-    if (prefill?.sel) l.selection = prefill.sel;
-    if (prefill?.cote) l.cote = prefill.cote;
-    if (prefill?.origin) l.origin = prefill.origin;
-    if (prefill?.prediction) l.predictionId = prefill.prediction;
-    return [l];
+    if (!legs.length) return [newLine(0, defaultOrigin)];
+    return legs.map((p, i) => {
+      const l = newLine(i, p.origin ?? defaultOrigin);
+      l.match = p.match; l.query = `${p.match.home} – ${p.match.away}`;
+      if (p.market) { l.market = p.market; l.param = p.param ?? defaultParam(p.market); }
+      if (p.sel) l.selection = p.sel;
+      if (p.cote) l.cote = p.cote;
+      if (p.prediction) l.predictionId = p.prediction;
+      return l;
+    });
   });
   const [, setTick] = useState(0);
 
@@ -52,6 +56,7 @@ export function NewBetForm({ sources, markets, defaultOrigin, prefill }: { sourc
   function submit() {
     setError(null);
     const payload = {
+      virtuel: test,
       mise: miseNum,
       selections: lines.map((l) => ({
         match_id: l.match?.id ?? null,
@@ -67,12 +72,17 @@ export function NewBetForm({ sources, markets, defaultOrigin, prefill }: { sourc
     start(async () => {
       const res = await placeBet(payload);
       if (!res.ok) { setError(res.error); return; }
-      router.push("/paris?ajout=1");
+      router.push(test ? "/paris?vue=tests&ajout=1" : "/paris?ajout=1");
     });
   }
 
   return (
     <div className="space-y-5">
+      <div className="grid grid-cols-2 rounded-xl border border-line bg-surface-2 p-1 text-sm font-medium" role="radiogroup" aria-label="Type d’enregistrement">
+        <button type="button" role="radio" aria-checked={!test} onClick={() => setTest(false)} className={`rounded-lg py-2 ${!test ? "bg-white shadow-card" : "text-ink-muted"}`}>Parier</button>
+        <button type="button" role="radio" aria-checked={test} onClick={() => { setTest(true); if (!mise) setMise("1000"); }} className={`rounded-lg py-2 ${test ? "bg-white shadow-card" : "text-ink-muted"}`}>Tester sans miser</button>
+      </div>
+      {test && <Notice kind="info">Mode test : le choix est suivi et réglé comme un pari, mais ta bankroll ne bouge pas. Il compte dans « Mes tests » et dans la fiche de chaque source d’origine, pour mesurer la justesse des choix.</Notice>}
       {lines.map((l, i) => (
         <section key={l.key} className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
           {lines.length > 1 && (
@@ -88,29 +98,21 @@ export function NewBetForm({ sources, markets, defaultOrigin, prefill }: { sourc
             <Field label="Marché">
               <select
                 value={l.market}
-                onChange={(e) => update(l.key, { market: e.target.value, selection: "", param: e.target.value === "OU" ? "2.5" : "" })}
+                onChange={(e) => update(l.key, { market: e.target.value, selection: "", param: defaultParam(e.target.value) })}
                 className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base"
               >
                 {markets.map((m) => <option key={m.code} value={m.code}>{m.libelle_fr}</option>)}
               </select>
             </Field>
             {markets.find((m) => m.code === l.market)?.a_parametre && (
-              <Field label={l.market === "OU" ? "Ligne (buts)" : "Handicap"}>
-                <Input inputMode="decimal" value={l.param} onChange={(e) => update(l.key, { param: e.target.value })} placeholder={l.market === "OU" ? "2.5" : "-1"} />
+              <Field label={paramLabel(l.market)}>
+                <Input inputMode="decimal" value={l.param} onChange={(e) => update(l.key, { param: e.target.value })} placeholder={defaultParam(l.market) || "2.5"} />
               </Field>
             )}
           </div>
 
           <Field label="Sélection">
-            {SELECTIONS[l.market]?.length ? (
-              <div className="flex flex-wrap gap-2">
-                {SELECTIONS[l.market].map((s) => (
-                  <Chip key={s} active={l.selection === s} onClick={() => update(l.key, { selection: s })}>{labelSel(l.market, s, l.match)}</Chip>
-                ))}
-              </div>
-            ) : (
-              <Input value={l.selection} onChange={(e) => update(l.key, { selection: e.target.value })} placeholder="ex. 2-1" />
-            )}
+            <SelectionField market={l.market} param={l.param} value={l.selection} match={l.match} onChange={(v) => update(l.key, { selection: v })} />
           </Field>
 
           <Field label="Cote">
@@ -139,7 +141,7 @@ export function NewBetForm({ sources, markets, defaultOrigin, prefill }: { sourc
       </button>
 
       <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
-        <Field label="Mise (F CFA)">
+        <Field label={test ? "Mise fictive (F CFA)" : "Mise (F CFA)"} hint={test ? "Sert seulement à calculer le rendement du test." : undefined}>
           <Input inputMode="numeric" value={mise} onChange={(e) => setMise(e.target.value)} placeholder="2 000" />
         </Field>
         <div className="flex justify-between text-sm text-slate-700">
@@ -149,7 +151,7 @@ export function NewBetForm({ sources, markets, defaultOrigin, prefill }: { sourc
       </section>
 
       {error && <Notice>{error}</Notice>}
-      <Button onClick={submit} disabled={pending || !ready(lines, miseNum)}>{pending ? "Enregistrement…" : "Enregistrer le pari"}</Button>
+      <Button onClick={submit} disabled={pending || !ready(lines, miseNum)}>{pending ? "Enregistrement…" : test ? "Enregistrer le test" : "Enregistrer le pari"}</Button>
     </div>
   );
 }

@@ -17,6 +17,7 @@ const selection = z.object({
 });
 
 const schema = z.object({
+  virtuel: z.boolean().optional(),
   mise: z.number().positive().lte(100_000_000),
   statut: z.enum(["en_cours", "gagne", "perdu", "rembourse"]),
   placed_at: z.string().datetime().nullable(),
@@ -49,6 +50,7 @@ export async function placeImportedBet(input: ImportedBetInput): Promise<{ ok: t
       coupon_externe: d.coupon_externe,
       ...(d.summary ?? { nb_selections: d.selections.length }),
     },
+    p_virtuel: d.virtuel ?? false,
   });
   if (error) {
     if (error.message.includes("coupon déjà importé")) return { ok: false, error: "Ce coupon a déjà été importé." };
@@ -56,5 +58,6 @@ export async function placeImportedBet(input: ImportedBetInput): Promise<{ ok: t
     return { ok: false, error: "Enregistrement impossible : " + error.message };
   }
   revalidatePath("/"); revalidatePath("/paris");
+  if (d.virtuel) revalidatePath("/sources", "layout");
   return { ok: true, betId: data as string };
 }

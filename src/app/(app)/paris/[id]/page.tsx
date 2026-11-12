@@ -19,7 +19,7 @@ export default async function BetPage({ params }: { params: Promise<{ id: string
 
   const { data } = await supabase
     .from("bets")
-    .select("id, type, mise, cote_totale, statut, gain_net, placed_at, created_at, bookmaker, detail_complet, nb_selections, source_import, bet_selections(id, match_id, match_libre, market_code, market_param, selection, cote, resultat, risque_calcule, origin_source_id, match:matches(id, kickoff_at, statut, score_home, score_away, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe)))")
+    .select("id, type, mise, cote_totale, statut, gain_net, placed_at, created_at, bookmaker, detail_complet, nb_selections, source_import, virtuel, bet_selections(id, match_id, match_libre, market_code, market_param, selection, cote, resultat, risque_calcule, origin_source_id, match:matches(id, kickoff_at, statut, score_home, score_away, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe)))")
     .eq("id", id)
     .maybeSingle();
   if (!data) notFound();
@@ -50,7 +50,8 @@ export default async function BetPage({ params }: { params: Promise<{ id: string
   return (
     <>
       <Link href="/paris" className="mb-3 inline-block text-sm text-slate-600">‹ Mes paris</Link>
-      <PageHeader title="Détail du pari" subtitle={`${b.type === "combine" ? "Combiné" : "Simple"} · ${b.statut === "en_cours" ? "en cours" : "réglé"} · saisi le ${new Date(b.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", timeZone: "Africa/Abidjan" })}`} />
+      {b.virtuel && <p className="mb-3 rounded-lg border border-brand/30 bg-brand/5 px-3 py-2 text-xs text-ink-soft">🧪 <b>Test sans mise</b> : suivi et réglé comme un pari, sans effet sur ta bankroll.</p>}
+      <PageHeader title={b.virtuel ? "Détail du test" : "Détail du pari"} subtitle={`${b.type === "combine" ? "Combiné" : "Simple"} · ${b.statut === "en_cours" ? "en cours" : "réglé"} · saisi le ${new Date(b.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", timeZone: "Africa/Abidjan" })}`} />
       {analysis && <TicketAnalysisCard a={analysis} />}
       <BetEditor bet={bet} sources={sources} markets={markets ?? []} />
 

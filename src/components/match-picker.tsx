@@ -12,8 +12,22 @@ export const SELECTIONS: Record<string, string[]> = {
   OU: ["Plus", "Moins"],
   BTTS: ["Oui", "Non"],
   AH: ["1", "2"],
+  TT1: ["Plus", "Moins"],
+  TT2: ["Plus", "Moins"],
   CS: [],
 };
+
+/** Marchés combinés d'un même match : sélection « A|B ». */
+export const COMBO_PARTS: Record<string, [string[], string[]]> = {
+  DC_OU: [["1N", "12", "N2"], ["Plus", "Moins"]],
+  "1X2_OU": [["1", "N", "2"], ["Plus", "Moins"]],
+  DC_BTTS: [["1N", "12", "N2"], ["Oui", "Non"]],
+  "1X2_BTTS": [["1", "N", "2"], ["Oui", "Non"]],
+  OU_BTTS: [["Plus", "Moins"], ["Oui", "Non"]],
+};
+/** Ligne par défaut à la sélection d'un marché. */
+export const defaultParam = (market: string) => (market === "TT1" || market === "TT2" ? "0.5" : market.includes("OU") ? "2.5" : market === "AH" ? "-1.5" : "");
+export const paramLabel = (market: string) => (market === "AH" ? "Handicap" : market === "TT1" || market === "TT2" ? "Ligne (buts de l’équipe)" : "Ligne (buts)");
 
 export const toNum = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
 
@@ -24,6 +38,8 @@ export function labelSel(market: string, s: string, m: MatchHit | null) {
     return "Nul";
   }
   if (market === "DC") return { "1N": "Dom. ou nul", "12": "Dom. ou ext.", N2: "Nul ou ext." }[s] ?? s;
+  if (s === "Plus" || s === "Moins") return s === "Plus" ? "Plus de" : "Moins de";
+  if (s === "Oui" || s === "Non") return s === "Oui" ? "Les deux marquent" : "Pas les deux";
   return s;
 }
 export const short = (n: string) => n.replace(/\s?(FC|CF|SC|AC|AS|US|SV|RB|SSC|Calcio|Club de Fútbol|Football Club)\b\.?/g, "").trim().slice(0, 16);

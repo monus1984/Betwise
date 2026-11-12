@@ -28,11 +28,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
   // Profil (créé au besoin : couvre un compte Kehiwa qui ouvre BETWISE pour la première fois)
   const { data: profile } = await supabase.rpc("ensure_profile");
 
-  const [{ data: summary }, d, { data: follows }] = await Promise.all([
+  const [{ data: summary }, d, { data: follows }, { data: tests }] = await Promise.all([
     supabase.from("my_bankroll_summary").select("*").maybeSingle(),
     loadDashboard(supabase, period.d ? new Date(Date.now() - period.d * 86400000).toISOString() : null),
     supabase.from("source_follows").select("source_id, source:sources(id, nom, type)").eq("user_id", user!.id),
+    supabase.from("bets").select("statut, mise, gain_net").eq("virtuel", true).neq("statut", "annule").limit(2000),
   ]);
+  const tRegles = (tests ?? []).filter((t) => t.statut !== "en_cours");
+  const tMises = tRegles.reduce((x, t) => x + Number(t.mise), 0), tNet = tRegles.reduce((x, t) => x + Number(t.gain_net ?? 0), 0);
   const solde = Number(summary?.solde ?? 0), exposition = Number(summary?.exposition ?? 0);
   const [goal, today] = await Promise.all([loadGoal(supabase, solde), loadToday(supabase, user!.id)]);
   const mises = goal ? goal.mises : solde > 0 ? misesDuJour(solde, solde) : null;
@@ -64,6 +67,21 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
 
       <ObjectifCard goal={goal} solde={solde} />
       <CoupsDuJour picks={today.picks} theirs={today.theirs} mises={mises} />
+
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <Link href="/options" className="rounded-xl border border-line bg-white p-3 shadow-card active:bg-surface-2">
+          <p className="text-sm font-semibold">🎯 Options du jour</p>
+          <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">Ton % de réussite, en simple ou en combiné à la cote voulue.</p>
+        </Link>
+        <Link href="/paris?vue=tests" className="rounded-xl border border-line bg-white p-3 shadow-card active:bg-surface-2">
+          <p className="text-sm font-semibold">🧪 Mes tests</p>
+          <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
+            {!tests?.length ? "Teste tes choix et ceux de tes tipsters, sans miser."
+              : !tRegles.length ? `${tests.length} en attente de résultat.`
+              : <>{tRegles.length} réglé{tRegles.length > 1 ? "s" : ""} · {Math.round((100 * tRegles.filter((t) => t.statut === "gagne").length) / tRegles.length)} % gagnés · <span className={tNet >= 0 ? "text-gain" : "text-loss"}>{tNet >= 0 ? "+" : ""}{Math.round((100 * tNet) / tMises)} %</span></>}
+          </p>
+        </Link>
+      </div>
 
       <h2 className="mt-6 text-base font-bold">Ton bilan</h2>
       <nav className="mt-2 flex gap-1.5" aria-label="Période">

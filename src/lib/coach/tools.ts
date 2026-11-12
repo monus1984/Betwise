@@ -54,14 +54,14 @@ const matchName = (s: BetRow["bet_selections"][number]) => { const m = one(s.mat
 const riskOf = (c: number) => (c < 1.5 ? "prudent" : c <= 2.2 ? "moyen" : "risqué");
 
 async function allBets(db: Db, from: string | null) {
-  let q = db.from("bets").select(BET_SELECT).order("placed_at", { ascending: true }).limit(2000);
+  let q = db.from("bets").select(BET_SELECT).eq("virtuel", false).order("placed_at", { ascending: true }).limit(2000);
   if (from) q = q.gte("placed_at", from);
   const { data, error } = await q;
   if (error) throw new Error(error.message);
   return (data ?? []) as unknown as BetRow[];
 }
 async function unit(db: Db) {
-  const { data } = await db.from("bets").select("mise").neq("statut", "annule").limit(2000);
+  const { data } = await db.from("bets").select("mise").eq("virtuel", false).neq("statut", "annule").limit(2000);
   return median((data ?? []).map((b) => Number(b.mise))) || 1;
 }
 
@@ -258,7 +258,7 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
     }
 
     case "paris_en_cours": {
-      const { data, error } = await db.from("bets").select(BET_SELECT).eq("statut", "en_cours").order("placed_at", { ascending: false }).limit(30);
+      const { data, error } = await db.from("bets").select(BET_SELECT).eq("virtuel", false).eq("statut", "en_cours").order("placed_at", { ascending: false }).limit(30);
       if (error) throw new Error(error.message);
       const bets = (data ?? []) as unknown as BetRow[];
       const u = await unit(db);

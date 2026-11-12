@@ -27,3 +27,6 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0017_match_extras.sql | 2026-11-11 | `match_extras` : compositions, absents, statistiques (cache API-Football, lecture connectés) |
 | 0018_af_history.sql | 2026-11-11 | `af_history` (résultats, xG, tirs par match depuis API-Football) ; `af_home_id` / `af_away_id` sur matches |
 | 0019_objectifs_coups_du_jour.sql | 2026-11-12 | `objectifs` (bankroll de départ, cible, échéance ; un actif par utilisateur), `daily_picks` (coups du jour par catégorie), source « Coups du jour BETWISE » |
+| 0020_markets_and_tests.sql | 2026-11-12 | Marchés TT1/TT2 (buts par équipe), DC_BTTS, 1X2_BTTS, OU_BTTS ; règlement étendu ; `bets.virtuel` (paris de test) |
+| 0021_virtual_bets.sql | 2026-11-12 | `place_bet(..., p_virtuel)` : un test ne touche pas la bankroll et enregistre le choix comme prono de chaque source d'origine ; `finalize_bet`, `settle_bet`, `my_bankroll_summary` ignorent les tests |
+| 0022_update_bet_test_fingerprint.sql | 2026-11-12 | `update_bet` garde le préfixe de test dans l'empreinte d'un ticket de test |

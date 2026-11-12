@@ -19,6 +19,7 @@ const selectionSchema = z.object({
 }).refine((s) => s.match_id || s.match_libre, { message: "Match requis" });
 
 const placeSchema = z.object({
+  virtuel: z.boolean().optional(),
   mise: z.number().positive().lte(100_000_000),
   selections: z.array(selectionSchema).min(1).max(20),
 });
@@ -35,10 +36,12 @@ export async function placeBet(input: PlaceBetInput): Promise<PlaceBetResult> {
     p_mise: parsed.data.mise,
     p_selections: parsed.data.selections,
     p_source_import: "manuel",
+    p_virtuel: parsed.data.virtuel ?? false,
   });
   if (error) return { ok: false, error: humanize(error.message) };
   revalidatePath("/");
   revalidatePath("/paris", "layout");
+  if (parsed.data.virtuel) revalidatePath("/sources", "layout");
   return { ok: true, betId: data as string };
 }
 

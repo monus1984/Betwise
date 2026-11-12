@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateBet, updateSelection } from "@/lib/bets/actions";
 import { Button, Chip, Field, Input, Notice, RISK_CLASS, RISK_LABEL, riskFromOdds } from "@/components/ui";
-import { MatchPicker, SELECTIONS, labelSel, toNum, type MatchHit } from "@/components/match-picker";
+import { MatchPicker, defaultParam, toNum, type MatchHit } from "@/components/match-picker";
+import { SelectionField } from "@/components/selection-field";
 import { OriginPicker, type SourceOpt } from "../origin-picker";
 
 export type EditableBet = {
@@ -71,10 +72,6 @@ export function BetEditor({ bet, sources, markets }: { bet: EditableBet; sources
   );
 }
 
-const COMBO_FIRST: Record<string, { v: string; label: string }[]> = {
-  DC_OU: [{ v: "1N", label: "1 ou N" }, { v: "12", label: "1 ou 2" }, { v: "N2", label: "N ou 2" }],
-  "1X2_OU": [{ v: "1", label: "1" }, { v: "N", label: "N" }, { v: "2", label: "2" }],
-};
 const RESULT_LABEL: Record<string, { t: string; c: string }> = {
   en_attente: { t: "en attente", c: "bg-surface-2 text-ink-muted" }, gagne: { t: "gagnée", c: "bg-emerald-50 text-gain" },
   perdu: { t: "perdue", c: "bg-red-50 text-loss" }, rembourse: { t: "remboursée", c: "bg-amber-50 text-draw" },
@@ -91,8 +88,6 @@ function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index
   const [query, setQuery] = useState(s.match ? `${s.match.home} – ${s.match.away}` : s.match_libre ?? "");
   const [match, setMatch] = useState<MatchHit | null>(s.match ? { id: s.match.id, kickoff_at: s.match.kickoff_at, statut: s.match.statut, home: s.match.home, away: s.match.away, competition: s.match.competition } : null);
   const hasParam = markets.find((m) => m.code === market)?.a_parametre;
-  const combined = market === "DC_OU" || market === "1X2_OU";
-  const [comboA, comboB] = selection.split("|");
   const dirty = (match?.id ?? null) !== (s.match?.id ?? null) || (!match && query.trim() !== (s.match_libre ?? "")) ||
     (!locked && (Number(toNum(cote)) !== Number(s.cote) || market !== s.market_code || selection !== s.selection || (hasParam ? toNum(param) : null) !== (s.market_param !== null ? Number(s.market_param) : null)));
 
@@ -135,7 +130,7 @@ function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index
         <>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Marché">
-              <select value={market} onChange={(e) => { setMarket(e.target.value); setSelection(""); setParam(e.target.value.includes("OU") ? "2.5" : ""); }} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base">
+              <select value={market} onChange={(e) => { setMarket(e.target.value); setSelection(""); setParam(defaultParam(e.target.value)); }} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base">
                 {markets.map((m) => <option key={m.code} value={m.code}>{m.libelle_fr}</option>)}
               </select>
             </Field>
@@ -145,18 +140,7 @@ function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index
           </div>
 
           <Field label="Sélection">
-            {combined ? (
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">{COMBO_FIRST[market].map((o) => <Chip key={o.v} active={comboA === o.v} onClick={() => setSelection(`${o.v}|${comboB ?? "Plus"}`)}>{o.label}</Chip>)}</div>
-                <div className="flex flex-wrap gap-2">{["Plus", "Moins"].map((o) => <Chip key={o} active={comboB === o} onClick={() => setSelection(`${comboA ?? COMBO_FIRST[market][0].v}|${o}`)}>{o === "Plus" ? "+" : "−"} de {param || "2.5"} buts</Chip>)}</div>
-              </div>
-            ) : SELECTIONS[market]?.length ? (
-              <div className="flex flex-wrap gap-2">
-                {SELECTIONS[market].map((v) => <Chip key={v} active={selection === v} onClick={() => setSelection(v)}>{labelSel(market, v, match)}</Chip>)}
-              </div>
-            ) : (
-              <Input value={selection} onChange={(e) => setSelection(e.target.value)} placeholder="ex. 2-1" />
-            )}
+            <SelectionField market={market} param={param} value={selection} match={match} onChange={setSelection} />
           </Field>
 
           <div className="flex items-end gap-3">

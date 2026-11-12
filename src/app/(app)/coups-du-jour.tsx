@@ -12,7 +12,7 @@ const CAT_NOTE: Record<Categorie, string> = { sur: "cotes 1,10–1,20", audacieu
 export function CoupsDuJour({ picks, theirs, mises }: { picks: TodayPick[]; theirs: TheirPick[]; mises: Record<Categorie, number> | null }) {
   return (
     <section className="mt-3 rounded-xl border border-line bg-white p-4 shadow-card">
-      <div className="mb-3 flex items-baseline justify-between gap-2"><h2 className="text-sm font-semibold">⚡ Les coups du jour</h2><Link href="/matchs?top=80" className="text-[11px] text-brand">tous les matchs ›</Link></div>
+      <div className="mb-3 flex items-baseline justify-between gap-2"><h2 className="text-sm font-semibold">⚡ Les coups du jour</h2><Link href="/options" className="text-[11px] text-brand">toutes les options ›</Link></div>
       {picks.length === 0 ? (
         <p className="text-sm text-ink-muted">Rien de solide aujourd’hui : aucune sélection ne s’appuie sur une vraie cote de référence. Le Coach préfère se taire que proposer au hasard.</p>
       ) : (

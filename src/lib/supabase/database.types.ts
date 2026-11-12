@@ -562,6 +562,7 @@ export type Database = {
           coupon_externe: string | null
           bookmaker: string | null
           ticket_fingerprint: string | null
+          virtuel: boolean
         }
         Insert: {
           id?: string
@@ -583,6 +584,7 @@ export type Database = {
           coupon_externe?: string | null
           bookmaker?: string | null
           ticket_fingerprint?: string | null
+          virtuel?: boolean
         }
         Update: {
           id?: string
@@ -604,6 +606,7 @@ export type Database = {
           coupon_externe?: string | null
           bookmaker?: string | null
           ticket_fingerprint?: string | null
+          virtuel?: boolean
         }
         Relationships: [
           {
@@ -1342,6 +1345,7 @@ export type Database = {
           p_upload_id?: string | null
           p_placed_at?: string | null
           p_summary?: Json | null
+          p_virtuel?: boolean | null
         }
         Returns: string
       }

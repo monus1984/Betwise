@@ -31,14 +31,14 @@ export async function loadToday(db: Db, userId: string) {
 
   const [{ data: preds }, { data: bets }] = await Promise.all([
     srcIds.length ? db.from("predictions").select(`market_code, market_param, selection, cote_annoncee, source:sources(nom, type), match:matches!inner(${MATCH})`).in("source_id", srcIds).neq("statut", "annule").gte("match.kickoff_at", from).lte("match.kickoff_at", to).limit(100) : Promise.resolve({ data: [] as never[] }),
-    db.from("bet_selections").select(`market_code, market_param, selection, cote, origin:sources!bet_selections_origin_source_id_fkey(nom, type), bets!inner(user_id, statut), match:matches!inner(${MATCH})`).eq("bets.user_id", userId).eq("bets.statut", "en_cours").gte("match.kickoff_at", from).lte("match.kickoff_at", to).limit(100),
+    db.from("bet_selections").select(`market_code, market_param, selection, cote, origin:sources!bet_selections_origin_source_id_fkey(nom, type), bets!inner(user_id, statut, virtuel), match:matches!inner(${MATCH})`).eq("bets.user_id", userId).eq("bets.statut", "en_cours").gte("match.kickoff_at", from).lte("match.kickoff_at", to).limit(100),
   ]);
 
   type Raw = { market_code: string; market_param: number | null; selection: string; cote: number | null; qui: string; type: "pari" | "prono"; m: M };
   const theirsRaw: Raw[] = [
-    ...((bets ?? []) as unknown as { market_code: string; market_param: number | null; selection: string; cote: number; origin: One<{ nom: string; type: string }>; match: One<M> }[]).map((b) => {
+    ...((bets ?? []) as unknown as { market_code: string; market_param: number | null; selection: string; cote: number; origin: One<{ nom: string; type: string }>; bets: One<{ virtuel: boolean }>; match: One<M> }[]).map((b) => {
       const o = one(b.origin);
-      return { market_code: b.market_code, market_param: b.market_param, selection: b.selection, cote: Number(b.cote), qui: `Ton pari${o && o.type !== "perso" ? ` (${o.nom})` : ""}`, type: "pari" as const, m: one(b.match)! };
+      return { market_code: b.market_code, market_param: b.market_param, selection: b.selection, cote: Number(b.cote), qui: `${one(b.bets)?.virtuel ? "Ton test" : "Ton pari"}${o && o.type !== "perso" ? ` (${o.nom})` : ""}`, type: "pari" as const, m: one(b.match)! };
     }),
     ...((preds ?? []) as unknown as { market_code: string; market_param: number | null; selection: string; cote_annoncee: number | null; source: One<{ nom: string; type: string }>; match: One<M> }[])
       .filter((p) => one(p.source)?.nom !== "Coups du jour BETWISE" && one(p.source)?.type !== "modele_betwise")

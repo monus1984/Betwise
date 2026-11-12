@@ -22,18 +22,42 @@ const RDC: Record<string, (i: number, j: number) => boolean> = { "1N": (i, j) =>
 type Rule = (i: number, j: number) => boolean;
 const ou = (sel: string, line: number): Rule => (i, j) => (sel === "Plus" ? i + j > line : i + j < line);
 
-/** Probabilité d'une sélection ; null si le marché n'est pas calculable (handicap, sélection inconnue). */
+const BTTS: Record<string, Rule> = { Oui: (i, j) => i > 0 && j > 0, Non: (i, j) => i === 0 || j === 0 };
+/** Probabilité de gagner quand une égalité à la ligne rembourse : p(gagné) / (p(gagné) + p(perdu)). */
+const sansRembourse = (g: Grid, win: Rule, push: Rule) => { const w = sum(g, win), l = sum(g, (i, j) => !win(i, j) && !push(i, j)); return w + l > 0 ? w / (w + l) : null; };
+
+/** Probabilité d'une sélection ; null si le marché n'est pas calculable (ligne en quart, sélection inconnue). */
 export function probOf(g: Grid, market: string, param: number | null, sel: string): number | null {
+  const ouOk = (s: string) => s === "Plus" || s === "Moins";
   switch (market) {
     case "1X2": return R1X2[sel] ? sum(g, R1X2[sel]) : null;
     case "DC": return RDC[sel] ? sum(g, RDC[sel]) : null;
     case "DNB": { if (sel !== "1" && sel !== "2") return null; const a = sum(g, R1X2["1"]), b = sum(g, R1X2["2"]); return (sel === "1" ? a : b) / (a + b); }
-    case "OU": return param === null || !["Plus", "Moins"].includes(sel) ? null : sum(g, ou(sel, param));
-    case "BTTS": return sel === "Oui" ? sum(g, (i, j) => i > 0 && j > 0) : sel === "Non" ? sum(g, (i, j) => i === 0 || j === 0) : null;
+    case "OU": return param === null || !ouOk(sel) ? null : sansRembourse(g, ou(sel, param), (i, j) => i + j === param);
+    case "BTTS": return BTTS[sel] ? sum(g, BTTS[sel]) : null;
     case "CS": { const [a, b] = sel.split("-").map(Number); return Number.isInteger(a) && Number.isInteger(b) && a <= MAX && b <= MAX ? g[a][b] : null; }
+    case "TT1": case "TT2": {
+      if (param === null || !ouOk(sel)) return null;
+      const goals = (i: number, j: number) => (market === "TT1" ? i : j);
+      return sansRembourse(g, (i, j) => (sel === "Plus" ? goals(i, j) > param : goals(i, j) < param), (i, j) => goals(i, j) === param);
+    }
+    case "AH": {
+      // Même convention que le règlement : sélection « 1 » ou « 2 », param = handicap de l'équipe choisie
+      if (param === null || (sel !== "1" && sel !== "2") || (param * 2) % 1 !== 0) return null;
+      const adj = (i: number, j: number) => (sel === "1" ? i - j : j - i) + param;
+      return sansRembourse(g, (i, j) => adj(i, j) > 0, (i, j) => adj(i, j) === 0);
+    }
     case "DC_OU": case "1X2_OU": {
       const [a, b] = sel.split("|"); const r: Rule | undefined = (market === "DC_OU" ? RDC : R1X2)[a];
-      return r !== undefined && param !== null && ["Plus", "Moins"].includes(b) ? sum(g, (i, j) => r(i, j) && ou(b, param)(i, j)) : null;
+      return r !== undefined && param !== null && ouOk(b) ? sansRembourse(g, (i, j) => r(i, j) && ou(b, param)(i, j), (i, j) => r(i, j) && i + j === param) : null;
+    }
+    case "DC_BTTS": case "1X2_BTTS": {
+      const [a, b] = sel.split("|"); const r: Rule | undefined = (market === "DC_BTTS" ? RDC : R1X2)[a];
+      return r !== undefined && BTTS[b] ? sum(g, (i, j) => r(i, j) && BTTS[b](i, j)) : null;
+    }
+    case "OU_BTTS": {
+      const [a, b] = sel.split("|");
+      return param !== null && ouOk(a) && BTTS[b] ? sansRembourse(g, (i, j) => ou(a, param)(i, j) && BTTS[b](i, j), (i, j) => i + j === param && BTTS[b](i, j)) : null;
     }
   }
   return null;

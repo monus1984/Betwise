@@ -34,7 +34,7 @@ function group(rows: Row[], key: (b: Row) => string): Group[] {
 }
 
 export async function loadDashboard(db: Db, since: string | null): Promise<Dashboard> {
-  let q = db.from("bets").select("id, type, mise, cote_totale, statut, gain_net, placed_at, settled_at, bookmaker, bet_selections(market_code, cote, resultat, origin:sources!bet_selections_origin_source_id_fkey(id, nom, type))").neq("statut", "annule").order("placed_at").limit(3000);
+  let q = db.from("bets").select("id, type, mise, cote_totale, statut, gain_net, placed_at, settled_at, bookmaker, bet_selections(market_code, cote, resultat, origin:sources!bet_selections_origin_source_id_fkey(id, nom, type))").eq("virtuel", false).neq("statut", "annule").order("placed_at").limit(3000);
   if (since) q = q.gte("placed_at", since);
   const { data } = await q;
   const all = (data ?? []) as unknown as Row[];

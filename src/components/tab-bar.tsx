@@ -21,7 +21,7 @@ export function TabBar() {
     >
       <ul className="mx-auto grid max-w-xl grid-cols-5">
         {TABS.map((t) => {
-          const active = t.href === "/" ? path === "/" : path.startsWith(t.href);
+          const active = t.href === "/" ? path === "/" : path.startsWith(t.href) || (t.href === "/matchs" && path.startsWith("/options"));
           const Icon = t.icon;
           if ("central" in t && t.central) {
             return (

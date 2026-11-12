@@ -34,6 +34,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
   const [lines, setLines] = useState<Line[]>([]);
   const [mise, setMise] = useState("");
   const [status, setStatus] = useState<"en_cours" | "gagne" | "perdu" | "rembourse">("en_cours");
+  const [test, setTest] = useState(false);
   const [summaryOrigin, setSummaryOrigin] = useState<string | null>(defaultOrigin);
   const [pending, start] = useTransition();
 
@@ -100,6 +101,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
     setError(null);
     start(async () => {
       const res = await placeImportedBet({
+        virtuel: test,
         mise: toNum(mise),
         statut: status,
         placed_at: result.placed_at_iso,
@@ -120,7 +122,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
         })),
       });
       if (!res.ok) { setError(res.error); return; }
-      router.push("/import?ok=1&next=" + (status === "en_cours" ? "paris" : "regles"));
+      router.push(test ? "/paris?vue=tests&ajout=1" : "/import?ok=1&next=" + (status === "en_cours" ? "paris" : "regles"));
     });
   }
 
@@ -158,6 +160,11 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
   const raw = result.raw;
   return (
     <div className="space-y-4">
+      <div className="grid grid-cols-2 rounded-xl border border-line bg-surface-2 p-1 text-sm font-medium" role="radiogroup" aria-label="Type d’enregistrement">
+        <button type="button" role="radio" aria-checked={!test} onClick={() => setTest(false)} className={`rounded-lg py-2 ${!test ? "bg-white shadow-card" : "text-ink-muted"}`}>J’ai parié</button>
+        <button type="button" role="radio" aria-checked={test} onClick={() => { setTest(true); if (!toNum(mise)) setMise("1000"); }} className={`rounded-lg py-2 ${test ? "bg-white shadow-card" : "text-ink-muted"}`}>Tester sans miser</button>
+      </div>
+      {test && <Notice kind="info">Coupon ou pronos chargés comme test : suivis et réglés automatiquement, sans toucher à ta bankroll. Choisis bien l’origine (toi ou le tipster) : c’est elle qui sera notée.</Notice>}
       <section className="rounded-xl border border-slate-200 bg-white p-4">
         <div className="flex items-start justify-between">
           <div>
@@ -211,7 +218,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
 
       <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Mise (F CFA)"><Input inputMode="numeric" value={mise} onChange={(e) => setMise(e.target.value)} /></Field>
+          <Field label={test ? "Mise fictive (F CFA)" : "Mise (F CFA)"}><Input inputMode="numeric" value={mise} onChange={(e) => setMise(e.target.value)} /></Field>
           <Field label="Résultat du ticket">
             <select value={status} onChange={(e) => setStatus(e.target.value as typeof status)} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base">
               <option value="en_cours">En cours</option>
@@ -230,7 +237,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
       </section>
 
       {error && <Notice>{error}</Notice>}
-      <Button onClick={save} disabled={pending || !ready}>{pending ? "Enregistrement…" : "Enregistrer ce ticket"}</Button>
+      <Button onClick={save} disabled={pending || !ready}>{pending ? "Enregistrement…" : test ? "Enregistrer le test" : "Enregistrer ce ticket"}</Button>
     </div>
   );
 }
