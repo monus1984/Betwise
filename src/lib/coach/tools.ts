@@ -6,7 +6,9 @@
  */
 import type { createClient } from "../supabase/server";
 import type { ChatTool } from "../llm/provider";
-import { loadSignals, pickLabel, picksOf } from "../probs/signals";
+import { loadSignals } from "../probs/signals";
+import { buildCombos, coteEstimee, singlesOf } from "../options/build";
+import { loadOptions } from "../options/load";
 import { analyzeTicket } from "../probs/ticket";
 import { loadGoal } from "./goal";
 import { evaluatePlan, misesDuJour } from "./plan";
@@ -32,7 +34,9 @@ export const COACH_TOOLS: ChatTool[] = [
   { name: "simuler_objectif", description: "Simule un objectif sans l'enregistrer, à partir du solde actuel : chance d'atteindre la cible dans le délai, risque de chute, mise nécessaire, et objectif raisonnable.", input_schema: { type: "object", properties: { cible: { type: "number", description: "Montant visé en F CFA" }, jours: { type: "number", description: "Délai en jours" } }, required: ["cible", "jours"] } },
   { name: "fixer_objectif", description: "Enregistre l'objectif (remplace l'actuel). À n'appeler que si l'utilisateur a clairement validé le montant et le délai.", input_schema: { type: "object", properties: { cible: { type: "number" }, jours: { type: "number" } }, required: ["cible", "jours"] } },
   { name: "coups_du_jour", description: "Les coups du jour BETWISE classés Sûr / Audacieux / Risqué (probabilité, cote, mise conseillée, gain possible), et les choix de l'utilisateur et de ses sources sur les matchs du jour, confrontés aux probabilités BETWISE et classés dans les mêmes catégories. À utiliser pour « quoi jouer aujourd'hui », « mes paris du jour », « que penses-tu du prono de X ».", input_schema: { type: "object", properties: {} } },
-  { name: "selections_probables", description: "Les sélections les plus probables d'une journée, tous marchés confondus (victoire, double chance, plus/moins de buts, les deux marquent), au-dessus d'un seuil de probabilité. Donne pour chacune la probabilité (tirée des cotes du marché, sinon du modèle), la cote de référence ou la cote juste, et l'avis du modèle quand il existe. Donne aussi la probabilité d'un combiné des premières. À utiliser pour « les meilleurs paris du jour », « des paris fiables à 85 % », « quoi jouer demain ».", input_schema: { type: "object", properties: { jour: { type: "string", description: "« aujourdhui », « demain » ou une date AAAA-MM-JJ. Par défaut aujourdhui." }, seuil_pct: { type: "number", description: "Probabilité minimale en %, entre 50 et 95. Par défaut 80." }, max: { type: "number", description: "Nombre maximal de sélections, par défaut 8." } } } },
+  { name: "options_du_jour", description: "Paris simples dont la probabilité est dans une fourchette choisie, sur tous les marchés (victoire, double chance, remboursé si nul, handicap ±1,5, plus/moins de buts du match ou d'une équipe, les deux marquent, et combos d'un même match comme « Sénégal ou nul et plus de 1,5 but »). Donne probabilité, catégorie, cote de référence ou cote juste. À utiliser pour « quoi jouer à 80 % », « des paris Audacieux », « les options de PSG–Lyon ».", input_schema: { type: "object", properties: { min_pct: { type: "number", description: "Probabilité minimale en %, par défaut 67" }, max_pct: { type: "number", description: "Probabilité maximale en %, par défaut 91" }, periode: { type: "string", enum: ["auj", "demain", "48h"], description: "Par défaut auj" }, famille: { type: "string", enum: ["tout", "resultat", "buts", "combo"], description: "combo = combos d'un même match" }, equipe: { type: "string", description: "Limiter aux matchs d'une équipe (nom partiel)" }, max: { type: "number", description: "Nombre maximal, par défaut 8" } } } },
+  { name: "combine_cible", description: "Compose des combinés qui visent une cote donnée avec des sélections dans une fourchette de probabilité (une par match, le moins de matchs possible). Donne pour chacun les sélections, la cote estimée, la chance réelle de passer et la cote juste. À utiliser pour « fais-moi un combiné à 3 », « un combiné Sûr à 2 ».", input_schema: { type: "object", properties: { cote_cible: { type: "number", description: "Cote recherchée, ex. 2, 3, 5" }, min_pct: { type: "number", description: "Par défaut 67" }, max_pct: { type: "number", description: "Par défaut 91" }, periode: { type: "string", enum: ["auj", "demain", "48h"], description: "Par défaut 48h" } }, required: ["cote_cible"] } },
+  { name: "mes_tests", description: "Bilan des choix testés sans miser (tests) : nombre réglé, tickets gagnés, rendement sur mises fictives, justesse des sélections par origine (choix perso, tipster, modèle). À utiliser pour « mes tests », « mes choix tiennent-ils la route », « mon tipster est-il fiable sur mes tests ».", input_schema: { type: "object", properties: { periode: PERIODE } } },
   { name: "bilan_paris", description: "Bilan des paris réglés de l'utilisateur sur une période : nombre, réussite, rendement (ROI), résultat en unités, cote moyenne, et détail selon un regroupement.", input_schema: { type: "object", properties: { periode: PERIODE, regroupement: { type: "string", enum: ["aucun", "type", "nb_selections", "risque", "bookmaker", "marche"], description: "Découpage du bilan. type = simple/combiné." } } } },
   { name: "bilan_par_origine", description: "Réussite des sélections selon leur origine (choix perso, tipster, page, modèle BETWISE…), comparée à la probabilité implicite des cotes jouées. Indique aussi combien de combinés ont été perdus à cause d'une seule sélection.", input_schema: { type: "object", properties: { periode: PERIODE } } },
   { name: "etat_bankroll", description: "État de la bankroll en pourcentages : évolution depuis le capital initial, exposition sur les paris en cours, séries, comportement de mise après une perte, respect des limites que l'utilisateur s'est fixées.", input_schema: { type: "object", properties: {} } },
@@ -132,42 +136,55 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
       };
     }
 
-    case "selections_probables": {
-      const TZ = "Africa/Abidjan";
-      const key = (d: Date | string) => new Date(d).toLocaleDateString("en-CA", { timeZone: TZ });
-      const j = String(input.jour ?? "aujourdhui").toLowerCase();
-      let day = /^\d{4}-\d{2}-\d{2}$/.test(j) ? j : key(new Date(Date.now() + (j.startsWith("dem") ? 86400000 : 0)));
-      const seuil = Math.min(95, Math.max(50, Number(input.seuil_pct) || 80)) / 100;
-      const max = Math.min(15, Math.max(1, Number(input.max) || 8));
-      const { data: ms } = await db.from("matches")
-        .select("id, kickoff_at, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom)")
-        .eq("statut", "programme").gte("kickoff_at", new Date().toISOString()).lte("kickoff_at", new Date(Date.now() + 15 * 86400000).toISOString()).order("kickoff_at").limit(400);
-      const all = ms ?? [];
-      let rows = all.filter((m) => key(m.kickoff_at) === day);
-      let note: string | null = null;
-      if (!rows.length && all.length) { day = key(all[0].kickoff_at); rows = all.filter((m) => key(m.kickoff_at) === day); note = `aucun match le jour demandé ; prochaine journée avec des matchs : ${day}`; }
-      const signals = await loadSignals(db, rows.map((m) => m.id));
-      const sels = rows.flatMap((m) => {
-        const sg = signals.get(m.id); if (!sg) return [];
-        const h = one(m.home as One<{ nom: string }>)?.nom ?? "", a = one(m.away as One<{ nom: string }>)?.nom ?? "";
-        const seen = new Set<string>();
-        return picksOf(sg).filter((p) => p.p >= seuil && p.p <= 0.95 && !seen.has(p.market) && seen.add(p.market)).slice(0, 2).map((p) => ({
-          match: `${h} – ${a}`, competition: one(m.competition as One<{ nom: string }>)?.nom, coup_envoi: m.kickoff_at,
-          selection: pickLabel(p.market, p.param, p.sel, h, a), probabilite_pct: pct(p.p), categorie: (() => { const c = categorieOf(p.p); return c ? CAT_LABEL[c] : null; })(),
-          cote_reference: p.cote, cote_juste: r2(1 / p.p), origine: sg.source === "modele" ? "modèle BETWISE (pas de cote disponible)" : "cotes du marché, marge retirée",
-          avis_du_modele_pct: p.pModele !== null ? pct(p.pModele) : null, _p: p.p,
-        }));
-      }).sort((x, y) => y._p - x._p).slice(0, max);
-      const comb = (n: number) => sels.length >= n ? pct(sels.slice(0, n).reduce((a, s) => a * s._p, 1)) : null;
+    case "options_du_jour": {
+      const min = Math.min(97, Math.max(30, Number(input.min_pct) || 67)) / 100, max = Math.min(99, Math.max(31, Number(input.max_pct) || 91)) / 100;
+      const per = (["auj", "demain", "48h"] as const).find((x) => x === input.periode) ?? "auj";
+      const fam = ["resultat", "buts", "combo"].includes(String(input.famille)) ? String(input.famille) : null;
+      const eq = typeof input.equipe === "string" && input.equipe.trim().length >= 2 ? input.equipe.trim().toLowerCase() : null;
+      const n = Math.min(15, Math.max(1, Number(input.max) || 8));
+      const { options, nbMatchs, nbCouverts } = await loadOptions(db, per);
+      const pool = options.filter((o) => o.p >= min && o.p <= max && (!fam || o.famille === fam) && (!eq || `${o.home} ${o.away}`.toLowerCase().includes(eq)));
+      const list = (eq ? [...pool].sort((a, b) => b.p - a.p) : singlesOf(pool, 2)).slice(0, n);
       return {
-        jour: day, seuil_pct: seuil * 100, matchs_ce_jour: rows.length, matchs_avec_chiffres: signals.size, note,
-        selections: sels.map(({ _p, ...s }) => s),
-        combine_des_3_premieres_pct: comb(3), combine_des_5_premieres_pct: comb(5),
-        rappels: [
-          "la probabilité vient des cotes du marché quand elles existent : c'est la meilleure estimation disponible",
-          "une sélection n'est une bonne affaire que si le bookmaker de l'utilisateur propose PLUS que cote_juste ; à cote_juste ou moins, elle perd de l'argent sur la durée",
-          "avis_du_modele_pct est un second avis : sur 1 954 matchs passés le modèle a été moins juste que le marché, et parier sur ses désaccords avec le marché aurait perdu 15 %",
-        ],
+        periode: per, fourchette_pct: [pct(min), pct(max)], matchs: nbMatchs, matchs_avec_chiffres: nbCouverts, options_dans_la_fourchette: pool.length,
+        options: list.map((o) => ({ selection: o.label, match: `${o.home} – ${o.away}`, coup_envoi: o.kickoff, probabilite_pct: pct(o.p), categorie: (() => { const c = categorieOf(o.p); return c ? CAT_LABEL[c] : null; })(), cote_reference: o.cote, cote_juste: r2(1 / o.p), origine: o.source === "modele" ? "modèle (pas de cote)" : "cotes du marché, marge retirée" })),
+        rappels: ["une sélection n'est une bonne affaire que si le bookmaker paie PLUS que cote_juste", "l'utilisateur peut tester une option sans miser depuis Options du jour (bouton Tester)"],
+      };
+    }
+
+    case "combine_cible": {
+      const cible = Math.min(50, Math.max(1.1, Number(input.cote_cible) || 2));
+      const min = Math.min(97, Math.max(30, Number(input.min_pct) || 67)) / 100, max = Math.min(99, Math.max(31, Number(input.max_pct) || 91)) / 100;
+      const per = (["auj", "demain", "48h"] as const).find((x) => x === input.periode) ?? "48h";
+      const { options } = await loadOptions(db, per);
+      const combos = buildCombos(options.filter((o) => o.p >= min && o.p <= max), cible, 2);
+      return {
+        cote_cible: cible, fourchette_pct: [pct(min), pct(max)], periode: per,
+        plafond_de_reussite_pct: pct(1 / cible),
+        combines: combos.map((c) => ({ nb_selections: c.legs.length, cote_estimee: r2(c.cote), chance_de_passer_pct: pct(c.p), cote_juste: r2(c.coteJuste), cible_atteinte: c.atteint,
+          selections: c.legs.map((o) => ({ selection: o.label, match: `${o.home} – ${o.away}`, coup_envoi: o.kickoff, probabilite_pct: pct(o.p), cote: o.cote ?? r2(coteEstimee(o)), cote_est_une_estimation: !o.cote })) })),
+        rappels: ["à cote égale, la chance d'un combiné ne dépend pas des sélections : au mieux 1/cote ; chaque match ajouté paie la marge du bookmaker, d'où chance_de_passer < plafond", "cote_estimee suppose 5 % de marge sur les marchés sans cote de référence : à vérifier chez le bookmaker"],
+      };
+    }
+
+    case "mes_tests": {
+      let q = db.from("bets").select("statut, mise, gain_net, bet_selections(resultat, origin:sources!bet_selections_origin_source_id_fkey(nom, type))").eq("virtuel", true).neq("statut", "annule").limit(2000);
+      const from = since(input.periode); if (from) q = q.gte("placed_at", from);
+      const { data } = await q;
+      const rows = (data ?? []) as unknown as { statut: string; mise: number; gain_net: number | null; bet_selections: { resultat: string; origin: One<{ nom: string; type: string }> }[] }[];
+      const done = rows.filter((b) => b.statut !== "en_cours");
+      const mises = done.reduce((x, b) => x + Number(b.mise), 0), net = done.reduce((x, b) => x + Number(b.gain_net ?? 0), 0);
+      const by = new Map<string, { n: number; ok: number }>();
+      for (const b of done) for (const s of b.bet_selections) {
+        if (s.resultat !== "gagne" && s.resultat !== "perdu") continue;
+        const k = originName(one(s.origin)); const e = by.get(k) ?? { n: 0, ok: 0 }; e.n++; if (s.resultat === "gagne") e.ok++; by.set(k, e);
+      }
+      return {
+        tests: rows.length, en_attente: rows.length - done.length, regles: done.length,
+        tickets_gagnes_pct: done.length ? pct(done.filter((b) => b.statut === "gagne").length / done.length) : null,
+        rendement_pct: mises ? pct(net / mises) : null,
+        par_origine: [...by].map(([origine, e]) => ({ origine, selections_reglees: e.n, justes_pct: pct(e.ok / e.n) })).sort((a, b) => b.selections_reglees - a.selections_reglees),
+        rappel: done.length < 30 ? "moins de 30 tests réglés : résultat encore très dépendant du hasard" : null,
       };
     }
 
