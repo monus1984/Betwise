@@ -155,7 +155,7 @@ function speak(text: string) {
     const parts = spoken(text).split(/(?<=[.!?:])\s+/).map((x) => x.trim()).filter(Boolean);
     for (const part of parts) {
       const u = new SpeechSynthesisUtterance(part);
-      u.lang = voice?.lang ?? "fr-FR"; u.rate = 1.08; u.pitch = 1.12; // un peu plus vif et plus clair que le réglage d'usine
+      u.lang = voice?.lang ?? "fr-FR"; u.rate = 0.92; u.pitch = 1.06; // débit posé, voix un peu plus claire que le réglage du téléphone
       if (voice) u.voice = voice as SpeechSynthesisVoice;
       synth.speak(u);
     }

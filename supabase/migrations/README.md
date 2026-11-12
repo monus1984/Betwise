@@ -35,3 +35,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0025_notifications.sql | 2026-11-12 | Notifications push : `push_subscriptions`, `notification_prefs`, `notifications` (file d'attente), `app_secrets` ; déclencheurs (pari réglé, prono d'une source suivie), `tick_notify()` chaque minute |
 | 0026_live_notifications.sql | 2026-11-12 | `match_follows` (étoile sur un match), préférence `direct`, déclencheur sur `matches` : coup d'envoi, but, but annulé, mi-temps, fin |
 | 0027_standings_team_follows.sql | 2026-11-12 | `standings` (classements, cache API-Football), `team_follows` (équipes suivies) ; le direct va aussi aux abonnés d'une équipe |
+| 0028_function_grants.sql | 2026-11-12 | Fonctions internes retirées de l'API publique ; fonctions utilisateur réservées aux comptes connectés |
