@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { linkOf } from "@/lib/sources/link";
 import { PageHeader } from "@/components/page-header";
 import { createClient } from "@/lib/supabase/server";
 import { labelType, TrendBadge } from "./source-ui";
@@ -16,7 +17,7 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
 
   const { data: sources } = await supabase
     .from("sources")
-    .select("id, nom, type, visibilite, created_by, created_at")
+    .select("id, nom, type, visibilite, created_by, created_at, lien, identifiant_externe")
     .order("created_at");
   const { data: trends } = await supabase.from("source_trend").select("*");
   const trend = new Map((trends ?? []).map((t) => [t.source_id, t]));
@@ -51,14 +52,19 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
         {list.map((s) => {
           const t = trend.get(s.id);
           return (
-            <li key={s.id}>
-              <Link href={`/sources/${s.id}`} className="flex items-center justify-between gap-3 px-3 py-3 active:bg-slate-50">
+            <li key={s.id} className="flex items-stretch">
+              <Link href={`/sources/${s.id}`} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-3 py-3 active:bg-slate-50">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{s.nom}</p>
                   <p className="text-xs text-slate-500">{labelType(s.type)}{s.visibilite === "partagee" && s.type !== "modele_betwise" ? " · partagée" : ""}</p>
                 </div>
                 <TrendBadge regles={Number(t?.nb_regles ?? 0)} gagnes={Number(t?.nb_gagnes ?? 0)} declares={Number(t?.nb_declares ?? 0)} />
               </Link>
+              {linkOf(s) && (
+                <a href={linkOf(s)!} target="_blank" rel="noopener noreferrer" aria-label={`Ouvrir la page de ${s.nom}`} className="flex w-11 shrink-0 items-center justify-center border-l border-slate-200 text-brand active:bg-slate-50">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>
+                </a>
+              )}
             </li>
           );
         })}

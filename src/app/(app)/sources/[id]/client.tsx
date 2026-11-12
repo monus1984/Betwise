@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { cancelPrediction, toggleFollow } from "@/lib/sources/actions";
+import { cancelPrediction, setSourceLink, toggleFollow } from "@/lib/sources/actions";
+import { linkLabel } from "@/lib/sources/link";
 import { RISK_CLASS, RISK_LABEL } from "@/components/ui";
 
 export function FollowButton({ sourceId, following }: { sourceId: string; following: boolean }) {
@@ -103,4 +104,47 @@ export function marketLabel(code: string, param: number | null, sel: string) {
     case "1X2_OU": { const [r, ou] = sel.split("|"); return `${({ "1": "Dom.", N: "Nul", "2": "Ext." } as Record<string,string>)[r] ?? r} & ${ou} de ${param ?? ""} buts`; }
     default: return `${code} ${sel}`;
   }
+}
+
+/** Lien vers la page de la source : bouton pour s'y rendre, et saisie quand il manque ou qu'on peut le corriger. */
+export function SourceLink({ sourceId, type, url, saved, canEdit }: { sourceId: string; type: string; url: string | null; saved: boolean; canEdit: boolean }) {
+  const [open, setOpen] = useState(false);
+  const [val, setVal] = useState(saved && url ? url : "");
+  const [err, setErr] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  const save = (v: string) => start(async () => {
+    const r = await setSourceLink(sourceId, type, v);
+    if (r.ok) { setErr(null); setOpen(false); } else setErr(r.error);
+  });
+  return (
+    <div className="mb-4">
+      <div className="flex flex-wrap items-center gap-2">
+        {url && (
+          <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white active:scale-[0.98]">
+            Ouvrir sur {linkLabel(url)}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>
+          </a>
+        )}
+        {canEdit && !open && (
+          <button type="button" onClick={() => setOpen(true)} className={url ? "text-xs text-ink-muted underline" : "rounded-lg border border-brand/40 px-3 py-2 text-sm font-medium text-brand"}>
+            {url ? "Changer le lien" : "+ Ajouter le lien de sa page"}
+          </button>
+        )}
+      </div>
+      {open && (
+        <form onSubmit={(e) => { e.preventDefault(); save(val); }} className="mt-2 rounded-xl border border-line bg-white p-3">
+          <label htmlFor="source-lien" className="block text-xs font-medium text-ink-muted">Adresse de la page (Facebook, Telegram, Instagram, site…)</label>
+          <input id="source-lien" value={val} onChange={(e) => setVal(e.target.value)} inputMode="url" autoCapitalize="none" autoCorrect="off" placeholder="https://www.facebook.com/…" maxLength={300}
+            className="mt-1 w-full rounded-lg border border-line bg-white px-3 py-2.5 text-base" />
+          <p className="mt-1 text-[11px] text-ink-muted">Dans l’appli du réseau : ouvre la page, « Partager » puis « Copier le lien », et colle-le ici.</p>
+          {err && <p className="mt-1 text-xs text-red-700">{err}</p>}
+          <div className="mt-2 flex items-center gap-3">
+            <button type="submit" disabled={pending || !val.trim()} className="rounded-lg bg-ink px-3 py-2 text-sm font-medium text-white disabled:opacity-50">{pending ? "Enregistrement…" : "Enregistrer"}</button>
+            <button type="button" onClick={() => { setOpen(false); setErr(null); }} className="text-sm text-ink-muted">Annuler</button>
+            {saved && <button type="button" disabled={pending} onClick={() => { setVal(""); save(""); }} className="ml-auto text-xs text-red-700 underline">Retirer le lien</button>}
+          </div>
+        </form>
+      )}
+    </div>
+  );
 }

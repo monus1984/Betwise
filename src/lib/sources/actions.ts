@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { MARKETS } from "@/lib/bets/markets";
+import { normalizeLink } from "./link";
 
 const SOURCE_TYPES = ["tipster", "page_facebook", "compte_instagram", "canal_telegram", "site"] as const;
 
@@ -13,6 +14,7 @@ const sourceSchema = z.object({
   nom: z.string().trim().min(2).max(60),
   identifiant_externe: z.string().trim().max(200).optional().or(z.literal("")),
   description: z.string().trim().max(300).optional().or(z.literal("")),
+  lien: z.string().trim().max(300).optional().or(z.literal("")),
   visibilite: z.enum(["privee", "partagee"]),
 });
 
@@ -27,6 +29,9 @@ export async function createSource(_prev: ActionState, formData: FormData): Prom
 
   // Une source partagée avec le même identifiant externe existe peut-être déjà : on la suit plutôt que la dupliquer
   const ident = parsed.data.identifiant_externe?.trim() || null;
+  const lienSaisi = parsed.data.lien?.trim() || "";
+  const lien = normalizeLink(lienSaisi, parsed.data.type);
+  if (lienSaisi && !lien) return { error: "Lien de la page non reconnu. Colle l’adresse complète, par exemple https://www.facebook.com/nomdelapage." };
   if (ident) {
     const { data: existing } = await supabase
       .from("sources")
@@ -48,6 +53,7 @@ export async function createSource(_prev: ActionState, formData: FormData): Prom
       nom: parsed.data.nom,
       identifiant_externe: ident,
       description: parsed.data.description?.trim() || null,
+      lien,
       visibilite: parsed.data.visibilite,
       created_by: user.id,
     })
@@ -139,4 +145,17 @@ export async function quickCreateSource(input: { nom: string; type: string; visi
   await supabase.from("source_follows").upsert({ user_id: user.id, source_id: data.id });
   revalidatePath("/sources");
   return { ok: true, source: data };
+}
+
+/** Enregistre (ou retire) le lien de la page d'une source. */
+export async function setSourceLink(sourceId: string, type: string, saisie: string): Promise<{ ok: true; lien: string | null } | { ok: false; error: string }> {
+  const brut = saisie.trim();
+  const lien = brut ? normalizeLink(brut, type) : null;
+  if (brut && !lien) return { ok: false, error: "Lien non reconnu. Colle l’adresse complète de la page, par exemple https://www.facebook.com/nomdelapage." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_source_link", { p_source_id: sourceId, p_lien: lien });
+  if (error) return { ok: false, error: error.message.includes("créateur") ? "Seul le créateur de cette source peut changer son lien." : "Enregistrement impossible : " + error.message };
+  revalidatePath(`/sources/${sourceId}`);
+  revalidatePath("/sources");
+  return { ok: true, lien };
 }

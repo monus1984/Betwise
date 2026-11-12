@@ -284,6 +284,7 @@ export type Database = {
           nom: string
           identifiant_externe: string | null
           description: string | null
+          lien: string | null
           visibilite: Database["betwise"]["Enums"]["source_visibility"]
           created_by: string | null
           created_at: string
@@ -294,6 +295,7 @@ export type Database = {
           nom: string
           identifiant_externe?: string | null
           description?: string | null
+          lien?: string | null
           visibilite?: Database["betwise"]["Enums"]["source_visibility"]
           created_by?: string | null
           created_at?: string
@@ -304,6 +306,7 @@ export type Database = {
           nom?: string
           identifiant_externe?: string | null
           description?: string | null
+          lien?: string | null
           visibilite?: Database["betwise"]["Enums"]["source_visibility"]
           created_by?: string | null
           created_at?: string
@@ -1632,6 +1635,13 @@ export type Database = {
           p_motif: string
         }
         Returns: undefined
+      }
+      set_source_link: {
+        Args: {
+          p_source_id: string
+          p_lien?: string | null
+        }
+        Returns: string
       }
       delete_duplicate_bet: {
         Args: {

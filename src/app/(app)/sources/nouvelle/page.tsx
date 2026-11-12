@@ -28,6 +28,9 @@ export default function NouvelleSourcePage() {
         <Field label="Identifiant ou lien" hint="@canal, URL de la page… Sert à reconnaître la même source chez d’autres utilisateurs.">
           <Input name="identifiant_externe" placeholder="@manuleparieur" />
         </Field>
+        <Field label="Lien de la page (facultatif)" hint="Colle l’adresse de sa page Facebook, de son canal Telegram, de son compte… Tu pourras l’ouvrir depuis sa fiche.">
+          <Input name="lien" inputMode="url" autoCapitalize="none" autoCorrect="off" placeholder="https://www.facebook.com/…" maxLength={300} />
+        </Field>
         <Field label="Note (facultatif)">
           <Input name="description" placeholder="Spécialisé Ligue 1, publie le matin" maxLength={300} />
         </Field>

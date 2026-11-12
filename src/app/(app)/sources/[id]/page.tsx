@@ -4,7 +4,8 @@ import { PageHeader } from "@/components/page-header";
 import { RISK_CLASS, RISK_LABEL } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 import { evalStatus, labelType } from "../source-ui";
-import { FollowButton, PredictionRow } from "./client";
+import { FollowButton, PredictionRow, SourceLink } from "./client";
+import { linkOf } from "@/lib/sources/link";
 import { CumulChart, type CumulPoint } from "./cumul-chart";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +50,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
         subtitle={`${labelType(s.type)}${s.identifiant_externe ? ` · ${s.identifiant_externe}` : ""}${s.visibilite === "partagee" && !isSystem ? " · partagée" : ""}`}
         action={!isSystem ? <FollowButton sourceId={id} following={!!f} /> : undefined}
       />
+      {!isSystem && <SourceLink sourceId={id} type={s.type} url={linkOf(s)} saved={!!s.lien} canEdit={s.created_by === user!.id || (s.visibilite === "partagee" && !s.lien)} />}
       {sp.existante && <p className="mb-4 rounded-lg border border-sky-200 bg-sky-50 p-3 text-sm text-sky-900">Cette source existait déjà en partagé : tu la suis maintenant, son historique est commun.</p>}
       {sp.ajout && !sp.doublon && <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Prono enregistré.</p>}
       {sp.doublon && <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">Ce prono existait déjà pour cette source (même match, marché et sélection le même jour) : rien n’a été ajouté.</p>}
