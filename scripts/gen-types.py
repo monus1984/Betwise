@@ -118,6 +118,7 @@ FUNCTIONS = {
     "compute_source_metrics": ([], "setof:sources_calculees:int4"),
     "set_selection_origin": ([("p_selection_id", "uuid", False), ("p_source_id", "uuid", False)], "void"),
     "update_selection": ([("p_selection_id", "uuid", False), ("p_cote", "numeric", True), ("p_match_id", "uuid", True), ("p_match_libre", "text", True), ("p_market_code", "text", True), ("p_market_param", "numeric", True), ("p_selection", "text", True), ("p_clear_match", "bool", True)], "void"),
+    "convert_bet_to_test": ([("p_bet_id", "uuid", False)], "void"),
     "update_bet": ([("p_bet_id", "uuid", False), ("p_mise", "numeric", True), ("p_bookmaker", "text", True), ("p_placed_at", "timestamptz", True)], "void"),
 }
 

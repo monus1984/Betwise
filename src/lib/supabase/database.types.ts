@@ -1680,6 +1680,12 @@ export type Database = {
         }
         Returns: undefined
       }
+      convert_bet_to_test: {
+        Args: {
+          p_bet_id: string
+        }
+        Returns: undefined
+      }
       update_bet: {
         Args: {
           p_bet_id: string

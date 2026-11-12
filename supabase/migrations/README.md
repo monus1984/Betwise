@@ -37,3 +37,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0027_standings_team_follows.sql | 2026-11-12 | `standings` (classements, cache API-Football), `team_follows` (équipes suivies) ; le direct va aussi aux abonnés d'une équipe |
 | 0028_function_grants.sql | 2026-11-12 | Fonctions internes retirées de l'API publique ; fonctions utilisateur réservées aux comptes connectés |
 | 0029_source_link.sql | 2026-11-12 | `sources.lien` (page du tipster) et `set_source_link()` : le créateur le modifie, tout utilisateur peut le renseigner sur une source partagée qui n'en a pas |
+| 0030_convert_bet_to_test.sql | 2026-11-12 | `convert_bet_to_test()` : un pari réel non joué devient un test ; les mouvements de bankroll sont compensés par un ajustement, rien n'est supprimé |

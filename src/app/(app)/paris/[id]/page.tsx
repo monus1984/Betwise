@@ -6,6 +6,7 @@ import { loadSourceOptions } from "@/lib/sources/options";
 import { loadSignals } from "@/lib/probs/signals";
 import { analyzeTicket } from "@/lib/probs/ticket";
 import { TicketAnalysisCard } from "./ticket-analysis";
+import { NotPlayed } from "./not-played";
 import { BetEditor, type EditableBet } from "./editor";
 
 export const dynamic = "force-dynamic";
@@ -54,6 +55,7 @@ export default async function BetPage({ params }: { params: Promise<{ id: string
       <PageHeader title={b.virtuel ? "Détail du test" : "Détail du pari"} subtitle={`${b.type === "combine" ? "Combiné" : "Simple"} · ${b.statut === "en_cours" ? "en cours" : "réglé"} · saisi le ${new Date(b.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", timeZone: "Africa/Abidjan" })}`} />
       {analysis && <TicketAnalysisCard a={analysis} />}
       <BetEditor bet={bet} sources={sources} markets={markets ?? []} />
+      {!b.virtuel && b.statut !== "annule" && <NotPlayed betId={b.id} />}
 
       <section className="mt-6">
         <h2 className="mb-2 text-sm font-semibold">Historique des modifications</h2>

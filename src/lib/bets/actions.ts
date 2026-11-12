@@ -74,6 +74,15 @@ function humanize(msg: string) {
   return "Enregistrement impossible : " + msg;
 }
 
+/** « Je n'ai pas joué ce pari » : le pari réel devient un test, la bankroll est rétablie. */
+export async function convertBetToTest(betId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("convert_bet_to_test", { p_bet_id: betId });
+  if (error) return { ok: false as const, error: error.message.includes("existe déjà") ? "Ce ticket existe déjà parmi tes tests." : error.message.includes("déjà un test") ? "C’est déjà un test." : "Conversion impossible : " + error.message };
+  revalidatePath("/"); revalidatePath("/paris", "layout"); revalidatePath("/sources", "layout");
+  return { ok: true as const };
+}
+
 /** Suppression d'un pari saisi en double (autorisée 24 h après la saisie, sur ses propres paris). */
 export async function deleteDuplicateBet(betId: string) {
   const supabase = await createClient();
