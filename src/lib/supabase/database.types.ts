@@ -1128,6 +1128,87 @@ export type Database = {
         }
         Relationships: []
       }
+      standings: {
+        Row: {
+          comp_code: string
+          groupe: string
+          af_team_id: number
+          saison: number
+          rang: number
+          team_nom: string
+          team_id: string | null
+          joues: number
+          gagnes: number
+          nuls: number
+          perdus: number
+          bp: number
+          bc: number
+          diff: number
+          points: number
+          forme: string | null
+          zone: string | null
+          updated_at: string
+        }
+        Insert: {
+          comp_code: string
+          groupe?: string
+          af_team_id: number
+          saison: number
+          rang: number
+          team_nom: string
+          team_id?: string | null
+          joues?: number
+          gagnes?: number
+          nuls?: number
+          perdus?: number
+          bp?: number
+          bc?: number
+          diff?: number
+          points?: number
+          forme?: string | null
+          zone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          comp_code?: string
+          groupe?: string
+          af_team_id?: number
+          saison?: number
+          rang?: number
+          team_nom?: string
+          team_id?: string | null
+          joues?: number
+          gagnes?: number
+          nuls?: number
+          perdus?: number
+          bp?: number
+          bc?: number
+          diff?: number
+          points?: number
+          forme?: string | null
+          zone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      team_follows: {
+        Row: {
+          user_id: string
+          team_id: string
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          team_id: string
+          created_at?: string
+        }
+        Update: {
+          user_id?: string
+          team_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       match_follows: {
         Row: {
           user_id: string

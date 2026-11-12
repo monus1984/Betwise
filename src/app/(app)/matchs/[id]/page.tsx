@@ -11,6 +11,9 @@ import { loadSignals, pickLabel, picksOf } from "@/lib/probs/signals";
 import { MatchMarkets } from "./markets";
 import { AddToSlip } from "@/components/slip";
 import { FollowStar } from "@/components/follow-star";
+import { StandingsTable } from "@/components/standings-table";
+import { STANDING_COMPS, type StandingRow } from "@/lib/matches/standings";
+import { GoalWatcher } from "@/components/goal-watcher";
 import { legFrom } from "@/lib/slip/leg";
 
 export const dynamic = "force-dynamic";
@@ -34,10 +37,10 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
   const { data } = await supabase
     .from("matches")
-    .select("id, kickoff_at, statut, score_home, score_away, minute, af_fixture_id, details, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe)")
+    .select("id, kickoff_at, statut, score_home, score_away, minute, af_fixture_id, details, home_team_id, away_team_id, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe)")
     .eq("id", id).maybeSingle();
   if (!data) notFound();
-  const m = data as unknown as { id: string; kickoff_at: string; statut: string; score_home: number | null; score_away: number | null; minute: number | null; af_fixture_id: number | null; details: { evts?: Evt[] } | null; home: Named; away: Named; competition: { nom: string; code_externe: string | null } | { nom: string; code_externe: string | null }[] | null };
+  const m = data as unknown as { id: string; kickoff_at: string; statut: string; score_home: number | null; score_away: number | null; minute: number | null; af_fixture_id: number | null; details: { evts?: Evt[] } | null; home_team_id: string; away_team_id: string; home: Named; away: Named; competition: { nom: string; code_externe: string | null } | { nom: string; code_externe: string | null }[] | null };
   const home = one(m.home)?.nom ?? "", away = one(m.away)?.nom ?? "";
   const comp = one(m.competition);
   const upcoming = m.statut === "programme" || m.statut === "en_cours";
@@ -60,6 +63,12 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const extras: Extras | null = tab === "equipes" ? await getExtras({ id: m.id, af_fixture_id: m.af_fixture_id, kickoff_at: m.kickoff_at, statut: m.statut }) : null;
   const sg = (await loadSignals(supabase, [id])).get(id) ?? null;
   const suivi = !!(await supabase.from("match_follows").select("match_id").eq("match_id", id).maybeSingle()).data;
+  const [{ data: tf }, { data: st }] = await Promise.all([
+    supabase.from("team_follows").select("team_id").in("team_id", [m.home_team_id, m.away_team_id]),
+    comp?.code_externe && STANDING_COMPS.includes(comp.code_externe) ? supabase.from("standings").select("*").eq("comp_code", comp.code_externe).in("team_id", [m.home_team_id, m.away_team_id]).order("rang") : Promise.resolve({ data: [] as StandingRow[] }),
+  ]);
+  const teamOn = new Set((tf ?? []).map((x) => x.team_id));
+  const standing = (st ?? []) as StandingRow[];
   const evts = [...(m.details?.evts ?? [])].sort((x, y) => x.m - y.m || (x.x ?? 0) - (y.x ?? 0));
   const mk = sg?.market ?? null;
   const onglet = tab ?? (m.statut === "programme" && sg ? "paris" : "analyse");
@@ -69,6 +78,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   return (
     <div className="pb-20">
       <LiveRefresh active={m.statut === "en_cours"} />
+      {m.statut === "en_cours" && m.score_home !== null && <GoalWatcher scores={[{ id: m.id, label: `${shortName(home)} ${m.score_home}–${m.score_away} ${shortName(away)}`, h: m.score_home ?? 0, a: m.score_away ?? 0 }]} />}
       <div className="mb-3 flex items-center justify-between">
         <Link href="/matchs" className="inline-flex items-center gap-1 text-sm text-ink-muted">‹ Matchs</Link>
         {m.statut !== "termine" && <span className="rounded-full bg-pitch"><FollowStar matchId={m.id} initial={suivi} light label /></span>}
@@ -78,13 +88,13 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
       <header className="pitch mb-3 rounded-3xl px-4 pb-4 pt-3">
         <p className="mb-3 text-center text-[11px] text-white/60">{COMP_FLAG[comp?.code_externe ?? ""] ?? "⚽"} {COMP_SHORT[comp?.code_externe ?? ""] ?? comp?.nom} · {new Date(m.kickoff_at).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: TZ })}</p>
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-          <div className="flex flex-col items-center gap-1.5 text-center"><TeamBadge name={home} size={44} /><span className="text-sm font-medium leading-tight">{shortName(home)}</span></div>
+          <div className="flex flex-col items-center gap-1.5 text-center"><TeamBadge name={home} size={44} /><span className="flex items-center gap-0.5 text-sm font-medium leading-tight">{shortName(home)}<FollowStar teamId={m.home_team_id} initial={teamOn.has(m.home_team_id)} light small /></span></div>
           <div className="text-center">
             {m.statut === "termine" ? <p className="font-display text-5xl font-bold tabular-nums">{m.score_home} – {m.score_away}</p>
               : m.statut === "en_cours" && m.score_home !== null ? <><p className="font-display text-5xl font-bold tabular-nums">{m.score_home} – {m.score_away}</p><p className="text-[11px] font-semibold text-red-300">● {m.minute ? `${m.minute}’` : "en direct"}</p></>
               : <><p className="font-display text-4xl font-bold tabular-nums">{new Date(m.kickoff_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: TZ })}</p><p className="text-[11px] text-white/60">{countdown(m.kickoff_at)}</p></>}
           </div>
-          <div className="flex flex-col items-center gap-1.5 text-center"><TeamBadge name={away} size={44} /><span className="text-sm font-medium leading-tight">{shortName(away)}</span></div>
+          <div className="flex flex-col items-center gap-1.5 text-center"><TeamBadge name={away} size={44} /><span className="flex items-center gap-0.5 text-sm font-medium leading-tight">{shortName(away)}<FollowStar teamId={m.away_team_id} initial={teamOn.has(m.away_team_id)} light small /></span></div>
         </div>
         {(model || market) && (
           <div className="mt-4">
@@ -196,6 +206,12 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         </div>
       )}
 
+      {onglet === "forme" && standing.length > 0 && (
+        <section className="mb-3 rounded-xl border border-line bg-white p-3 shadow-card">
+          <div className="mb-1 flex items-baseline justify-between"><h2 className="text-sm font-semibold">Classement{standing[0].groupe ? ` · ${standing[0].groupe}` : ""}</h2><Link href={`/matchs/classement?c=${comp?.code_externe}&e=${m.home_team_id},${m.away_team_id}`} className="text-[11px] font-medium text-brand">tout le classement ›</Link></div>
+          <StandingsTable rows={standing} highlight={[]} />
+        </section>
+      )}
       {onglet === "forme" && (
         just?.forme_dom ? (
           <div className="grid grid-cols-1 gap-3">

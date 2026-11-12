@@ -14,3 +14,15 @@ export async function toggleFollowMatch(matchId: string, follow: boolean) {
   revalidatePath("/matchs");
   return { ok: !error };
 }
+
+/** Suivre ou ne plus suivre une équipe : tous ses matchs apparaissent dans « Suivis » et envoient le direct. */
+export async function toggleFollowTeam(teamId: string, follow: boolean) {
+  const db = await createClient();
+  const { data: { user } } = await db.auth.getUser();
+  if (!user) return { ok: false as const };
+  const { error } = follow
+    ? await db.from("team_follows").upsert({ user_id: user.id, team_id: teamId }, { onConflict: "user_id,team_id", ignoreDuplicates: true })
+    : await db.from("team_follows").delete().eq("user_id", user.id).eq("team_id", teamId);
+  revalidatePath("/matchs");
+  return { ok: !error };
+}

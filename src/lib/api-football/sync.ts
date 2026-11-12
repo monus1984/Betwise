@@ -264,3 +264,37 @@ export async function fillDetails(db: Db, api: ApiFootball): Promise<{ filled: n
   }
   return { filled };
 }
+
+/** Compétitions dont on garde le classement (championnats et phases de groupes). */
+export const AF_STANDINGS: Record<string, { league: number; season: number }> = {
+  ...AF_LINKED, CIV1: { league: 386, season: 2026 }, CANQ: { league: 36, season: 2027 }, CAFCL: { league: 12, season: 2026 }, CAFCC: { league: 20, season: 2026 },
+};
+
+/** Classement d'une compétition, avec les noms d'équipes de BETWISE quand l'équipe est connue. Une requête. */
+export async function syncStandings(db: Db, api: ApiFootball, code: string) {
+  const c = AF_STANDINGS[code];
+  const groups = await api.standings(c.league, c.season);
+  if (!groups.length) return { rows: 0 };
+  const ids = groups.flat().map((r) => r.team.id);
+  // équipe BETWISE correspondante, d'après les matchs déjà rattachés
+  const [{ data: hs }, { data: as }] = await Promise.all([
+    db.from("matches").select("af_home_id, team:teams!matches_home_team_id_fkey(id, nom)").in("af_home_id", ids).limit(1000),
+    db.from("matches").select("af_away_id, team:teams!matches_away_team_id_fkey(id, nom)").in("af_away_id", ids).limit(1000),
+  ]);
+  type T = { id: string; nom: string };
+  const one = (v: T | T[] | null) => (Array.isArray(v) ? v[0] ?? null : v);
+  const local = new Map<number, T>();
+  for (const r of hs ?? []) { const t = one(r.team as T | T[] | null); if (r.af_home_id && t) local.set(r.af_home_id, t); }
+  for (const r of as ?? []) { const t = one(r.team as T | T[] | null); if (r.af_away_id && t) local.set(r.af_away_id, t); }
+  const now = new Date().toISOString();
+  const multi = groups.length > 1;
+  const rows = groups.flatMap((g) => g.map((r) => ({
+    comp_code: code, groupe: multi ? (r.group ?? "").replace(/^.*?(Group|Groupe)\s*/i, "Groupe ").slice(0, 40) : "", af_team_id: r.team.id, saison: c.season, rang: r.rank,
+    team_nom: local.get(r.team.id)?.nom ?? NATION_FR_EXTRA[NATION_CANON[r.team.name] ?? r.team.name] ?? r.team.name, team_id: local.get(r.team.id)?.id ?? null,
+    joues: r.all.played ?? 0, gagnes: r.all.win ?? 0, nuls: r.all.draw ?? 0, perdus: r.all.lose ?? 0, bp: r.all.goals.for ?? 0, bc: r.all.goals.against ?? 0,
+    diff: r.goalsDiff ?? 0, points: r.points ?? 0, forme: r.form, zone: r.description, updated_at: now,
+  })));
+  const { error } = await db.from("standings").upsert(rows, { onConflict: "comp_code,groupe,af_team_id" });
+  if (error) throw error;
+  return { rows: rows.length };
+}

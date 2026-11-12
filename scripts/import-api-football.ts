@@ -6,7 +6,7 @@
 import "dotenv/config";
 import { createAdminClient } from "../src/lib/supabase/admin";
 import { ApiFootball } from "../src/lib/api-football/client";
-import { AF_COMPETITIONS, AF_LINKED, fillDetails, linkAfFixtures, syncAfCompetition, syncAfOdds } from "../src/lib/api-football/sync";
+import { AF_COMPETITIONS, AF_LINKED, AF_STANDINGS, fillDetails, syncStandings, linkAfFixtures, syncAfCompetition, syncAfOdds } from "../src/lib/api-football/sync";
 
 async function main() {
   if (!process.env.API_FOOTBALL_KEY) { console.error("API_FOOTBALL_KEY manquant"); process.exit(1); }
@@ -27,6 +27,8 @@ async function main() {
     try { const r = await linkAfFixtures(db, api, code); if (r.linked || r.pending) console.log(`[${code}] direct : ${r.linked} rattachés, ${r.pending} sans correspondance`); }
     catch (e) { console.error(`[${code}] rattachement :`, e instanceof Error ? e.message : e); }
   }
+  // Classements (une requête par compétition)
+  { let n = 0; for (const code of Object.keys(AF_STANDINGS)) { try { n += (await syncStandings(db, api, code)).rows; } catch (e) { console.error(`[${code}] classement :`, e instanceof Error ? e.message : e); } } console.log(`Classements : ${n} lignes`); }
   // Détail des matchs terminés (corners, cartons, tirs, buteurs, issue), par lots de 20
   try { let n = 0; for (let i = 0; i < 5; i++) { const r = await fillDetails(db, api); n += r.filled; if (r.filled < 20) break; } if (n) console.log(`Détail complété : ${n} match(s)`); }
   catch (e) { console.error("Détail des matchs :", e instanceof Error ? e.message : e); }

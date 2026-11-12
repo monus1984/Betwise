@@ -49,6 +49,8 @@ TABLES = {
     "objectifs": "id:uuid= user_id:uuid bankroll_depart:numeric cible:numeric debut:date= echeance:date paris_par_jour:int2= actif:bool= created_at:timestamptz=",
     "push_subscriptions": "id:uuid= user_id:uuid endpoint:text p256dh:text auth:text user_agent:text? created_at:timestamptz= last_ok_at:timestamptz?",
     "notification_prefs": "user_id:uuid resultats:bool= coup_envoi:bool= coups_du_jour:bool= sources:bool= direct:bool= updated_at:timestamptz=",
+    "standings": "comp_code:text groupe:text= af_team_id:int4 saison:int4 rang:int4 team_nom:text team_id:uuid? joues:int4= gagnes:int4= nuls:int4= perdus:int4= bp:int4= bc:int4= diff:int4= points:int4= forme:text? zone:text? updated_at:timestamptz=",
+    "team_follows": "user_id:uuid team_id:uuid created_at:timestamptz=",
     "match_follows": "user_id:uuid match_id:uuid created_at:timestamptz=",
     "notifications": "id:uuid= user_id:uuid type:text cle:text titre:text corps:text url:text= created_at:timestamptz= sent_at:timestamptz? lu_at:timestamptz?",
     "app_secrets": "name:text value:jsonb created_at:timestamptz=",

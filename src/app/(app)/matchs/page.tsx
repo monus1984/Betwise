@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { LiveRefresh } from "@/components/live-refresh";
 import { AddToSlip } from "@/components/slip";
 import { FollowStar } from "@/components/follow-star";
+import { GoalWatcher } from "@/components/goal-watcher";
+import { STANDING_COMPS } from "@/lib/matches/standings";
 import { legFrom } from "@/lib/slip/leg";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +16,7 @@ type Named = { nom: string } | { nom: string }[] | null;
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
 type Row = {
   id: string; kickoff_at: string; statut: "programme" | "en_cours" | "termine" | "reporte" | "annule";
-  score_home: number | null; score_away: number | null; minute: number | null; home: Named; away: Named;
+  score_home: number | null; score_away: number | null; minute: number | null; home_team_id: string; away_team_id: string; home: Named; away: Named;
   competition: { nom: string; code_externe: string | null } | { nom: string; code_externe: string | null }[] | null;
 };
 
@@ -29,7 +31,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   const from = new Date(Date.now() - 3 * 86400000), to = new Date(Date.now() + 15 * 86400000);
   const { data } = await supabase
     .from("matches")
-    .select("id, kickoff_at, statut, score_home, score_away, minute, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe)")
+    .select("id, kickoff_at, statut, score_home, score_away, minute, home_team_id, away_team_id, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe)")
     .gte("kickoff_at", from.toISOString()).lte("kickoff_at", to.toISOString())
     .neq("statut", "annule").order("kickoff_at").limit(400);
   const all = (data ?? []) as unknown as Row[];
@@ -43,8 +45,11 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   const comp = sp.c && COMP_ORDER.includes(sp.c) ? sp.c : null;
 
   // Matchs suivis (étoile) et filtre « En direct » / « Suivis »
-  const { data: fol } = await supabase.from("match_follows").select("match_id");
-  const followed = new Set((fol ?? []).map((x) => x.match_id));
+  const [{ data: fol }, { data: tfol }] = await Promise.all([supabase.from("match_follows").select("match_id"), supabase.from("team_follows").select("team_id")]);
+  const teamsFollowed = new Set((tfol ?? []).map((x) => x.team_id));
+  // un match est suivi par son étoile ou parce qu'une de ses équipes est suivie
+  const followed = new Set([...(fol ?? []).map((x) => x.match_id), ...all.filter((r) => teamsFollowed.has(r.home_team_id) || teamsFollowed.has(r.away_team_id)).map((r) => r.id)]);
+  const starred = new Set((fol ?? []).map((x) => x.match_id));
   const filtre = sp.f === "direct" || sp.f === "suivis" ? sp.f : null;
   const rows = filtre === "direct" ? all.filter((r) => r.statut === "en_cours")
     : filtre === "suivis" ? all.filter((r) => followed.has(r.id) && Date.parse(r.kickoff_at) > Date.now() - 36 * 3600000)
@@ -83,6 +88,8 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
         </div>
       </nav>
 
+      <GoalWatcher scores={all.filter((r) => r.statut === "en_cours" && r.score_home !== null).map((r) => ({ id: r.id, label: `${shortName(one(r.home)?.nom ?? "")} ${r.score_home}–${r.score_away} ${shortName(one(r.away)?.nom ?? "")}`, h: r.score_home ?? 0, a: r.score_away ?? 0 }))} />
+
       {/* Tous / En direct / Suivis */}
       <div className="mb-3 flex gap-1.5">
         <Link href={q(day, null)} scroll={false} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${!filtre ? "border-brand bg-brand text-white" : "border-line bg-white text-ink-soft"}`}>Tous</Link>
@@ -114,7 +121,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
         <section key={code} className="mb-4 overflow-hidden rounded-xl border border-line bg-white shadow-card">
           <h2 className="flex items-center justify-between border-b border-line bg-surface-2 px-3 py-2 text-xs font-semibold text-ink-soft">
             <span>{COMP_FLAG[code] ?? "⚽"} {COMP_SHORT[code] ?? one(list[0].competition)?.nom}</span>
-            <span className="font-normal text-ink-muted">{list.length} match{list.length > 1 ? "s" : ""}</span>
+            {STANDING_COMPS.includes(code) ? <Link href={`/matchs/classement?c=${code}`} className="font-medium text-brand">Classement ›</Link> : <span className="font-normal text-ink-muted">{list.length} match{list.length > 1 ? "s" : ""}</span>}
           </h2>
           <ul className="divide-y divide-line">
             {list.map((m) => {
@@ -124,7 +131,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
               const homeWin = done && (m.score_home ?? 0) > (m.score_away ?? 0), awayWin = done && (m.score_away ?? 0) > (m.score_home ?? 0);
               return (
                 <li key={m.id} className="flex items-center pr-2">
-                  {!done && <span className="-mr-2 pl-1"><FollowStar matchId={m.id} initial={followed.has(m.id)} /></span>}
+                  {!done && <span className="-mr-2 pl-1"><FollowStar matchId={m.id} initial={starred.has(m.id)} /></span>}
                   <Link href={`/matchs/${m.id}`} className={`flex min-w-0 flex-1 items-center gap-3 py-2.5 pr-3 active:bg-surface-2 ${done ? "pl-3" : "pl-2"}`}>
                     <span className="w-10 shrink-0 text-center text-xs tabular-nums">
                       {done ? <span className="font-medium text-ink-muted">Fin</span>

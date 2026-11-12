@@ -11,6 +11,7 @@ export type AfFixture = {
   statistics?: { team: { id: number }; statistics: { type: string; value: number | string | null }[] }[];
   score: { fulltime: { home: number | null; away: number | null }; halftime?: { home: number | null; away: number | null } };
 };
+export type AfStanding = { rank: number; team: { id: number; name: string }; points: number; goalsDiff: number; group: string | null; form: string | null; description: string | null; all: { played: number; win: number; draw: number; lose: number; goals: { for: number; against: number } } };
 export type AfOdds = {
   fixture: { id: number };
   bookmakers: { name: string; bets: { name: string; values: { value: string; odd: string }[] }[] }[];
@@ -42,6 +43,11 @@ export class ApiFootball {
   live() { return this.get<AfFixture>(`/fixtures?live=all`).then((j) => j.response); }
   /** Jusqu'à 20 matchs par identifiant (scores finaux des matchs sortis du direct). */
   byIds(ids: number[]) { return this.get<AfFixture>(`/fixtures?ids=${ids.slice(0, 20).join("-")}`).then((j) => j.response); }
+
+  /** Classement d'une compétition : un tableau par groupe (un seul pour un championnat). */
+  standings(league: number, season: number) {
+    return this.get<{ league: { standings: AfStanding[][] } }>(`/standings?league=${league}&season=${season}`).then((j) => j.response[0]?.league.standings ?? []);
+  }
 
   /** Cotes d'avant-match d'une compétition (10 matchs par page). */
   async odds(league: number, season: number, maxPages = 6) {
