@@ -34,6 +34,16 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
     loadDashboard(supabase, period.d ? new Date(Date.now() - period.d * 86400000).toISOString() : null),
     supabase.from("source_follows").select("source_id, source:sources(id, nom, type)").eq("user_id", user!.id),
   ]);
+  // Paris que BETWISE ne réglera pas seul : sélection sans match reconnu (depuis plus d'un jour) ou match terminé depuis plus de 3 h
+  const { data: pend } = await supabase.from("bet_selections")
+    .select("bet_id, match_id, bets!inner(statut, placed_at), match:matches(statut, result_at)").eq("resultat", "en_attente").eq("bets.statut", "en_cours").limit(500);
+  type Pend = { bet_id: string; match_id: string | null; bets: { placed_at: string } | { placed_at: string }[]; match: { statut: string; result_at: string | null } | { statut: string; result_at: string | null }[] | null };
+  const aRegler = new Set(((pend ?? []) as unknown as Pend[]).filter((x) => {
+    const b = Array.isArray(x.bets) ? x.bets[0] : x.bets, mt = Array.isArray(x.match) ? x.match[0] : x.match;
+    if (!x.match_id) return Date.now() - Date.parse(b.placed_at) > 24 * 3600000;
+    return mt?.statut === "termine" && !!mt.result_at && Date.now() - Date.parse(mt.result_at) > 3 * 3600000;
+  }).map((x) => x.bet_id)).size;
+
   const solde = Number(summary?.solde ?? 0), exposition = Number(summary?.exposition ?? 0);
   const [goal, { count: nbCoups }, { data: np }] = await Promise.all([loadGoal(supabase, solde), supabase.from("daily_picks").select("id", { count: "exact", head: true }).eq("jour", jourAbidjan()), supabase.from("notification_prefs").select("resultats, direct, coup_envoi, coups_du_jour, sources").maybeSingle()]);
   const ids = (follows ?? []).map((f) => f.source_id);
@@ -66,6 +76,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
         </div>
         <p className="mt-2 text-xs text-ink-muted">{d.enCours > 0 ? <>{fcfa(exposition)} en jeu sur <Link href="/paris" className="font-medium text-brand underline">{d.enCours} pari{d.enCours > 1 ? "s" : ""} en cours</Link></> : "Aucun pari en cours"}</p>
       </section>
+
+      {aRegler > 0 && (
+        <Link href="/paris" className="mt-3 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 active:bg-amber-100">
+          <span className="text-lg">✍️</span>
+          <span className="min-w-0 flex-1"><b>{aRegler} pari{aRegler > 1 ? "s" : ""} à régler à la main</b><span className="block text-[11px]">Match non reconnu, ou statistiques non publiées : BETWISE ne peut pas les régler seul.</span></span>
+          <span>›</span>
+        </Link>
+      )}
 
       <div className="mt-3"><InstallButton /></div>
 

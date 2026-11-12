@@ -24,6 +24,9 @@ const TZ = "Africa/Abidjan";
 const dayKey = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { timeZone: TZ }); // AAAA-MM-JJ
 const todayKey = () => dayKey(new Date().toISOString());
 
+/** Match encore « en cours » plus de 3 h 30 après le coup d'envoi : la source n'a pas confirmé la fin. */
+const isStale = (kickoff: string) => Date.now() - Date.parse(kickoff) > 3.5 * 3600000;
+
 export default async function MatchsPage({ searchParams }: { searchParams: Promise<{ d?: string; c?: string; f?: string }> }) {
   const sp = await searchParams;
   const supabase = await createClient();
@@ -51,10 +54,10 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   const followed = new Set([...(fol ?? []).map((x) => x.match_id), ...all.filter((r) => teamsFollowed.has(r.home_team_id) || teamsFollowed.has(r.away_team_id)).map((r) => r.id)]);
   const starred = new Set((fol ?? []).map((x) => x.match_id));
   const filtre = sp.f === "direct" || sp.f === "suivis" ? sp.f : null;
-  const rows = filtre === "direct" ? all.filter((r) => r.statut === "en_cours")
+  const rows = filtre === "direct" ? all.filter((r) => r.statut === "en_cours" && !isStale(r.kickoff_at))
     : filtre === "suivis" ? all.filter((r) => followed.has(r.id) && Date.parse(r.kickoff_at) > Date.now() - 36 * 3600000)
     : all.filter((r) => dayKey(r.kickoff_at) === day && (!comp || one(r.competition)?.code_externe === comp));
-  const nbDirect = all.filter((r) => r.statut === "en_cours").length;
+  const nbDirect = all.filter((r) => r.statut === "en_cours" && !isStale(r.kickoff_at)).length;
   const ids = rows.map((r) => r.id);
 
   const signals = await loadSignals(supabase, ids);
@@ -135,6 +138,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
                   <Link href={`/matchs/${m.id}`} className={`flex min-w-0 flex-1 items-center gap-3 py-2.5 pr-3 active:bg-surface-2 ${done ? "pl-3" : "pl-2"}`}>
                     <span className="w-10 shrink-0 text-center text-xs tabular-nums">
                       {done ? <span className="font-medium text-ink-muted">Fin</span>
+                        : m.statut === "en_cours" && isStale(m.kickoff_at) ? <span className="text-[10px] leading-tight text-draw" title="La source n’a pas encore confirmé la fin du match">Fin ?</span>
                         : m.statut === "en_cours" ? <span className="font-semibold text-loss">● {m.minute ? `${m.minute}’` : "Live"}</span>
                         : m.statut === "reporte" ? <span className="text-draw">Rep.</span>
                         : <span className="font-medium text-ink-soft">{fmtTime(m.kickoff_at)}</span>}

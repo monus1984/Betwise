@@ -12,10 +12,17 @@ const MAX_BYTES = 8 * 1024 * 1024;
  * POST multipart : `image` (fichier) ou `text` (ticket partagé en texte), optionnel `link`.
  * Réponse : ticket extrait + rapprochements + contrôles, et l'id de l'upload journalisé.
  */
+const IMPORTS_PAR_JOUR = 40;
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "non authentifié" }, { status: 401 });
+
+  // Limite quotidienne pendant le test : chaque lecture de capture ou de vidéo a un coût
+  const startOfDay = new Date(); startOfDay.setUTCHours(0, 0, 0, 0);
+  const { count: lus } = await supabase.from("uploads").select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("created_at", startOfDay.toISOString());
+  if ((lus ?? 0) >= IMPORTS_PAR_JOUR) return NextResponse.json({ error: `Limite de ${IMPORTS_PAR_JOUR} tickets lus par jour atteinte pendant le test. Reprise demain ; la saisie à la main reste possible.` }, { status: 429 });
 
   const form = await req.formData();
   const files = form.getAll("image").filter((f): f is File => f instanceof File && f.size > 0);
