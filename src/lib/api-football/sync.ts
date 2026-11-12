@@ -289,7 +289,7 @@ export async function syncStandings(db: Db, api: ApiFootball, code: string) {
   const now = new Date().toISOString();
   const multi = groups.length > 1;
   const rows = groups.flatMap((g) => g.map((r) => ({
-    comp_code: code, groupe: multi ? (r.group ?? "").replace(/^.*?(Group|Groupe)\s*/i, "Groupe ").slice(0, 40) : "", af_team_id: r.team.id, saison: c.season, rang: r.rank,
+    comp_code: code, groupe: multi ? (r.group ?? "").replace(/\bGroup\b/i, "Groupe").replace(/\bLeague\b/i, "Ligue").slice(0, 40) : "", af_team_id: r.team.id, saison: c.season, rang: r.rank,
     team_nom: local.get(r.team.id)?.nom ?? NATION_FR_EXTRA[NATION_CANON[r.team.name] ?? r.team.name] ?? r.team.name, team_id: local.get(r.team.id)?.id ?? null,
     joues: r.all.played ?? 0, gagnes: r.all.win ?? 0, nuls: r.all.draw ?? 0, perdus: r.all.lose ?? 0, bp: r.all.goals.for ?? 0, bc: r.all.goals.against ?? 0,
     diff: r.goalsDiff ?? 0, points: r.points ?? 0, forme: r.form, zone: r.description, updated_at: now,

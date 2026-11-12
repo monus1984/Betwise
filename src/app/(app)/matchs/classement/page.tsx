@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { COMP_FLAG, COMP_SHORT } from "@/components/match-ui";
 import { StandingsTable } from "@/components/standings-table";
-import { STANDING_COMPS, type StandingRow } from "@/lib/matches/standings";
+import { STANDING_COMPS, latestStandings, type StandingRow } from "@/lib/matches/standings";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export default async function ClassementPage({ searchParams }: { searchParams: P
     db.from("standings").select("*").eq("comp_code", comp).order("groupe").order("rang").limit(400),
     db.from("team_follows").select("team_id"),
   ]);
-  const rows = (data ?? []) as StandingRow[];
+  const rows = latestStandings((data ?? []) as StandingRow[]);
   const groups = [...new Set(rows.map((r) => r.groupe))];
   const highlight = [...(sp.e ?? "").split(",").filter(Boolean), ...(fol ?? []).map((f) => f.team_id)];
   const maj = rows[0]?.updated_at;

@@ -12,7 +12,7 @@ import { MatchMarkets } from "./markets";
 import { AddToSlip } from "@/components/slip";
 import { FollowStar } from "@/components/follow-star";
 import { StandingsTable } from "@/components/standings-table";
-import { STANDING_COMPS, type StandingRow } from "@/lib/matches/standings";
+import { STANDING_COMPS, latestStandings, type StandingRow } from "@/lib/matches/standings";
 import { GoalWatcher } from "@/components/goal-watcher";
 import { legFrom } from "@/lib/slip/leg";
 
@@ -68,7 +68,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
     comp?.code_externe && STANDING_COMPS.includes(comp.code_externe) ? supabase.from("standings").select("*").eq("comp_code", comp.code_externe).in("team_id", [m.home_team_id, m.away_team_id]).order("rang") : Promise.resolve({ data: [] as StandingRow[] }),
   ]);
   const teamOn = new Set((tf ?? []).map((x) => x.team_id));
-  const standing = (st ?? []) as StandingRow[];
+  const standing = latestStandings((st ?? []) as StandingRow[]);
   const evts = [...(m.details?.evts ?? [])].sort((x, y) => x.m - y.m || (x.x ?? 0) - (y.x ?? 0));
   const mk = sg?.market ?? null;
   const onglet = tab ?? (m.statut === "programme" && sg ? "paris" : "analyse");
