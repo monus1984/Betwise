@@ -11,7 +11,7 @@ describe("pronos Facebook", () => {
   it("story en tableau : code entre les deux équipes", () => {
     expect(n("2x", "Turquie", "Belgique")).toBe("DC N2 ok");
     expect(n("V2", "Tchéquie", "Espagne")).toBe("1X2 2 ok");
-    expect(n("+2", "Italie", "France")).toBe("OU 2 Plus ok");
+    expect(n("+2", "Italie", "France")).toBe("OU 1.5 Plus ok");
     expect(n("GG", "Angleterre", "Croatie")).toBe("BTTS Oui ok");
     expect(n("V1", "RD Congo", "Sierra Leone")).toBe("1X2 1 ok");
     expect(n("1x", "Bénin", "Centrafrique")).toBe("DC 1N ok");
@@ -36,9 +36,16 @@ describe("pronos Facebook", () => {
   it("buts simples", () => {
     expect(n("👉Plus 2.5 buts", "Italie", "France")).toBe("OU 2.5 Plus ok");
     expect(n("👉Les deux équipes marquent", "Turquie", "Belgique")).toBe("BTTS Oui ok");
-    expect(n("+2 BUTS", "Tchéquie", "Espagne")).toBe("OU 2 Plus ok");
+    expect(n("+2 BUTS", "Tchéquie", "Espagne")).toBe("OU 1.5 Plus ok");
     expect(n("au-moins une équipe marque+1,5 BUTS", "Angleterre", "Croatie")).toBe("OU 1.5 Plus ok");
     expect(n("au moins une équipe va marquer+1,5 BUTS", "Italie", "France")).toBe("OU 1.5 Plus ok");
+  });
+  it("« +2 » d'un tipster = au moins 2 ; la ligne d'un ticket de bookmaker ne bouge pas", () => {
+    expect(n("Ghana gagne & +2 buts", "Ghana", "Somalie")).toBe("1X2_OU 1.5 1|Plus ok");
+    const r = normalizePick("Nombre total de buts", "Plus de 2", "Italie", "France");
+    expect(`${r.market_code} ${r.market_param} ${r.selection}`).toBe("OU 2 Plus");
+    const b = normalizePick("Total", "+2", "Italie", "France");
+    expect(b.market_param).toBe(2);
   });
   it("but + corners : signalé, pas deviné", () => {
     const r = normalizePick("", "1BUT+ 3 CORNERS", "Turquie", "Belgique", "Turquie");

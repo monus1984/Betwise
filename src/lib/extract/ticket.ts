@@ -162,7 +162,9 @@ export function normalizePick(marketText: string, pickText: string, home: string
     const r = s.match(/([+\-]|plus|moins|over|under)\s*(?:de\s*)?(\d+[.,]?\d*)/i);
     if (!r) return null;
     const dir = /^(\+|plus|over)$/i.test(r[1]) ? "Plus" : "Moins";
-    return { dir, line: Number(r[2].replace(",", ".")) };
+    const line = Number(r[2].replace(",", "."));
+    // Écriture de tipster « +2 » : au moins 2, soit plus de 1,5. Sur un ticket de bookmaker (marché nommé), la ligne reste telle quelle.
+    return { dir, line: r[1] === "+" && !m.trim() && Number.isInteger(line) && line >= 1 ? line - 0.5 : line };
   };
 
   // Pronos de tipsters, libellés courts (avec l'équipe nommée seule ou dans le texte)
