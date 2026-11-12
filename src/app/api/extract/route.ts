@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
   let images, storagePath: string | null = null, truncated = false;
   if (file) {
-    if (files.length > 6) return NextResponse.json({ error: "6 captures maximum pour un même ticket" }, { status: 400 });
+    if (files.length > 8) return NextResponse.json({ error: "8 captures maximum pour un même ticket" }, { status: 400 });
     const total = files.reduce((a, f) => a + f.size, 0);
     if (total > MAX_BYTES * 2) return NextResponse.json({ error: "Images trop lourdes (16 Mo max au total)" }, { status: 413 });
     images = [];

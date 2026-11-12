@@ -6,6 +6,7 @@ import { placeImportedBet } from "@/lib/bets/import-actions";
 import { SourceChooser } from "@/components/source-chooser";
 import { Button, Chip, Field, Input, Notice, RISK_CLASS, RISK_LABEL, fcfa, riskFromOdds } from "@/components/ui";
 import type { ExtractedTicket, MatchedSelection } from "@/lib/extract/ticket";
+import { framesFromVideo } from "@/lib/extract/video-frames";
 
 type Source = { id: string; nom: string; type: string };
 type Extracted = ExtractedTicket & { upload_id: string | null; truncated: boolean };
@@ -35,25 +36,44 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
   const [mise, setMise] = useState("");
   const [status, setStatus] = useState<"en_cours" | "gagne" | "perdu" | "rembourse">("en_cours");
   const [test, setTest] = useState(false);
+  const [stage, setStage] = useState<string | null>(null);
+  const [videoNote, setVideoNote] = useState<string | null>(null);
   const [summaryOrigin, setSummaryOrigin] = useState<string | null>(defaultOrigin);
   const [pending, start] = useTransition();
 
-  // Fichiers arrivés par la feuille de partage Android (voir /import/share)
+  // Fichiers arrivés par la feuille de partage Android : déposés par le service worker (sans limite de taille),
+  // sinon par la route serveur /import/share (petites images seulement)
   useEffect(() => {
     if (!new URLSearchParams(window.location.search).has("shared")) return;
-    try {
-      const raw = sessionStorage.getItem("betwise.shared");
-      if (!raw) return;
-      sessionStorage.removeItem("betwise.shared");
-      const parts = JSON.parse(raw) as { name: string; type: string; b64: string }[];
-      const fd = new FormData();
-      for (const p of parts) {
-        const bin = atob(p.b64); const arr = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-        fd.append("image", new File([arr], p.name || "capture.jpg", { type: p.type }));
-      }
-      run(fd);
-    } catch { /* ignore */ }
+    (async () => {
+      try {
+        if ("caches" in window) {
+          const cache = await caches.open("betwise-share");
+          const keys = await cache.keys();
+          if (keys.length) {
+            const files: File[] = [];
+            for (const k of [...keys].sort((a, b) => a.url.localeCompare(b.url))) {
+              const r = await cache.match(k); if (!r) continue;
+              const blob = await r.blob();
+              files.push(new File([blob], decodeURIComponent(r.headers.get("x-name") ?? "partage"), { type: blob.type || r.headers.get("content-type") || "" }));
+              await cache.delete(k);
+            }
+            if (files.length) { await onFiles(files); return; }
+          }
+        }
+        const raw = sessionStorage.getItem("betwise.shared");
+        if (!raw) return;
+        sessionStorage.removeItem("betwise.shared");
+        const parts = JSON.parse(raw) as { name: string; type: string; b64: string }[];
+        const fd = new FormData();
+        for (const p of parts) {
+          const bin = atob(p.b64); const arr = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+          fd.append("image", new File([arr], p.name || "capture.jpg", { type: p.type }));
+        }
+        run(fd);
+      } catch { /* ignore */ }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -75,11 +95,28 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
     }
   }
 
-  function onFiles(list: FileList | null) {
-    const files = Array.from(list ?? []).filter((f) => f.size > 0);
-    if (files.length === 0) return;
+  async function onFiles(list: FileList | File[] | null) {
+    const all = Array.from(list ?? []).filter((f) => f.size > 0);
+    if (all.length === 0) return;
+    const videos = all.filter((f) => f.type.startsWith("video/"));
+    let images = all.filter((f) => !f.type.startsWith("video/"));
+    setVideoNote(null);
+    if (videos.length) {
+      if (videos.length > 1) { setError("Une seule vidéo à la fois : une vidéo = un ticket."); return; }
+      setBusy(true); setError(null); setStage("Lecture de la vidéo…");
+      try {
+        const r = await framesFromVideo(videos[0], { max: Math.max(2, 8 - images.length) });
+        images = [...images, ...r.files];
+        setVideoNote(`${r.retenues} image${r.retenues > 1 ? "s" : ""} tirée${r.retenues > 1 ? "s" : ""} de la vidéo (${Math.round(r.duree)} s)${r.candidates > r.retenues ? ` sur ${r.candidates} possibles : vérifie qu’aucune sélection ne manque, ou filme plus lentement` : ""}.`);
+      } catch (e) {
+        setBusy(false); setStage(null);
+        setError(e instanceof Error ? e.message : "Vidéo illisible.");
+        return;
+      }
+      setStage(null);
+    }
     const fd = new FormData();
-    for (const f of files) fd.append("image", f);
+    for (const f of images.slice(0, 8)) fd.append("image", f);
     if (coupon) fd.set("link", coupon.url);
     run(fd);
   }
@@ -140,10 +177,10 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
           <Notice kind="info">Lien {coupon.bookmaker} reconnu (coupon {coupon.code}). Il ne contient pas les sélections : ajoute une capture ou le texte du coupon.</Notice>
         )}
         <section className="rounded-xl border border-slate-200 bg-white p-4">
-          <h2 className="mb-2 text-sm font-semibold">Capture d’écran</h2>
-          <p className="mb-3 text-xs text-slate-500">Déplie le ticket avant la capture. Un ticket long peut être envoyé en plusieurs captures : sélectionne-les toutes, dans l’ordre (6 max).</p>
-          <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { onFiles(e.target.files); e.target.value = ""; }} />
-          <Button variant="ghost" onClick={() => fileRef.current?.click()} disabled={busy}>{busy ? "Lecture en cours…" : "Choisir une ou plusieurs captures"}</Button>
+          <h2 className="mb-2 text-sm font-semibold">Capture ou vidéo d’écran</h2>
+          <p className="mb-3 text-xs text-slate-500">Déplie le ticket avant la capture. Un ticket long : plusieurs captures dans l’ordre (6 max), ou une vidéo d’écran en faisant défiler sans te presser. La vidéo est découpée sur ton téléphone, elle n’est pas envoyée.</p>
+          <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={(e) => { const f = Array.from(e.target.files ?? []); e.target.value = ""; void onFiles(f); }} />
+          <Button variant="ghost" onClick={() => fileRef.current?.click()} disabled={busy}>{busy ? stage ?? "Lecture en cours…" : "Choisir des captures ou une vidéo"}</Button>
           <p className="mt-2 text-[11px] text-slate-400">Betclic ne partage pas ses tickets : la capture d’écran est le seul moyen. Sur iPhone : Photos. Sur Android : Galerie ou Fichiers.</p>
         </section>
         <section className="rounded-xl border border-slate-200 bg-white p-4">
@@ -164,6 +201,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
         <button type="button" role="radio" aria-checked={!test} onClick={() => setTest(false)} className={`rounded-lg py-2 ${!test ? "bg-white shadow-card" : "text-ink-muted"}`}>J’ai parié</button>
         <button type="button" role="radio" aria-checked={test} onClick={() => { setTest(true); if (!toNum(mise)) setMise("1000"); }} className={`rounded-lg py-2 ${test ? "bg-white shadow-card" : "text-ink-muted"}`}>Tester sans miser</button>
       </div>
+      {videoNote && <Notice kind="info">{videoNote}</Notice>}
       {test && <Notice kind="info">Coupon ou pronos chargés comme test : suivis et réglés automatiquement, sans toucher à ta bankroll. Choisis bien l’origine (toi ou le tipster) : c’est elle qui sera notée.</Notice>}
       <section className="rounded-xl border border-slate-200 bg-white p-4">
         <div className="flex items-start justify-between">
