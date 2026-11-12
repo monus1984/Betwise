@@ -6,6 +6,11 @@ on:
     # les coups du jour sont générés à la fin du même job
     - cron: "30 7 * * *"
   workflow_dispatch:
+    inputs:
+      refaire:
+        description: "Remplacer les coups du jour (avant tout coup d'envoi)"
+        type: boolean
+        default: false
 
 concurrency:
   group: run-model
@@ -31,7 +36,7 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      - run: npx tsx scripts/daily-picks.ts
+      - run: npx tsx scripts/daily-picks.ts ${{ inputs.refaire && '--refaire' || '' }}
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

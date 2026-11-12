@@ -13,14 +13,24 @@ export const PICKS_SOURCE = "Coups du jour BETWISE";
 const RISK: Record<Categorie, Database["betwise"]["Enums"]["risk_category"]> = { sur: "prudent", audacieux: "moyen", risque: "risque" };
 export const jourAbidjan = (d = new Date()) => d.toLocaleDateString("en-CA", { timeZone: "Africa/Abidjan" });
 
-export async function generateDailyPicks(db: Db, parCategorie = 3) {
+export async function generateDailyPicks(db: Db, parCategorie = 3, refaire = false) {
   const jour = jourAbidjan();
+  if (refaire) {
+    // Remplacement avant tout coup d'envoi : les anciens pronos sont annulés (jamais effacés), les lignes du jour retirées
+    const { data: old } = await db.from("daily_picks").select("id, prediction_id, match:matches(kickoff_at)").eq("jour", jour);
+    const started = (old ?? []).some((o) => { const m = Array.isArray(o.match) ? o.match[0] : o.match; return m && Date.parse(m.kickoff_at) <= Date.now(); });
+    if (started) return { jour, deja: true, picks: 0, note: "un match du jour a commencé : remplacement refusé" };
+    const ids = (old ?? []).map((o) => o.prediction_id).filter(Boolean) as string[];
+    if (ids.length) await db.from("predictions").update({ statut: "annule" }).in("id", ids);
+    await db.from("daily_picks").delete().eq("jour", jour);
+  }
   const { count } = await db.from("daily_picks").select("id", { count: "exact", head: true }).eq("jour", jour);
   if ((count ?? 0) > 0) return { jour, deja: true, picks: 0 };
 
-  const { data: ms } = await db.from("matches").select("id, kickoff_at").eq("statut", "programme")
+  const { data: ms } = await db.from("matches").select("id, kickoff_at, competition:competitions(code_externe)").eq("statut", "programme")
     .gte("kickoff_at", new Date(Date.now() + 20 * 60000).toISOString()).lte("kickoff_at", new Date(Date.now() + 24 * 3600000).toISOString()).limit(300);
   const signals = await loadSignals(db as never, (ms ?? []).map((m) => m.id));
+  const compOf = new Map((ms ?? []).map((m) => [m.id, (Array.isArray(m.competition) ? m.competition[0] : m.competition)?.code_externe ?? ""]));
 
   type Cand = { match_id: string; market: string; param: number | null; sel: string; p: number; cote: number | null; pModele: number | null; cat: Categorie; score: number };
   const cands: Cand[] = [];
@@ -31,7 +41,9 @@ export async function generateDailyPicks(db: Db, parCategorie = 3) {
       if (!cat || cat === "hors") continue;
       // l'avis du modèle départage : accord = bonus, fort désaccord = pénalité
       const accord = pk.pModele === null ? 0 : pk.pModele >= pk.p - 0.03 ? 0.03 : pk.pModele < pk.p - 0.1 ? -0.06 : 0;
-      cands.push({ match_id, market: pk.market, param: pk.param, sel: pk.sel, p: pk.p, cote: pk.cote, pModele: pk.pModele, cat, score: pk.p + accord });
+      // une cote de référence vérifiable vaut mieux qu'une probabilité calculée ; les amicaux sont moins fiables
+      const bonus = (pk.cote ? 0.03 : 0) - (compOf.get(match_id) === "AMI" ? 0.03 : 0);
+      cands.push({ match_id, market: pk.market, param: pk.param, sel: pk.sel, p: pk.p, cote: pk.cote, pModele: pk.pModele, cat, score: pk.p + accord + bonus });
     }
   }
   const used = new Set<string>();

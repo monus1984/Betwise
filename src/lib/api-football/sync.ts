@@ -32,7 +32,7 @@ const NATION_FR_EXTRA: Record<string, string> = {
   Mauritania: "Mauritanie", Gambia: "Gambie", "Guinea-Bissau": "Guinée-Bissau", "Sierra Leone": "Sierra Leone", Liberia: "Liberia", "Equatorial Guinea": "Guinée équatoriale",
   Angola: "Angola", Zambia: "Zambie", Zimbabwe: "Zimbabwe", Mozambique: "Mozambique", Madagascar: "Madagascar", Comoros: "Comores", Uganda: "Ouganda", Kenya: "Kenya",
   Tanzania: "Tanzanie", Ethiopia: "Éthiopie", Sudan: "Soudan", "South Sudan": "Soudan du Sud", Libya: "Libye", Rwanda: "Rwanda", Burundi: "Burundi", Namibia: "Namibie",
-  Botswana: "Botswana", Malawi: "Malawi", Lesotho: "Lesotho", Eswatini: "Eswatini", "Central African Republic": "Centrafrique", Mauritius: "Maurice",
+  Botswana: "Botswana", Eritrea: "Érythrée", Somalia: "Somalie", Djibouti: "Djibouti", "Sao Tome and Principe": "Sao Tomé-et-Principe", Seychelles: "Seychelles", "Cameroon": "Cameroun", Senegal: "Sénégal", Morocco: "Maroc", Algeria: "Algérie", Tunisia: "Tunisie", Egypt: "Égypte", Guinea: "Guinée", "South Africa": "Afrique du Sud", Suriname: "Suriname", Lithuania: "Lituanie", Malta: "Malte", Malawi: "Malawi", Lesotho: "Lesotho", Eswatini: "Eswatini", "Central African Republic": "Centrafrique", Mauritius: "Maurice",
   Brazil: "Brésil", Argentina: "Argentine", "United States": "États-Unis", Mexico: "Mexique", Japan: "Japon", "South Korea": "Corée du Sud", "Saudi Arabia": "Arabie saoudite",
   Qatar: "Qatar", Iran: "Iran", Australia: "Australie", Canada: "Canada", Colombia: "Colombie", Uruguay: "Uruguay", Chile: "Chili", Peru: "Pérou", Ecuador: "Équateur",
   Paraguay: "Paraguay", China: "Chine", India: "Inde", "New Zealand": "Nouvelle-Zélande", Jordan: "Jordanie", Iraq: "Irak", "United Arab Emirates": "Émirats arabes unis",

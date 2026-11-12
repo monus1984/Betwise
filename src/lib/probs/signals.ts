@@ -14,6 +14,8 @@ export type Signal = {
   model: { lh: number; la: number; grid: Grid } | null;
   /** Cote de référence d'une sélection, si elle existe. */
   refOdd: (market: string, param: number | null, sel: string) => number | null;
+  /** Probabilité tirée directement des cotes de référence pour les marchés cotés (1X2, plus/moins 2,5). */
+  direct: (market: string, param: number | null, sel: string) => number | null;
 };
 /** pModele : second avis du modèle sur la même sélection, quand il couvre le match et que p vient des cotes. */
 export type Pick = { market: string; param: number | null; sel: string; p: number; cote: number | null; pModele: number | null };
@@ -38,20 +40,33 @@ export async function loadSignals(db: Db, ids: string[]): Promise<Map<string, Si
       const o = mine.find((x) => x.market_code === market && x.selection === sel && (x.market_param === null ? param === null : Number(x.market_param) === param));
       return o ? Number(o.cote) : null;
     };
+    // Probabilité directe des marchés cotés (victoire, plus/moins 2,5) : cotes de référence, marge retirée proportionnellement
+    const direct = (market: string, param: number | null, sel: string): number | null => {
+      const group = market === "1X2" ? (["1", "N", "2"] as const).map((k) => refOdd("1X2", null, k)) : market === "OU" && param === 2.5 ? (["Plus", "Moins"] as const).map((k) => refOdd("OU", 2.5, k)) : null;
+      if (!group || group.some((c) => !c)) return null;
+      const inv = group.map((c) => 1 / c!), tot = inv.reduce((a, b) => a + b, 0);
+      const idx = market === "1X2" ? ["1", "N", "2"].indexOf(sel) : ["Plus", "Moins"].indexOf(sel);
+      return idx < 0 ? null : inv[idx] / tot;
+    };
     const ml = lambdasFromOdds({ c1: refOdd("1X2", null, "1"), cN: refOdd("1X2", null, "N"), c2: refOdd("1X2", null, "2"), plus25: refOdd("OU", 2.5, "Plus"), moins25: refOdd("OU", 2.5, "Moins") });
     const market = ml ? { lh: ml.lh, la: ml.la, grid: makeGrid(ml.lh, ml.la) } : null;
     const j = est?.find((e) => e.match_id === id)?.justification as { lambda_dom?: number; lambda_ext?: number } | null | undefined;
     const model = j?.lambda_dom && j?.lambda_ext ? { lh: j.lambda_dom, la: j.lambda_ext, grid: makeGrid(j.lambda_dom, j.lambda_ext, DRAW_BOOST) } : null;
-    if (ml && market) out.set(id, { source: "marche", lh: ml.lh, la: ml.la, grid: market.grid, approx: ml.approx, market, model, refOdd });
-    else if (model) out.set(id, { source: "modele", lh: model.lh, la: model.la, grid: model.grid, approx: false, market: null, model, refOdd });
+    if (ml && market) out.set(id, { source: "marche", lh: ml.lh, la: ml.la, grid: market.grid, approx: ml.approx, market, model, refOdd, direct });
+    else if (model) out.set(id, { source: "modele", lh: model.lh, la: model.la, grid: model.grid, approx: false, market: null, model, refOdd, direct: () => null });
   }
   return out;
+}
+
+/** Probabilité d'une sélection quelconque, cohérente avec les pastilles (cote directe d'abord, grille ensuite). */
+export function probOfSignal(s: Signal, market: string, param: number | null, sel: string): number | null {
+  return (s.source === "marche" ? s.direct(market, param, sel) : null) ?? probOf(s.grid, market, param, sel);
 }
 
 /** Sélections candidates d'un match, de la plus probable à la moins probable. */
 export function picksOf(s: Signal): Pick[] {
   return CANDIDATES.map(([market, param, sel]) => {
-    const p = probOf(s.grid, market, param, sel)!;
+    const p = (s.source === "marche" ? s.direct(market, param, sel) : null) ?? probOf(s.grid, market, param, sel)!;
     const cote = s.refOdd(market, param, sel);
     return { market, param, sel, p, cote, pModele: s.source === "marche" && s.model ? probOf(s.model.grid, market, param, sel) : null };
   }).sort((a, b) => b.p - a.p);

@@ -3,7 +3,7 @@
  *  - Sûr       : cote juste 1,10 à 1,20 (probabilité 83 à 91 %) — 87,9 % de réussite constatée
  *  - Audacieux : cote juste 1,20 à 1,50 (67 à 83 %)              — 76,4 %
  *  - Risqué    : cote juste 1,50 à 1,90 (53 à 67 %)              — 59,1 %
- * Au-delà de 1,90 : « Hors catégorie » ; en deçà de 1,08, gain trop faible pour être proposé.
+ * Au-delà de 1,90 : « Très risqué » ; en deçà de 1,10, gain trop faible : non classé, jamais proposé.
  */
 export type Categorie = "sur" | "audacieux" | "risque";
 export const CAT_LABEL: Record<Categorie | "hors", string> = { sur: "Sûr", audacieux: "Audacieux", risque: "Risqué", hors: "Très risqué" };
@@ -16,7 +16,7 @@ export const CAT_CONSTATE: Record<Categorie, number> = { sur: 0.879, audacieux: 
 export const CAT_ANNONCE: Record<Categorie, number> = { sur: 0.866, audacieux: 0.75, risque: 0.591 };
 
 export function categorieOf(p: number): Categorie | "hors" | null {
-  if (p > 0.926) return null;          // cote juste < 1,08 : trop peu de gain
+  if (p > 0.909) return null;          // cote juste < 1,10 : sous la borne Sûr, trop peu de gain
   if (p >= 0.833) return "sur";
   if (p >= 0.667) return "audacieux";
   if (p >= 0.526) return "risque";

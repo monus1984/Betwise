@@ -3,8 +3,7 @@
  * confrontés aux probabilités BETWISE et rangés dans les mêmes catégories.
  */
 import type { createClient } from "@/lib/supabase/server";
-import { probOf } from "../probs/grid";
-import { loadSignals, pickLabel } from "../probs/signals";
+import { loadSignals, pickLabel, probOfSignal } from "../probs/signals";
 import { categorieFromOdds, categorieOf, type Categorie } from "./categories";
 import { jourAbidjan } from "./daily";
 
@@ -65,7 +64,7 @@ export async function loadToday(db: Db, userId: string) {
 
   const theirs: TheirPick[] = theirsRaw.map((r) => {
     const { h, a } = names(r.m); const sg = signals.get(r.m.id);
-    const p = sg ? probOf(sg.grid, r.market_code, r.market_param === null ? null : Number(r.market_param), r.selection) : null;
+    const p = sg ? probOfSignal(sg, r.market_code, r.market_param === null ? null : Number(r.market_param), r.selection) : null;
     const categorie = p !== null ? categorieOf(p) : r.cote ? categorieFromOdds(r.cote) : null;
     const value = p !== null && r.cote ? p * r.cote - 1 : null;
     const verdict = p === null ? (r.cote ? "pas de cote de référence : classé d’après sa cote" : "pas de données sur ce match")

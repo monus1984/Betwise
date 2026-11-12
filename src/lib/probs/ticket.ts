@@ -1,5 +1,4 @@
-import { probOf } from "./grid";
-import { pickLabel, type Signal } from "./signals";
+import { pickLabel, probOfSignal, type Signal } from "./signals";
 
 export type TicketSel = { match_id: string | null; market_code: string; market_param: number | null; selection: string; cote: number; home?: string; away?: string; libre?: string | null };
 export type TicketLine = { label: string; match: string; cote: number; p: number; origine: "modele" | "marche" | "estime"; valeur: number };
@@ -19,7 +18,7 @@ export function analyzeTicket(sels: TicketSel[], signals: Map<string, Signal>, c
   if (!sels.length) return null;
   const lignes = sels.map<TicketLine>((s) => {
     const sg = s.match_id ? signals.get(s.match_id) : undefined;
-    const p0 = sg ? probOf(sg.grid, s.market_code, s.market_param !== null ? Number(s.market_param) : null, s.selection) : null;
+    const p0 = sg ? probOfSignal(sg, s.market_code, s.market_param !== null ? Number(s.market_param) : null, s.selection) : null;
     const p = p0 ?? Math.min(0.97, 1 / s.cote / (1 + MARGE_SUPPOSEE));
     const home = s.home ?? "Domicile", away = s.away ?? "Extérieur";
     return {

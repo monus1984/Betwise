@@ -3,4 +3,4 @@ import "dotenv/config";
 import { createAdminClient } from "../src/lib/supabase/admin";
 import { generateDailyPicks } from "../src/lib/coach/daily";
 
-generateDailyPicks(createAdminClient()).then((r) => console.log("Coups du jour :", JSON.stringify(r))).catch((e) => { console.error(e instanceof Error ? e.message : e); process.exit(1); });
+generateDailyPicks(createAdminClient(), 3, process.argv.includes("--refaire")).then((r) => console.log("Coups du jour :", JSON.stringify(r))).catch((e) => { console.error(e instanceof Error ? e.message : e); process.exit(1); });
