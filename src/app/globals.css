@@ -44,6 +44,15 @@ body {
   pointer-events: none;
 }
 
+/* Variante photo (accueil, connexion) : le stade de nuit sous un voile vert, pour que le texte reste net */
+.pitch-photo {
+  background:
+    linear-gradient(180deg, rgba(10, 43, 34, .78) 0%, rgba(10, 43, 34, .62) 45%, rgba(10, 43, 34, .88) 100%),
+    url("/bandeaux/stade-nuit.webp") center 35% / cover no-repeat,
+    #0a2b22;
+}
+.pitch-photo::after { display: none; }
+
 /* Chiffres et titres « tableau d'affichage » */
 .font-display { letter-spacing: .005em; font-feature-settings: "tnum" 1, "lnum" 1; }
 

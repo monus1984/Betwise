@@ -53,7 +53,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
 
   return (
     <>
-      <PageHeader title={`Salut ${profile?.pseudo ?? ""}`} subtitle="Ton tableau de bord." tall
+      <PageHeader title={`Salut ${profile?.pseudo ?? ""}`} subtitle="Ton tableau de bord." tall photo
         action={<form action={signOut}><button className="text-xs text-ink-muted underline">Déconnexion</button></form>} />
 
       <section className="relative z-10 -mt-9 rounded-2xl border border-line bg-white p-4 shadow-card">
