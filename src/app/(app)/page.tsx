@@ -7,16 +7,14 @@ import { bankrollMove } from "@/lib/bets/actions";
 import { loadDashboard, type Group } from "@/lib/stats/dashboard";
 import { createClient } from "@/lib/supabase/server";
 import { loadGoal } from "@/lib/coach/goal";
-import { misesDuJour } from "@/lib/coach/plan";
-import { loadToday } from "@/lib/coach/today";
-import { ObjectifCard } from "./objectif-card";
-import { CoupsDuJour } from "./coups-du-jour";
+import { jourAbidjan } from "@/lib/coach/daily";
 
 export const dynamic = "force-dynamic";
 
 const PERIODS = [{ k: "7j", t: "7 jours", d: 7 }, { k: "30j", t: "30 jours", d: 30 }, { k: "90j", t: "90 jours", d: 90 }, { k: "tout", t: "Tout", d: 0 }] as const;
 const pct = (x: number | null, signed = false) => (x === null ? "—" : `${signed && x > 0 ? "+" : ""}${Math.round(x * 100)} %`);
 const tone = (x: number | null) => (x === null ? "" : x > 0 ? "text-gain" : x < 0 ? "text-loss" : "");
+const STATUT: Record<string, string> = { atteint: "atteint", en_avance: "en avance", dans_les_temps: "dans les temps", en_retard: "en retard", echu: "délai dépassé" };
 const signedF = (x: number) => `${x > 0 ? "+" : ""}${fcfa(x)}`;
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ p?: string }> }) {
@@ -28,17 +26,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
   // Profil (créé au besoin : couvre un compte Kehiwa qui ouvre BETWISE pour la première fois)
   const { data: profile } = await supabase.rpc("ensure_profile");
 
-  const [{ data: summary }, d, { data: follows }, { data: tests }] = await Promise.all([
+  const [{ data: summary }, d, { data: follows }] = await Promise.all([
     supabase.from("my_bankroll_summary").select("*").maybeSingle(),
     loadDashboard(supabase, period.d ? new Date(Date.now() - period.d * 86400000).toISOString() : null),
     supabase.from("source_follows").select("source_id, source:sources(id, nom, type)").eq("user_id", user!.id),
-    supabase.from("bets").select("statut, mise, gain_net").eq("virtuel", true).neq("statut", "annule").limit(2000),
   ]);
-  const tRegles = (tests ?? []).filter((t) => t.statut !== "en_cours");
-  const tMises = tRegles.reduce((x, t) => x + Number(t.mise), 0), tNet = tRegles.reduce((x, t) => x + Number(t.gain_net ?? 0), 0);
   const solde = Number(summary?.solde ?? 0), exposition = Number(summary?.exposition ?? 0);
-  const [goal, today] = await Promise.all([loadGoal(supabase, solde), loadToday(supabase, user!.id)]);
-  const mises = goal ? goal.mises : solde > 0 ? misesDuJour(solde, solde) : null;
+  const [goal, { count: nbCoups }] = await Promise.all([loadGoal(supabase, solde), supabase.from("daily_picks").select("id", { count: "exact", head: true }).eq("jour", jourAbidjan())]);
   const ids = (follows ?? []).map((f) => f.source_id);
   const [{ data: trends }, { data: metrics }] = ids.length
     ? await Promise.all([
@@ -65,23 +59,16 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
         <p className="mt-1 text-xs text-white/60">{d.enCours > 0 ? <>{fcfa(exposition)} en jeu sur <Link href="/paris" className="underline">{d.enCours} pari{d.enCours > 1 ? "s" : ""} en cours</Link></> : "Aucun pari en cours"}</p>
       </section>
 
-      <ObjectifCard goal={goal} solde={solde} />
-      <CoupsDuJour picks={today.picks} theirs={today.theirs} mises={mises} />
-
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        <Link href="/options" className="rounded-xl border border-line bg-white p-3 shadow-card active:bg-surface-2">
-          <p className="text-sm font-semibold">🎯 Options du jour</p>
-          <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">Ton % de réussite, en simple ou en combiné à la cote voulue.</p>
-        </Link>
-        <Link href="/paris?vue=tests" className="rounded-xl border border-line bg-white p-3 shadow-card active:bg-surface-2">
-          <p className="text-sm font-semibold">🧪 Mes tests</p>
-          <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
-            {!tests?.length ? "Teste tes choix et ceux de tes tipsters, sans miser."
-              : !tRegles.length ? `${tests.length} en attente de résultat.`
-              : <>{tRegles.length} réglé{tRegles.length > 1 ? "s" : ""} · {Math.round((100 * tRegles.filter((t) => t.statut === "gagne").length) / tRegles.length)} % gagnés · <span className={tNet >= 0 ? "text-gain" : "text-loss"}>{tNet >= 0 ? "+" : ""}{Math.round((100 * tNet) / tMises)} %</span></>}
-          </p>
-        </Link>
-      </div>
+      <Link href="/coach" className="mt-3 flex items-center gap-3 rounded-xl border border-brand/30 bg-brand/5 p-3 active:bg-brand/10">
+        <span className="text-xl">🧭</span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold">Coach</span>
+          <span className="block truncate text-[11px] text-ink-muted">
+            {goal ? `Objectif ${fcfa(goal.cible)} · ${STATUT[goal.statut] ?? goal.statut}` : "Pas encore d’objectif"} · {nbCoups ? `${nbCoups} coup${nbCoups > 1 ? "s" : ""} du jour` : "pas de coup du jour"}
+          </span>
+        </span>
+        <span className="text-brand">›</span>
+      </Link>
 
       <h2 className="mt-6 text-base font-bold">Ton bilan</h2>
       <nav className="mt-2 flex gap-1.5" aria-label="Période">
@@ -181,7 +168,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
       </details>
 
       <section className="mt-3 grid grid-cols-2 gap-2">
-        <Link href="/coach" className="rounded-xl border border-line bg-white p-3 text-sm font-medium active:bg-surface-2">💬 Demander au Coach</Link>
+        <Link href="/coach?v=discussion" className="rounded-xl border border-line bg-white p-3 text-sm font-medium active:bg-surface-2">💬 Demander au Coach</Link>
         <Link href="/import" className="rounded-xl border border-line bg-white p-3 text-sm font-medium active:bg-surface-2">📷 Importer un ticket</Link>
       </section>
 

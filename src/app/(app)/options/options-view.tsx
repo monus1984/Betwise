@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
+import { CoachNav } from "@/components/coach-nav";
 import { COMP_FLAG, shortName } from "@/components/match-ui";
 import { CAT_LABEL, CAT_STYLE, categorieOf } from "@/lib/coach/categories";
 import { buildCombos, coteEstimee, legsParam, singlesOf, type Option } from "@/lib/options/build";
@@ -54,6 +55,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
   return (
     <>
       <PageHeader title="Options du jour" subtitle="Choisis ton taux de réussite : BETWISE te donne les paris qui y correspondent, en simple ou en combiné." />
+      <CoachNav current="options" />
 
       <div className="mb-3 flex gap-1.5 overflow-x-auto">
         {([["auj", "Aujourd’hui"], ["demain", "Demain"], ["48h", "48 h"]] as const).map(([k, l]) => <Link key={k} href={q({ per: k, m: null })} scroll={false} className={small(per === k)}>{l}</Link>)}

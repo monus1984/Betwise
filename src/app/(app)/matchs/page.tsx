@@ -75,11 +75,6 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
         </div>
       </nav>
 
-      <Link href="/options" className="mb-3 flex items-center justify-between rounded-xl border border-brand/30 bg-brand/5 px-3 py-2.5 text-sm">
-        <span><b>🎯 Options du jour</b> <span className="text-ink-muted">· choisis ton % de réussite, simples et combinés</span></span>
-        <span className="text-brand">›</span>
-      </Link>
-
       {/* Filtre compétition */}
       {compsOfDay.length > 1 && (
         <nav className="-mx-4 mb-4 overflow-x-auto px-4" aria-label="Compétitions">
