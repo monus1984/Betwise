@@ -8,6 +8,7 @@ import { loadDashboard, type Group } from "@/lib/stats/dashboard";
 import { createClient } from "@/lib/supabase/server";
 import { loadGoal } from "@/lib/coach/goal";
 import { jourAbidjan } from "@/lib/coach/daily";
+import { InstallButton } from "@/components/install-button";
 import { NotificationsCard } from "@/components/notifications-card";
 
 export const dynamic = "force-dynamic";
@@ -53,6 +54,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
     <>
       <PageHeader title={`Salut ${profile?.pseudo ?? ""}`} subtitle="Ton tableau de bord."
         action={<form action={signOut}><button className="text-xs text-ink-muted underline">Déconnexion</button></form>} />
+
+      <InstallButton />
 
       <section className="rounded-2xl bg-ink p-5 text-white">
         <p className="text-xs uppercase tracking-wide text-white/60">Solde</p>

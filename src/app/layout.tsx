@@ -19,7 +19,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <body className="min-h-dvh bg-canvas font-sans text-ink antialiased">{children}</body>
+      <body className="min-h-dvh bg-canvas font-sans text-ink antialiased">
+        {/* La proposition d'installation du navigateur peut arriver avant le chargement de la page : on la garde */}
+        <script dangerouslySetInnerHTML={{ __html: "window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__bwInstall=e});if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){})}" }} />
+        {children}
+      </body>
     </html>
   );
 }

@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useActionState } from "react";
 import { signIn, type AuthState } from "@/lib/auth/actions";
 import { Button, Field, Input, Notice } from "@/components/ui";
+import { InstallButton } from "@/components/install-button";
 
 function Form() {
   const params = useSearchParams();
@@ -24,6 +25,7 @@ function Form() {
         Pas encore de compte ? <Link href="/inscription" className="font-medium text-slate-900 underline">S’inscrire</Link>
       </p>
       <p className="text-center text-xs text-slate-500">Un compte Kehiwa fonctionne ici avec les mêmes identifiants.</p>
+      <InstallButton compact />
     </form>
   );
 }
