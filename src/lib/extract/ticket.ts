@@ -37,13 +37,19 @@ const rawTicket = z.object({
   coupon_code: z.string().nullable(),
   is_collapsed: z.boolean(),                   // ticket replié : résumé sans le détail des lignes
   notes: z.string().nullable(),
+  source: z.object({                           // qui a publié ou partagé ce ticket, si c'est visible
+    name: z.string().nullable(),
+    platform: z.enum(["telegram", "whatsapp", "facebook", "instagram", "tiktok", "autre"]).nullable(),
+    evidence: z.string().nullable(),
+    published_at: z.string().nullable(),
+  }).nullable().optional(),
 });
 export type RawTicket = z.infer<typeof rawTicket>;
 
 const SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["bookmaker", "ticket_type", "nb_selections_declared", "selections", "total_odds", "stake", "currency", "payout", "status", "placed_at", "coupon_code", "is_collapsed", "notes"],
+  required: ["bookmaker", "ticket_type", "nb_selections_declared", "selections", "total_odds", "stake", "currency", "payout", "status", "placed_at", "coupon_code", "is_collapsed", "notes", "source"],
   properties: {
     bookmaker: { type: ["string", "null"], description: "Nom du bookmaker (Betclic, 1xBet, Premier Bet…) ou null" },
     ticket_type: { type: "string", enum: ["single", "combo", "unknown"] },
@@ -78,6 +84,18 @@ const SCHEMA = {
     coupon_code: { type: ["string", "null"], description: "Code du coupon s'il est visible" },
     is_collapsed: { type: "boolean", description: "true si le ticket ne montre pas le détail des sélections" },
     notes: { type: ["string", "null"], description: "Toute ambiguïté rencontrée, en une phrase" },
+    source: {
+      type: ["object", "null"],
+      description: "Qui a publié ou partagé ce ticket, si c'est visible. null si l'image montre seulement l'application du bookmaker, sans auteur.",
+      additionalProperties: false,
+      required: ["name", "platform", "evidence", "published_at"],
+      properties: {
+        name: { type: ["string", "null"], description: "Nom du canal, de la page, du groupe ou du compte tel qu'affiché : en-tête d'une conversation Telegram ou WhatsApp, nom de page Facebook, pseudo Instagram ou TikTok, filigrane ou signature sur l'image. Jamais le nom du bookmaker ni celui de l'application." },
+        platform: { type: ["string", "null"], enum: ["telegram", "whatsapp", "facebook", "instagram", "tiktok", "autre", null] },
+        evidence: { type: ["string", "null"], description: "Où le nom apparaît, en quelques mots (ex. « en-tête du canal Telegram », « filigrane en bas du coupon »)" },
+        published_at: { type: ["string", "null"], description: "Date et heure de publication du message ou du post, telles qu'affichées" },
+      },
+    },
   },
 } as const;
 
@@ -94,6 +112,7 @@ const SYSTEM = `Tu lis des tickets de paris sportifs (captures d'écran ou texte
 Tu copies ce qui est affiché, tu n'inventes rien et tu ne calcules rien. Si une information n'est pas visible, renvoie null.
 Conventions : l'équipe à gauche du score est à domicile, celle à droite à l'extérieur. Un nom de sélection en vert avec une coche signifie gagnée, en rouge avec une croix perdue. Les cotes utilisent la virgule décimale en français : "1,47" vaut 1.47. Les montants "5 000 F" valent 5000.
 Pour un combiné, une ligne par sélection, dans l'ordre affiché. Si le ticket est replié (pas de détail des lignes), selections est vide et is_collapsed vaut true.
+Si le ticket est montré dans une conversation ou une publication (Telegram, WhatsApp, Facebook, Instagram, TikTok), relève dans source le nom du canal, de la page ou du groupe, et l'heure de publication ; un filigrane ou une signature sur l'image compte aussi. Ne déduis pas : seulement ce qui est écrit.
 Plusieurs tickets peuvent apparaître : chacun a son en-tête (type, nombre de sélections) et son pied (mise, cote totale, gains, horodatage). Ne fusionne jamais deux tickets : un élément de tickets par ticket distinct. Une sélection n'appartient qu'à un ticket.`;
 
 // ---------- Normalisation marché / sélection ----------
@@ -248,7 +267,7 @@ export async function extractTickets(db: Db, input: { images?: LlmImage[]; text?
       count_ok: raw.nb_selections_declared !== null && !raw.is_collapsed ? raw.selections.length === raw.nb_selections_declared : null,
     };
     // Coût de l'appel compté une fois, sur le premier ticket
-    return { raw, selections, checks, placed_at_iso: parseFrDate(raw.placed_at), usage: { tokensIn: k ? 0 : res.tokensIn, tokensOut: k ? 0 : res.tokensOut, model: res.model } };
+    return { raw, selections, checks, placed_at_iso: parseFrDate(raw.placed_at) ?? parseFrDate(raw.source?.published_at ?? null), usage: { tokensIn: k ? 0 : res.tokensIn, tokensOut: k ? 0 : res.tokensOut, model: res.model } };
   });
 }
 
@@ -279,3 +298,4 @@ export function parseCouponLink(s: string): { bookmaker: string; code: string; u
   if (m) return { bookmaker: "1xBet", code: m[1].toUpperCase(), url: m[0] };
   return null;
 }
+

@@ -6,6 +6,8 @@ import { placeImportedBet } from "@/lib/bets/import-actions";
 import { SourceChooser } from "@/components/source-chooser";
 import { Button, Chip, Field, Input, Notice, RISK_CLASS, RISK_LABEL, fcfa, riskFromOdds } from "@/components/ui";
 import type { ExtractedTicket, MatchedSelection } from "@/lib/extract/ticket";
+import { SOURCE_TYPE_OF, matchSource } from "@/lib/extract/source-match";
+import { quickCreateSource } from "@/lib/sources/actions";
 import { framesFromVideo } from "@/lib/extract/video-frames";
 
 type Source = { id: string; nom: string; type: string };
@@ -33,6 +35,9 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
   const [result, setResult] = useState<Extracted | null>(null);
   const [queue, setQueue] = useState<Extracted[]>([]);   // tickets lus dans le même envoi, en attente
   const [done, setDone] = useState<{ n: number; total: number } | null>(null);
+  type Hint = NonNullable<ExtractedTicket["raw"]["source"]>;
+  const [detected, setDetected] = useState<{ hint: Hint; sourceId: string | null } | null>(null);
+  const [creating, setCreating] = useState(false);
   const [coupon, setCoupon] = useState<CouponOnly["coupon"] | null>(null);
   const [lines, setLines] = useState<Line[]>([]);
   const [mise, setMise] = useState("");
@@ -81,11 +86,33 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
 
   function load(t: Extracted) {
     setResult(t);
-    setLines(t.selections.map((s, i) => ({ ...s, key: i, origin: lines[0]?.origin ?? defaultOrigin, coteStr: s.odds ? String(s.odds) : "", include: true })));
+    // Source lue sur la capture (canal, page, groupe, filigrane) : appliquée si elle existe déjà
+    const hint = t.raw.source?.name ? t.raw.source : null;
+    const found = hint ? matchSource(hint.name, srcList) : null;
+    setDetected(hint ? { hint, sourceId: found?.id ?? null } : null);
+    const origin = found?.id ?? lines[0]?.origin ?? defaultOrigin;
+    if (found) setSummaryOrigin(found.id);
+    setLines(t.selections.map((s, i) => ({ ...s, key: i, origin, coteStr: s.odds ? String(s.odds) : "", include: true })));
     setMise(t.raw.stake ? String(t.raw.stake) : test ? "1000" : "");
     setStatus(t.raw.status === "won" ? "gagne" : t.raw.status === "lost" ? "perdu" : t.raw.status === "void" ? "rembourse" : "en_cours");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+  /** Crée la source détectée (WhatsApp : privée, ce sont souvent des personnes) et l'applique à tout le ticket. */
+  async function createDetected() {
+    if (!detected?.hint.name) return;
+    setCreating(true);
+    const r = await quickCreateSource({ nom: detected.hint.name.slice(0, 60), type: SOURCE_TYPE_OF[detected.hint.platform ?? "autre"] ?? "tipster", visibilite: detected.hint.platform === "whatsapp" ? "privee" : "partagee" });
+    setCreating(false);
+    if (!r.ok) { setError(r.error); return; }
+    setSrcList((x) => (x.some((s) => s.id === r.source.id) ? x : [...x, r.source]));
+    applySource(r.source.id);
+  }
+  function applySource(id: string) {
+    setDetected((d) => (d ? { ...d, sourceId: id } : d));
+    setSummaryOrigin(id);
+    setLines((ls) => ls.map((l) => ({ ...l, origin: id })));
+  }
+
   /** Ticket suivant du même envoi, ou fin. */
   function next(saved: boolean) {
     const total = done?.total ?? 1;
@@ -227,6 +254,23 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
         </div>
       )}
       {videoNote && <Notice kind="info">{videoNote}</Notice>}
+      {detected && (
+        <div className="rounded-xl border border-line bg-white p-3 text-sm shadow-card">
+          <p>
+            <span className="text-ink-muted">Source repérée{detected.hint.platform && detected.hint.platform !== "autre" ? ` sur ${({ telegram: "Telegram", whatsapp: "WhatsApp", facebook: "Facebook", instagram: "Instagram", tiktok: "TikTok" } as Record<string, string>)[detected.hint.platform]}` : ""} : </span>
+            <b>{detected.hint.name}</b>
+          </p>
+          {(detected.hint.evidence || detected.hint.published_at) && <p className="mt-0.5 text-[11px] text-ink-muted">{[detected.hint.evidence, detected.hint.published_at ? `publié ${detected.hint.published_at}` : null].filter(Boolean).join(" · ")}</p>}
+          {detected.sourceId ? (
+            <p className="mt-1.5 text-xs text-gain">✓ Appliquée à toutes les sélections ({srcList.find((x) => x.id === detected.sourceId)?.nom}). Tu peux changer l’origine ligne par ligne.</p>
+          ) : (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <button type="button" disabled={creating} onClick={createDetected} className="rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white">{creating ? "Création…" : "Créer cette source et l’appliquer"}</button>
+              <span className="text-[11px] text-ink-muted">ou choisis-la plus bas si elle existe sous un autre nom.{detected.hint.platform === "whatsapp" ? " Une source WhatsApp reste privée." : ""}</span>
+            </div>
+          )}
+        </div>
+      )}
       {test && <Notice kind="info">Coupon ou pronos chargés comme test : suivis et réglés automatiquement, sans toucher à ta bankroll. Choisis bien l’origine (toi ou le tipster) : c’est elle qui sera notée.</Notice>}
       <section className="rounded-xl border border-slate-200 bg-white p-4">
         <div className="flex items-start justify-between">
@@ -234,7 +278,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
             <p className="text-sm font-semibold">{raw.bookmaker ?? "Bookmaker inconnu"} · {raw.ticket_type === "combo" ? `Combiné (${raw.nb_selections_declared ?? lines.length})` : "Simple"}</p>
             <p className="text-xs text-slate-500">{raw.placed_at ? `Ticket du ${raw.placed_at}` : "Date du ticket non lue"}{raw.coupon_code ? ` · coupon ${raw.coupon_code}` : ""}</p>
           </div>
-          <button className="text-xs text-slate-600 underline" onClick={() => { setResult(null); setLines([]); setQueue([]); setDone(null); }}>Recommencer</button>
+          <button className="text-xs text-slate-600 underline" onClick={() => { setResult(null); setLines([]); setQueue([]); setDone(null); setDetected(null); }}>Recommencer</button>
         </div>
         {result.truncated && <Notice>Capture trop longue : seules les premières lignes ont été lues. Vérifie et complète.</Notice>}
         {raw.notes && <p className="mt-2 text-xs text-amber-800">{raw.notes}</p>}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { normalizePick, parseFrDate } from "./ticket";
+import { matchSource } from "./source-match";
 
 const CP = ["Crystal Palace", "Liverpool"] as const;
 const MU = ["Manchester United", "Aston Villa"] as const;
@@ -35,5 +36,19 @@ describe("parseFrDate", () => {
   it("lit l'horodatage Betclic", () => {
     expect(parseFrDate("08/11/2026 13:38")).toBe("2026-11-08T13:38:00.000Z");
     expect(parseFrDate(null)).toBeNull();
+  });
+});
+
+describe("matchSource", () => {
+  const src = [{ id: "a", nom: "Groupe Betclic CI", type: "page_facebook" }, { id: "b", nom: "Pronos Élite 225", type: "canal_telegram" }, { id: "m", nom: "Moi", type: "perso" }];
+  it("retrouve une source malgré la casse, les accents et les emojis", () => {
+    expect(matchSource("GROUPE BETCLIC CI 🇨🇮", src)?.id).toBe("a");
+    expect(matchSource("Pronos Elite 225 ✅", src)?.id).toBe("b");
+    expect(matchSource("Elite 225 Pronos officiel", src)?.id).toBe("b");
+  });
+  it("ne force pas une correspondance douteuse", () => {
+    expect(matchSource("Betclic", src)).toBeNull();
+    expect(matchSource("Moi", src)).toBeNull();
+    expect(matchSource(null, src)).toBeNull();
   });
 });
