@@ -184,6 +184,8 @@ export async function applyFixtures(db: Db, fixtures: AfFixture[]) {
     const { error } = await db.from("matches").update({
       statut, score_home: sh, score_away: sa, minute, live_at: now, updated_at: now,
       ...(hth !== null && hta !== null ? { ht_home: hth, ht_away: hta } : {}),
+      // pendant le match : buteurs et chronologie, pour la fiche match et la notification de but
+      ...(!done && Array.isArray(f.events) && f.events.length ? { details: JSON.parse(JSON.stringify({ buteurs: detailsOf(f).details.buteurs ?? [], evts: timelineOf(f) })) } : {}),
       ...(done ? { source_resultat: "api-football", result_at: now } : {}),
     }).eq("id", m.id);
     if (error) throw error;
@@ -195,7 +197,22 @@ export async function applyFixtures(db: Db, fixtures: AfFixture[]) {
 export type MatchDetails = {
   corners?: [number, number]; jaunes?: [number, number]; rouges?: [number, number]; tirs?: [number, number]; cadres?: [number, number];
   buteurs?: { n: string; e: "1" | "2"; m: number; x?: number }[]; issue?: "FT" | "AET" | "PEN"; vainqueur?: "1" | "2" | null;
+  /** Chronologie affichée sur la fiche match : buts, buts contre son camp, penalties manqués, cartons. */
+  evts?: { t: "but" | "pen" | "csc" | "pen_rate" | "jaune" | "rouge"; n: string | null; e: "1" | "2"; m: number; x?: number }[];
 };
+
+/** Chronologie d'un match à partir de sa feuille d'événements (direct ou match terminé). */
+export function timelineOf(f: AfFixture): NonNullable<MatchDetails["evts"]> {
+  const out: NonNullable<MatchDetails["evts"]> = [];
+  for (const e of f.events ?? []) {
+    if (e.comments === "Penalty Shootout") continue;
+    const t = e.type === "Goal" ? (e.detail === "Normal Goal" ? "but" : e.detail === "Penalty" ? "pen" : e.detail === "Own Goal" ? "csc" : e.detail === "Missed Penalty" ? "pen_rate" : null)
+      : e.type === "Card" ? (e.detail === "Yellow Card" ? "jaune" : /red/i.test(e.detail) ? "rouge" : null) : null;
+    if (!t) continue;
+    out.push({ t, n: e.player?.name ?? null, e: e.team.id === f.teams.home.id ? "1" : "2", m: e.time.elapsed ?? 0, ...(e.time.extra ? { x: e.time.extra } : {}) });
+  }
+  return out;
+}
 
 /** Détail d'un match terminé (corners, cartons, tirs, buteurs, issue) à partir d'un match demandé par identifiant. */
 export function detailsOf(f: AfFixture): { details: MatchDetails; hasStats: boolean } {
@@ -217,6 +234,7 @@ export function detailsOf(f: AfFixture): { details: MatchDetails; hasStats: bool
     const goals = f.events.filter((e) => e.type === "Goal" && (e.detail === "Normal Goal" || e.detail === "Penalty") && e.comments !== "Penalty Shootout" && e.player?.name);
     const total = (f.score.fulltime.home ?? f.goals.home ?? 0) + (f.score.fulltime.away ?? f.goals.away ?? 0);
     // feuille d'événements vide alors qu'il y a eu des buts : pas publiée, on ne règle pas les buteurs dessus
+    d.evts = timelineOf(f);
     if (f.events.length > 0 || total === 0) d.buteurs = goals.map((e) => ({ n: e.player.name!, e: e.team.id === f.teams.home.id ? "1" as const : "2" as const, m: e.time.elapsed ?? 0, ...(e.time.extra ? { x: e.time.extra } : {}) }));
   }
   return { details: d, hasStats };

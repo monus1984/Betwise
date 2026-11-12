@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ApiFootball } from "@/lib/api-football/client";
 import { applyFixtures, fillDetails } from "@/lib/api-football/sync";
+import { sendPending } from "@/lib/push/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -43,7 +44,10 @@ async function run(req: Request) {
 
   let settled: unknown = null;
   if (a.finished + b.finished + details > 0) { const r = await db.rpc("settle_pending"); settled = r.error ? r.error.message : r.data; }
-  return NextResponse.json({ ok: true, en_direct_monde: live.length, mis_a_jour: a.updated + b.updated, termines: a.finished + b.finished, details_completes: details, reglement: settled, requetes: api.calls });
+  // Notifications du direct (but, mi-temps, fin) : envoyées tout de suite, sans attendre la minute suivante
+  let notifs = 0;
+  try { notifs = (await sendPending(db)).envois; } catch { /* la file sera reprise par tick_notify */ }
+  return NextResponse.json({ ok: true, notifications: notifs, en_direct_monde: live.length, mis_a_jour: a.updated + b.updated, termines: a.finished + b.finished, details_completes: details, reglement: settled, requetes: api.calls });
 }
 export const POST = run;
 export const GET = run;

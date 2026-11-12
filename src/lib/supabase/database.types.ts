@@ -1105,6 +1105,7 @@ export type Database = {
           coup_envoi: boolean
           coups_du_jour: boolean
           sources: boolean
+          direct: boolean
           updated_at: string
         }
         Insert: {
@@ -1113,6 +1114,7 @@ export type Database = {
           coup_envoi?: boolean
           coups_du_jour?: boolean
           sources?: boolean
+          direct?: boolean
           updated_at?: string
         }
         Update: {
@@ -1121,7 +1123,26 @@ export type Database = {
           coup_envoi?: boolean
           coups_du_jour?: boolean
           sources?: boolean
+          direct?: boolean
           updated_at?: string
+        }
+        Relationships: []
+      }
+      match_follows: {
+        Row: {
+          user_id: string
+          match_id: string
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          match_id: string
+          created_at?: string
+        }
+        Update: {
+          user_id?: string
+          match_id?: string
+          created_at?: string
         }
         Relationships: []
       }

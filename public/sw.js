@@ -28,7 +28,7 @@ self.addEventListener("push", (event) => {
   let d = {};
   try { d = event.data ? event.data.json() : {}; } catch (e) { d = { body: event.data ? event.data.text() : "" }; }
   event.waitUntil(self.registration.showNotification(d.title || "BETWISE", {
-    body: d.body || "", icon: "/icon-192.png", badge: "/icon-192.png", tag: d.tag || undefined, data: { url: d.url || "/" },
+    body: d.body || "", icon: "/icon-192.png", badge: "/icon-192.png", tag: d.tag || undefined, renotify: !!(d.tag && d.renotify), data: { url: d.url || "/" },
   }));
 });
 self.addEventListener("notificationclick", (event) => {

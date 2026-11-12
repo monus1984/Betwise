@@ -1,20 +1,19 @@
 -- 0026 : direct des matchs — matchs suivis (étoile) et notifications en direct (coup d'envoi, but, mi-temps, fin).
 -- Reçoivent le direct d'un match : ceux qui l'ont marqué d'une étoile et ceux qui ont un pari ou un test en cours dessus.
 
-create table if not exists betwise.match_follows (
+create table betwise.match_follows (
   user_id uuid not null references auth.users(id) on delete cascade,
   match_id uuid not null references betwise.matches(id) on delete cascade,
   created_at timestamptz not null default now(),
   primary key (user_id, match_id)
 );
-create index if not exists match_follows_match_idx on betwise.match_follows (match_id);
+create index match_follows_match_idx on betwise.match_follows (match_id);
 alter table betwise.match_follows enable row level security;
 create policy match_follows_all on betwise.match_follows for all to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 grant select, insert, delete on betwise.match_follows to authenticated;
 
-alter table betwise.notification_prefs add column if not exists direct boolean not null default true;
-alter table betwise.notifications drop constraint if exists notifications_type_check;
-alter table betwise.notifications add constraint notifications_type_check check (type in ('resultat', 'coup_envoi', 'coups_du_jour', 'source', 'test', 'direct'));
+alter table betwise.notification_prefs add column direct boolean not null default true;
+-- Les notifications du direct gardent le type « coup_envoi » (famille « match ») : la clé « live:… » les distingue du rappel à 30 minutes.
 
 create or replace function betwise.notif_wanted(p_user uuid, p_type text) returns boolean language sql stable security definer set search_path to 'betwise', 'public' as $$
   select coalesce((select case p_type when 'resultat' then resultats when 'coup_envoi' then coup_envoi when 'coups_du_jour' then coups_du_jour when 'source' then sources when 'direct' then direct else true end
@@ -59,7 +58,7 @@ begin
       ev.corps := concat_ws(' · ', v_min, v_but);
     end if;
     insert into betwise.notifications (user_id, type, cle, titre, corps, url)
-    select u.user_id, 'direct', 'live:' || new.id || ':' || ev.cle, ev.titre, coalesce(nullif(ev.corps, ''), 'Touche pour ouvrir le match'), '/matchs/' || new.id
+    select u.user_id, 'coup_envoi', 'live:' || new.id || ':' || ev.cle, ev.titre, coalesce(nullif(ev.corps, ''), 'Touche pour ouvrir le match'), '/matchs/' || new.id
     from (select f.user_id from betwise.match_follows f where f.match_id = new.id
           union
           select b.user_id from betwise.bet_selections s join betwise.bets b on b.id = s.bet_id where s.match_id = new.id and b.statut = 'en_cours') u
@@ -68,5 +67,4 @@ begin
   end loop;
   return new;
 end $function$;
-drop trigger if exists trg_matches_live_notify on betwise.matches;
 create trigger trg_matches_live_notify after update of statut, score_home, score_away, ht_home on betwise.matches for each row execute function betwise.trg_notify_match_live();

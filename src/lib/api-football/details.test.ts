@@ -17,6 +17,8 @@ describe("détail d'un match terminé", () => {
     expect(hasStats).toBe(true);
     expect(d).toMatchObject({ corners: [7, 3], jaunes: [2, 3], rouges: [0, 1], tirs: [14, 9], cadres: [6, 2], issue: "FT", vainqueur: "1" });
     expect(d.buteurs).toEqual([{ n: "K. Mbappé", e: "1", m: 23 }, { n: "V. Osimhen", e: "2", m: 40 }]);
+    // chronologie : buts, csc, penalty manqué et carton, sans la séance de tirs au but
+    expect(d.evts?.map((e) => `${e.m} ${e.t} ${e.e}`)).toEqual(["23 but 1", "30 csc 2", "40 pen 2", "60 pen_rate 1", "70 jaune 1"]);
   });
   it("sans statistiques ni événements : rien d'inventé", () => {
     const { details: d, hasStats } = detailsOf({ ...base, fixture: { ...base.fixture, status: { short: "PEN", elapsed: 120 } }, teams: { home: { id: 10, name: "A", winner: false }, away: { id: 20, name: "B", winner: true } } });

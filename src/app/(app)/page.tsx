@@ -35,7 +35,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
     supabase.from("source_follows").select("source_id, source:sources(id, nom, type)").eq("user_id", user!.id),
   ]);
   const solde = Number(summary?.solde ?? 0), exposition = Number(summary?.exposition ?? 0);
-  const [goal, { count: nbCoups }, { data: np }] = await Promise.all([loadGoal(supabase, solde), supabase.from("daily_picks").select("id", { count: "exact", head: true }).eq("jour", jourAbidjan()), supabase.from("notification_prefs").select("resultats, coup_envoi, coups_du_jour, sources").maybeSingle()]);
+  const [goal, { count: nbCoups }, { data: np }] = await Promise.all([loadGoal(supabase, solde), supabase.from("daily_picks").select("id", { count: "exact", head: true }).eq("jour", jourAbidjan()), supabase.from("notification_prefs").select("resultats, direct, coup_envoi, coups_du_jour, sources").maybeSingle()]);
   const ids = (follows ?? []).map((f) => f.source_id);
   const [{ data: trends }, { data: metrics }] = ids.length
     ? await Promise.all([
@@ -177,7 +177,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
         <p className="mt-2 text-xs text-ink-muted">Le solde part de 0 : enregistre ton capital de départ comme premier dépôt.</p>
       </details>
 
-      <NotificationsCard prefs={{ resultats: np?.resultats ?? true, coup_envoi: np?.coup_envoi ?? true, coups_du_jour: np?.coups_du_jour ?? true, sources: np?.sources ?? true }} />
+      <NotificationsCard prefs={{ resultats: np?.resultats ?? true, direct: np?.direct ?? true, coup_envoi: np?.coup_envoi ?? true, coups_du_jour: np?.coups_du_jour ?? true, sources: np?.sources ?? true }} />
 
       <section className="mt-3 grid grid-cols-2 gap-2">
         <Link href="/coach?v=discussion" className="flex items-center gap-2.5 rounded-2xl border border-line bg-white p-3 text-sm font-medium shadow-card active:bg-surface-2"><IconTile size="sm" tone="conseil"><IconChat width={18} height={18} /></IconTile>Demander au Coach</Link>

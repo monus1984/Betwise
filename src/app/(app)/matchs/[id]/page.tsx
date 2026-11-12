@@ -10,6 +10,7 @@ import { probOf } from "@/lib/probs/grid";
 import { loadSignals, pickLabel, picksOf } from "@/lib/probs/signals";
 import { MatchMarkets } from "./markets";
 import { AddToSlip } from "@/components/slip";
+import { FollowStar } from "@/components/follow-star";
 import { legFrom } from "@/lib/slip/leg";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,8 @@ type Named = { nom: string } | { nom: string }[] | null;
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
 type Form = { date: string; adv: string; lieu: "D" | "E"; score: string; r: "V" | "N" | "D"; xg?: string | null }[];
 type Just = { lambda_dom?: number; lambda_ext?: number; score_probable?: string; forme_dom?: Form; forme_ext?: Form; h2h?: { date: string; dom: "home" | "away"; score: string }[] };
+type Evt = { t: "but" | "pen" | "csc" | "pen_rate" | "jaune" | "rouge"; n: string | null; e: "1" | "2"; m: number; x?: number };
+const EVT: Record<Evt["t"], { icon: string; txt: string }> = { but: { icon: "⚽", txt: "" }, pen: { icon: "⚽", txt: " (penalty)" }, csc: { icon: "⚽", txt: " (contre son camp)" }, pen_rate: { icon: "✖️", txt: " (penalty manqué)" }, jaune: { icon: "🟨", txt: "" }, rouge: { icon: "🟥", txt: "" } };
 const TABS = [
   { k: "paris", t: "Paris" }, { k: "analyse", t: "Analyse" }, { k: "forme", t: "Forme" }, { k: "equipes", t: "Équipes" }, { k: "pronos", t: "Pronos" },
 ] as const;
@@ -31,10 +34,10 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
   const { data } = await supabase
     .from("matches")
-    .select("id, kickoff_at, statut, score_home, score_away, minute, af_fixture_id, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe)")
+    .select("id, kickoff_at, statut, score_home, score_away, minute, af_fixture_id, details, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe)")
     .eq("id", id).maybeSingle();
   if (!data) notFound();
-  const m = data as unknown as { id: string; kickoff_at: string; statut: string; score_home: number | null; score_away: number | null; minute: number | null; af_fixture_id: number | null; home: Named; away: Named; competition: { nom: string; code_externe: string | null } | { nom: string; code_externe: string | null }[] | null };
+  const m = data as unknown as { id: string; kickoff_at: string; statut: string; score_home: number | null; score_away: number | null; minute: number | null; af_fixture_id: number | null; details: { evts?: Evt[] } | null; home: Named; away: Named; competition: { nom: string; code_externe: string | null } | { nom: string; code_externe: string | null }[] | null };
   const home = one(m.home)?.nom ?? "", away = one(m.away)?.nom ?? "";
   const comp = one(m.competition);
   const upcoming = m.statut === "programme" || m.statut === "en_cours";
@@ -56,6 +59,8 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const market = marketProbs(ref("1X2", "1")?.cote, ref("1X2", "N")?.cote, ref("1X2", "2")?.cote);
   const extras: Extras | null = tab === "equipes" ? await getExtras({ id: m.id, af_fixture_id: m.af_fixture_id, kickoff_at: m.kickoff_at, statut: m.statut }) : null;
   const sg = (await loadSignals(supabase, [id])).get(id) ?? null;
+  const suivi = !!(await supabase.from("match_follows").select("match_id").eq("match_id", id).maybeSingle()).data;
+  const evts = [...(m.details?.evts ?? [])].sort((x, y) => x.m - y.m || (x.x ?? 0) - (y.x ?? 0));
   const mk = sg?.market ?? null;
   const onglet = tab ?? (m.statut === "programme" && sg ? "paris" : "analyse");
   const picks = sg ? picksOf(sg).filter((p) => p.p >= 0.6 && p.p <= 0.95).slice(0, 4) : [];
@@ -64,7 +69,10 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   return (
     <div className="pb-20">
       <LiveRefresh active={m.statut === "en_cours"} />
-      <Link href="/matchs" className="mb-3 inline-flex items-center gap-1 text-sm text-ink-muted">‹ Matchs</Link>
+      <div className="mb-3 flex items-center justify-between">
+        <Link href="/matchs" className="inline-flex items-center gap-1 text-sm text-ink-muted">‹ Matchs</Link>
+        {m.statut !== "termine" && <span className="rounded-full bg-pitch"><FollowStar matchId={m.id} initial={suivi} light label /></span>}
+      </div>
 
       {/* En-tête façon tableau d'affichage */}
       <header className="pitch mb-3 rounded-3xl px-4 pb-4 pt-3">
@@ -85,6 +93,21 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
           </div>
         )}
       </header>
+
+      {/* Chronologie du match : buts et cartons, domicile à gauche, extérieur à droite */}
+      {evts.length > 0 && (
+        <section className="mb-3 rounded-xl border border-line bg-white p-3 shadow-card">
+          <ul className="space-y-1.5">
+            {evts.map((e, i) => (
+              <li key={i} className={`flex items-center gap-2 text-[13px] ${e.e === "2" ? "flex-row-reverse text-right" : ""}`}>
+                <span className="w-9 shrink-0 text-center text-xs font-semibold tabular-nums text-ink-muted">{e.m}{e.x ? `+${e.x}` : ""}’</span>
+                <span>{EVT[e.t].icon}</span>
+                <span className={`min-w-0 truncate ${e.t === "but" || e.t === "pen" || e.t === "csc" ? "font-semibold" : "text-ink-soft"}`}>{e.n ?? "—"}{EVT[e.t].txt}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Onglets */}
       <nav className="sticky top-0 z-10 -mx-4 mb-3 bg-canvas/95 px-4 py-1.5 backdrop-blur">

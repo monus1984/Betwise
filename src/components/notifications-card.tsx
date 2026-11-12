@@ -6,7 +6,8 @@ import { setNotifPref, type NotifPrefs } from "@/lib/push/actions";
 
 const TYPES: { k: keyof NotifPrefs; t: string; d: string }[] = [
   { k: "resultats", t: "Résultat de mes paris et tests", d: "Dès qu’un pari ou un test est réglé." },
-  { k: "coup_envoi", t: "Coup d’envoi", d: "30 minutes avant un match de mes paris en cours." },
+  { k: "direct", t: "Direct des matchs", d: "Coup d’envoi, buts, mi-temps et fin des matchs suivis (étoile) ou de mes paris." },
+  { k: "coup_envoi", t: "Rappel avant le match", d: "30 minutes avant un match de mes paris en cours." },
   { k: "coups_du_jour", t: "Coups du jour", d: "Le matin, quand les sélections du jour sont prêtes." },
   { k: "sources", t: "Sources suivies", d: "Quand un tipster que je suis publie de nouveaux pronos." },
 ];

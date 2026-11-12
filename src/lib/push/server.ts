@@ -24,7 +24,7 @@ export async function getVapid(admin: Db): Promise<Vapid> {
 export async function sendPending(admin: Db, onlyUser?: string) {
   const vapid = await getVapid(admin);
   webpush.setVapidDetails("mailto:contact@betwise.app", vapid.publicKey, vapid.privateKey);
-  let q = admin.from("notifications").select("id, user_id, type, titre, corps, url").is("sent_at", null).order("created_at").limit(200);
+  let q = admin.from("notifications").select("id, user_id, type, cle, titre, corps, url").is("sent_at", null).order("created_at").limit(200);
   if (onlyUser) q = q.eq("user_id", onlyUser);
   const { data: pending } = await q;
   if (!pending?.length) return { notifications: 0, envois: 0, expires: 0 };
@@ -34,10 +34,12 @@ export async function sendPending(admin: Db, onlyUser?: string) {
   const now = new Date().toISOString();
   for (const n of pending) {
     const mine = (subs ?? []).filter((s) => s.user_id === n.user_id);
-    const payload = JSON.stringify({ title: n.titre, body: n.corps, url: n.url, tag: n.type === "coup_envoi" ? "coup_envoi" : n.id });
+    const live = n.cle.startsWith("live:");
+    // Direct : une seule notification par match, remplacée et ré-annoncée à chaque événement
+    const payload = JSON.stringify({ title: n.titre, body: n.corps, url: n.url, tag: live ? n.cle.split(":").slice(0, 2).join(":") : n.type === "coup_envoi" ? "coup_envoi" : n.id, renotify: live });
     await Promise.all(mine.map(async (s) => {
       try {
-        await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, { TTL: 3 * 3600, urgency: n.type === "coup_envoi" ? "high" : "normal" });
+        await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, { TTL: live ? 600 : 3 * 3600, urgency: n.type === "coup_envoi" ? "high" : "normal" });
         envois++;
         await admin.from("push_subscriptions").update({ last_ok_at: now }).eq("id", s.id);
       } catch (e) {

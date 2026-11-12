@@ -5,6 +5,7 @@ import { bestPick, loadSignals, pickLabel } from "@/lib/probs/signals";
 import { createClient } from "@/lib/supabase/server";
 import { LiveRefresh } from "@/components/live-refresh";
 import { AddToSlip } from "@/components/slip";
+import { FollowStar } from "@/components/follow-star";
 import { legFrom } from "@/lib/slip/leg";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +22,7 @@ const TZ = "Africa/Abidjan";
 const dayKey = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { timeZone: TZ }); // AAAA-MM-JJ
 const todayKey = () => dayKey(new Date().toISOString());
 
-export default async function MatchsPage({ searchParams }: { searchParams: Promise<{ d?: string; c?: string }> }) {
+export default async function MatchsPage({ searchParams }: { searchParams: Promise<{ d?: string; c?: string; f?: string }> }) {
   const sp = await searchParams;
   const supabase = await createClient();
 
@@ -41,7 +42,14 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   const day = sp.d && counts.has(sp.d) ? sp.d : days.find((d) => d >= today) ?? days.at(-1) ?? today;
   const comp = sp.c && COMP_ORDER.includes(sp.c) ? sp.c : null;
 
-  const rows = all.filter((r) => dayKey(r.kickoff_at) === day && (!comp || one(r.competition)?.code_externe === comp));
+  // Matchs suivis (étoile) et filtre « En direct » / « Suivis »
+  const { data: fol } = await supabase.from("match_follows").select("match_id");
+  const followed = new Set((fol ?? []).map((x) => x.match_id));
+  const filtre = sp.f === "direct" || sp.f === "suivis" ? sp.f : null;
+  const rows = filtre === "direct" ? all.filter((r) => r.statut === "en_cours")
+    : filtre === "suivis" ? all.filter((r) => followed.has(r.id) && Date.parse(r.kickoff_at) > Date.now() - 36 * 3600000)
+    : all.filter((r) => dayKey(r.kickoff_at) === day && (!comp || one(r.competition)?.code_externe === comp));
+  const nbDirect = all.filter((r) => r.statut === "en_cours").length;
   const ids = rows.map((r) => r.id);
 
   const signals = await loadSignals(supabase, ids);
@@ -75,8 +83,17 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
         </div>
       </nav>
 
+      {/* Tous / En direct / Suivis */}
+      <div className="mb-3 flex gap-1.5">
+        <Link href={q(day, null)} scroll={false} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${!filtre ? "border-brand bg-brand text-white" : "border-line bg-white text-ink-soft"}`}>Tous</Link>
+        <Link href="/matchs?f=direct" scroll={false} className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium ${filtre === "direct" ? "border-loss bg-loss text-white" : "border-line bg-white text-ink-soft"}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${filtre === "direct" ? "bg-white" : nbDirect ? "animate-pulse bg-loss" : "bg-slate-300"}`} />En direct{nbDirect ? ` (${nbDirect})` : ""}
+        </Link>
+        <Link href="/matchs?f=suivis" scroll={false} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${filtre === "suivis" ? "border-ink bg-ink text-white" : "border-line bg-white text-ink-soft"}`}>★ Suivis{followed.size ? ` (${followed.size})` : ""}</Link>
+      </div>
+
       {/* Filtre compétition */}
-      {compsOfDay.length > 1 && (
+      {!filtre && compsOfDay.length > 1 && (
         <nav className="-mx-4 mb-4 overflow-x-auto px-4" aria-label="Compétitions">
           <div className="flex w-max gap-1.5">
             <Link href={q(day, null)} scroll={false} className={`rounded-full border px-3 py-1 text-xs ${!comp ? "border-ink bg-ink text-white" : "border-line bg-white text-ink-soft"}`}>Tout</Link>
@@ -89,7 +106,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
 
       {rows.length === 0 && (
         <div className="rounded-xl border border-dashed border-line bg-white p-6 text-center text-sm text-ink-muted">
-          Aucun match ce jour-là. Le calendrier couvre les 14 prochains jours et se met à jour chaque matin.
+          {filtre === "direct" ? "Aucun match en direct pour l’instant." : filtre === "suivis" ? "Aucun match suivi. Touche l’étoile d’un match pour le suivre et recevoir ses buts en notification." : "Aucun match ce jour-là. Le calendrier couvre les 14 prochains jours et se met à jour chaque matin."}
         </div>
       )}
 
@@ -107,7 +124,8 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
               const homeWin = done && (m.score_home ?? 0) > (m.score_away ?? 0), awayWin = done && (m.score_away ?? 0) > (m.score_home ?? 0);
               return (
                 <li key={m.id} className="flex items-center pr-2">
-                  <Link href={`/matchs/${m.id}`} className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5 active:bg-surface-2">
+                  {!done && <span className="-mr-2 pl-1"><FollowStar matchId={m.id} initial={followed.has(m.id)} /></span>}
+                  <Link href={`/matchs/${m.id}`} className={`flex min-w-0 flex-1 items-center gap-3 py-2.5 pr-3 active:bg-surface-2 ${done ? "pl-3" : "pl-2"}`}>
                     <span className="w-10 shrink-0 text-center text-xs tabular-nums">
                       {done ? <span className="font-medium text-ink-muted">Fin</span>
                         : m.statut === "en_cours" ? <span className="font-semibold text-loss">● {m.minute ? `${m.minute}’` : "Live"}</span>
