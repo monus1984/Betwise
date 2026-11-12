@@ -32,6 +32,22 @@ describe("normalizePick — Betclic", () => {
   });
 });
 
+describe("normalizePick — pronos de tipsters", () => {
+  it("équipe nommée seule", () => {
+    expect(normalizePick("", "Victoire", "RD Congo", "Sierra Leone", "RD Congo")).toMatchObject({ market_code: "1X2", selection: "1", ok: true });
+    expect(normalizePick("", "Victoire", "Turquie", "Belgique", "Belgique")).toMatchObject({ market_code: "1X2", selection: "2", ok: true });
+  });
+  it("libellés courts des posts", () => {
+    expect(normalizePick("", "ITALIE OU NUL", "Italie", "France")).toMatchObject({ market_code: "DC", selection: "1N", ok: true });
+    expect(normalizePick("", "LES 2 MARQUENT", "Tchéquie", "Espagne")).toMatchObject({ market_code: "BTTS", selection: "Oui", ok: true });
+  });
+  it("dit clairement ce qui n'est pas suivi ou pas visible", () => {
+    expect(normalizePick("", "1ère mi-temps", "Ghana", "Somalie", "Ghana")).toMatchObject({ ok: false, reason: expect.stringContaining("mi-temps") });
+    expect(normalizePick("", "PÉPITE DU JOUR", "Angleterre", "Croatie").ok).toBe(false);
+    expect(normalizePick("", "", "Côte d'Ivoire", "Gambie")).toMatchObject({ ok: false, reason: expect.stringContaining("oral") });
+  });
+});
+
 describe("parseFrDate", () => {
   it("lit l'horodatage Betclic", () => {
     expect(parseFrDate("08/11/2026 13:38")).toBe("2026-11-08T13:38:00.000Z");

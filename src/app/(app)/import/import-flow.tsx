@@ -9,12 +9,15 @@ import type { ExtractedTicket, MatchedSelection } from "@/lib/extract/ticket";
 import { SOURCE_TYPE_OF, matchSource } from "@/lib/extract/source-match";
 import { quickCreateSource } from "@/lib/sources/actions";
 import { framesFromVideo } from "@/lib/extract/video-frames";
+import { MatchPicker, defaultParam, paramLabel } from "@/components/match-picker";
+import { SelectionField } from "@/components/selection-field";
+import { pickLabel } from "@/lib/probs/signals";
 
 type Source = { id: string; nom: string; type: string };
 type Extracted = ExtractedTicket & { upload_id: string | null; truncated: boolean };
 type CouponOnly = { coupon_only: true; coupon: { bookmaker: string; code: string; url: string }; message: string };
 
-type Line = MatchedSelection & { key: number; origin: string | null; coteStr: string; include: boolean };
+type Line = MatchedSelection & { key: number; origin: string | null; coteStr: string; include: boolean; editing: boolean; paramStr: string; query: string };
 
 const OUTCOME: Record<MatchedSelection["outcome"], { label: string; cls: string }> = {
   won: { label: "Gagnée", cls: "bg-emerald-100 text-emerald-800" },
@@ -25,7 +28,7 @@ const OUTCOME: Record<MatchedSelection["outcome"], { label: string; cls: string 
 };
 const toNum = (s: string) => Number(String(s).replace(/\s/g, "").replace(",", "."));
 
-export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nextTab }: { sources: Source[]; defaultOrigin: string | null; initialText: string; justSaved?: boolean; nextTab?: string }) {
+export function ImportFlow({ markets, sources, defaultOrigin, initialText, justSaved, nextTab }: { markets: { code: string; libelle_fr: string; a_parametre: boolean }[]; sources: Source[]; defaultOrigin: string | null; initialText: string; justSaved?: boolean; nextTab?: string }) {
   const [srcList, setSrcList] = useState<{ id: string; nom: string; type?: string }[]>(sources);
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -92,8 +95,11 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
     setDetected(hint ? { hint, sourceId: found?.id ?? null } : null);
     const origin = found?.id ?? lines[0]?.origin ?? defaultOrigin;
     if (found) setSummaryOrigin(found.id);
-    setLines(t.selections.map((s, i) => ({ ...s, key: i, origin, coteStr: s.odds ? String(s.odds) : "", include: true })));
-    setMise(t.raw.stake ? String(t.raw.stake) : test ? "1000" : "");
+    setLines(t.selections.map((s, i) => ({ ...s, key: i, origin, coteStr: s.odds ? String(s.odds) : "", include: true, editing: !s.ok || !s.match, paramStr: s.market_param !== null ? String(s.market_param) : "", query: s.match ? "" : [s.home_team, s.away_team].filter(Boolean).join(" ") })));
+    // Pronos de tipster : ce ne sont pas des paris de l'utilisateur, on les enregistre comme tests par défaut
+    const pronos = t.raw.kind === "pronos";
+    if (pronos) setTest(true);
+    setMise(t.raw.stake ? String(t.raw.stake) : test || pronos ? "1000" : "");
     setStatus(t.raw.status === "won" ? "gagne" : t.raw.status === "lost" ? "perdu" : t.raw.status === "void" ? "rembourse" : "en_cours");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -174,6 +180,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
 
   const included = lines.filter((l) => l.include);
   const collapsed = result?.raw.is_collapsed || (result && lines.length === 0);
+  const separes = result?.raw.kind === "pronos" && !result.raw.total_odds && included.length > 1;
   const readyDetail = included.length > 0 && included.every((l) => l.ok && toNum(l.coteStr) > 1 && l.origin && (l.match || (l.home_team && l.away_team)));
   const readySummary = !!collapsed && toNum(mise) > 0 && !!result?.raw.total_odds && !!summaryOrigin;
   const ready = toNum(mise) > 0 && (collapsed ? readySummary : readyDetail);
@@ -182,6 +189,22 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
     if (!result) return;
     setError(null);
     start(async () => {
+      // Liste de pronos sans cote totale : un test (ou pari) simple par prono, comme le tipster les a donnés
+      if (separes) {
+        let ok = 0;
+        for (const l of included) {
+          const r = await placeImportedBet({
+            virtuel: test, mise: toNum(mise), statut: "en_cours", placed_at: result.placed_at_iso, bookmaker: null, coupon_externe: null,
+            upload_id: result.upload_id, raw_text: text || null, summary: null,
+            selections: [{ match_id: l.match?.id ?? null, match_libre: l.match ? null : `${l.home_team ?? "?"} – ${l.away_team ?? "?"}`, market_code: l.market_code as never, market_param: l.market_param, selection: l.selection, cote: toNum(l.coteStr), origin_source_id: l.origin!, resultat: null }],
+          });
+          if (!r.ok) { setError(`${ok} prono${ok > 1 ? "s" : ""} enregistré${ok > 1 ? "s" : ""}, puis : ${r.error}`); return; }
+          ok++;
+        }
+        if (next(true)) return;
+        router.push(test ? "/paris?vue=tests&ajout=1" : "/paris?ajout=1");
+        return;
+      }
       const res = await placeImportedBet({
         virtuel: test,
         mise: toNum(mise),
@@ -271,7 +294,8 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
           )}
         </div>
       )}
-      {test && <Notice kind="info">Coupon ou pronos chargés comme test : suivis et réglés automatiquement, sans toucher à ta bankroll. Choisis bien l’origine (toi ou le tipster) : c’est elle qui sera notée.</Notice>}
+      {raw.kind === "pronos" && <Notice kind="info">Pronos de tipster{separes ? ` : ${included.length} pronos séparés, enregistrés chacun comme un ${test ? "test" : "pari"} simple` : raw.total_odds ? " : combiné annoncé par le tipster" : ""}. Réglés automatiquement après les matchs ; les ✅ du message ne sont pas des résultats.</Notice>}
+      {test && raw.kind !== "pronos" && <Notice kind="info">Coupon ou pronos chargés comme test : suivis et réglés automatiquement, sans toucher à ta bankroll. Choisis bien l’origine (toi ou le tipster) : c’est elle qui sera notée.</Notice>}
       <section className="rounded-xl border border-slate-200 bg-white p-4">
         <div className="flex items-start justify-between">
           <div>
@@ -297,43 +321,66 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
           </Field>
         </section>
       ) : (
-        lines.map((l, i) => (
+        lines.map((l, i) => {
+          const hasParam = markets.find((m) => m.code === l.market_code)?.a_parametre;
+          const homeN = l.match?.home ?? l.home_team ?? "Domicile", awayN = l.match?.away ?? l.away_team ?? "Extérieur";
+          return (
           <section key={l.key} className={`space-y-2 rounded-xl border bg-white p-4 ${l.include ? "border-slate-200" : "border-dashed border-slate-300 opacity-60"}`}>
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Sélection {i + 1}</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{raw.kind === "pronos" ? "Prono" : "Sélection"} {i + 1}</p>
                 <p className="truncate text-sm font-medium">{l.match ? `${l.match.home} – ${l.match.away}` : `${l.home_team ?? "?"} – ${l.away_team ?? "?"}`}</p>
-                <p className="text-xs text-slate-600">{l.label_pick} <span className="text-slate-400">({l.market_code}{l.market_param !== null ? ` ${l.market_param}` : ""} → {l.selection})</span></p>
+                <p className="text-xs text-slate-600">{l.ok ? pickLabel(l.market_code, l.market_param, l.selection, homeN, awayN) : l.label_pick}</p>
                 {l.match
-                  ? <p className="text-[11px] text-emerald-700">Match reconnu · {l.match.competition}{l.match.score ? ` · score en base ${l.match.score}` : ""}{l.score_consistent === false ? " · ⚠ diffère du ticket" : ""}</p>
-                  : <p className="text-[11px] text-amber-700">Match non reconnu : sera gardé en texte et réglé à la main.</p>}
-                {!l.ok && <p className="text-[11px] text-red-700">Sélection non comprise : corrige le marché ou retire la ligne.</p>}
+                  ? <p className="text-[11px] text-emerald-700">Match reconnu · {l.match.competition} · {new Date(l.match.kickoff_at).toLocaleString("fr-FR", { weekday: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}{l.match.score ? ` · score en base ${l.match.score}` : ""}{l.score_consistent === false ? " · ⚠ diffère du ticket" : ""}</p>
+                  : <p className="text-[11px] text-amber-700">Match non reconnu : choisis-le ci-dessous, sinon il sera gardé en texte et réglé à la main.</p>}
+                {!l.ok && <p className="text-[11px] text-red-700">{l.reason ?? "Sélection non comprise : choisis le marché ci-dessous ou retire la ligne."}</p>}
               </div>
-              <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${OUTCOME[l.outcome].cls}`}>{OUTCOME[l.outcome].label}</span>
+              {raw.kind === "pronos"
+                ? <button type="button" onClick={() => update(l.key, { editing: !l.editing })} className="shrink-0 text-xs text-brand underline">{l.editing ? "Fermer" : "Modifier"}</button>
+                : <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${OUTCOME[l.outcome].cls}`}>{OUTCOME[l.outcome].label}</span>}
             </div>
+            {raw.kind !== "pronos" && <button type="button" onClick={() => update(l.key, { editing: !l.editing })} className="text-xs text-brand underline">{l.editing ? "Fermer la correction" : "Corriger le match ou le choix"}</button>}
+            {l.editing && (
+              <div className="space-y-2 rounded-lg bg-surface-2 p-2.5">
+                {!l.match && <MatchPicker line={{ query: l.query, match: null }} onChange={(p) => { if (p.match) update(l.key, { match: { ...p.match, score: null }, query: "" }); else if (p.query !== undefined) update(l.key, { query: p.query }); }} hint="Tape une équipe pour retrouver le match." />}
+                <div className="grid grid-cols-2 gap-2">
+                  <Field label="Marché">
+                    <select value={l.market_code} onChange={(e) => update(l.key, { market_code: e.target.value, selection: "", ok: false, paramStr: defaultParam(e.target.value), market_param: defaultParam(e.target.value) ? Number(defaultParam(e.target.value)) : null })} className="w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm">
+                      {markets.map((m) => <option key={m.code} value={m.code}>{m.libelle_fr}</option>)}
+                    </select>
+                  </Field>
+                  {hasParam && <Field label={paramLabel(l.market_code)}><Input inputMode="decimal" value={l.paramStr} onChange={(e) => update(l.key, { paramStr: e.target.value, market_param: toNum(e.target.value) || null })} /></Field>}
+                </div>
+                <SelectionField market={l.market_code} param={l.paramStr} value={l.selection} match={l.match ? { id: l.match.id, kickoff_at: l.match.kickoff_at, statut: "programme", home: l.match.home, away: l.match.away, competition: l.match.competition } : null}
+                  onChange={(v) => update(l.key, { selection: v, ok: !!v && (!v.includes("|") || v.split("|").every(Boolean)), reason: undefined })} />
+              </div>
+            )}
             <div className="flex items-center gap-3">
-              <Field label="Cote"><Input inputMode="decimal" value={l.coteStr} onChange={(e) => update(l.key, { coteStr: e.target.value })} className="max-w-[7rem]" /></Field>
+              <Field label={l.odds_source === "estimee" ? "Cote (estimée)" : l.odds_source === "reference" ? "Cote (référence)" : "Cote"}><Input inputMode="decimal" value={l.coteStr} onChange={(e) => update(l.key, { coteStr: e.target.value, odds_source: "ticket" })} className="max-w-[7rem]" /></Field>
               {toNum(l.coteStr) > 1 && <span className={`mt-5 rounded-full border px-2 py-1 text-[11px] ${RISK_CLASS[riskFromOdds(toNum(l.coteStr))]}`}>{RISK_LABEL[riskFromOdds(toNum(l.coteStr))]}</span>}
               <label className="ml-auto mt-5 flex items-center gap-1 text-xs text-slate-600"><input type="checkbox" checked={l.include} onChange={(e) => update(l.key, { include: e.target.checked })} /> inclure</label>
             </div>
+            {l.odds_source && l.odds_source !== "ticket" && <p className="-mt-1 text-[11px] text-ink-muted">Le tipster ne donne pas de cote : {l.odds_source === "reference" ? "cote de référence des bookmakers" : "cote estimée d’après les probabilités BETWISE"}. Mets la tienne si tu l’as.</p>}
             <Field label="Origine du choix">
               <SourceChooser size="sm" sources={srcList} value={l.origin} onChange={(id) => update(l.key, { origin: id })} onCreated={(s) => setSrcList((x) => [...x, s])} />
             </Field>
           </section>
-        ))
+          );
+        })
       )}
 
       <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
         <div className="grid grid-cols-2 gap-3">
-          <Field label={test ? "Mise fictive (F CFA)" : "Mise (F CFA)"}><Input inputMode="numeric" value={mise} onChange={(e) => setMise(e.target.value)} /></Field>
-          <Field label="Résultat du ticket">
+          <Field label={`${test ? "Mise fictive" : "Mise"}${separes ? " par prono" : ""} (F CFA)`}><Input inputMode="numeric" value={mise} onChange={(e) => setMise(e.target.value)} /></Field>
+          {raw.kind !== "pronos" && <Field label="Résultat du ticket">
             <select value={status} onChange={(e) => setStatus(e.target.value as typeof status)} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base">
               <option value="en_cours">En cours</option>
               <option value="gagne">Gagné</option>
               <option value="perdu">Perdu</option>
               <option value="rembourse">Remboursé</option>
             </select>
-          </Field>
+          </Field>}
         </div>
         <p className="text-xs text-slate-500">
           {collapsed
@@ -344,7 +391,7 @@ export function ImportFlow({ sources, defaultOrigin, initialText, justSaved, nex
       </section>
 
       {error && <Notice>{error}</Notice>}
-      <Button onClick={save} disabled={pending || !ready}>{pending ? "Enregistrement…" : `${test ? "Enregistrer le test" : "Enregistrer ce ticket"}${queue.length ? " et passer au suivant" : ""}`}</Button>
+      <Button onClick={save} disabled={pending || !ready}>{pending ? "Enregistrement…" : `${separes ? `Enregistrer les ${included.length} ${test ? "tests" : "paris"}` : test ? "Enregistrer le test" : "Enregistrer ce ticket"}${queue.length ? " et passer au suivant" : ""}`}</Button>
     </div>
   );
 }

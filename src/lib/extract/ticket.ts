@@ -7,6 +7,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../supabase/database.types";
 import { getLlm, type LlmImage } from "../llm/provider";
 import { teamSimilarity } from "../odds-api/client";
+import { loadSignals, probOfSignal } from "../probs/signals";
+import { coteEstimee } from "../options/build";
 
 type Db = SupabaseClient<Database, "betwise">;
 
@@ -19,11 +21,13 @@ const rawSelection = z.object({
   market_text: z.string(),                     // libellé brut du marché, ex. "Double chance & nombre de buts"
   pick_text: z.string(),                       // libellé brut de la sélection, ex. "Liverpool / Nul & + de 1,5"
   odds: z.number().nullable(),
+  team_only: z.string().nullable().optional(), // prono de tipster qui ne nomme qu'une équipe : « RD Congo – Victoire »
   score: z.string().nullable(),                // "1 - 3" si affiché
   outcome: z.enum(["won", "lost", "void", "pending", "unknown"]),
   confidence: z.number().min(0).max(1),
 });
 const rawTicket = z.object({
+  kind: z.enum(["ticket", "pronos"]).optional(), // ticket de bookmaker, ou pronos publiés par un tipster
   bookmaker: z.string().nullable(),
   ticket_type: z.enum(["single", "combo", "unknown"]),
   nb_selections_declared: z.number().int().nullable(),
@@ -49,8 +53,9 @@ export type RawTicket = z.infer<typeof rawTicket>;
 const SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["bookmaker", "ticket_type", "nb_selections_declared", "selections", "total_odds", "stake", "currency", "payout", "status", "placed_at", "coupon_code", "is_collapsed", "notes", "source"],
+  required: ["kind", "bookmaker", "ticket_type", "nb_selections_declared", "selections", "total_odds", "stake", "currency", "payout", "status", "placed_at", "coupon_code", "is_collapsed", "notes", "source"],
   properties: {
+    kind: { type: "string", enum: ["ticket", "pronos"], description: "ticket : ticket ou coupon d'une application de bookmaker. pronos : pronostics publiés par un tipster (message Telegram/WhatsApp, post, vidéo), même présentés en liste ou avec une cote totale." },
     bookmaker: { type: ["string", "null"], description: "Nom du bookmaker (Betclic, 1xBet, Premier Bet…) ou null" },
     ticket_type: { type: "string", enum: ["single", "combo", "unknown"] },
     nb_selections_declared: { type: ["integer", "null"], description: "Nombre de sélections annoncé par le ticket, ex. 'Combiné (3)' → 3" },
@@ -60,14 +65,15 @@ const SCHEMA = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["home_team", "away_team", "competition", "kickoff", "market_text", "pick_text", "odds", "score", "outcome", "confidence"],
+        required: ["home_team", "away_team", "team_only", "competition", "kickoff", "market_text", "pick_text", "odds", "score", "outcome", "confidence"],
         properties: {
           home_team: { type: ["string", "null"], description: "Équipe à domicile telle qu'affichée (à gauche du score)" },
+          team_only: { type: ["string", "null"], description: "Si la ligne ne nomme qu'une seule équipe (ex. « RD Congo – Victoire »), son nom ; home_team et away_team sont alors null" },
           away_team: { type: ["string", "null"], description: "Équipe à l'extérieur telle qu'affichée (à droite du score)" },
           competition: { type: ["string", "null"] },
           kickoff: { type: ["string", "null"], description: "Date/heure du match telle qu'affichée" },
           market_text: { type: "string", description: "Libellé brut du marché, copié tel quel" },
-          pick_text: { type: "string", description: "Libellé brut de la sélection, copié tel quel (ex. 'Liverpool / Nul & + de 1,5')" },
+          pick_text: { type: "string", description: "Libellé brut de la sélection, copié tel quel (ex. 'Liverpool / Nul & + de 1,5', 'Victoire', 'Italie ou nul', 'Les 2 marquent'). Chaîne vide si le choix n'est pas écrit à l'image (prono dit à l'oral, par exemple)." },
           odds: { type: ["number", "null"], description: "Cote de cette sélection, nombre décimal" },
           score: { type: ["string", "null"], description: "Score final affiché, ex. '1 - 3', sinon null" },
           outcome: { type: "string", enum: ["won", "lost", "void", "pending", "unknown"], description: "won si le nom de la sélection est en vert / coche, lost si en rouge / croix" },
@@ -112,6 +118,11 @@ const SYSTEM = `Tu lis des tickets de paris sportifs (captures d'écran ou texte
 Tu copies ce qui est affiché, tu n'inventes rien et tu ne calcules rien. Si une information n'est pas visible, renvoie null.
 Conventions : l'équipe à gauche du score est à domicile, celle à droite à l'extérieur. Un nom de sélection en vert avec une coche signifie gagnée, en rouge avec une croix perdue. Les cotes utilisent la virgule décimale en français : "1,47" vaut 1.47. Les montants "5 000 F" valent 5000.
 Pour un combiné, une ligne par sélection, dans l'ordre affiché. Si le ticket est replié (pas de détail des lignes), selections est vide et is_collapsed vaut true.
+Pronos de tipsters (kind = pronos) : messages Telegram ou WhatsApp, posts, vidéos TikTok, Instagram ou Facebook.
+- Les emojis ✅ 🔥 💚 sont de la décoration, pas des résultats : outcome vaut unknown, sauf si le message dit explicitement « gagné » ou « perdu » pour la ligne.
+- Une liste de pronos sans cote totale ni mise est une liste de paris séparés : ticket_type single. S'il y a une cote totale (« CÔTE TOTALE : 10,16 »), c'est un combiné.
+- Les drapeaux affichés identifient les pays : utilise-les pour nommer les équipes quand le texte est caché ou coupé.
+- Une fiche de match affichée sans choix écrit (le tipster parle) donne une sélection avec home_team, away_team, kickoff et pick_text vide.
 Si le ticket est montré dans une conversation ou une publication (Telegram, WhatsApp, Facebook, Instagram, TikTok), relève dans source le nom du canal, de la page ou du groupe, et l'heure de publication ; un filigrane ou une signature sur l'image compte aussi. Ne déduis pas : seulement ce qui est écrit.
 Plusieurs tickets peuvent apparaître : chacun a son en-tête (type, nombre de sélections) et son pied (mise, cote totale, gains, horodatage). Ne fusionne jamais deux tickets : un élément de tickets par ticket distinct. Une sélection n'appartient qu'à un ticket.`;
 
@@ -122,12 +133,14 @@ export type NormalizedSelection = {
   selection: string;
   label_pick: string;
   ok: boolean;          // false = non reconnu, à corriger à la main
+  reason?: string;      // pourquoi ce n'est pas compris, quand on le sait
 };
 
 /** Déduit code marché + sélection normalisée à partir des libellés bruts et des noms d'équipes. */
-export function normalizePick(marketText: string, pickText: string, home: string | null, away: string | null): NormalizedSelection {
+export function normalizePick(marketText: string, pickText: string, home: string | null, away: string | null, team?: string | null): NormalizedSelection {
   const m = marketText.toLowerCase();
   const p = pickText.toLowerCase().replace(/\s+/g, " ").trim();
+  if (!p) return { market_code: "1X2", market_param: null, selection: "", label_pick: "Choix non visible", ok: false, reason: "Le choix n'est pas écrit (prono dit à l'oral ?) : choisis-le." };
   const side = (name: string): "1" | "2" | null => {
     if (!name) return null;
     const sh = home ? teamSimilarity(name, home) : 0;
@@ -142,6 +155,15 @@ export function normalizePick(marketText: string, pickText: string, home: string
     const dir = /^(\+|plus|over)$/i.test(r[1]) ? "Plus" : "Moins";
     return { dir, line: Number(r[2].replace(",", ".")) };
   };
+
+  // Pronos de tipsters, libellés courts (avec l'équipe nommée seule ou dans le texte)
+  const all = `${m} ${p}`;
+  if (/mi[- ]?temps|\bmt\b|\bht\b/.test(all)) return { market_code: "1X2", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Résultat à la mi-temps : marché pas encore suivi par BETWISE." };
+  if (/(les )?(2|deux) (équipes )?marquent|btts/.test(p) && !/(ne )?marquent pas|non/.test(p)) return { market_code: "BTTS", market_param: null, selection: "Oui", label_pick: pickText, ok: true };
+  const teamSide = team ? side(team) : null;
+  if (teamSide && /^(victoire|gagne|vainqueur|win|1|2)$/.test(p.replace(/[^a-zà-ü0-9 ]/g, "").trim())) return { market_code: "1X2", market_param: null, selection: teamSide, label_pick: `${team} gagne`, ok: true };
+  if (teamSide && /ou nul|ou match nul|double chance/.test(p) && !p.includes("&")) return { market_code: "DC", market_param: null, selection: teamSide === "1" ? "1N" : "N2", label_pick: `${team} ou nul`, ok: true };
+  if (/\s(ou|or)\s|\//.test(p) && !p.includes("&") && !m.includes("&")) { const dc = parseDoubleChance(p, side, isDraw); if (dc) return { market_code: "DC", market_param: null, selection: dc, label_pick: pickText, ok: true }; }
 
   // Marchés combinés : "Double chance & nombre de buts", "Résultat & nombre de buts"
   if (m.includes("&") || m.includes(" et ")) {
@@ -211,6 +233,7 @@ export type MatchedSelection = NormalizedSelection & {
   home_team: string | null;
   away_team: string | null;
   odds: number | null;
+  odds_source: "ticket" | "reference" | "estimee" | null;
   outcome: "won" | "lost" | "void" | "pending" | "unknown";
   score: string | null;
   confidence: number;
@@ -247,15 +270,19 @@ export async function extractTickets(db: Db, input: { images?: LlmImage[]; text?
   type M = { id: string; kickoff_at: string; score_home: number | null; score_away: number | null; home: { nom: string; alias: string[] } | null; away: { nom: string; alias: string[] } | null; competition: { code_externe: string | null } | null };
   const matches = ((pool ?? []) as unknown as M[]).filter((x) => x.home && x.away);
 
-  return raws.map((raw, k) => {
+  const out = raws.map((raw, k) => {
+    const pronos = raw.kind === "pronos";
+    const ref = parseFrDate(raw.placed_at) ?? parseFrDate(raw.source?.published_at ?? null) ?? new Date().toISOString();
     const selections: MatchedSelection[] = raw.selections.map((s) => {
-      const norm = normalizePick(s.market_text, s.pick_text, s.home_team, s.away_team);
-      const best = bestMatch(s.home_team, s.away_team, matches);
+      const best = s.team_only && !(s.home_team && s.away_team) ? bestMatchOne(s.team_only, matches, ref) : bestMatch(s.home_team, s.away_team, matches);
+      const h = best ? best.home!.nom : s.home_team, a = best ? best.away!.nom : s.away_team;
+      const norm = normalizePick(s.market_text, s.pick_text, h, a, s.team_only ?? null);
       const scoreDb = best && best.score_home !== null ? `${best.score_home}-${best.score_away}` : null;
       const scoreTicket = s.score ? s.score.replace(/\s/g, "") : null;
       return {
         ...norm,
-        home_team: s.home_team, away_team: s.away_team, odds: s.odds, outcome: s.outcome, score: s.score, confidence: s.confidence,
+        home_team: s.home_team ?? (s.team_only && !best ? s.team_only : null), away_team: s.away_team, odds: s.odds, odds_source: s.odds ? "ticket" as const : null,
+        outcome: pronos ? "unknown" as const : s.outcome, score: s.score, confidence: s.confidence,
         match: best ? { id: best.id, home: best.home!.nom, away: best.away!.nom, kickoff_at: best.kickoff_at, competition: best.competition?.code_externe ?? "", score: scoreDb } : null,
         score_consistent: scoreDb && scoreTicket ? scoreDb === scoreTicket : null,
       };
@@ -269,6 +296,38 @@ export async function extractTickets(db: Db, input: { images?: LlmImage[]; text?
     // Coût de l'appel compté une fois, sur le premier ticket
     return { raw, selections, checks, placed_at_iso: parseFrDate(raw.placed_at) ?? parseFrDate(raw.source?.published_at ?? null), usage: { tokensIn: k ? 0 : res.tokensIn, tokensOut: k ? 0 : res.tokensOut, model: res.model } };
   });
+
+  // Pronos sans cote : cote de référence quand elle existe, sinon cote estimée à partir des probabilités (marquée comme telle)
+  const ids = [...new Set(out.flatMap((t) => t.selections.filter((x) => x.match && !x.odds && x.ok).map((x) => x.match!.id)))];
+  if (ids.length) {
+    const signals = await loadSignals(db as never, ids);
+    for (const t of out) for (const x of t.selections) {
+      if (!x.match || x.odds || !x.ok) continue;
+      const sg = signals.get(x.match.id); if (!sg) continue;
+      const refOdd = sg.refOdd(x.market_code, x.market_param, x.selection);
+      const p = probOfSignal(sg, x.market_code, x.market_param, x.selection);
+      if (refOdd) { x.odds = refOdd; x.odds_source = "reference"; }
+      else if (p) { x.odds = Math.round(coteEstimee({ p, cote: null }) * 100) / 100; x.odds_source = "estimee"; }
+    }
+  }
+  return out;
+}
+
+/** Match d'une équipe nommée seule (pronos de tipster) : le plus proche de la date de publication, à venir de préférence. */
+function bestMatchOne(team: string, pool: Parameters<typeof bestMatch>[2], refIso: string) {
+  const ref = Date.parse(refIso);
+  let best: { m: (typeof pool)[number]; score: number } | null = null;
+  for (const m of pool) {
+    const sh = Math.max(teamSimilarity(team, m.home!.nom), ...m.home!.alias.map((x) => teamSimilarity(team, x)));
+    const sa = Math.max(teamSimilarity(team, m.away!.nom), ...m.away!.alias.map((x) => teamSimilarity(team, x)));
+    const sim = Math.max(sh, sa);
+    if (sim < 0.8) continue;
+    const dt = (Date.parse(m.kickoff_at) - ref) / 3600000; // heures après la publication
+    if (dt < -3 || dt > 96) continue;
+    const score = sim - Math.max(0, dt) / 200;
+    if (!best || score > best.score) best = { m, score };
+  }
+  return best?.m ?? null;
 }
 
 function bestMatch(home: string | null, away: string | null, pool: { id: string; kickoff_at: string; score_home: number | null; score_away: number | null; home: { nom: string; alias: string[] } | null; away: { nom: string; alias: string[] } | null; competition: { code_externe: string | null } | null }[]) {
