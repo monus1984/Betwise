@@ -2,6 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
+import Link from "next/link";
+import { COMP_FLAG } from "@/components/match-ui";
+import { slip, slipHref, useSlip } from "@/lib/slip/store";
 import { MatchPicker, defaultParam, paramLabel, toNum, type MatchHit } from "@/components/match-picker";
 import { SelectionField } from "@/components/selection-field";
 import { placeBet } from "@/lib/bets/actions";
@@ -24,7 +27,8 @@ type Line = {
 
 export type PrefillLeg = { match: MatchHit; market?: string; param?: string; sel?: string; cote?: string; origin?: string; prediction?: string };
 
-export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest = false }: { sources: Source[]; markets: Market[]; defaultOrigin: string | null; legs: PrefillLeg[]; initialTest?: boolean }) {
+export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest = false, upcoming = [], fromCoupon = false }: { sources: Source[]; markets: Market[]; defaultOrigin: string | null; legs: PrefillLeg[]; initialTest?: boolean; upcoming?: MatchHit[]; fromCoupon?: boolean }) {
+  const coupon = useSlip();
   const [srcList, setSrcList] = useState<{ id: string; nom: string; type?: string }[]>(sources);
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -53,6 +57,22 @@ export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest 
     setLines((ls) => ls.map((l) => (l.key === key ? { ...l, ...patch } : l)));
   }
 
+  /** Appui sur un match : pari simple sur ce match. */
+  function single(m: MatchHit) {
+    setLines((ls) => { const base = newLine(Date.now(), ls[0]?.origin ?? defaultOrigin); base.match = m; base.query = `${m.home} – ${m.away}`; return [base]; });
+    setTimeout(() => document.getElementById("bet-lines")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  }
+  /** « + » : ajoute le match au combiné (remplit la première sélection vide). */
+  function addToCombo(m: MatchHit) {
+    setLines((ls) => {
+      if (ls.some((l) => l.match?.id === m.id)) return ls;
+      const empty = ls.find((l) => !l.match && !l.query.trim());
+      if (empty) return ls.map((l) => (l.key === empty.key ? { ...l, match: m, query: `${m.home} – ${m.away}` } : l));
+      const nl = newLine(Date.now(), ls[ls.length - 1]?.origin ?? defaultOrigin); nl.match = m; nl.query = `${m.home} – ${m.away}`;
+      return [...ls, nl];
+    });
+  }
+
   function submit() {
     setError(null);
     const payload = {
@@ -72,9 +92,12 @@ export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest 
     start(async () => {
       const res = await placeBet(payload);
       if (!res.ok) { setError(res.error); return; }
+      if (fromCoupon) slip.clear();
       router.push(test ? "/paris?vue=tests&ajout=1" : "/paris?ajout=1");
     });
   }
+
+  const list = <UpcomingList matches={upcoming} chosen={new Set(lines.map((l) => l.match?.id).filter(Boolean) as string[])} onSingle={single} onAdd={addToCombo} defaultOpen={!legs.length} />;
 
   return (
     <div className="space-y-5">
@@ -82,7 +105,15 @@ export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest 
         <button type="button" role="radio" aria-checked={!test} onClick={() => setTest(false)} className={`rounded-lg py-2 ${!test ? "bg-white shadow-card" : "text-ink-muted"}`}>Parier</button>
         <button type="button" role="radio" aria-checked={test} onClick={() => { setTest(true); if (!mise) setMise("1000"); }} className={`rounded-lg py-2 ${test ? "bg-white shadow-card" : "text-ink-muted"}`}>Tester sans miser</button>
       </div>
+      {!legs.length && coupon.length > 0 && (
+        <Link href={slipHref(coupon, test)} className="flex items-center justify-between rounded-xl border border-brand/30 bg-brand/5 px-3 py-2.5 text-sm">
+          <span>Ton coupon : <b>{coupon.length} sélection{coupon.length > 1 ? "s" : ""}</b>, cote {coupon.reduce((x, l) => x * l.cote, 1).toFixed(2).replace(".", ",")}</span>
+          <span className="font-medium text-brand">Charger ›</span>
+        </Link>
+      )}
+      {upcoming.length > 0 && !legs.length && list}
       {test && <Notice kind="info">Mode test : le choix est suivi et réglé comme un pari, mais ta bankroll ne bouge pas. Il compte dans « Mes tests » et dans la fiche de chaque source d’origine, pour mesurer la justesse des choix.</Notice>}
+      <div id="bet-lines" className="scroll-mt-4" />
       {lines.map((l, i) => (
         <section key={l.key} className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
           {lines.length > 1 && (
@@ -140,10 +171,17 @@ export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest 
         + Ajouter une sélection (combiné)
       </button>
 
+      {upcoming.length > 0 && legs.length > 0 && list}
+
       <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
         <Field label={test ? "Mise fictive (F CFA)" : "Mise (F CFA)"} hint={test ? "Sert seulement à calculer le rendement du test." : undefined}>
           <Input inputMode="numeric" value={mise} onChange={(e) => setMise(e.target.value)} placeholder="2 000" />
         </Field>
+        <div className="flex gap-1.5">
+          {[500, 1000, 2000, 5000, 10000].map((v) => (
+            <button key={v} type="button" onClick={() => setMise(String(v))} className={`flex-1 rounded-lg border py-1.5 text-xs tabular-nums ${miseNum === v ? "border-ink bg-ink text-white" : "border-line bg-white text-ink-soft"}`}>{v.toLocaleString("fr-FR")}</button>
+          ))}
+        </div>
         <div className="flex justify-between text-sm text-slate-700">
           <span>{lines.length > 1 ? `Combiné × ${coteTotale.toFixed(2)}` : "Pari simple"}</span>
           <span>Gain potentiel : <strong>{gainPotentiel > 0 ? fcfa(gainPotentiel) : "—"}</strong></span>
@@ -164,3 +202,49 @@ function ready(lines: Line[], mise: number) {
   return mise > 0 && lines.every((l) => (l.match || l.query.trim().length >= 2) && l.selection.trim() && toNum(l.cote) > 1 && l.origin);
 }
 
+
+const TZ = "Africa/Abidjan";
+const dayKey = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { timeZone: TZ });
+
+/** Matchs des 48 prochaines heures : appui = pari simple sur le match, « + » = ajout au combiné. */
+function UpcomingList({ matches, chosen, onSingle, onAdd, defaultOpen }: { matches: MatchHit[]; chosen: Set<string>; onSingle: (m: MatchHit) => void; onAdd: (m: MatchHit) => void; defaultOpen: boolean }) {
+  const days = [...new Set(matches.map((m) => dayKey(m.kickoff_at)))];
+  const [day, setDay] = useState(days[0]);
+  const [q, setQ] = useState("");
+  const today = dayKey(new Date().toISOString());
+  const list = matches.filter((m) => dayKey(m.kickoff_at) === day && (!q.trim() || `${m.home} ${m.away}`.toLowerCase().includes(q.trim().toLowerCase())));
+  return (
+    <details open={defaultOpen} className="group rounded-xl border border-line bg-white shadow-card">
+      <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-semibold">
+        <span>📅 Matchs des 2 prochains jours <span className="font-normal text-ink-muted">({matches.length})</span></span>
+        <span className="text-ink-muted group-open:rotate-180">▾</span>
+      </summary>
+      <div className="border-t border-line px-3 pb-3 pt-2">
+        <div className="mb-2 flex items-center gap-1.5">
+          {days.map((d) => (
+            <button key={d} type="button" onClick={() => setDay(d)} className={`rounded-full border px-3 py-1 text-xs ${day === d ? "border-ink bg-ink text-white" : "border-line text-ink-soft"}`}>
+              {d === today ? "Aujourd’hui" : new Date(`${d}T12:00:00Z`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", timeZone: "UTC" })}
+            </button>
+          ))}
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrer" className="ml-auto w-24 rounded-lg border border-line px-2 py-1 text-xs" />
+        </div>
+        <p className="mb-1.5 text-[11px] text-ink-muted">Touche un match pour un pari simple, « + » pour l’ajouter au combiné.</p>
+        <ul className="max-h-80 divide-y divide-line overflow-y-auto rounded-lg border border-line">
+          {list.length === 0 && <li className="px-3 py-3 text-center text-xs text-ink-muted">Aucun match.</li>}
+          {list.map((m) => {
+            const on = chosen.has(m.id);
+            return (
+              <li key={m.id} className={`flex items-center ${on ? "bg-brand/5" : ""}`}>
+                <button type="button" onClick={() => onSingle(m)} className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2 text-left active:bg-surface-2">
+                  <span className="w-10 shrink-0 text-xs tabular-nums text-ink-muted">{new Date(m.kickoff_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: TZ })}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm">{COMP_FLAG[m.competition] ?? "⚽"} {m.home} – {m.away}</span>
+                </button>
+                <button type="button" aria-label={on ? "Déjà dans le pari" : "Ajouter au combiné"} onClick={() => onAdd(m)} className={`mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-sm font-semibold ${on ? "border-brand bg-brand text-white" : "border-brand/40 text-brand"}`}>{on ? "✓" : "+"}</button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </details>
+  );
+}

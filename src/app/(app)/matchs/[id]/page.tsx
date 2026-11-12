@@ -8,6 +8,9 @@ import { LiveRefresh } from "@/components/live-refresh";
 import { getExtras, type Extras } from "@/lib/api-football/extras";
 import { probOf } from "@/lib/probs/grid";
 import { loadSignals, pickLabel, picksOf } from "@/lib/probs/signals";
+import { MatchMarkets } from "./markets";
+import { AddToSlip } from "@/components/slip";
+import { legFrom } from "@/lib/slip/leg";
 
 export const dynamic = "force-dynamic";
 
@@ -16,14 +19,14 @@ const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? nul
 type Form = { date: string; adv: string; lieu: "D" | "E"; score: string; r: "V" | "N" | "D"; xg?: string | null }[];
 type Just = { lambda_dom?: number; lambda_ext?: number; score_probable?: string; forme_dom?: Form; forme_ext?: Form; h2h?: { date: string; dom: "home" | "away"; score: string }[] };
 const TABS = [
-  { k: "analyse", t: "Analyse" }, { k: "cotes", t: "Cotes" }, { k: "forme", t: "Forme" }, { k: "equipes", t: "Équipes" }, { k: "pronos", t: "Pronos" },
+  { k: "paris", t: "Paris" }, { k: "analyse", t: "Analyse" }, { k: "forme", t: "Forme" }, { k: "equipes", t: "Équipes" }, { k: "pronos", t: "Pronos" },
 ] as const;
 const TZ = "Africa/Abidjan";
 
 export default async function MatchPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ t?: string }> }) {
   const { id } = await params;
   const sp = await searchParams;
-  const tab = sp.t === "h2h" ? "forme" : TABS.some((x) => x.k === sp.t) ? sp.t! : "analyse";
+  const tab = sp.t === "h2h" ? "forme" : sp.t === "cotes" ? "paris" : TABS.some((x) => x.k === sp.t) ? sp.t! : null;
   const supabase = await createClient();
 
   const { data } = await supabase
@@ -54,6 +57,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const extras: Extras | null = tab === "equipes" ? await getExtras({ id: m.id, af_fixture_id: m.af_fixture_id, kickoff_at: m.kickoff_at, statut: m.statut }) : null;
   const sg = (await loadSignals(supabase, [id])).get(id) ?? null;
   const mk = sg?.market ?? null;
+  const onglet = tab ?? (m.statut === "programme" && sg ? "paris" : "analyse");
   const picks = sg ? picksOf(sg).filter((p) => p.p >= 0.6 && p.p <= 0.95).slice(0, 4) : [];
   const parier = (market: string, sel: string, cote?: number, param?: number) => `/nouveau?match=${m.id}&market=${market}${param !== undefined ? `&param=${param}` : ""}&sel=${encodeURIComponent(sel)}${cote ? `&cote=${cote}` : ""}`;
 
@@ -84,26 +88,27 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
       {/* Onglets */}
       <nav className="sticky top-0 z-10 -mx-4 mb-3 bg-canvas/95 px-4 py-1.5 backdrop-blur">
-        <div className="grid grid-cols-5 gap-0.5 rounded-xl bg-surface-2 p-1">
+        <div className="grid grid-cols-6 gap-0.5 rounded-xl bg-surface-2 p-1">
           {TABS.map((t) => (
-            <Link key={t.k} href={`/matchs/${m.id}?t=${t.k}`} scroll={false} replace className={`truncate rounded-lg px-1 py-1.5 text-center text-[12.5px] ${tab === t.k ? "bg-white font-semibold text-ink shadow-card" : "text-ink-muted"}`}>
+            <Link key={t.k} href={`/matchs/${m.id}?t=${t.k}`} scroll={false} replace className={`truncate rounded-lg px-1 py-1.5 text-center text-[12.5px] ${onglet === t.k ? "bg-white font-semibold text-ink shadow-card" : "text-ink-muted"}`}>
               {t.t}{t.k === "pronos" && preds?.length ? ` (${preds.length})` : ""}
             </Link>
           ))}
         </div>
       </nav>
 
-      {tab === "analyse" && (
+      {onglet === "analyse" && (
         <div className="space-y-3">
           {picks.length > 0 && (
             <Card title="Les issues les plus probables" note={sg!.source === "modele" ? "modèle BETWISE" : "d’après les cotes"}>
               <ul className="divide-y divide-line">
                 {picks.map((p) => (
-                  <li key={`${p.market}${p.param}${p.sel}`}>
-                    <Link href={upcoming ? parier(p.market, p.sel, p.cote ?? undefined, p.param ?? undefined) : "#"} className="flex items-center justify-between gap-3 py-2 text-sm active:bg-surface-2">
+                  <li key={`${p.market}${p.param}${p.sel}`} className="flex items-center gap-2">
+                    <Link href={upcoming ? parier(p.market, p.sel, p.cote ?? undefined, p.param ?? undefined) : "#"} className="flex min-w-0 flex-1 items-center justify-between gap-3 py-2 text-sm active:bg-surface-2">
                       <span className="truncate">{pickLabel(p.market, p.param, p.sel, shortName(home), shortName(away))}</span>
                       <span className="shrink-0 tabular-nums"><b>{Math.round(p.p * 100)} %</b> <span className="text-xs text-ink-muted">{p.cote ? `cote ${p.cote.toFixed(2)}` : `cote juste ${(1 / p.p).toFixed(2)}`}</span>{p.pModele !== null && <span className="ml-1 text-xs text-brand">· modèle {Math.round(p.pModele * 100)} %</span>}</span>
                     </Link>
+                    {m.statut === "programme" && <AddToSlip size="sm" leg={legFrom({ matchId: m.id, home, away, kickoff: m.kickoff_at, comp: comp?.code_externe ?? "", market: p.market, param: p.param, sel: p.sel, p: p.p, cote: p.cote })} />}
                   </li>
                 ))}
               </ul>
@@ -146,8 +151,10 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         </div>
       )}
 
-      {tab === "cotes" && (
+      {onglet === "paris" && (
         <div className="space-y-3">
+          {sg ? <MatchMarkets m={{ id: m.id, kickoff_at: m.kickoff_at, home, away, comp: comp?.code_externe ?? "", ouvert: m.statut === "programme" }} sg={sg} /> : <Card><p className="text-sm text-ink-muted">Pas encore de cote ni d’estimation pour ce match. Elles arrivent chaque matin à partir de J-14.</p></Card>}
+          {m.statut !== "programme" && sg && <p className="px-1 text-[11px] text-ink-muted">Match commencé ou terminé : les cotes sont affichées pour mémoire, le coupon est fermé.</p>}
           <Card title="Cotes de référence" note="médiane des bookmakers européens">
             <OddsRow cells={[{ sel: "1", name: shortName(home), o: ref("1X2", "1") }, { sel: "N", name: "Nul", o: ref("1X2", "N") }, { sel: "2", name: shortName(away), o: ref("1X2", "2") }]} market="1X2" upcoming={upcoming} href={parier} />
             <OddsRow cells={[{ sel: "Plus", name: "+ de 2,5", o: ref("OU", "Plus", 2.5) }, { sel: "Moins", name: "− de 2,5", o: ref("OU", "Moins", 2.5) }]} market="OU" param={2.5} upcoming={upcoming} href={parier} />
@@ -166,7 +173,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         </div>
       )}
 
-      {tab === "forme" && (
+      {onglet === "forme" && (
         just?.forme_dom ? (
           <div className="grid grid-cols-1 gap-3">
             <FormCard team={shortName(home)} form={just.forme_dom} />
@@ -175,7 +182,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         ) : <Card><p className="text-sm text-ink-muted">Forme disponible pour les 5 grands championnats, avec l’estimation du modèle (J-14).</p></Card>
       )}
 
-      {tab === "forme" && (
+      {onglet === "forme" && (
         <div className="mt-3"><Card title="Dernières confrontations">
           {!just?.h2h ? <p className="text-sm text-ink-muted">Disponible pour les 5 grands championnats, avec l’estimation du modèle.</p>
             : just.h2h.length === 0 ? <p className="text-sm text-ink-muted">Pas de confrontation en championnat sur les trois dernières saisons.</p> : (
@@ -198,7 +205,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
       )}
 
 
-      {tab === "equipes" && extras && (
+      {onglet === "equipes" && extras && (
         <div className="space-y-3">
           {!extras.disponible && <Card><p className="text-sm text-ink-muted">Compositions et absents indisponibles pour ce match pour l’instant.</p></Card>}
           {extras.stats && extras.stats.length === 2 && (
@@ -258,7 +265,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         </div>
       )}
 
-      {tab === "pronos" && (
+      {onglet === "pronos" && (
         <Card title="Pronos enregistrés sur ce match" note="toutes sources visibles">
           {!preds?.length ? <p className="text-sm text-ink-muted">Aucun prono pour l’instant.</p> : (
             <ul className="divide-y divide-line">

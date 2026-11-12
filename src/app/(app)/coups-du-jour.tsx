@@ -2,6 +2,8 @@ import Link from "next/link";
 import { CAT_CONSTATE, CAT_LABEL, CAT_STYLE, type Categorie } from "@/lib/coach/categories";
 import type { TheirPick, TodayPick } from "@/lib/coach/today";
 import { COMP_FLAG } from "@/components/match-ui";
+import { AddToSlip } from "@/components/slip";
+import { legFrom } from "@/lib/slip/leg";
 
 const F = (x: number) => `${Math.round(x).toLocaleString("fr-FR")} F`;
 const C = (x: number) => x.toFixed(2).replace(".", ",");
@@ -31,8 +33,8 @@ export function CoupsDuJour({ picks, theirs, mises }: { picks: TodayPick[]; thei
                   {list.map((p) => {
                     const cote = p.cote ?? p.coteJuste;
                     return (
-                      <li key={p.id}>
-                        <Link href={`/matchs/${p.match_id}`} className="flex items-center gap-3 px-3 py-2 active:bg-surface-2">
+                      <li key={p.id} className="flex items-center pr-2">
+                        <Link href={`/matchs/${p.match_id}`} className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2 active:bg-surface-2">
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-sm font-medium">{p.selection}</span>
                             <span className="block truncate text-[11px] text-ink-muted">{COMP_FLAG[p.comp ?? ""] ?? "⚽"} {p.match} · {p.statut === "termine" ? "terminé" : time(p.kickoff)}</span>
@@ -44,6 +46,7 @@ export function CoupsDuJour({ picks, theirs, mises }: { picks: TodayPick[]; thei
                             {mise > 0 && <span className="block text-[10px] text-gain">+{F(mise * (cote - 1))}</span>}
                           </span>
                         </Link>
+                        {p.statut === "programme" && <AddToSlip size="sm" leg={legFrom({ matchId: p.match_id, home: p.home, away: p.away, kickoff: p.kickoff, comp: p.comp ?? "", market: p.market, param: p.param, sel: p.sel, p: p.p, cote: p.cote, label: p.selection })} />}
                       </li>
                     );
                   })}

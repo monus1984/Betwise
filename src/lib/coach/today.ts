@@ -13,7 +13,7 @@ const one = <T,>(v: One<T>): T | null => (Array.isArray(v) ? v[0] ?? null : v);
 const MATCH = "id, kickoff_at, statut, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe)";
 type M = { id: string; kickoff_at: string; statut: string; home: One<{ nom: string }>; away: One<{ nom: string }>; competition: One<{ code_externe: string | null }> };
 
-export type TodayPick = { id: string; categorie: Categorie; match_id: string; match: string; kickoff: string; comp: string | null; selection: string; p: number; cote: number | null; coteJuste: number; pModele: number | null; soutiens: string[]; statut: string };
+export type TodayPick = { id: string; categorie: Categorie; match_id: string; match: string; home: string; away: string; market: string; param: number | null; sel: string; kickoff: string; comp: string | null; selection: string; p: number; cote: number | null; coteJuste: number; pModele: number | null; soutiens: string[]; statut: string };
 export type TheirPick = { qui: string; type: "pari" | "prono"; match_id: string; match: string; kickoff: string; selection: string; cote: number | null; p: number | null; categorie: Categorie | "hors" | null; verdict: string; tone: "good" | "mid" | "bad" | "none"; aussiBetwise: boolean };
 
 const key = (m: string, market: string, param: number | null, sel: string) => `${m}|${market}|${param === null ? "" : Number(param)}|${sel}`;
@@ -57,7 +57,7 @@ export async function loadToday(db: Db, userId: string) {
 
   const todayPicks: TodayPick[] = pickRows.map((p) => {
     const m = one(p.match)!; const { h, a } = names(m);
-    return { id: p.id, categorie: p.categorie, match_id: m.id, match: `${h} – ${a}`, kickoff: m.kickoff_at, comp: one(m.competition)?.code_externe ?? null, statut: m.statut,
+    return { id: p.id, categorie: p.categorie, match_id: m.id, match: `${h} – ${a}`, home: h, away: a, market: p.market_code, param: p.market_param === null ? null : Number(p.market_param), sel: p.selection, kickoff: m.kickoff_at, comp: one(m.competition)?.code_externe ?? null, statut: m.statut,
       selection: pickLabel(p.market_code, p.market_param === null ? null : Number(p.market_param), p.selection, h, a), p: Number(p.probabilite), cote: p.cote_ref === null ? null : Number(p.cote_ref), coteJuste: Number(p.cote_juste), pModele: p.p_modele === null ? null : Number(p.p_modele),
       soutiens: soutiens.get(key(m.id, p.market_code, p.market_param, p.selection)) ?? [] };
   });

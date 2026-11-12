@@ -5,6 +5,8 @@ import { CAT_LABEL, CAT_STYLE, categorieOf } from "@/lib/coach/categories";
 import { buildCombos, coteEstimee, legsParam, singlesOf, type Option } from "@/lib/options/build";
 import { loadOptions, type Periode } from "@/lib/options/load";
 import { createClient } from "@/lib/supabase/server";
+import { AddAllToSlip, AddToSlip } from "@/components/slip";
+import { legFrom } from "@/lib/slip/leg";
 
 export type SP = { per?: string; min?: string; max?: string; fam?: string; vue?: string; cible?: string; m?: string; n?: string };
 const PRESETS = [
@@ -90,7 +92,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
           <>
             {focus && <p className="mb-2 text-xs text-ink-muted">Toutes les options de {focus[0] ? `${focus[0].home} – ${focus[0].away}` : "ce match"} dans ta fourchette · <Link href={q({ m: null })} className="text-brand">revenir à la liste</Link></p>}
             <ul className="overflow-hidden rounded-xl border border-line bg-white shadow-card">
-              {singles.slice(0, shown).map((o, i) => <SingleRow key={`${o.matchId}-${o.market}-${o.param}-${o.sel}`} o={o} first={i === 0} tester={saisir([o], true)} parier={saisir([o], false)} more={focus ? null : q({ m: o.matchId })} />)}
+              {singles.slice(0, shown).map((o, i) => <SingleRow key={`${o.matchId}-${o.market}-${o.param}-${o.sel}`} o={o} first={i === 0} tester={saisir([o], true)} more={focus ? null : q({ m: o.matchId })} />)}
             </ul>
             <p className="mt-2 px-1 text-[11px] leading-relaxed text-ink-muted">
               {shown < singles.length && <><Link href={q({ n: "all" })} scroll={false} className="font-medium text-brand">Voir les {singles.length} options</Link> · </>}Deux options par match ici ; « + » ouvre toutes celles du match. « Cote » : cote de référence du marché. « Juste » : pas de cote de référence, c’est la cote sans marge ; ton bookmaker paiera un peu moins, vérifie avant de jouer.
@@ -138,6 +140,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
                   <span className="text-ink-muted"> · cote juste {C(c.coteJuste)}</span>
                   {!c.atteint && <span className="block text-draw">Pas assez de matchs pour atteindre {C(cible)} dans cette fourchette.</span>}
                 </span>
+                <AddAllToSlip legs={c.legs.map((o) => legFrom({ ...o, cote: o.cote }))} />
                 <Link href={saisir(c.legs, true)} className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium">Tester</Link>
                 <Link href={saisir(c.legs, false)} className="rounded-lg bg-brand px-2.5 py-1.5 text-xs font-medium text-white">Parier</Link>
               </footer>
@@ -153,7 +156,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
   );
 }
 
-function SingleRow({ o, first, tester, parier, more }: { o: Option; first: boolean; tester: string; parier: string; more: string | null }) {
+function SingleRow({ o, first, tester, more }: { o: Option; first: boolean; tester: string; more: string | null }) {
   const cat = categorieOf(o.p);
   return (
     <li className={`flex items-center gap-2.5 px-3 py-2.5 ${first ? "" : "border-t border-line"}`}>
@@ -166,9 +169,9 @@ function SingleRow({ o, first, tester, parier, more }: { o: Option; first: boole
         <span className="block text-[11px] text-ink-muted">{o.cote ? `cote ${C(o.cote)}` : `juste ${C(1 / o.p)}`}</span>
         {cat && <span className={`mt-0.5 inline-block rounded-full border px-1.5 text-[10px] font-medium ${CAT_STYLE[cat]}`}>{CAT_LABEL[cat]}</span>}
       </span>
-      <span className="flex shrink-0 flex-col gap-1">
-        <Link href={tester} className="rounded-md border border-line px-2 py-0.5 text-center text-[11px] font-medium">Tester</Link>
-        <Link href={parier} className="rounded-md bg-brand px-2 py-0.5 text-center text-[11px] font-medium text-white">Parier</Link>
+      <span className="flex shrink-0 flex-col items-center gap-1">
+        <AddToSlip size="sm" leg={legFrom({ ...o, label: o.label })} />
+        <Link href={tester} className="rounded-md border border-line px-1.5 py-0.5 text-center text-[10px] font-medium">Tester</Link>
       </span>
       {more && <Link href={more} scroll={false} aria-label="Toutes les options de ce match" className="-mr-1 shrink-0 px-1 text-lg text-ink-muted">+</Link>}
     </li>

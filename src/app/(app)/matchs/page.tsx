@@ -4,6 +4,8 @@ import { COMP_FLAG, COMP_ORDER, COMP_SHORT, PickBadge, TeamBadge, shortName } fr
 import { bestPick, loadSignals, pickLabel } from "@/lib/probs/signals";
 import { createClient } from "@/lib/supabase/server";
 import { LiveRefresh } from "@/components/live-refresh";
+import { AddToSlip } from "@/components/slip";
+import { legFrom } from "@/lib/slip/leg";
 
 export const dynamic = "force-dynamic";
 
@@ -109,8 +111,8 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
               const live = m.statut === "en_cours" && m.score_home !== null;
               const homeWin = done && (m.score_home ?? 0) > (m.score_away ?? 0), awayWin = done && (m.score_away ?? 0) > (m.score_home ?? 0);
               return (
-                <li key={m.id}>
-                  <Link href={`/matchs/${m.id}`} className="flex items-center gap-3 px-3 py-2.5 active:bg-surface-2">
+                <li key={m.id} className="flex items-center pr-2">
+                  <Link href={`/matchs/${m.id}`} className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5 active:bg-surface-2">
                     <span className="w-10 shrink-0 text-center text-xs tabular-nums">
                       {done ? <span className="font-medium text-ink-muted">Fin</span>
                         : m.statut === "en_cours" ? <span className="font-semibold text-loss">● {m.minute ? `${m.minute}’` : "Live"}</span>
@@ -123,6 +125,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
                     </span>
                     {!done && !live && (() => { const sg = signals.get(m.id); if (!sg) return <span className="w-[120px] shrink-0 text-right text-[11px] text-ink-muted">pas encore de cote</span>; const p = bestPick(sg); return <PickBadge label={pickLabel(p.market, p.param, p.sel, shortName(h), shortName(a))} p={p.p} cote={p.cote} source={sg.source} pModele={p.pModele} />; })()}
                   </Link>
+                  {m.statut === "programme" && (() => { const sg = signals.get(m.id); if (!sg) return null; const p = bestPick(sg); return <AddToSlip size="sm" leg={legFrom({ matchId: m.id, home: h, away: a, kickoff: m.kickoff_at, comp: code, market: p.market, param: p.param, sel: p.sel, p: p.p, cote: p.cote })} />; })()}
                 </li>
               );
             })}

@@ -7,7 +7,7 @@ import { NewBetForm, type PrefillLeg } from "./new-bet-form";
 
 export const dynamic = "force-dynamic";
 
-type SP = { match?: string; market?: string; param?: string; sel?: string; cote?: string; origin?: string; prediction?: string; legs?: string; test?: string };
+type SP = { from?: string; match?: string; market?: string; param?: string; sel?: string; cote?: string; origin?: string; prediction?: string; legs?: string; test?: string };
 type Named = { nom: string } | { nom: string }[] | null;
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
 
@@ -36,10 +36,18 @@ export default async function NouveauPage({ searchParams }: { searchParams: Prom
   }
   const test = sp.test === "1";
 
+  // Matchs des deux prochains jours, pour choisir sans chercher
+  const { data: up } = await supabase.from("matches")
+    .select("id, kickoff_at, statut, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe)")
+    .eq("statut", "programme").gte("kickoff_at", new Date().toISOString()).lt("kickoff_at", new Date(Date.now() + 48 * 3600000).toISOString())
+    .order("kickoff_at").limit(200);
+  const upcoming: MatchHit[] = ((up ?? []) as unknown as { id: string; kickoff_at: string; statut: string; home: Named; away: Named; competition: { code_externe: string | null } | { code_externe: string | null }[] | null }[])
+    .map((r) => ({ id: r.id, kickoff_at: r.kickoff_at, statut: r.statut, home: one(r.home)?.nom ?? "", away: one(r.away)?.nom ?? "", competition: one(r.competition)?.code_externe ?? "" }));
+
   return (
     <>
       <PageHeader title={test ? "Tester un choix" : "Nouveau pari"} subtitle={test ? "Enregistré et suivi comme un pari, sans toucher à ta bankroll." : "Trois champs, et l’origine de ton choix."} action={<a href="/import" className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium">Importer un ticket</a>} />
-      <NewBetForm sources={ordered} markets={markets ?? []} defaultOrigin={mine?.id ?? null} legs={legs} initialTest={test} />
+      <NewBetForm sources={ordered} markets={markets ?? []} defaultOrigin={mine?.id ?? null} legs={legs} initialTest={test} upcoming={upcoming} fromCoupon={sp.from === "coupon"} />
     </>
   );
 }
