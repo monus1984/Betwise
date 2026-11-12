@@ -73,7 +73,7 @@ export function probOf(g: Grid, market: string, param: number | null, sel: strin
       return sum(g, (i, j) => res(i + param, j) === sel);
     }
     case "WTN": return sel === "1" ? sum(g, (i, j) => i > j && j === 0) : sel === "2" ? sum(g, (i, j) => j > i && i === 0) : null;
-    case "HT_1X2": case "HT_DC": case "HT_OU": case "HT_BTTS": { const h = halves(g); return h ? probOf(h.ht, market.slice(3), param, sel) : null; }
+    case "HT_1X2": case "HT_DC": case "HT_OU": case "HT_BTTS": case "HT_CS": { const h = halves(g); return h ? probOf(h.ht, market.slice(3), param, sel) : null; }
     case "H2_1X2": case "H2_OU": { const h = halves(g); return h ? probOf(h.h2, market.slice(3), param, sel) : null; }
     case "HTFT": {
       const [a, b] = sel.split("/"); const h = halves(g);

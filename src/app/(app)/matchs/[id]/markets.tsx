@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { OddButton } from "@/components/slip";
 import { shortName } from "@/components/match-ui";
 import { MG_RANGES, pickLabel, picksOf, type Signal } from "@/lib/probs/signals";
@@ -71,6 +72,16 @@ export function MatchMarkets({ m, sg }: { m: M; sg: Signal }) {
         <Group title="Résultat et les deux marquent">{[...["1N", "N2", "12"].flatMap((x) => ["Oui", "Non"].map((b) => cell("DC_BTTS", null, `${x}|${b}`, pickLabel("DC_BTTS", null, `${x}|${b}`, h, a), true))), ...["1", "N", "2"].flatMap((x) => ["Oui", "Non"].map((b) => cell("1X2_BTTS", null, `${x}|${b}`, pickLabel("1X2_BTTS", null, `${x}|${b}`, h, a), true)))]}</Group>
         <Group title="Buts et les deux marquent">{[1.5, 2.5, 3.5].flatMap((l) => ["Plus", "Moins"].flatMap((x) => ["Oui", "Non"].map((b) => cell("OU_BTTS", l, `${x}|${b}`, pickLabel("OU_BTTS", l, `${x}|${b}`, h, a), true))))}</Group>
       </Block>
+      {m.ouvert && (
+        <Block title="Corners, cartons, tirs, buteurs" note="sans pourcentage">
+          <div className="flex flex-wrap gap-1.5">
+            {[["CORN", "Corners"], ["CARD", "Cartons"], ["RED", "Carton rouge"], ["SOT", "Tirs cadrés"], ["BUT", "Buteur"], ["BUT1", "Premier buteur"], ["QUALIF", "Qualification"], ["ET", "Prolongation"]].map(([code, label]) => (
+              <Link key={code} href={`/nouveau?match=${m.id}&market=${code}`} className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-medium">{label}</Link>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px] text-ink-muted">BETWISE enregistre et règle ces paris avec les statistiques du match, mais n’estime pas leurs chances : tu saisis la cote de ton bookmaker.</p>
+        </Block>
+      )}
       <p className="px-1 text-[11px] leading-relaxed text-ink-muted">
         Cote sans « ≈ » : cote de référence des bookmakers européens. « ≈ » : cote estimée à partir des probabilités, avec 5 % de marge ; ton bookmaker peut payer un peu plus ou moins. Les marchés de mi-temps supposent que 45 % des buts tombent avant la pause : pourcentages indicatifs, pas encore vérifiés sur notre historique. Le pourcentage est la chance de gagner d’après les cotes de référence, marge retirée{sg.source === "modele" ? " (ici le modèle BETWISE, faute de cote)" : ""}.
       </p>

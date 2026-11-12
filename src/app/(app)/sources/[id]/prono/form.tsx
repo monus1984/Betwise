@@ -1,5 +1,6 @@
 "use client";
 
+import { MarketOptions } from "@/components/market-options";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { logPrediction } from "@/lib/sources/actions";
@@ -59,7 +60,7 @@ export function NewPredictionForm({ sourceId, markets }: { sourceId: string; mar
         <div className="grid grid-cols-2 gap-3">
           <Field label="Marché">
             <select value={market} onChange={(e) => { setMarket(e.target.value); setSelection(""); setParam(e.target.value === "OU" ? "2.5" : ""); }} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base">
-              {markets.map((m) => <option key={m.code} value={m.code}>{m.libelle_fr}</option>)}
+              <MarketOptions markets={markets} />
             </select>
           </Field>
           {hasParam && (

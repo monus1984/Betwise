@@ -191,3 +191,58 @@ export async function applyFixtures(db: Db, fixtures: AfFixture[]) {
   }
   return { updated, finished };
 }
+
+export type MatchDetails = {
+  corners?: [number, number]; jaunes?: [number, number]; rouges?: [number, number]; tirs?: [number, number]; cadres?: [number, number];
+  buteurs?: { n: string; e: "1" | "2"; m: number; x?: number }[]; issue?: "FT" | "AET" | "PEN"; vainqueur?: "1" | "2" | null;
+};
+
+/** Détail d'un match terminé (corners, cartons, tirs, buteurs, issue) à partir d'un match demandé par identifiant. */
+export function detailsOf(f: AfFixture): { details: MatchDetails; hasStats: boolean } {
+  const d: MatchDetails = {};
+  const of = (teamId: number) => f.statistics?.find((s) => s.team.id === teamId)?.statistics ?? null;
+  const sh = of(f.teams.home.id), sa = of(f.teams.away.id);
+  const hasStats = !!sh?.length && !!sa?.length;
+  if (hasStats) {
+    // Une valeur vide dans une feuille de statistiques publiée vaut zéro (aucun carton rouge, par exemple)
+    const val = (list: NonNullable<typeof sh>, type: string) => { const v = list.find((x) => x.type === type)?.value; return v === null || v === undefined ? 0 : Number(v) || 0; };
+    const pair = (type: string): [number, number] | undefined => (sh!.some((x) => x.type === type) && sa!.some((x) => x.type === type) ? [val(sh!, type), val(sa!, type)] : undefined);
+    d.corners = pair("Corner Kicks"); d.jaunes = pair("Yellow Cards"); d.rouges = pair("Red Cards"); d.tirs = pair("Total Shots"); d.cadres = pair("Shots on Goal");
+  }
+  const st = f.fixture.status.short;
+  if (st === "FT" || st === "AET" || st === "PEN") d.issue = st;
+  d.vainqueur = f.teams.home.winner === true ? "1" : f.teams.away.winner === true ? "2" : null;
+  // Buteurs : buts marqués dans le jeu (penalties compris), hors buts contre son camp et hors séance de tirs au but
+  if (Array.isArray(f.events)) {
+    const goals = f.events.filter((e) => e.type === "Goal" && (e.detail === "Normal Goal" || e.detail === "Penalty") && e.comments !== "Penalty Shootout" && e.player?.name);
+    const total = (f.score.fulltime.home ?? f.goals.home ?? 0) + (f.score.fulltime.away ?? f.goals.away ?? 0);
+    // feuille d'événements vide alors qu'il y a eu des buts : pas publiée, on ne règle pas les buteurs dessus
+    if (f.events.length > 0 || total === 0) d.buteurs = goals.map((e) => ({ n: e.player.name!, e: e.team.id === f.teams.home.id ? "1" as const : "2" as const, m: e.time.elapsed ?? 0, ...(e.time.extra ? { x: e.time.extra } : {}) }));
+  }
+  return { details: d, hasStats };
+}
+
+/** Complète le détail des matchs terminés récemment (une requête pour 20 matchs). Les statistiques arrivent parfois quelques minutes après la fin. */
+export async function fillDetails(db: Db, api: ApiFootball): Promise<{ filled: number }> {
+  const { data: ms } = await db.from("matches").select("id, af_fixture_id, result_at, ht_home")
+    .eq("statut", "termine").not("af_fixture_id", "is", null).is("details_at", null)
+    .gte("result_at", new Date(Date.now() - 3 * 86400000).toISOString()).order("result_at").limit(20);
+  if (!ms?.length) return { filled: 0 };
+  const fixtures = await api.byIds(ms.map((m) => m.af_fixture_id!));
+  let filled = 0;
+  const now = new Date().toISOString();
+  for (const m of ms) {
+    const f = fixtures.find((x) => x.fixture.id === m.af_fixture_id);
+    if (!f) continue;
+    const { details, hasStats } = detailsOf(f);
+    const recent = m.result_at ? Date.now() - Date.parse(m.result_at) < 20 * 60000 : false;
+    if (!hasStats && recent) continue; // on réessaie à la minute suivante
+    const { error } = await db.from("matches").update({
+      details: JSON.parse(JSON.stringify(details)), details_at: now,
+      ...(m.ht_home === null && f.score.halftime?.home != null && f.score.halftime?.away != null ? { ht_home: f.score.halftime.home, ht_away: f.score.halftime.away } : {}),
+    }).eq("id", m.id);
+    if (error) throw error;
+    filled++;
+  }
+  return { filled };
+}

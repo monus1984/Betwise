@@ -4,7 +4,9 @@ const BASE = "https://v3.football.api-sports.io";
 export type AfFixture = {
   fixture: { id: number; date: string; status: { short: string; elapsed: number | null } };
   league: { id: number; season: number; round?: string };
-  teams: { home: { id: number; name: string }; away: { id: number; name: string } };
+  teams: { home: { id: number; name: string; winner?: boolean | null }; away: { id: number; name: string; winner?: boolean | null } };
+  /** Présents seulement quand le match est demandé par identifiant (byIds). */
+  events?: { time: { elapsed: number | null; extra: number | null }; team: { id: number }; player: { name: string | null }; type: string; detail: string; comments: string | null }[];
   goals: { home: number | null; away: number | null };
   statistics?: { team: { id: number }; statistics: { type: string; value: number | string | null }[] }[];
   score: { fulltime: { home: number | null; away: number | null }; halftime?: { home: number | null; away: number | null } };

@@ -1,6 +1,6 @@
 "use client";
 
-import { COMBO_PARTS, SELECTIONS, labelSel, type MatchHit } from "@/components/match-picker";
+import { COMBO_PARTS, LINE_MARKETS, SELECTIONS, freePlaceholder, labelSel, type MatchHit } from "@/components/match-picker";
 import { Chip, Input } from "@/components/ui";
 
 /** Choix de la sélection pour n'importe quel marché, y compris les combos d'un même match (« A|B »). */
@@ -21,9 +21,9 @@ export function SelectionField({ market, param, value, match, onChange }: { mark
   if (SELECTIONS[market]?.length) {
     return (
       <div className="flex flex-wrap gap-2">
-        {SELECTIONS[market].map((s) => <Chip key={s} active={value === s} onClick={() => onChange(s)}>{["OU", "TT1", "TT2", "HT_OU", "H2_OU"].includes(market) ? `${labelSel(market, s, match)} ${param || "?"}` : labelSel(market, s, match)}</Chip>)}
+        {SELECTIONS[market].map((s) => <Chip key={s} active={value === s} onClick={() => onChange(s)}>{LINE_MARKETS.includes(market) ? `${labelSel(market, s, match)} ${param || "?"}` : labelSel(market, s, match)}</Chip>)}
       </div>
     );
   }
-  return <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder="ex. 2-1" />;
+  return <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={freePlaceholder(market)} />;
 }

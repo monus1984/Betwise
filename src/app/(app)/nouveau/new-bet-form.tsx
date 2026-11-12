@@ -1,5 +1,6 @@
 "use client";
 
+import { MarketOptions } from "@/components/market-options";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
@@ -40,7 +41,7 @@ export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest 
     return legs.map((p, i) => {
       const l = newLine(i, p.origin ?? defaultOrigin);
       l.match = p.match; l.query = `${p.match.home} – ${p.match.away}`;
-      if (p.market) { l.market = p.market; l.param = p.param ?? defaultParam(p.market); }
+      if (p.market) { l.market = p.market; l.param = p.param || defaultParam(p.market); }
       if (p.sel) l.selection = p.sel;
       if (p.cote) l.cote = p.cote;
       if (p.prediction) l.predictionId = p.prediction;
@@ -132,7 +133,7 @@ export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest 
                 onChange={(e) => update(l.key, { market: e.target.value, selection: "", param: defaultParam(e.target.value) })}
                 className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base"
               >
-                {markets.map((m) => <option key={m.code} value={m.code}>{m.libelle_fr}</option>)}
+                <MarketOptions markets={markets} />
               </select>
             </Field>
             {markets.find((m) => m.code === l.market)?.a_parametre && (

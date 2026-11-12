@@ -163,6 +163,27 @@ export function normalizePick(marketText: string, pickText: string, home: string
   const all = `${m} ${p}`;
   const teamSide = team ? side(team) : null;
   const who = (x: string): "1" | "N" | "2" | null => { const y = x.replace(/\b(victoire|gagne|vainqueur)\b/g, "").trim(); return isDraw(y) ? "N" : y ? side(y) : null; };
+  // Statistiques, buteurs, prolongation, qualification : réglés sur le détail du match
+  const mention = (): "1" | "2" | null => teamSide ?? (home && all.includes(home.toLowerCase()) ? "1" : away && all.includes(away.toLowerCase()) ? "2" : null);
+  const yesNo = non || /\b(non|no|pas de|aucun)\b/.test(p) ? "Non" : "Oui";
+  const stat = /corner/.test(all) ? "CORN" : /tirs? cadr|shots? on (goal|target)/.test(all) ? "SOT" : /carton|\bcards?\b|jaune/.test(all) ? "CARD" : /\btirs?\b(?! au but)|\bshots?\b/.test(all) ? "SHOT" : null;
+  if (stat) {
+    const o = ouLine(p), t = mention();
+    if (stat === "CARD" && /rouge|red/.test(all) && !o) return { market_code: "RED", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
+    if (o) return { market_code: t && stat !== "SHOT" ? `${stat}${t}` : stat, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
+    if (stat === "CORN" && /le plus|plus de corners|most/.test(all)) { const r = isDraw(p) || /égalité|autant/.test(p) ? "N" : t; if (r) return { market_code: "CORN_1X2", market_param: null, selection: r, label_pick: pickText, ok: true }; }
+    return { market_code: stat, market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari sur les statistiques : précise la ligne (ex. plus de 9,5)." };
+  }
+  if (/buteur|marque à tout moment|\bscorer\b|marque(ra)? (un but|le premier)/.test(all)) {
+    const first = /premier|first|1er/.test(all);
+    const name = pickText.replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ").replace(/\b(premier|1er|buteur|marque(ra)?( à tout moment| un but| le premier but)?|but|:)\b/gi, " ").replace(/[:–—-]/g, " ").replace(/\s+/g, " ").trim();
+    return name.length >= 3 ? { market_code: first ? "BUT1" : "BUT", market_param: null, selection: name, label_pick: pickText, ok: true } : { market_code: "BUT", market_param: null, selection: "", label_pick: pickText, ok: false, reason: "Buteur : indique le nom du joueur." };
+  }
+  if (/tirs au but|penalty shoot/.test(all)) return { market_code: "PEN", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
+  if (/prolongation|extra time/.test(all)) return { market_code: "ET", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
+  if (/qualifi|vainqueur final|remporte (le trophée|la coupe)|to qualify/.test(all)) { const r = teamSide ?? who(p.replace(/se qualifie|qualifié|qualification|vainqueur final|:/g, " ").trim()); const r12 = r === "1" || r === "2" ? r : null; return { market_code: "QUALIF", market_param: null, selection: r12 ?? pickText, label_pick: pickText, ok: !!r12 }; }
+  if (/score exact/.test(all) && /mi[- ]?temps/.test(all)) { const cs = p.match(/(\d+)\s*[-:]\s*(\d+)/); return { market_code: "HT_CS", market_param: null, selection: cs ? `${cs[1]}-${cs[2]}` : pickText, label_pick: pickText, ok: !!cs }; }
+
   // Mi-temps / fin de match : « Italie / Nul », « 1/2 »
   if (/mi[- ]?temps\s*[\/-]\s*fin|\b(ht|mt)\s*\/\s*ft\b/.test(all)) {
     const parts = p.replace(/.*(fin de match|ft)\s*:?/i, "").split(/\s*\/\s*/).map((x) => x.trim()).filter(Boolean);

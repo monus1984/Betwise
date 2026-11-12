@@ -6,7 +6,7 @@
 import "dotenv/config";
 import { createAdminClient } from "../src/lib/supabase/admin";
 import { ApiFootball } from "../src/lib/api-football/client";
-import { AF_COMPETITIONS, AF_LINKED, linkAfFixtures, syncAfCompetition, syncAfOdds } from "../src/lib/api-football/sync";
+import { AF_COMPETITIONS, AF_LINKED, fillDetails, linkAfFixtures, syncAfCompetition, syncAfOdds } from "../src/lib/api-football/sync";
 
 async function main() {
   if (!process.env.API_FOOTBALL_KEY) { console.error("API_FOOTBALL_KEY manquant"); process.exit(1); }
@@ -27,6 +27,9 @@ async function main() {
     try { const r = await linkAfFixtures(db, api, code); if (r.linked || r.pending) console.log(`[${code}] direct : ${r.linked} rattachés, ${r.pending} sans correspondance`); }
     catch (e) { console.error(`[${code}] rattachement :`, e instanceof Error ? e.message : e); }
   }
+  // Détail des matchs terminés (corners, cartons, tirs, buteurs, issue), par lots de 20
+  try { let n = 0; for (let i = 0; i < 5; i++) { const r = await fillDetails(db, api); n += r.filled; if (r.filled < 20) break; } if (n) console.log(`Détail complété : ${n} match(s)`); }
+  catch (e) { console.error("Détail des matchs :", e instanceof Error ? e.message : e); }
   const { data: settled, error } = await db.rpc("settle_pending");
   if (error) console.error("Règlement :", error.message);
   else { const r = Array.isArray(settled) ? settled[0] : settled; console.log(`Règlement : ${r?.matchs ?? 0} match(s), ${r?.selections_reglees ?? 0} sélection(s), ${r?.pronos_regles ?? 0} prono(s), ${r?.paris_finalises ?? 0} pari(s) finalisé(s)`); }

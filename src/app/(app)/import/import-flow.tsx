@@ -1,5 +1,6 @@
 "use client";
 
+import { MarketOptions } from "@/components/market-options";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { placeImportedBet } from "@/lib/bets/import-actions";
@@ -347,7 +348,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
                 <div className="grid grid-cols-2 gap-2">
                   <Field label="Marché">
                     <select value={l.market_code} onChange={(e) => update(l.key, { market_code: e.target.value, selection: "", ok: false, paramStr: defaultParam(e.target.value), market_param: defaultParam(e.target.value) ? Number(defaultParam(e.target.value)) : null })} className="w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm">
-                      {markets.map((m) => <option key={m.code} value={m.code}>{m.libelle_fr}</option>)}
+                      <MarketOptions markets={markets} />
                     </select>
                   </Field>
                   {hasParam && <Field label={paramLabel(l.market_code)}><Input inputMode="decimal" value={l.paramStr} onChange={(e) => update(l.key, { paramStr: e.target.value, market_param: toNum(e.target.value) || null })} /></Field>}

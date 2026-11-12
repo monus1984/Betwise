@@ -98,6 +98,8 @@ export type Database = {
           live_at: string | null
           ht_home: number | null
           ht_away: number | null
+          details: Json | null
+          details_at: string | null
           created_at: string
           updated_at: string
         }
@@ -120,6 +122,8 @@ export type Database = {
           live_at?: string | null
           ht_home?: number | null
           ht_away?: number | null
+          details?: Json | null
+          details_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -142,6 +146,8 @@ export type Database = {
           live_at?: string | null
           ht_home?: number | null
           ht_away?: number | null
+          details?: Json | null
+          details_at?: string | null
           created_at?: string
           updated_at?: string
         }

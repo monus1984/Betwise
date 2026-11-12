@@ -65,6 +65,23 @@ describe("normalizePick — pronos de tipsters", () => {
     expect(normalizePick("Nombre total de buts (t. rég)", "+ de 1,5", "Brighton", "Brentford")).toMatchObject({ market_code: "OU", market_param: 1.5 });
     expect(normalizePick("Double chance & nombre de buts", "Liverpool / Nul & + de 1,5", "Crystal Palace", "Liverpool")).toMatchObject({ market_code: "DC_OU" });
   });
+  it("corners, cartons, tirs, buteurs, qualification", () => {
+    const G = ["Ghana", "Somalie"] as const;
+    expect(normalizePick("Nombre total de corners", "+ de 9,5", ...G)).toMatchObject({ market_code: "CORN", market_param: 9.5, selection: "Plus", ok: true });
+    expect(normalizePick("Corners Ghana", "Plus de 5,5", ...G)).toMatchObject({ market_code: "CORN1", market_param: 5.5, selection: "Plus", ok: true });
+    expect(normalizePick("Équipe avec le plus de corners", "Somalie", "Ghana", "Somalie", "Somalie")).toMatchObject({ market_code: "CORN_1X2", selection: "2", ok: true });
+    expect(normalizePick("Total cartons", "Moins de 4,5", ...G)).toMatchObject({ market_code: "CARD", market_param: 4.5, selection: "Moins", ok: true });
+    expect(normalizePick("Carton rouge dans le match", "Oui", ...G)).toMatchObject({ market_code: "RED", selection: "Oui", ok: true });
+    expect(normalizePick("Tirs cadrés", "+7,5", ...G)).toMatchObject({ market_code: "SOT", market_param: 7.5, selection: "Plus", ok: true });
+    expect(normalizePick("Buteur", "Jordan Ayew ✅", ...G)).toMatchObject({ market_code: "BUT", selection: "Jordan Ayew", ok: true });
+    expect(normalizePick("Premier buteur", "Ayew", ...G)).toMatchObject({ market_code: "BUT1", selection: "Ayew", ok: true });
+    expect(normalizePick("Qualification", "Ghana", ...G)).toMatchObject({ market_code: "QUALIF", selection: "1", ok: true });
+    expect(normalizePick("Y aura-t-il prolongation ?", "Non", ...G)).toMatchObject({ market_code: "ET", selection: "Non", ok: true });
+    expect(normalizePick("Mi-temps - Score exact", "1-0", ...G)).toMatchObject({ market_code: "HT_CS", selection: "1-0", ok: true });
+    // un total de buts ne devient pas un pari sur les tirs
+    expect(normalizePick("Nombre total de buts (t. rég)", "+ de 1,5", ...G)).toMatchObject({ market_code: "OU" });
+    expect(normalizePick("", "Les 2 marquent", ...G)).toMatchObject({ market_code: "BTTS" });
+  });
   it("dit clairement ce qui n'est pas suivi ou pas visible", () => {
     expect(normalizePick("", "PÉPITE DU JOUR", "Angleterre", "Croatie").ok).toBe(false);
     expect(normalizePick("", "", "Côte d'Ivoire", "Gambie")).toMatchObject({ ok: false, reason: expect.stringContaining("oral") });

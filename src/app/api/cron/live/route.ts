@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ApiFootball } from "@/lib/api-football/client";
-import { applyFixtures } from "@/lib/api-football/sync";
+import { applyFixtures, fillDetails } from "@/lib/api-football/sync";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -37,9 +37,13 @@ async function run(req: Request) {
   const ids = [...new Set([...missing, ...stale])];
   const b = ids.length ? await applyFixtures(db, await api.byIds(ids)) : { updated: 0, finished: 0 };
 
+  // Détail des matchs terminés (corners, cartons, buteurs…) : règle les paris qui en dépendent
+  let details = 0;
+  try { details = (await fillDetails(db, api)).filled; } catch { /* réessayé à la minute suivante */ }
+
   let settled: unknown = null;
-  if (a.finished + b.finished > 0) { const r = await db.rpc("settle_pending"); settled = r.error ? r.error.message : r.data; }
-  return NextResponse.json({ ok: true, en_direct_monde: live.length, mis_a_jour: a.updated + b.updated, termines: a.finished + b.finished, reglement: settled, requetes: api.calls });
+  if (a.finished + b.finished + details > 0) { const r = await db.rpc("settle_pending"); settled = r.error ? r.error.message : r.data; }
+  return NextResponse.json({ ok: true, en_direct_monde: live.length, mis_a_jour: a.updated + b.updated, termines: a.finished + b.finished, details_completes: details, reglement: settled, requetes: api.calls });
 }
 export const POST = run;
 export const GET = run;

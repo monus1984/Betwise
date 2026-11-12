@@ -31,3 +31,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0021_virtual_bets.sql | 2026-11-12 | `place_bet(..., p_virtuel)` : un test ne touche pas la bankroll et enregistre le choix comme prono de chaque source d'origine ; `finalize_bet`, `settle_bet`, `my_bankroll_summary` ignorent les tests |
 | 0022_update_bet_test_fingerprint.sql | 2026-11-12 | `update_bet` garde le préfixe de test dans l'empreinte d'un ticket de test |
 | 0023_more_markets.sql | 2026-11-12 | Marchés de mi-temps, 2e mi-temps, mi-temps/fin, pair/impair, tranches de buts, handicap européen, gagne sans encaisser ; `matches.ht_home/ht_away` ; règlement étendu |
+| 0024_stats_markets.sql | 2026-11-12 | Corners, cartons, tirs, buteurs, prolongation / tirs au but / qualification, score exact mi-temps ; `matches.details` ; `settle_sel` (règlement sur la fiche complète) ; `tick_live` complète le détail après le match |

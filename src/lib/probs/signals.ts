@@ -110,6 +110,7 @@ export function bestPick(s: Signal): Pick {
   return all.find((p) => p.p <= 0.9) ?? all[all.length - 1];
 }
 
+const STAT_NOM: Record<string, string> = { CORN: "corners", CARD: "cartons", SHOT: "tirs", SOT: "tirs cadrés" };
 export function pickLabel(market: string, param: number | null, sel: string, home: string, away: string): string {
   const line = param !== null ? String(Math.abs(param)).replace(".", ",") : "";
   const buts = (x: string) => `${x === "Plus" ? "plus" : "moins"} de ${line} but${param !== null && Math.abs(param) < 1 ? "" : "s"}`;
@@ -130,7 +131,16 @@ export function pickLabel(market: string, param: number | null, sel: string, hom
     }
     case "DC_OU": case "1X2_OU": { const [a, b] = sel.split("|"); return `${pickLabel(market === "DC_OU" ? "DC" : "1X2", null, a, home, away)} et ${buts(b)}`; }
     case "DC_BTTS": case "1X2_BTTS": { const [a, b] = sel.split("|"); return `${pickLabel(market === "DC_BTTS" ? "DC" : "1X2", null, a, home, away)} et ${btts(b)}`; }
-    case "HT_1X2": case "HT_DC": case "HT_OU": case "HT_BTTS": return `Mi-temps : ${pickLabel(market.slice(3), param, sel, home, away)}`;
+    case "CORN": case "CARD": case "SHOT": case "SOT": return `${sel === "Plus" ? "Plus" : "Moins"} de ${line} ${STAT_NOM[market]}`;
+    case "CORN1": case "CORN2": case "CARD1": case "CARD2": case "SOT1": case "SOT2": return `${market.endsWith("1") ? home : away} : ${sel === "Plus" ? "plus" : "moins"} de ${line} ${STAT_NOM[market.slice(0, -1)]}`;
+    case "CORN_1X2": return sel === "N" ? "Autant de corners" : `${sel === "1" ? home : away} a le plus de corners`;
+    case "RED": return sel === "Oui" ? "Au moins un carton rouge" : "Pas de carton rouge";
+    case "BUT": return `${sel} marque`;
+    case "BUT1": return /^aucun/i.test(sel) ? "Aucun buteur" : `${sel} marque le premier but`;
+    case "ET": return sel === "Oui" ? "Il y a prolongation" : "Pas de prolongation";
+    case "PEN": return sel === "Oui" ? "Il y a tirs au but" : "Pas de tirs au but";
+    case "QUALIF": return `${sel === "1" ? home : away} se qualifie`;
+    case "HT_1X2": case "HT_DC": case "HT_OU": case "HT_BTTS": case "HT_CS": return `Mi-temps : ${pickLabel(market.slice(3), param, sel, home, away)}`;
     case "H2_1X2": case "H2_OU": return `2e mi-temps : ${pickLabel(market.slice(3), param, sel, home, away)}`;
     case "HTFT": { const [a, b] = sel.split("/"); const n = (x: string) => (x === "1" ? home : x === "2" ? away : "nul"); return `Mi-temps ${n(a)} / fin ${n(b)}`; }
     case "HMG": return sel === "1" ? "Plus de buts en 1re mi-temps" : sel === "2" ? "Plus de buts en 2e mi-temps" : "Autant de buts dans les deux mi-temps";
