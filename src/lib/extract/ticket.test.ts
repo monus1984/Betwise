@@ -41,6 +41,15 @@ describe("normalizePick — pronos de tipsters", () => {
     expect(normalizePick("", "ITALIE OU NUL", "Italie", "France")).toMatchObject({ market_code: "DC", selection: "1N", ok: true });
     expect(normalizePick("", "LES 2 MARQUENT", "Tchéquie", "Espagne")).toMatchObject({ market_code: "BTTS", selection: "Oui", ok: true });
   });
+  it("✅ = oui pour l'option, ❌ = non", () => {
+    expect(normalizePick("", "✅", "Tchéquie", "Espagne", "Espagne")).toMatchObject({ market_code: "1X2", selection: "2", ok: true });
+    expect(normalizePick("", "Espagne ✅", "Tchéquie", "Espagne")).toMatchObject({ market_code: "1X2", selection: "2", ok: true });
+    expect(normalizePick("", "Victoire ✅", "RD Congo", "Sierra Leone", "RD Congo")).toMatchObject({ selection: "1", ok: true });
+    expect(normalizePick("", "BTTS ✅", "Italie", "France")).toMatchObject({ market_code: "BTTS", selection: "Oui", ok: true });
+    expect(normalizePick("", "BTTS ❌", "Italie", "France")).toMatchObject({ market_code: "BTTS", selection: "Non", ok: true });
+    expect(normalizePick("", "+2,5 buts ✅", "Italie", "France")).toMatchObject({ market_code: "OU", market_param: 2.5, selection: "Plus", ok: true });
+    expect(normalizePick("", "Italie ou nul ✅", "Italie", "France")).toMatchObject({ market_code: "DC", selection: "1N", ok: true });
+  });
   it("dit clairement ce qui n'est pas suivi ou pas visible", () => {
     expect(normalizePick("", "1ère mi-temps", "Ghana", "Somalie", "Ghana")).toMatchObject({ ok: false, reason: expect.stringContaining("mi-temps") });
     expect(normalizePick("", "PÉPITE DU JOUR", "Angleterre", "Croatie").ok).toBe(false);

@@ -119,7 +119,7 @@ Tu copies ce qui est affiché, tu n'inventes rien et tu ne calcules rien. Si une
 Conventions : l'équipe à gauche du score est à domicile, celle à droite à l'extérieur. Un nom de sélection en vert avec une coche signifie gagnée, en rouge avec une croix perdue. Les cotes utilisent la virgule décimale en français : "1,47" vaut 1.47. Les montants "5 000 F" valent 5000.
 Pour un combiné, une ligne par sélection, dans l'ordre affiché. Si le ticket est replié (pas de détail des lignes), selections est vide et is_collapsed vaut true.
 Pronos de tipsters (kind = pronos) : messages Telegram ou WhatsApp, posts, vidéos TikTok, Instagram ou Facebook.
-- Les emojis ✅ 🔥 💚 sont de la décoration, pas des résultats : outcome vaut unknown, sauf si le message dit explicitement « gagné » ou « perdu » pour la ligne.
+- Un ✅ après une option veut dire « oui, je joue cette option » : « Espagne ✅ » = victoire de l'Espagne, « BTTS ✅ » = les deux marquent, oui. Un ❌ veut dire « non » (« BTTS ❌ » = non). Recopie ces emojis dans pick_text. Ce ne sont jamais des résultats : outcome vaut unknown, sauf si le message dit explicitement « gagné » ou « perdu » pour la ligne. 🔥 💚 🎯 sont de la décoration.
 - Une liste de pronos sans cote totale ni mise est une liste de paris séparés : ticket_type single. S'il y a une cote totale (« CÔTE TOTALE : 10,16 »), c'est un combiné.
 - Les drapeaux affichés identifient les pays : utilise-les pour nommer les équipes quand le texte est caché ou coupé.
 - Une fiche de match affichée sans choix écrit (le tipster parle) donne une sélection avec home_team, away_team, kickoff et pick_text vide.
@@ -139,7 +139,10 @@ export type NormalizedSelection = {
 /** Déduit code marché + sélection normalisée à partir des libellés bruts et des noms d'équipes. */
 export function normalizePick(marketText: string, pickText: string, home: string | null, away: string | null, team?: string | null): NormalizedSelection {
   const m = marketText.toLowerCase();
-  const p = pickText.toLowerCase().replace(/\s+/g, " ").trim();
+  // ✅ = « oui, cette option » ; ❌ = « non ». Les autres emojis sont de la décoration.
+  const oui = /[✅✔☑]/u.test(pickText) || /[✅✔☑]/u.test(marketText), non = /[❌✖🚫]/u.test(pickText);
+  const p = pickText.toLowerCase().replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ").replace(/\s+/g, " ").trim().replace(/^[–—-]\s*|\s*[–—-]$/g, "").trim();
+  if (!p && oui && team) { const sd = (home && teamSimilarity(team, home) >= (away ? teamSimilarity(team, away) : 0)) ? "1" : "2"; if (home || away) return { market_code: "1X2", market_param: null, selection: sd, label_pick: `${team} gagne`, ok: true }; }
   if (!p) return { market_code: "1X2", market_param: null, selection: "", label_pick: "Choix non visible", ok: false, reason: "Le choix n'est pas écrit (prono dit à l'oral ?) : choisis-le." };
   const side = (name: string): "1" | "2" | null => {
     if (!name) return null;
@@ -159,7 +162,8 @@ export function normalizePick(marketText: string, pickText: string, home: string
   // Pronos de tipsters, libellés courts (avec l'équipe nommée seule ou dans le texte)
   const all = `${m} ${p}`;
   if (/mi[- ]?temps|\bmt\b|\bht\b/.test(all)) return { market_code: "1X2", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Résultat à la mi-temps : marché pas encore suivi par BETWISE." };
-  if (/(les )?(2|deux) (équipes )?marquent|btts/.test(p) && !/(ne )?marquent pas|non/.test(p)) return { market_code: "BTTS", market_param: null, selection: "Oui", label_pick: pickText, ok: true };
+  if (/(les )?(2|deux) (équipes )?marquent|btts/.test(all)) return { market_code: "BTTS", market_param: null, selection: non || /(ne )?marquent pas|\bnon\b|\bno\b/.test(p) ? "Non" : "Oui", label_pick: pickText, ok: true };
+  if (!m.includes("handicap") && !all.includes("&") && (/\b(buts?|goals?|over|under)\b/.test(p) || /^(\+|-|plus|moins)/.test(p))) { const o = ouLine(p); if (o) return { market_code: "OU", market_param: o.line, selection: o.dir, label_pick: pickText, ok: true }; }
   const teamSide = team ? side(team) : null;
   if (teamSide && /^(victoire|gagne|vainqueur|win|1|2)$/.test(p.replace(/[^a-zà-ü0-9 ]/g, "").trim())) return { market_code: "1X2", market_param: null, selection: teamSide, label_pick: `${team} gagne`, ok: true };
   if (teamSide && /ou nul|ou match nul|double chance/.test(p) && !p.includes("&")) return { market_code: "DC", market_param: null, selection: teamSide === "1" ? "1N" : "N2", label_pick: `${team} ou nul`, ok: true };
