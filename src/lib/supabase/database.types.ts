@@ -1014,6 +1014,93 @@ export type Database = {
         }
         Relationships: []
       }
+      objectifs: {
+        Row: {
+          id: string
+          user_id: string
+          bankroll_depart: number
+          cible: number
+          debut: string
+          echeance: string
+          paris_par_jour: number
+          actif: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          bankroll_depart: number
+          cible: number
+          debut?: string
+          echeance: string
+          paris_par_jour?: number
+          actif?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          bankroll_depart?: number
+          cible?: number
+          debut?: string
+          echeance?: string
+          paris_par_jour?: number
+          actif?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      daily_picks: {
+        Row: {
+          id: string
+          jour: string
+          match_id: string
+          market_code: string
+          market_param: number | null
+          selection: string
+          categorie: string
+          rang: number
+          probabilite: number
+          cote_ref: number | null
+          cote_juste: number
+          p_modele: number | null
+          prediction_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          jour: string
+          match_id: string
+          market_code: string
+          market_param?: number | null
+          selection: string
+          categorie: string
+          rang: number
+          probabilite: number
+          cote_ref?: number | null
+          cote_juste: number
+          p_modele?: number | null
+          prediction_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          jour?: string
+          match_id?: string
+          market_code?: string
+          market_param?: number | null
+          selection?: string
+          categorie?: string
+          rang?: number
+          probabilite?: number
+          cote_ref?: number | null
+          cote_juste?: number
+          p_modele?: number | null
+          prediction_id?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       match_history: {
         Row: {
           id: string

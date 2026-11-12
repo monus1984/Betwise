@@ -7,7 +7,7 @@ import { Notice } from "@/components/ui";
 export type ChatMsg = { id?: string; role: "user" | "assistant"; text: string; fonctions?: string[] };
 
 const FN_LABEL: Record<string, string> = {
-  selections_probables: "sélections du jour", bilan_paris: "bilan des paris", bilan_par_origine: "réussite par origine", etat_bankroll: "état de la bankroll",
+  selections_probables: "sélections du jour", mon_objectif: "ton objectif", simuler_objectif: "simulation d’objectif", fixer_objectif: "objectif enregistré", coups_du_jour: "coups du jour", bilan_paris: "bilan des paris", bilan_par_origine: "réussite par origine", etat_bankroll: "état de la bankroll",
   paris_en_cours: "paris en cours", sources_suivies: "sources suivies", detail_source: "détail d’une source", analyse_match: "analyse de match",
 };
 

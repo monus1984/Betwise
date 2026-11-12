@@ -46,7 +46,7 @@ export async function POST(req: Request) {
   await db.from("messages").insert({ conversation_id: conversationId, role: "user", contenu: message });
 
   try {
-    const r = await getLlm().chat({ system: COACH_SYSTEM, history, tools: COACH_TOOLS, run: (name, input) => runCoachTool(db, name, input) });
+    const r = await getLlm().chat({ system: COACH_SYSTEM, history, tools: COACH_TOOLS, run: (name, input) => runCoachTool(db, name, input), maxTokens: 700 });
     const fonctions = r.trace.map((t) => ({ nom: t.name, entree: t.input, sortie: t.output, ms: t.ms }));
     const { data: saved } = await db.from("messages").insert({
       conversation_id: conversationId, role: "assistant", contenu: r.text, fonctions: fonctions as unknown as Json, tokens_in: r.tokensIn, tokens_out: r.tokensOut,

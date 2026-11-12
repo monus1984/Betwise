@@ -26,3 +26,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0016_live_scores.sql | 2026-11-11 | Direct : `af_fixture_id`, `minute`, `live_at` sur matches ; pg_net ; `tick_live()` appelée chaque minute par pg_cron quand un match suivi est en cours |
 | 0017_match_extras.sql | 2026-11-11 | `match_extras` : compositions, absents, statistiques (cache API-Football, lecture connectés) |
 | 0018_af_history.sql | 2026-11-11 | `af_history` (résultats, xG, tirs par match depuis API-Football) ; `af_home_id` / `af_away_id` sur matches |
+| 0019_objectifs_coups_du_jour.sql | 2026-11-12 | `objectifs` (bankroll de départ, cible, échéance ; un actif par utilisateur), `daily_picks` (coups du jour par catégorie), source « Coups du jour BETWISE » |

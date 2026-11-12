@@ -8,6 +8,11 @@ import type { createClient } from "../supabase/server";
 import type { ChatTool } from "../llm/provider";
 import { loadSignals, pickLabel, picksOf } from "../probs/signals";
 import { analyzeTicket } from "../probs/ticket";
+import { loadGoal } from "./goal";
+import { evaluatePlan, misesDuJour } from "./plan";
+import { loadToday } from "./today";
+import { setObjectif } from "./actions";
+import { CAT_LABEL, categorieOf } from "./categories";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
 type One<T> = T | T[] | null;
@@ -23,6 +28,10 @@ function since(p: unknown) {
 }
 
 export const COACH_TOOLS: ChatTool[] = [
+  { name: "mon_objectif", description: "Objectif actif de l'utilisateur (bankroll de départ, cible, échéance), sa progression, sa chance d'atteindre la cible à temps, le risque de chute, l'objectif raisonnable et les mises conseillées du jour par catégorie (Sûr, Audacieux, Risqué) avec le budget risque.", input_schema: { type: "object", properties: {} } },
+  { name: "simuler_objectif", description: "Simule un objectif sans l'enregistrer, à partir du solde actuel : chance d'atteindre la cible dans le délai, risque de chute, mise nécessaire, et objectif raisonnable.", input_schema: { type: "object", properties: { cible: { type: "number", description: "Montant visé en F CFA" }, jours: { type: "number", description: "Délai en jours" } }, required: ["cible", "jours"] } },
+  { name: "fixer_objectif", description: "Enregistre l'objectif (remplace l'actuel). À n'appeler que si l'utilisateur a clairement validé le montant et le délai.", input_schema: { type: "object", properties: { cible: { type: "number" }, jours: { type: "number" } }, required: ["cible", "jours"] } },
+  { name: "coups_du_jour", description: "Les coups du jour BETWISE classés Sûr / Audacieux / Risqué (probabilité, cote, mise conseillée, gain possible), et les choix de l'utilisateur et de ses sources sur les matchs du jour, confrontés aux probabilités BETWISE et classés dans les mêmes catégories. À utiliser pour « quoi jouer aujourd'hui », « mes paris du jour », « que penses-tu du prono de X ».", input_schema: { type: "object", properties: {} } },
   { name: "selections_probables", description: "Les sélections les plus probables d'une journée, tous marchés confondus (victoire, double chance, plus/moins de buts, les deux marquent), au-dessus d'un seuil de probabilité. Donne pour chacune la probabilité (tirée des cotes du marché, sinon du modèle), la cote de référence ou la cote juste, et l'avis du modèle quand il existe. Donne aussi la probabilité d'un combiné des premières. À utiliser pour « les meilleurs paris du jour », « des paris fiables à 85 % », « quoi jouer demain ».", input_schema: { type: "object", properties: { jour: { type: "string", description: "« aujourdhui », « demain » ou une date AAAA-MM-JJ. Par défaut aujourdhui." }, seuil_pct: { type: "number", description: "Probabilité minimale en %, entre 50 et 95. Par défaut 80." }, max: { type: "number", description: "Nombre maximal de sélections, par défaut 8." } } } },
   { name: "bilan_paris", description: "Bilan des paris réglés de l'utilisateur sur une période : nombre, réussite, rendement (ROI), résultat en unités, cote moyenne, et détail selon un regroupement.", input_schema: { type: "object", properties: { periode: PERIODE, regroupement: { type: "string", enum: ["aucun", "type", "nb_selections", "risque", "bookmaker", "marche"], description: "Découpage du bilan. type = simple/combiné." } } } },
   { name: "bilan_par_origine", description: "Réussite des sélections selon leur origine (choix perso, tipster, page, modèle BETWISE…), comparée à la probabilité implicite des cotes jouées. Indique aussi combien de combinés ont été perdus à cause d'une seule sélection.", input_schema: { type: "object", properties: { periode: PERIODE } } },
@@ -77,6 +86,52 @@ function summarize(bets: BetRow[], u: number) {
 
 export async function runCoachTool(db: Db, name: string, input: Record<string, unknown>): Promise<unknown> {
   switch (name) {
+    case "mon_objectif":
+    case "simuler_objectif":
+    case "fixer_objectif":
+    case "coups_du_jour": {
+      const { data: s } = await db.from("my_bankroll_summary").select("solde").maybeSingle();
+      const solde = Number(s?.solde ?? 0);
+      const r0 = (x: number) => Math.round(x);
+      const plan = (p: ReturnType<typeof evaluatePlan>) => ({
+        croissance_requise_pct: pct(p.croissanceRequise), jours: p.jours,
+        plan_pour_la_cible: { chance_pct: pct(p.objectif.pAtteindre), risque_chute_pct: pct(p.objectif.pChute), mise_par_pari_pct_bankroll: pct(p.objectif.mise), repartition: p.objectif.mix },
+        plan_prudent: { chance_pct: pct(p.prudent.pAtteindre), risque_chute_pct: pct(p.prudent.pChute) },
+        objectif_raisonnable: p.raisonnable ? { cible: p.raisonnable.cible, chance_pct: pct(p.raisonnable.plan.pAtteindre), risque_chute_pct: pct(p.raisonnable.plan.pChute), mise_pct: pct(p.raisonnable.plan.mise) } : "aucune cible au-dessus du solde n'atteint 50 % de chances avec moins de 20 % de risque",
+        note: "« chute » = bankroll sous la moitié du départ ; marge bookmaker comptée",
+      });
+      if (name === "simuler_objectif") {
+        if (solde <= 0) return { erreur: "pas de bankroll enregistrée : il faut un dépôt d'abord" };
+        const cible = Number(input.cible), jours = Math.min(180, Math.max(1, Number(input.jours)));
+        if (!(cible > solde)) return { erreur: `la cible doit dépasser le solde (${r0(solde)} F)` };
+        return { solde: r0(solde), cible, ...plan(evaluatePlan({ bankroll: solde, depart: solde, cible, jours, parisParJour: 2 })) };
+      }
+      if (name === "fixer_objectif") {
+        const r = await setObjectif({ cible: Number(input.cible), jours: Number(input.jours) });
+        return r.ok ? { enregistre: true } : { erreur: r.error };
+      }
+      const { data: { user } } = await db.auth.getUser();
+      const goal = await loadGoal(db, solde);
+      const mises = goal ? goal.mises : solde > 0 ? misesDuJour(solde, solde) : null;
+      if (name === "mon_objectif") {
+        if (!goal) return { objectif: null, solde: r0(solde), mises_conseillees_F: mises, note: "aucun objectif : proposer d'en fixer un (montant + délai)" };
+        return {
+          solde: r0(solde), depart: goal.depart, cible: goal.cible, echeance: goal.echeance, jours_restants: goal.joursRestants,
+          progression_pct: pct(goal.progression), temps_ecoule_pct: pct(goal.tempsEcoule), statut: goal.statut,
+          ...(goal.plan ? plan(goal.plan) : {}),
+          mises_conseillees_F: { sur: goal.mises.sur, audacieux: goal.mises.audacieux, risque: goal.mises.risque }, budget_risque_F: goal.mises.budgetRisque,
+          regle_budget_risque: "Risqué uniquement avec 30 % des gains réalisés depuis le début de l'objectif",
+        };
+      }
+      const t = await loadToday(db, user!.id);
+      return {
+        mises_conseillees_F: mises ? { sur: mises.sur, audacieux: mises.audacieux, risque: mises.risque } : "pas de bankroll enregistrée",
+        coups_du_jour: t.picks.map((p) => ({ categorie: CAT_LABEL[p.categorie], selection: p.selection, match: p.match, heure: p.kickoff, probabilite_pct: pct(p.p), cote_reference: p.cote, cote_juste: r2(p.coteJuste), avis_modele_pct: p.pModele === null ? null : pct(p.pModele), soutenu_par: p.soutiens })),
+        choix_utilisateur_et_sources: t.theirs.map((x) => ({ qui: x.qui, selection: x.selection, match: x.match, cote: x.cote, probabilite_betwise_pct: x.p === null ? null : pct(x.p), categorie: x.categorie ? CAT_LABEL[x.categorie] : null, verdict: x.verdict, aussi_coup_du_jour: x.aussiBetwise })),
+        rien_de_solide: t.picks.length === 0,
+      };
+    }
+
     case "selections_probables": {
       const TZ = "Africa/Abidjan";
       const key = (d: Date | string) => new Date(d).toLocaleDateString("en-CA", { timeZone: TZ });
@@ -98,7 +153,7 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
         const seen = new Set<string>();
         return picksOf(sg).filter((p) => p.p >= seuil && p.p <= 0.95 && !seen.has(p.market) && seen.add(p.market)).slice(0, 2).map((p) => ({
           match: `${h} – ${a}`, competition: one(m.competition as One<{ nom: string }>)?.nom, coup_envoi: m.kickoff_at,
-          selection: pickLabel(p.market, p.param, p.sel, h, a), probabilite_pct: pct(p.p),
+          selection: pickLabel(p.market, p.param, p.sel, h, a), probabilite_pct: pct(p.p), categorie: (() => { const c = categorieOf(p.p); return c ? CAT_LABEL[c] : null; })(),
           cote_reference: p.cote, cote_juste: r2(1 / p.p), origine: sg.source === "modele" ? "modèle BETWISE (pas de cote disponible)" : "cotes du marché, marge retirée",
           avis_du_modele_pct: p.pModele !== null ? pct(p.pModele) : null, _p: p.p,
         }));

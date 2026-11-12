@@ -6,6 +6,11 @@ import { signOut } from "@/lib/auth/actions";
 import { bankrollMove } from "@/lib/bets/actions";
 import { loadDashboard, type Group } from "@/lib/stats/dashboard";
 import { createClient } from "@/lib/supabase/server";
+import { loadGoal } from "@/lib/coach/goal";
+import { misesDuJour } from "@/lib/coach/plan";
+import { loadToday } from "@/lib/coach/today";
+import { ObjectifCard } from "./objectif-card";
+import { CoupsDuJour } from "./coups-du-jour";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +34,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
     supabase.from("source_follows").select("source_id, source:sources(id, nom, type)").eq("user_id", user!.id),
   ]);
   const solde = Number(summary?.solde ?? 0), exposition = Number(summary?.exposition ?? 0);
+  const [goal, today] = await Promise.all([loadGoal(supabase, solde), loadToday(supabase, user!.id)]);
+  const mises = goal ? goal.mises : solde > 0 ? misesDuJour(solde, solde) : null;
   const ids = (follows ?? []).map((f) => f.source_id);
   const [{ data: trends }, { data: metrics }] = ids.length
     ? await Promise.all([
@@ -55,7 +62,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
         <p className="mt-1 text-xs text-white/60">{d.enCours > 0 ? <>{fcfa(exposition)} en jeu sur <Link href="/paris" className="underline">{d.enCours} pari{d.enCours > 1 ? "s" : ""} en cours</Link></> : "Aucun pari en cours"}</p>
       </section>
 
-      <nav className="mt-4 flex gap-1.5" aria-label="Période">
+      <ObjectifCard goal={goal} solde={solde} />
+      <CoupsDuJour picks={today.picks} theirs={today.theirs} mises={mises} />
+
+      <h2 className="mt-6 text-base font-bold">Ton bilan</h2>
+      <nav className="mt-2 flex gap-1.5" aria-label="Période">
         {PERIODS.map((x) => <Link key={x.k} href={`/?p=${x.k}`} scroll={false} className={`rounded-full border px-3 py-1 text-xs ${period.k === x.k ? "border-ink bg-ink text-white" : "border-line bg-white text-ink-soft"}`}>{x.t}</Link>)}
       </nav>
 

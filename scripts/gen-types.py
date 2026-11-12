@@ -46,6 +46,8 @@ TABLES = {
     "model_estimates": "id:uuid= match_id:uuid market_code:text market_param:numeric? selection:text probabilite:numeric cote_reference:numeric? niveau_risque:int2? justification:jsonb? model_version:text prediction_id:uuid? created_at:timestamptz= updated_at:timestamptz=",
     "match_extras": "match_id:uuid lineups:jsonb? lineups_at:timestamptz? injuries:jsonb? injuries_at:timestamptz? stats:jsonb? stats_at:timestamptz?",
     "af_history": "fixture_id:int4 league:int4 season:int4 played_at:timestamptz home_id:int4 home_nom:text away_id:int4 away_nom:text home_goals:int2 away_goals:int2 xg_home:numeric? xg_away:numeric? shots_home:int2? shots_away:int2? sot_home:int2? sot_away:int2? stats_checked:bool= imported_at:timestamptz=",
+    "objectifs": "id:uuid= user_id:uuid bankroll_depart:numeric cible:numeric debut:date= echeance:date paris_par_jour:int2= actif:bool= created_at:timestamptz=",
+    "daily_picks": "id:uuid= jour:date match_id:uuid market_code:text market_param:numeric? selection:text categorie:text rang:int2 probabilite:numeric cote_ref:numeric? cote_juste:numeric p_modele:numeric? prediction_id:uuid? created_at:timestamptz=",
     "match_history": "id:uuid= ligue:text saison:text played_on:date home_nom:text away_nom:text home_goals:int2 away_goals:int2 cote_1:numeric? cote_n:numeric? cote_2:numeric? cote_plus25:numeric? cote_moins25:numeric? imported_at:timestamptz=",
     "conversations": "id:uuid= user_id:uuid titre:text? created_at:timestamptz=",
     "messages": "id:uuid= conversation_id:uuid role:text contenu:text? fonctions:jsonb? tokens_in:int4? tokens_out:int4? created_at:timestamptz=",

@@ -1,4 +1,5 @@
 import type { TicketAnalysis } from "@/lib/probs/ticket";
+import { CAT_LABEL, CAT_STYLE, categorieOf } from "@/lib/coach/categories";
 
 const fr = (x: number) => x.toFixed(2).replace(".", ",");
 const ORIG = { modele: "modèle", marche: "cotes", estime: "estimé" } as const;
@@ -20,7 +21,7 @@ export function TicketAnalysisCard({ a }: { a: TicketAnalysis }) {
         {a.lignes.map((l, i) => (
           <li key={i} className="py-2">
             <div className="flex items-baseline justify-between gap-2 text-sm"><span className="truncate">{l.label}</span><span className="shrink-0 tabular-nums"><b>{pct(l.p)}</b> <span className="text-xs text-ink-muted">cote {fr(l.cote)}</span></span></div>
-            <p className="truncate text-[11px] text-ink-muted">{l.match} · {ORIG[l.origine]}</p>
+            <p className="flex items-center gap-1.5 truncate text-[11px] text-ink-muted">{(() => { const c = categorieOf(l.p); return c ? <span className={`rounded-full border px-1.5 text-[10px] font-semibold ${CAT_STYLE[c]}`}>{CAT_LABEL[c]}</span> : null; })()}<span className="truncate">{l.match} · {ORIG[l.origine]}</span></p>
             <div className="mt-1 h-1.5 rounded-full bg-surface-2"><div className={`h-1.5 rounded-full ${l.p >= 0.75 ? "bg-gain" : l.p >= 0.55 ? "bg-draw" : "bg-loss"}`} style={{ width: `${l.p * 100}%` }} /></div>
           </li>
         ))}

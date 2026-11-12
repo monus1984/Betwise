@@ -2,7 +2,8 @@ name: Modèle BETWISE
 
 on:
   schedule:
-    # 07:30 UTC chaque jour, après l'import des matchs (06:00) et des cotes de référence (07:00)
+    # 07:30 UTC chaque jour, après l'import des matchs (06:00) et des cotes de référence (07:00 et 07:10) ;
+    # les coups du jour sont générés à la fin du même job
     - cron: "30 7 * * *"
   workflow_dispatch:
 
@@ -27,6 +28,10 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       - run: npm run model
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - run: npx tsx scripts/daily-picks.ts
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
