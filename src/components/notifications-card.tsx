@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { IconBell, IconTile } from "@/components/icons";
 import { setNotifPref, type NotifPrefs } from "@/lib/push/actions";
 
 const TYPES: { k: keyof NotifPrefs; t: string; d: string }[] = [
@@ -63,9 +64,9 @@ export function NotificationsCard({ prefs }: { prefs: NotifPrefs }) {
   function toggle(k: keyof NotifPrefs) { const on = !p[k]; setP({ ...p, [k]: on }); start(async () => { const r = await setNotifPref(k, on); if (!r.ok) setP((x) => ({ ...x, [k]: !on })); }); }
 
   return (
-    <details className="mt-3 rounded-xl border border-line bg-white p-4" open={state === "inactif"}>
+    <details className="mt-3 rounded-2xl border border-line bg-white p-4 shadow-card" open={state === "inactif"}>
       <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-semibold">
-        <span>🔔 Notifications</span>
+        <span className="flex items-center gap-2"><IconTile size="sm" tone="alerte"><IconBell width={18} height={18} /></IconTile>Notifications</span>
         <span className={`text-xs font-normal ${state === "actif" ? "text-gain" : "text-ink-muted"}`}>{state === "actif" ? "activées sur ce téléphone" : state === "chargement" ? "…" : "désactivées"}</span>
       </summary>
       <div className="mt-3 space-y-3">

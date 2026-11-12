@@ -17,7 +17,7 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
     <input
       {...props}
       className={
-        "w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200 " +
+        "w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 " +
         (props.className ?? "")
       }
     />
@@ -25,9 +25,9 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
 }
 
 export function Button({ variant = "primary", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "danger" }) {
-  const base = "inline-flex w-full items-center justify-center rounded-lg px-4 py-3 text-base font-medium transition disabled:opacity-50";
+  const base = "inline-flex w-full items-center justify-center rounded-xl px-4 py-3 text-base font-semibold transition disabled:opacity-50";
   const styles = {
-    primary: "bg-slate-900 text-white active:bg-slate-700",
+    primary: "bg-brand text-white shadow-[0_6px_14px_-8px_rgba(212,80,12,.8)] active:brightness-90",
     ghost: "bg-slate-100 text-slate-900 active:bg-slate-200",
     danger: "bg-red-600 text-white active:bg-red-700",
   }[variant];

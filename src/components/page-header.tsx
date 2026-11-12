@@ -1,13 +1,14 @@
 import type { ReactNode } from "react";
 
-export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
+/** Bandeau de page : le terrain, pleine largeur, avec le titre en lettres de tableau d'affichage. */
+export function PageHeader({ title, subtitle, action, tall }: { title: string; subtitle?: string; action?: ReactNode; tall?: boolean }) {
   return (
-    <header className="mb-4 flex items-start justify-between gap-3">
+    <header className={`pitch -mx-4 -mt-[max(1.25rem,env(safe-area-inset-top))] mb-4 flex items-end justify-between gap-3 rounded-b-[28px] px-4 ${tall ? "pb-14" : "pb-5"} pt-[calc(max(1.25rem,env(safe-area-inset-top))+0.5rem)]`}>
       <div className="min-w-0">
-        <h1 className="text-[26px] font-bold leading-tight tracking-tight">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm leading-snug text-ink-muted">{subtitle}</p>}
+        <h1 className="font-display text-[34px] font-bold leading-[1.02]">{title}</h1>
+        {subtitle && <p className="mt-1.5 max-w-[34ch] text-[13px] leading-snug text-white/75">{subtitle}</p>}
       </div>
-      {action}
+      {action && <div className="page-action shrink-0">{action}</div>}
     </header>
   );
 }

@@ -30,7 +30,7 @@ export function TabBar() {
                 <Link
                   href={t.href}
                   aria-label="Ajouter un pari ou un prono"
-                  className="-mt-5 flex h-12 w-12 items-center justify-center rounded-full bg-brand text-white shadow-lg shadow-brand/30 transition active:scale-95"
+                  className="-mt-5 flex h-12 w-12 items-center justify-center rounded-full bg-brand text-white shadow-lg shadow-brand/40 ring-4 ring-white transition active:scale-95"
                 >
                   <Icon />
                 </Link>

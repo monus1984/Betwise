@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { IconPhone, IconTile } from "@/components/icons";
 
 type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> };
 declare global { interface Window { __bwInstall?: InstallEvent | null } }
@@ -59,9 +60,9 @@ export function InstallButton({ compact = false }: { compact?: boolean }) {
     );
   }
   return (
-    <section className="mb-3 rounded-xl border border-brand/30 bg-brand/5 p-3">
+    <section className="mb-3 rounded-2xl border border-line bg-white p-3 shadow-card">
       <div className="flex items-center gap-3">
-        <span className="text-2xl">📲</span>
+        <IconTile tone="terrain"><IconPhone /></IconTile>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-semibold">Installer BETWISE</span>
           <span className="block text-[11px] text-ink-muted">Une icône sur l’écran d’accueil, le plein écran et les notifications.</span>

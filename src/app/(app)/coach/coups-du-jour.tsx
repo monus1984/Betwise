@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CAT_CONSTATE, CAT_LABEL, CAT_STYLE, type Categorie } from "@/lib/coach/categories";
 import type { TheirPick, TodayPick } from "@/lib/coach/today";
 import { COMP_FLAG } from "@/components/match-ui";
+import { IconBolt, IconFlame, IconShield, IconTile } from "@/components/icons";
 import { AddToSlip } from "@/components/slip";
 import { legFrom } from "@/lib/slip/leg";
 
@@ -14,7 +15,7 @@ const CAT_NOTE: Record<Categorie, string> = { sur: "cotes 1,10–1,20", audacieu
 export function CoupsDuJour({ picks, theirs, mises }: { picks: TodayPick[]; theirs: TheirPick[]; mises: Record<Categorie, number> | null }) {
   return (
     <section className="mt-3 rounded-xl border border-line bg-white p-4 shadow-card">
-      <div className="mb-3 flex items-baseline justify-between gap-2"><h2 className="text-sm font-semibold">⚡ Les coups du jour</h2><Link href="/options" className="text-[11px] text-brand">toutes les options ›</Link></div>
+      <div className="mb-3 flex items-baseline justify-between gap-2"><h2 className="flex items-center gap-2 text-sm font-semibold"><IconTile size="sm" tone="conseil"><IconBolt width={18} height={18} /></IconTile>Les coups du jour</h2><Link href="/options" className="text-[11px] text-brand">toutes les options ›</Link></div>
       {picks.length === 0 ? (
         <p className="text-sm text-ink-muted">Rien de solide aujourd’hui : aucune sélection ne s’appuie sur une vraie cote de référence. Le Coach préfère se taire que proposer au hasard.</p>
       ) : (
@@ -26,7 +27,7 @@ export function CoupsDuJour({ picks, theirs, mises }: { picks: TodayPick[]; thei
             return (
               <div key={cat}>
                 <div className="mb-1.5 flex items-baseline justify-between gap-2">
-                  <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${CAT_STYLE[cat]}`}>{CAT_LABEL[cat]} <span className="font-normal">· {CAT_NOTE[cat]}</span></span>
+                  <span className={`inline-flex items-center gap-1 rounded-full border py-0.5 pl-1.5 pr-2 text-[11px] font-semibold ${CAT_STYLE[cat]}`}>{cat === "sur" ? <IconShield width={14} height={14} /> : cat === "audacieux" ? <IconFlame width={14} height={14} /> : <IconBolt width={14} height={14} />}{CAT_LABEL[cat]} <span className="font-normal">· {CAT_NOTE[cat]}</span></span>
                   <span className="text-[11px] text-ink-muted">{mises ? (mise ? `mise conseillée ${F(mise)}` : "pas de budget risque") : `passe ~${Math.round(CAT_CONSTATE[cat] * 100)} fois sur 100`}</span>
                 </div>
                 <ul className="divide-y divide-line rounded-lg border border-line">

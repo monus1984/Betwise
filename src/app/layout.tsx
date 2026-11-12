@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: "BETWISE",
   description: "Comprends, mesure et maîtrise tes décisions de pari.",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "BETWISE" },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "BETWISE" },
   icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f172a",
+  themeColor: "#0e3b2e",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

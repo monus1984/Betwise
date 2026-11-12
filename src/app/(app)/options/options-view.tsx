@@ -97,7 +97,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
               {singles.slice(0, shown).map((o, i) => <SingleRow key={`${o.matchId}-${o.market}-${o.param}-${o.sel}`} o={o} first={i === 0} tester={saisir([o], true)} more={focus ? null : q({ m: o.matchId })} />)}
             </ul>
             <p className="mt-2 px-1 text-[11px] leading-relaxed text-ink-muted">
-              {shown < singles.length && <><Link href={q({ n: "all" })} scroll={false} className="font-medium text-brand">Voir les {singles.length} options</Link> · </>}Deux options par match ici ; « + » ouvre toutes celles du match. « Cote » : cote de référence du marché. « Juste » : pas de cote de référence, c’est la cote sans marge ; ton bookmaker paiera un peu moins, vérifie avant de jouer.
+              {shown < singles.length && <><Link href={q({ n: "all" })} scroll={false} className="font-medium text-brand">Voir les {singles.length} options</Link> · </>}Deux options par match ici ; « ⋯ » ouvre toutes celles du match, « + » ajoute au coupon. « Cote » : cote de référence du marché. « Juste » : pas de cote de référence, c’est la cote sans marge ; ton bookmaker paiera un peu moins, vérifie avant de jouer.
             </p>
           </>
         )
@@ -175,7 +175,7 @@ function SingleRow({ o, first, tester, more }: { o: Option; first: boolean; test
         <AddToSlip size="sm" leg={legFrom({ ...o, label: o.label })} />
         <Link href={tester} className="rounded-md border border-line px-1.5 py-0.5 text-center text-[10px] font-medium">Tester</Link>
       </span>
-      {more && <Link href={more} scroll={false} aria-label="Toutes les options de ce match" className="-mr-1 shrink-0 px-1 text-lg text-ink-muted">+</Link>}
+      {more && <Link href={more} scroll={false} aria-label="Toutes les options de ce match" className="-mr-1 shrink-0 px-1 text-lg leading-none text-ink-muted">⋯</Link>}
     </li>
   );
 }

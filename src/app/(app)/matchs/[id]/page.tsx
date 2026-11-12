@@ -67,14 +67,14 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
       <Link href="/matchs" className="mb-3 inline-flex items-center gap-1 text-sm text-ink-muted">‹ Matchs</Link>
 
       {/* En-tête façon tableau d'affichage */}
-      <header className="mb-3 rounded-2xl bg-ink px-4 pb-4 pt-3 text-white">
+      <header className="pitch mb-3 rounded-3xl px-4 pb-4 pt-3">
         <p className="mb-3 text-center text-[11px] text-white/60">{COMP_FLAG[comp?.code_externe ?? ""] ?? "⚽"} {COMP_SHORT[comp?.code_externe ?? ""] ?? comp?.nom} · {new Date(m.kickoff_at).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: TZ })}</p>
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
           <div className="flex flex-col items-center gap-1.5 text-center"><TeamBadge name={home} size={44} /><span className="text-sm font-medium leading-tight">{shortName(home)}</span></div>
           <div className="text-center">
-            {m.statut === "termine" ? <p className="text-3xl font-semibold tabular-nums">{m.score_home} – {m.score_away}</p>
-              : m.statut === "en_cours" && m.score_home !== null ? <><p className="text-3xl font-semibold tabular-nums">{m.score_home} – {m.score_away}</p><p className="text-[11px] font-semibold text-red-300">● {m.minute ? `${m.minute}’` : "en direct"}</p></>
-              : <><p className="text-2xl font-semibold tabular-nums">{new Date(m.kickoff_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: TZ })}</p><p className="text-[11px] text-white/60">{countdown(m.kickoff_at)}</p></>}
+            {m.statut === "termine" ? <p className="font-display text-5xl font-bold tabular-nums">{m.score_home} – {m.score_away}</p>
+              : m.statut === "en_cours" && m.score_home !== null ? <><p className="font-display text-5xl font-bold tabular-nums">{m.score_home} – {m.score_away}</p><p className="text-[11px] font-semibold text-red-300">● {m.minute ? `${m.minute}’` : "en direct"}</p></>
+              : <><p className="font-display text-4xl font-bold tabular-nums">{new Date(m.kickoff_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: TZ })}</p><p className="text-[11px] text-white/60">{countdown(m.kickoff_at)}</p></>}
           </div>
           <div className="flex flex-col items-center gap-1.5 text-center"><TeamBadge name={away} size={44} /><span className="text-sm font-medium leading-tight">{shortName(away)}</span></div>
         </div>

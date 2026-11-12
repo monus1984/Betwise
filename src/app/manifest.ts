@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Comprends, mesure et maîtrise tes décisions de pari.",
     start_url: "/",
     display: "standalone",
-    background_color: "#f8fafc",
-    theme_color: "#0f172a",
+    background_color: "#0e3b2e",
+    theme_color: "#0e3b2e",
     lang: "fr",
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png" },

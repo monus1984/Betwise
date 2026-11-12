@@ -8,6 +8,7 @@ import { loadDashboard, type Group } from "@/lib/stats/dashboard";
 import { createClient } from "@/lib/supabase/server";
 import { loadGoal } from "@/lib/coach/goal";
 import { jourAbidjan } from "@/lib/coach/daily";
+import { IconCamera, IconChat, IconCompass, IconTile, IconWallet } from "@/components/icons";
 import { InstallButton } from "@/components/install-button";
 import { NotificationsCard } from "@/components/notifications-card";
 
@@ -52,19 +53,24 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
 
   return (
     <>
-      <PageHeader title={`Salut ${profile?.pseudo ?? ""}`} subtitle="Ton tableau de bord."
+      <PageHeader title={`Salut ${profile?.pseudo ?? ""}`} subtitle="Ton tableau de bord." tall
         action={<form action={signOut}><button className="text-xs text-ink-muted underline">Déconnexion</button></form>} />
 
-      <InstallButton />
-
-      <section className="rounded-2xl bg-ink p-5 text-white">
-        <p className="text-xs uppercase tracking-wide text-white/60">Solde</p>
-        <p className="mt-1 text-3xl font-semibold tabular-nums">{fcfa(solde)}</p>
-        <p className="mt-1 text-xs text-white/60">{d.enCours > 0 ? <>{fcfa(exposition)} en jeu sur <Link href="/paris" className="underline">{d.enCours} pari{d.enCours > 1 ? "s" : ""} en cours</Link></> : "Aucun pari en cours"}</p>
+      <section className="relative z-10 -mt-9 rounded-2xl border border-line bg-white p-4 shadow-card">
+        <div className="flex items-center gap-3">
+          <IconTile tone="terrain"><IconWallet /></IconTile>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-ink-muted">Solde</p>
+            <p className="font-display text-4xl font-bold leading-none tabular-nums">{fcfa(solde)}</p>
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-ink-muted">{d.enCours > 0 ? <>{fcfa(exposition)} en jeu sur <Link href="/paris" className="font-medium text-brand underline">{d.enCours} pari{d.enCours > 1 ? "s" : ""} en cours</Link></> : "Aucun pari en cours"}</p>
       </section>
 
-      <Link href="/coach" className="mt-3 flex items-center gap-3 rounded-xl border border-brand/30 bg-brand/5 p-3 active:bg-brand/10">
-        <span className="text-xl">🧭</span>
+      <div className="mt-3"><InstallButton /></div>
+
+      <Link href="/coach" className="flex items-center gap-3 rounded-2xl border border-line bg-white p-3 shadow-card active:bg-surface-2">
+        <IconTile tone="conseil"><IconCompass /></IconTile>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-semibold">Coach</span>
           <span className="block truncate text-[11px] text-ink-muted">
@@ -174,8 +180,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
       <NotificationsCard prefs={{ resultats: np?.resultats ?? true, coup_envoi: np?.coup_envoi ?? true, coups_du_jour: np?.coups_du_jour ?? true, sources: np?.sources ?? true }} />
 
       <section className="mt-3 grid grid-cols-2 gap-2">
-        <Link href="/coach?v=discussion" className="rounded-xl border border-line bg-white p-3 text-sm font-medium active:bg-surface-2">💬 Demander au Coach</Link>
-        <Link href="/import" className="rounded-xl border border-line bg-white p-3 text-sm font-medium active:bg-surface-2">📷 Importer un ticket</Link>
+        <Link href="/coach?v=discussion" className="flex items-center gap-2.5 rounded-2xl border border-line bg-white p-3 text-sm font-medium shadow-card active:bg-surface-2"><IconTile size="sm" tone="conseil"><IconChat width={18} height={18} /></IconTile>Demander au Coach</Link>
+        <Link href="/import" className="flex items-center gap-2.5 rounded-2xl border border-line bg-white p-3 text-sm font-medium shadow-card active:bg-surface-2"><IconTile size="sm" tone="info"><IconCamera width={18} height={18} /></IconTile>Importer un ticket</Link>
       </section>
 
       <p className="mt-6 text-center text-xs text-ink-muted">Connecté : {user?.email}</p>
