@@ -6,7 +6,10 @@
  *  - une image au début ;
  *  - pendant que l'écran bouge, une image toutes les MOTION_EVERY secondes de mouvement ;
  *  - une image à chaque arrêt après un mouvement (pause, story suivante, ticket déplié) ;
- *  - une image à la fin si l'écran a bougé depuis la dernière.
+ *  - une image à la fin si l'écran a bougé depuis la dernière ;
+ *  - vidéo d'un tipster qui parle, avec des fiches de match incrustées : le visage bouge peu, mais chaque fiche
+ *    change fortement une bande de l'écran. Une image à chaque changement net d'une bande, une fois l'écran posé ;
+ *    l'image prise juste avant (fiche en train de disparaître) est remplacée.
  * Une vidéo d'écran n'a pas de flou de bougé : une image prise en plein défilement reste lisible.
  * Au-delà de `max`, on garde `max` images réparties sur les candidates (denses là où ça défile) et on le signale.
  */
@@ -14,10 +17,13 @@ const SIG_W = 48;
 const MOVE = 2;        // écart moyen (0–255) entre deux échantillons au-delà duquel l'écran bouge
 const CHANGED = 10;    // écart avec la dernière image retenue au-delà duquel un arrêt mérite une image
 const MOTION_EVERY = 0.3;
+const BAND = 8;        // hauteur d'une bande (lignes de signature)
+const BAND_CHANGED = 30; // écart moyen dans une bande au-delà duquel un élément d'écran a changé (fiche, bandeau)
+const BAND_STILL = 5;
 
 export type VideoFrames = { files: File[]; duree: number; retenues: number; candidates: number };
 
-export async function framesFromVideo(file: File, { max = 8, step = 0.1, maxDuree = 180 } = {}): Promise<VideoFrames> {
+export async function framesFromVideo(file: File, { max = 12, step = 0.1, maxDuree = 180 } = {}): Promise<VideoFrames> {
   const url = URL.createObjectURL(file);
   const video = document.createElement("video");
   video.muted = true; video.playsInline = true; video.preload = "auto"; video.src = url;
@@ -38,18 +44,21 @@ export async function framesFromVideo(file: File, { max = 8, step = 0.1, maxDure
     // 1er passage : signatures basse résolution, choix des instants
     const pas = Math.max(step, duree / 600);
     const times: number[] = [];
-    let prev: Uint8Array | null = null, kept: Uint8Array | null = null, moving = 0, wasMoving = false, last = 0;
+    let prev: Uint8Array | null = null, kept: Uint8Array | null = null, moving = 0, wasMoving = false, last = 0, still = 0;
+    const keep = (t: number, sig: Uint8Array, replace = false) => { if (replace && times.length > 1 && t - times[times.length - 1] < 0.6) times[times.length - 1] = t; else times.push(t); kept = sig; };
     for (let t = Math.min(0.05, duree / 2); t <= duree; t += pas) {
       await seek(video, t);
       sctx.drawImage(video, 0, 0, SIG_W, sigH);
       const sig = gray(sctx.getImageData(0, 0, SIG_W, sigH).data);
       last = t;
       if (prev === null || kept === null) { times.push(t); kept = sig; prev = sig; continue; }
+      still = bandMax(sig, prev, SIG_W, sigH) < BAND_STILL ? still + 1 : 0;
       if (diff(sig, prev) > MOVE) {
         moving += pas; wasMoving = true;
-        if (moving >= MOTION_EVERY) { times.push(t); kept = sig; moving = 0; }
+        if (moving >= MOTION_EVERY) { keep(t, sig); moving = 0; }
       } else {
-        if (wasMoving && diff(sig, kept) > CHANGED) { times.push(t); kept = sig; }
+        if (wasMoving && diff(sig, kept) > CHANGED) keep(t, sig, true);
+        else if (still >= 2 && bandMax(sig, kept, SIG_W, sigH) > BAND_CHANGED) keep(t, sig, true);
         wasMoving = false; moving = 0;
       }
       prev = sig;
@@ -59,8 +68,9 @@ export async function framesFromVideo(file: File, { max = 8, step = 0.1, maxDure
     const candidates = times.length;
     const choisis = candidates <= max ? times : Array.from({ length: max }, (_, i) => times[Math.round((i * (candidates - 1)) / (max - 1))]);
 
-    // 2e passage : images nettes, 1080 px de large au plus
-    const outW = Math.min(1080, w), outH = Math.round((h * outW) / w);
+    // 2e passage : images nettes, 1080 px de large au plus, et pas plus de 1 900 px de haut une fois ramenées à 1 000 px
+    // de large par le serveur (au-delà il découpe chaque image en deux morceaux à lire)
+    const outW = Math.min(1080, w, Math.max(600, Math.floor((1900 * w) / h))), outH = Math.round((h * outW) / w);
     const big = document.createElement("canvas"); big.width = outW; big.height = outH;
     const bctx = big.getContext("2d")!;
     const files: File[] = [];
@@ -75,6 +85,17 @@ export async function framesFromVideo(file: File, { max = 8, step = 0.1, maxDure
     URL.revokeObjectURL(url);
     video.removeAttribute("src"); video.load();
   }
+}
+
+/** Plus grand écart moyen sur une bande horizontale : repère un élément d'écran qui change, même petit. */
+function bandMax(a: Uint8Array, b: Uint8Array, w: number, h: number) {
+  let best = 0;
+  for (let y0 = 0; y0 + BAND <= h; y0 += BAND) {
+    let s = 0;
+    for (let i = y0 * w; i < (y0 + BAND) * w; i++) s += Math.abs(a[i] - b[i]);
+    best = Math.max(best, s / (BAND * w));
+  }
+  return best;
 }
 
 function gray(px: Uint8ClampedArray) {

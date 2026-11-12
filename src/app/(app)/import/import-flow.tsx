@@ -156,7 +156,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
       if (videos.length > 1) { setError("Une seule vidéo à la fois : une vidéo = un ticket."); return; }
       setBusy(true); setError(null); setStage("Lecture de la vidéo…");
       try {
-        const r = await framesFromVideo(videos[0], { max: Math.max(2, 8 - images.length) });
+        const r = await framesFromVideo(videos[0], { max: Math.max(2, 12 - images.length) });
         images = [...images, ...r.files];
         setVideoNote(`${r.retenues} image${r.retenues > 1 ? "s" : ""} tirée${r.retenues > 1 ? "s" : ""} de la vidéo (${Math.round(r.duree)} s)${r.candidates > r.retenues ? ` sur ${r.candidates} possibles : vérifie qu’aucune sélection ne manque, ou filme plus lentement` : ""}.`);
       } catch (e) {
@@ -167,7 +167,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
       setStage(null);
     }
     const fd = new FormData();
-    for (const f of images.slice(0, 8)) fd.append("image", f);
+    for (const f of images.slice(0, 12)) fd.append("image", f);
     if (coupon) fd.set("link", coupon.url);
     run(fd);
   }
