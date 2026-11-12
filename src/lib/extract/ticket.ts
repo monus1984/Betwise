@@ -121,6 +121,11 @@ Pour un combiné, une ligne par sélection, dans l'ordre affiché. Si le ticket 
 Pronos de tipsters (kind = pronos) : messages Telegram ou WhatsApp, posts, vidéos TikTok, Instagram ou Facebook.
 - Un ✅ après une option veut dire « oui, je joue cette option » : « Espagne ✅ » = victoire de l'Espagne, « BTTS ✅ » = les deux marquent, oui. Un ❌ veut dire « non » (« BTTS ❌ » = non). Recopie ces emojis dans pick_text. Ce ne sont jamais des résultats : outcome vaut unknown, sauf si le message dit explicitement « gagné » ou « perdu » pour la ligne. 🔥 💚 🎯 sont de la décoration.
 - Une liste de pronos sans cote totale ni mise est une liste de paris séparés : ticket_type single. S'il y a une cote totale (« CÔTE TOTALE : 10,16 »), c'est un combiné.
+- Publications Facebook d'un tipster : chaque publication (son propre en-tête avec le nom de la page et l'heure) est un élément de tickets distinct, même si plusieurs tiennent sur une capture. Une story en tableau « équipe – code – équipe » donne une sélection par ligne : le code écrit entre les deux équipes (V1, V2, 1X, 2X, 12, GG, NG, +2, +1,5…) va dans pick_text, recopié tel quel.
+- « COTE 3 », « COUPON COTE 4 », « cote 3 » en tête d'une publication : c'est la cote totale annoncée d'un combiné (total_odds = 3, ticket_type combo). Ce n'est la cote d'aucune ligne : odds reste null pour chaque sélection.
+- Ligne qui ne nomme qu'une équipe (« ESPAGNE VICTOIRE », « France → Win », « England — Victoire », « Lettonie+1,5 BUTS DANS LE MATCHS », « Espagne double+1,5 BUTS ») : team_only = l'équipe, pick_text = le reste de la ligne recopié tel quel (« VICTOIRE », « Win », « +1,5 BUTS DANS LE MATCHS », « double+1,5 BUTS »).
+- Ligne « Équipe A - Équipe B » suivie du choix sur la même ligne ou la suivante (« 👉Angleterre ou Nul & +1.5 buts », « ➡️RDC gagne & +1.5 buts », « au moins une équipe marque+1,5 BUTS », « 1X », « V1 ») : home_team, away_team, et tout le choix dans pick_text, sans le couper.
+- Les mentions d'offres de bookmaker (« 2UP », « boost ») ne sont pas des choix : ignore-les.
 - Les drapeaux affichés identifient les pays : utilise-les pour nommer les équipes quand le texte est caché ou coupé.
 - Une fiche de match affichée sans choix écrit (le tipster parle) donne une sélection avec home_team, away_team, kickoff et pick_text vide.
 Si le ticket est montré dans une conversation ou une publication (Telegram, WhatsApp, Facebook, Instagram, TikTok), relève dans source le nom du canal, de la page ou du groupe, et l'heure de publication ; un filigrane ou une signature sur l'image compte aussi. Ne déduis pas : seulement ce qui est écrit.
@@ -137,17 +142,18 @@ export type NormalizedSelection = {
 };
 
 /** Déduit code marché + sélection normalisée à partir des libellés bruts et des noms d'équipes. */
-export function normalizePick(marketText: string, pickText: string, home: string | null, away: string | null, team?: string | null): NormalizedSelection {
+export function normalizePick(marketText: string, pickText: string, home: string | null, away: string | null, team?: string | null, alias?: { home?: string[]; away?: string[] }): NormalizedSelection {
   const m = marketText.toLowerCase();
   // ✅ = « oui, cette option » ; ❌ = « non ». Les autres emojis sont de la décoration.
   const oui = /[✅✔☑]/u.test(pickText) || /[✅✔☑]/u.test(marketText), non = /[❌✖🚫]/u.test(pickText);
   const p = pickText.toLowerCase().replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ").replace(/\s+/g, " ").trim().replace(/^[–—-]\s*|\s*[–—-]$/g, "").trim();
-  if (!p && oui && team) { const sd = (home && teamSimilarity(team, home) >= (away ? teamSimilarity(team, away) : 0)) ? "1" : "2"; if (home || away) return { market_code: "1X2", market_param: null, selection: sd, label_pick: `${team} gagne`, ok: true }; }
+  if (!p && oui && team) { const sd = (home && Math.max(teamSimilarity(team, home), ...(alias?.home ?? []).map((x) => teamSimilarity(team, x))) >= (away ? Math.max(teamSimilarity(team, away), ...(alias?.away ?? []).map((x) => teamSimilarity(team, x))) : 0)) ? "1" : "2"; if (home || away) return { market_code: "1X2", market_param: null, selection: sd, label_pick: `${team} gagne`, ok: true }; }
   if (!p) return { market_code: "1X2", market_param: null, selection: "", label_pick: "Choix non visible", ok: false, reason: "Le choix n'est pas écrit (prono dit à l'oral ?) : choisis-le." };
   const side = (name: string): "1" | "2" | null => {
     if (!name) return null;
-    const sh = home ? teamSimilarity(name, home) : 0;
-    const sa = away ? teamSimilarity(name, away) : 0;
+    const names = [name, ABBR[name.toLowerCase().replace(/[.’']/g, "").trim()]].filter(Boolean) as string[];
+    const sim = (t: string | null, al?: string[]) => (t ? Math.max(...[t, ...(al ?? [])].flatMap((x) => names.map((n) => teamSimilarity(n, x)))) : 0);
+    const sh = sim(home, alias?.home), sa = sim(away, alias?.away);
     if (sh === 0 && sa === 0) return null;
     return sh >= sa ? "1" : "2";
   };
@@ -162,12 +168,26 @@ export function normalizePick(marketText: string, pickText: string, home: string
   // Pronos de tipsters, libellés courts (avec l'équipe nommée seule ou dans le texte)
   const all = `${m} ${p}`;
   const teamSide = team ? side(team) : null;
-  const who = (x: string): "1" | "N" | "2" | null => { const y = x.replace(/\b(victoire|gagne|vainqueur)\b/g, "").trim(); return isDraw(y) ? "N" : y ? side(y) : null; };
+  // Codes courts des tipsters, écrits entre les deux équipes ou après le match : V1, V2, 1X, 2X, 12, GG, NG
+  if (!team && (!m.trim() || /résultat|resultat|1x2|double chance|vainqueur|prono/.test(m)) && !/mi[- ]?temps|&/.test(m)) {
+    const c = p.replace(/[\s.]/g, "");
+    const short = (market_code: string, selection: string): NormalizedSelection => ({ market_code, market_param: null, selection, label_pick: pickText, ok: true });
+    if (/^(v1|1|victoire1)$/.test(c)) return short("1X2", "1");
+    if (/^(v2|2|victoire2)$/.test(c)) return short("1X2", "2");
+    if (/^(x|n|vn)$/.test(c)) return short("1X2", "N");
+    if (/^(1x|x1|1n|n1)$/.test(c)) return short("DC", "1N");
+    if (/^(x2|2x|n2|2n)$/.test(c)) return short("DC", "N2");
+    if (/^(12|21)$/.test(c)) return short("DC", "12");
+    if (/^(gg|btts)$/.test(c)) return short("BTTS", non ? "Non" : "Oui");
+    if (/^(ng|nogoal)$/.test(c)) return short("BTTS", "Non");
+  }
+  const who = (x: string): "1" | "N" | "2" | null => { const y = x.replace(/\b(victoire|gagne|vainqueur|wins?|to win)\b/g, "").trim(); return isDraw(y) ? "N" : y ? side(y) : null; };
   // Statistiques, buteurs, prolongation, qualification : réglés sur le détail du match
   const mention = (): "1" | "2" | null => teamSide ?? (home && all.includes(home.toLowerCase()) ? "1" : away && all.includes(away.toLowerCase()) ? "2" : null);
   const yesNo = non || /\b(non|no|pas de|aucun)\b/.test(p) ? "Non" : "Oui";
   const stat = /corner/.test(all) ? "CORN" : /tirs? cadr|shots? on (goal|target)/.test(all) ? "SOT" : /carton|\bcards?\b|jaune/.test(all) ? "CARD" : /\btirs?\b(?! au but)|\bshots?\b/.test(all) ? "SHOT" : null;
   if (stat) {
+    if (/\d\s*buts?\b|\bbuts?\s*\+|\bmarque/.test(all)) return { market_code: stat, market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari qui mêle buts et statistiques (corners, cartons) : pas encore suivi. Retire la ligne ou saisis-la à la main." };
     const o = ouLine(p), t = mention();
     if (stat === "CARD" && /rouge|red/.test(all) && !o) return { market_code: "RED", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
     if (o) return { market_code: t && stat !== "SHOT" ? `${stat}${t}` : stat, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
@@ -204,6 +224,27 @@ export function normalizePick(marketText: string, pickText: string, home: string
     if (r) return { market_code: `${pre}1X2`, market_param: null, selection: r, label_pick: pickText, ok: true };
     return { market_code: `${pre}1X2`, market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari de mi-temps : choisis le marché et le choix." };
   }
+  // Combinés écrits dans le choix : « Angleterre ou Nul & +1.5 buts », « Ghana gagne & +1.5 buts », « double + 1,5 buts »
+  {
+    const btts = (x: string) => (/(2|deux) (équipes )?marquent|btts|\bgg\b/.test(x) ? (/pas|\bnon\b/.test(x) ? "Non" : "Oui") : null);
+    const res = (x: string): { dc: string | null; r: "1" | "N" | "2" | null } => {
+      const y = x.replace(/\bdouble chance\b|:/g, " ").trim();
+      const dc = parseDoubleChance(y, side, isDraw) ?? (teamSide && /^(double|ou nul|ou match nul)?$/.test(y) && /double|ou nul/.test(x) ? (teamSide === "1" ? "1N" : "N2") : null);
+      return { dc, r: dc ? null : who(y) ?? (teamSide && /^(victoire|gagne|vainqueur|wins?)$/.test(y) ? teamSide : null) };
+    };
+    const parts = /^double( chance)?\s*\+/.test(p) && team ? ["double", p.replace(/^double( chance)?\s*/, "")] : p.split(/\s*&\s*|\s+et\s+(?=[+]|plus|moins|les (?:2|deux)|btts)/);
+    if (parts.length === 2) {
+      const [a, b] = parts;
+      const ou = ouLine(b), bt = btts(b), { dc, r } = res(a);
+      if (dc && ou) return { market_code: "DC_OU", market_param: ou.line, selection: `${dc}|${ou.dir}`, label_pick: pickText, ok: true };
+      if (r && ou) return { market_code: "1X2_OU", market_param: ou.line, selection: `${r}|${ou.dir}`, label_pick: pickText, ok: true };
+      if (dc && bt) return { market_code: "DC_BTTS", market_param: null, selection: `${dc}|${bt}`, label_pick: pickText, ok: true };
+      if (r && bt) return { market_code: "1X2_BTTS", market_param: null, selection: `${r}|${bt}`, label_pick: pickText, ok: true };
+      const ouA = ouLine(a), btA = btts(a);
+      if (ouA && bt) return { market_code: "OU_BTTS", market_param: ouA.line, selection: `${ouA.dir}|${bt}`, label_pick: pickText, ok: true };
+      if (btA && ou) return { market_code: "OU_BTTS", market_param: ou.line, selection: `${ou.dir}|${btA}`, label_pick: pickText, ok: true };
+    }
+  }
   if (/\bimpair\b|\bodd\b/.test(all)) return { market_code: "OE", market_param: null, selection: "Impair", label_pick: pickText, ok: true };
   if (/\bpair\b|\beven\b/.test(all)) return { market_code: "OE", market_param: null, selection: "Pair", label_pick: pickText, ok: true };
   if (/sans encaisser|win to nil/.test(all)) { const r = teamSide ?? side(p.replace(/gagne|sans encaisser( de but)?|win to nil/g, "").trim()); return { market_code: "WTN", market_param: null, selection: r ?? pickText, label_pick: pickText, ok: !!r }; }
@@ -214,7 +255,7 @@ export function normalizePick(marketText: string, pickText: string, home: string
   }
   if (/(les )?(2|deux) (équipes )?marquent|btts/.test(all)) return { market_code: "BTTS", market_param: null, selection: non || /(ne )?marquent pas|\bnon\b|\bno\b/.test(p) ? "Non" : "Oui", label_pick: pickText, ok: true };
   if (!m.includes("handicap") && !all.includes("&") && (/\b(buts?|goals?|over|under)\b/.test(p) || /^(\+|-|plus|moins)/.test(p))) { const o = ouLine(p); if (o) return { market_code: "OU", market_param: o.line, selection: o.dir, label_pick: pickText, ok: true }; }
-  if (teamSide && /^(victoire|gagne|vainqueur|win|1|2)$/.test(p.replace(/[^a-zà-ü0-9 ]/g, "").trim())) return { market_code: "1X2", market_param: null, selection: teamSide, label_pick: `${team} gagne`, ok: true };
+  if (teamSide && /^(victoire|gagne|vainqueur|wins?|to win|1|2)$/.test(p.replace(/[^a-zà-ü0-9 ]/g, "").trim())) return { market_code: "1X2", market_param: null, selection: teamSide, label_pick: `${team} gagne`, ok: true };
   if (teamSide && /ou nul|ou match nul|double chance/.test(p) && !p.includes("&")) return { market_code: "DC", market_param: null, selection: teamSide === "1" ? "1N" : "N2", label_pick: `${team} ou nul`, ok: true };
   if (/\s(ou|or)\s|\//.test(p) && !p.includes("&") && !m.includes("&")) { const dc = parseDoubleChance(p, side, isDraw); if (dc) return { market_code: "DC", market_param: null, selection: dc, label_pick: pickText, ok: true }; }
 
@@ -261,6 +302,12 @@ export function normalizePick(marketText: string, pickText: string, home: string
   const r = isDraw(p) ? "N" : side(p);
   return { market_code: "1X2", market_param: null, selection: r ?? pickText, label_pick: pickText, ok: !!r };
 }
+
+/** Sigles et noms longs que les tipsters emploient, ramenés au nom du référentiel. */
+const ABBR: Record<string, string> = {
+  rdc: "RD Congo", "dr congo": "RD Congo", "congo rdc": "RD Congo", "congo kinshasa": "RD Congo", rca: "Centrafrique", "république centrafricaine": "Centrafrique", "republique centrafricaine": "Centrafrique",
+  civ: "Côte d'Ivoire", "cote divoire": "Côte d'Ivoire", "côte divoire": "Côte d'Ivoire", "république tchèque": "Tchéquie", "republique tcheque": "Tchéquie", rsa: "Afrique du Sud", usa: "États-Unis", "pays bas": "Pays-Bas",
+};
 
 function parseDoubleChance(text: string, side: (n: string) => "1" | "2" | null, isDraw: (s: string) => boolean): string | null {
   const t = text.trim();
@@ -310,8 +357,8 @@ export async function extractTickets(db: Db, input: { images?: LlmImage[]; text?
         ? `Ces ${n} images se suivent dans l'ordre (captures successives, morceaux d'une capture longue ou images d'une vidéo d'écran qui défile), avec des chevauchements : une sélection visible deux fois à une jonction ne compte qu'une fois. Elles peuvent contenir un ou plusieurs tickets. Remplis un élément de tickets par ticket distinct, en copiant les libellés tels quels.`
         : "Lis le ou les tickets de pari de cette image et remplis un élément de tickets par ticket. Copie les libellés tels quels.")
     : `Lis le ou les tickets de pari partagés en texte et remplis un élément de tickets par ticket. Copie les libellés tels quels.\n\n${input.text ?? ""}`;
-  const res = await llm.extract({ system: SYSTEM, user, images: input.images, schema: SCHEMA_MULTI as unknown as Record<string, unknown>, maxTokens: 8192 });
-  const raws = rawMulti.parse(res.json).tickets.slice(0, 6);
+  const res = await llm.extract({ system: SYSTEM, user, images: input.images, schema: SCHEMA_MULTI as unknown as Record<string, unknown>, maxTokens: 12000 });
+  const raws = rawMulti.parse(res.json).tickets.slice(0, 12);
 
   // Fenêtre de recherche des matchs : ±10 jours autour d'aujourd'hui (les tickets importés sont récents)
   const from = new Date(Date.now() - 10 * 86400000).toISOString();
@@ -325,11 +372,11 @@ export async function extractTickets(db: Db, input: { images?: LlmImage[]; text?
 
   const out = raws.map((raw, k) => {
     const pronos = raw.kind === "pronos";
-    const ref = parseFrDate(raw.placed_at) ?? parseFrDate(raw.source?.published_at ?? null) ?? new Date().toISOString();
+    const ref = parseFrDate(raw.placed_at) ?? parsePublished(raw.source?.published_at ?? null) ?? new Date().toISOString();
     const selections: MatchedSelection[] = raw.selections.map((s) => {
       const best = s.team_only && !(s.home_team && s.away_team) ? bestMatchOne(s.team_only, matches, ref) : bestMatch(s.home_team, s.away_team, matches);
       const h = best ? best.home!.nom : s.home_team, a = best ? best.away!.nom : s.away_team;
-      const norm = normalizePick(s.market_text, s.pick_text, h, a, s.team_only ?? null);
+      const norm = normalizePick(s.market_text, s.pick_text, h, a, s.team_only ?? null, best ? { home: best.home!.alias, away: best.away!.alias } : undefined);
       const scoreDb = best && best.score_home !== null ? `${best.score_home}-${best.score_away}` : null;
       const scoreTicket = s.score ? s.score.replace(/\s/g, "") : null;
       return {
@@ -347,7 +394,7 @@ export async function extractTickets(db: Db, input: { images?: LlmImage[]; text?
       count_ok: raw.nb_selections_declared !== null && !raw.is_collapsed ? raw.selections.length === raw.nb_selections_declared : null,
     };
     // Coût de l'appel compté une fois, sur le premier ticket
-    return { raw, selections, checks, placed_at_iso: parseFrDate(raw.placed_at) ?? parseFrDate(raw.source?.published_at ?? null), usage: { tokensIn: k ? 0 : res.tokensIn, tokensOut: k ? 0 : res.tokensOut, model: res.model } };
+    return { raw, selections, checks, placed_at_iso: parseFrDate(raw.placed_at) ?? parsePublished(raw.source?.published_at ?? null), usage: { tokensIn: k ? 0 : res.tokensIn, tokensOut: k ? 0 : res.tokensOut, model: res.model } };
   });
 
   // Pronos sans cote : cote de référence quand elle existe, sinon cote estimée à partir des probabilités (marquée comme telle)
@@ -366,8 +413,11 @@ export async function extractTickets(db: Db, input: { images?: LlmImage[]; text?
   return out;
 }
 
+const canon = (name: string) => ABBR[name.toLowerCase().replace(/[.’']/g, "").trim()] ?? name;
+
 /** Match d'une équipe nommée seule (pronos de tipster) : le plus proche de la date de publication, à venir de préférence. */
-function bestMatchOne(team: string, pool: Parameters<typeof bestMatch>[2], refIso: string) {
+function bestMatchOne(teamRaw: string, pool: Parameters<typeof bestMatch>[2], refIso: string) {
+  const team = canon(teamRaw);
   const ref = Date.parse(refIso);
   let best: { m: (typeof pool)[number]; score: number } | null = null;
   for (const m of pool) {
@@ -385,6 +435,7 @@ function bestMatchOne(team: string, pool: Parameters<typeof bestMatch>[2], refIs
 
 function bestMatch(home: string | null, away: string | null, pool: { id: string; kickoff_at: string; score_home: number | null; score_away: number | null; home: { nom: string; alias: string[] } | null; away: { nom: string; alias: string[] } | null; competition: { code_externe: string | null } | null }[]) {
   if (!home || !away) return null;
+  home = canon(home); away = canon(away);
   let best: { m: (typeof pool)[number]; score: number } | null = null;
   for (const m of pool) {
     const sh = Math.max(teamSimilarity(home, m.home!.nom), ...m.home!.alias.map((a) => teamSimilarity(home, a)));
@@ -402,6 +453,16 @@ export function parseFrDate(s: string | null): string | null {
   if (!r) return null;
   const d = new Date(Date.UTC(Number(r[3]), Number(r[2]) - 1, Number(r[1]), Number(r[4]), Number(r[5])));
   return isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+/** Heure de publication d'un post : date complète, ou âge relatif tel que l'affichent les réseaux (« 13 h », « il y a 15 heures », « 2 j »). */
+export function parsePublished(s: string | null, now = Date.now()): string | null {
+  const abs = parseFrDate(s);
+  if (abs || !s) return abs;
+  const r = s.toLowerCase().match(/(\d+)\s*(min|mn|h|heures?|j|jours?|d)\b/);
+  if (!r) return null;
+  const n = Number(r[1]), ms = /^m/.test(r[2]) ? 60000 : /^h/.test(r[2]) ? 3600000 : 86400000;
+  return new Date(now - n * ms).toISOString();
 }
 
 /** Lien de partage 1xBet : xbet://open/coupon?id=H9KSJ → référence du coupon, sans contenu. */
