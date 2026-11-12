@@ -15,6 +15,13 @@ describe("normalizePick — Betclic", () => {
     expect(normalizePick("Double chance & nombre de buts", "Manchester Utd / Aston Villa & + de 1,5", ...MU)).toMatchObject({ market_code: "DC_OU", selection: "12|Plus", ok: true });
     expect(normalizePick("Double chance & nombre de buts", "Betis / Nul & + de 1,5", "Elche", "Betis")).toMatchObject({ selection: "N2|Plus" });
   });
+  it("double chance avec des noms qui contiennent « ou »", () => {
+    expect(normalizePick("Double chance", "Cameroun ou Namibie", "Cameroun", "Namibie")).toMatchObject({ market_code: "DC", selection: "12", ok: true });
+    expect(normalizePick("Double chance", "Toulouse ou Nul", "Toulouse", "Lens")).toMatchObject({ selection: "1N", ok: true });
+    expect(normalizePick("Double chance", "Nul ou Burkina Faso", "Mauritanie", "Burkina Faso")).toMatchObject({ selection: "N2", ok: true });
+    expect(normalizePick("Double chance", "1X", "Cameroun", "Namibie")).toMatchObject({ selection: "1N", ok: true });
+    expect(normalizePick("Double chance & nombre de buts", "Cameroun / Nul & + de 1,5", "Cameroun", "Namibie")).toMatchObject({ market_code: "DC_OU", selection: "1N|Plus", ok: true });
+  });
   it("nombre total de buts", () => {
     expect(normalizePick("Nombre total de buts (t. rég)", "+ de 1,5", "Brighton", "Brentford")).toMatchObject({ market_code: "OU", market_param: 1.5, selection: "Plus", ok: true });
     expect(normalizePick("Plus/Moins 2.5", "Moins de 2.5", "A", "B")).toMatchObject({ market_code: "OU", market_param: 2.5, selection: "Moins" });

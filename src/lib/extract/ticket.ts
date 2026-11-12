@@ -169,7 +169,14 @@ export function normalizePick(marketText: string, pickText: string, home: string
 }
 
 function parseDoubleChance(text: string, side: (n: string) => "1" | "2" | null, isDraw: (s: string) => boolean): string | null {
-  const parts = text.split(/\s*(?:\/|ou)\s*/).map((x) => x.trim()).filter(Boolean);
+  const t = text.trim();
+  // Codes courts affichés par certaines apps : 1X, X2, 12, 1N, N2
+  const code = t.toUpperCase().replace(/\s/g, "");
+  if (code === "1X" || code === "1N") return "1N";
+  if (code === "X2" || code === "N2") return "N2";
+  if (code === "12") return "12";
+  // « ou » comme mot entier seulement : « Cameroun ou Namibie », « Toulouse / Nul »
+  const parts = t.split(/\s*\/\s*|\s+ou\s+|\s+or\s+/i).map((x) => x.trim()).filter(Boolean);
   if (parts.length !== 2) return null;
   const codes = parts.map((x) => (isDraw(x) ? "N" : side(x)));
   if (codes.includes(null)) return null;
