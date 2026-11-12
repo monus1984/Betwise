@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -8,6 +9,14 @@ export type AuthState = { error?: string; info?: string } | undefined;
 function safeNext(v: FormDataEntryValue | null) {
   const s = typeof v === "string" ? v : "";
   return s.startsWith("/") && !s.startsWith("//") ? s : "/";
+}
+
+/** Adresse publique de BETWISE, d'après la requête (domaine de production ou aperçu). */
+async function siteOrigin() {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "betwise-iota.vercel.app";
+  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
 }
 
 export async function signIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
@@ -37,7 +46,8 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { pseudo, display_name: pseudo } },
+    // Le lien de confirmation doit ramener sur BETWISE : sans cette adresse, Supabase renvoie vers le site par défaut du projet (Kehiwa)
+    options: { data: { pseudo, display_name: pseudo }, emailRedirectTo: `${await siteOrigin()}/auth/callback` },
   });
   if (error) return { error: error.message.includes("already") ? "Un compte existe déjà avec cet e-mail. Connecte-toi." : "Inscription impossible pour le moment." };
 
