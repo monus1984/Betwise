@@ -181,8 +181,12 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
 
   const included = lines.filter((l) => l.include);
   const collapsed = result?.raw.is_collapsed || (result && lines.length === 0);
-  const separes = result?.raw.kind === "pronos" && !result.raw.total_odds && included.length > 1;
-  const readyDetail = included.length > 0 && included.every((l) => l.ok && toNum(l.coteStr) > 1 && l.origin && (l.match || (l.home_team && l.away_team)));
+  // Une ligne incomplète n'empêche pas d'enregistrer : elle est écartée, le reste part.
+  const manque = (l: Line): string | null => !l.ok ? "choix non compris" : !(l.match || (l.home_team && l.away_team)) ? "match inconnu" : !(toNum(l.coteStr) > 1) ? "cote manquante" : !l.origin ? "origine manquante" : null;
+  const valides = included.filter((l) => !manque(l));
+  const ecartees = included.filter((l) => manque(l));
+  const separes = result?.raw.kind === "pronos" && !result.raw.total_odds && valides.length > 1;
+  const readyDetail = valides.length > 0;
   const readySummary = !!collapsed && toNum(mise) > 0 && !!result?.raw.total_odds && !!summaryOrigin;
   const ready = toNum(mise) > 0 && (collapsed ? readySummary : readyDetail);
 
@@ -193,7 +197,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
       // Liste de pronos sans cote totale : un test (ou pari) simple par prono, comme le tipster les a donnés
       if (separes) {
         let ok = 0;
-        for (const l of included) {
+        for (const l of valides) {
           const r = await placeImportedBet({
             virtuel: test, mise: toNum(mise), statut: "en_cours", placed_at: result.placed_at_iso, bookmaker: null, coupon_externe: null,
             upload_id: result.upload_id, raw_text: text || null, summary: null,
@@ -216,7 +220,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
         upload_id: result.upload_id,
         raw_text: text || null,
         summary: collapsed ? { cote_totale: result.raw.total_odds!, nb_selections: result.raw.nb_selections_declared ?? 0, origin_source_id: summaryOrigin! } : null,
-        selections: collapsed ? [] : included.map((l) => ({
+        selections: collapsed ? [] : valides.map((l) => ({
           match_id: l.match?.id ?? null,
           match_libre: l.match ? null : `${l.home_team ?? "?"} – ${l.away_team ?? "?"}`,
           market_code: l.market_code as never,
@@ -295,7 +299,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
           )}
         </div>
       )}
-      {raw.kind === "pronos" && <Notice kind="info">Pronos de tipster{separes ? ` : ${included.length} pronos séparés, enregistrés chacun comme un ${test ? "test" : "pari"} simple` : raw.total_odds ? " : combiné annoncé par le tipster" : ""}. Réglés automatiquement après les matchs ; les ✅ du message ne sont pas des résultats.</Notice>}
+      {raw.kind === "pronos" && <Notice kind="info">Pronos de tipster{separes ? ` : ${valides.length} pronos séparés, enregistrés chacun comme un ${test ? "test" : "pari"} simple` : raw.total_odds ? " : combiné annoncé par le tipster" : ""}. Réglés automatiquement après les matchs ; les ✅ du message ne sont pas des résultats.</Notice>}
       {test && raw.kind !== "pronos" && <Notice kind="info">Coupon ou pronos chargés comme test : suivis et réglés automatiquement, sans toucher à ta bankroll. Choisis bien l’origine (toi ou le tipster) : c’est elle qui sera notée.</Notice>}
       <section className="rounded-xl border border-slate-200 bg-white p-4">
         <div className="flex items-start justify-between">
@@ -335,7 +339,8 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
                 {l.match
                   ? <p className="text-[11px] text-emerald-700">Match reconnu · {l.match.competition} · {new Date(l.match.kickoff_at).toLocaleString("fr-FR", { weekday: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}{l.match.score ? ` · score en base ${l.match.score}` : ""}{l.score_consistent === false ? " · ⚠ diffère du ticket" : ""}</p>
                   : <p className="text-[11px] text-amber-700">Match non reconnu : choisis-le ci-dessous, sinon il sera gardé en texte et réglé à la main.</p>}
-                {!l.ok && <p className="text-[11px] text-red-700">{l.reason ?? "Sélection non comprise : choisis le marché ci-dessous ou retire la ligne."}</p>}
+                {!l.ok && <p className="text-[11px] text-red-700">{l.reason ?? "Sélection non comprise : choisis le marché ci-dessous."}</p>}
+                {l.include && manque(l) && <p className="mt-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-900">Sera écartée ({manque(l)}) · le reste s’enregistre quand même</p>}
               </div>
               {raw.kind === "pronos"
                 ? <button type="button" onClick={() => update(l.key, { editing: !l.editing })} className="shrink-0 text-xs text-brand underline">{l.editing ? "Fermer" : "Modifier"}</button>
@@ -386,13 +391,21 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
         <p className="text-xs text-slate-500">
           {collapsed
             ? `Cote totale ${raw.total_odds ?? "—"}`
-            : `Cote totale calculée ${included.reduce((a, l) => a * (toNum(l.coteStr) > 1 ? toNum(l.coteStr) : 1), 1).toFixed(2)}${raw.total_odds ? ` · lue sur le ticket ${raw.total_odds}` : ""}`}
+            : `Cote totale calculée ${valides.reduce((a, l) => a * (toNum(l.coteStr) > 1 ? toNum(l.coteStr) : 1), 1).toFixed(2)}${raw.total_odds ? ` · lue sur le ticket ${raw.total_odds}` : ""}`}
           {toNum(mise) > 0 && status === "gagne" && raw.total_odds ? ` · gain ${fcfa(toNum(mise) * raw.total_odds - toNum(mise))}` : ""}
         </p>
       </section>
 
+      {!collapsed && ecartees.length > 0 && (
+        <Notice kind="info">
+          {valides.length > 0
+            ? <>{ecartees.length} ligne{ecartees.length > 1 ? "s" : ""} sur {included.length} {ecartees.length > 1 ? "seront écartées" : "sera écartée"} : {ecartees.map((l) => `${l.match ? `${l.match.home} – ${l.match.away}` : [l.home_team, l.away_team].filter(Boolean).join(" – ") || `ligne ${l.key + 1}`} (${manque(l)})`).join(", ")}. Corrige-les au-dessus si tu veux les garder.</>
+            : <>Aucune ligne n’est complète pour l’instant : corrige-en au moins une au-dessus (match, choix ou cote).</>}
+          {valides.length > 0 && !test && raw.kind !== "pronos" && included.length > 1 && <> Attention : c’est un pari réel. Le combiné enregistré n’aura que {valides.length} sélection{valides.length > 1 ? "s" : ""} : sa cote et son gain ne seront pas ceux du ticket.</>}
+        </Notice>
+      )}
       {error && <Notice>{error}</Notice>}
-      <Button onClick={save} disabled={pending || !ready}>{pending ? "Enregistrement…" : `${separes ? `Enregistrer les ${included.length} ${test ? "tests" : "paris"}` : test ? "Enregistrer le test" : "Enregistrer ce ticket"}${queue.length ? " et passer au suivant" : ""}`}</Button>
+      <Button onClick={save} disabled={pending || !ready}>{pending ? "Enregistrement…" : `${separes ? `Enregistrer les ${valides.length} ${test ? "tests" : "paris"}` : test ? "Enregistrer le test" : "Enregistrer ce ticket"}${!collapsed && ecartees.length && valides.length ? ` (${valides.length} ligne${valides.length > 1 ? "s" : ""} sur ${included.length})` : ""}${queue.length ? " et passer au suivant" : ""}`}</Button>
     </div>
   );
 }
