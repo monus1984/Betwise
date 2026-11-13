@@ -115,4 +115,14 @@ describe("matchSource", () => {
     expect(normalizePick("Total tirs cadrés", "Plus de 8,5", "Italie", "France")).toMatchObject({ market_code: "SOT", market_param: 8.5, selection: "Plus", ok: true });
     expect(normalizePick("Tirs cadrés Italie", "Plus de 3,5", "Italie", "France")).toMatchObject({ market_code: "SOT1", ok: true });
   });
+  it("tickets Betclic du 12/11 : total d'une équipe, écart de buts, marché inconnu", () => {
+    expect(normalizePick("Total de buts (t. rég) - Sierra Leone", "- de 1,5", "RD Congo", "Sierra Leone")).toMatchObject({ market_code: "TT2", market_param: 1.5, selection: "Moins", ok: true });
+    expect(normalizePick("Total de buts (t. rég) - Albanie", "- de 2,5", "Albanie", "Finlande")).toMatchObject({ market_code: "TT1", market_param: 2.5, selection: "Moins", ok: true });
+    expect(normalizePick("Écart de buts (t. rég)", "Madagascar ne perd pas ou perd de 1 but exactement", "Madagascar", "Guinée-Bissau")).toMatchObject({ market_code: "AH", market_param: 1.5, selection: "1", ok: true });
+    expect(normalizePick("Écart de buts (t. rég)", "Espagne gagne de 2 buts ou plus", "Tchéquie", "Espagne")).toMatchObject({ market_code: "AH", market_param: -1.5, selection: "2", ok: true });
+    expect(normalizePick("Nombre total de buts (t. rég)", "+ de 1,5", "Turquie", "Belgique")).toMatchObject({ market_code: "OU", market_param: 1.5, selection: "Plus", ok: true });
+    expect(normalizePick("Résultat du match (t. rég)", "RD Congo", "RD Congo", "Sierra Leone")).toMatchObject({ market_code: "1X2", selection: "1", ok: true });
+    expect(normalizePick("Double chance (t. rég)", "Cameroun ou Namibie", "Cameroun", "Namibie")).toMatchObject({ market_code: "DC", selection: "12", ok: true });
+    expect(normalizePick("Marché exotique", "Madagascar marque dans les deux périodes du match", "Madagascar", "Guinée-Bissau").ok).toBe(false);
+  });
 });

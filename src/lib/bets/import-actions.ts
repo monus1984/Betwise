@@ -18,6 +18,7 @@ const selection = z.object({
 
 const schema = z.object({
   virtuel: z.boolean().optional(),
+  assurance: z.boolean().optional(),
   mise: z.number().positive().lte(100_000_000),
   statut: z.enum(["en_cours", "gagne", "perdu", "rembourse"]),
   placed_at: z.string().datetime().nullable(),
@@ -57,6 +58,8 @@ export async function placeImportedBet(input: ImportedBetInput): Promise<{ ok: t
     if (error.message.includes("ticket déjà importé")) return { ok: false, error: "Ce " + error.message.replace(/^.*?ticket déjà importé/, "ticket a déjà été importé") + ". Rien n’a été ajouté." };
     return { ok: false, error: "Enregistrement impossible : " + error.message };
   }
+  // Combiné assuré : posé après coup (le pari est recalculé si une seule sélection est déjà perdue)
+  if (d.assurance && data) await supabase.rpc("set_bet_assurance", { p_bet_id: data as string, p_on: true });
   revalidatePath("/"); revalidatePath("/paris");
   if (d.virtuel) revalidatePath("/sources", "layout");
   return { ok: true, betId: data as string };

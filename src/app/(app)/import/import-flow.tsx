@@ -211,7 +211,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
         return;
       }
       const res = await placeImportedBet({
-        virtuel: test,
+        virtuel: test, assurance: !!result.raw.insurance && !collapsed,
         mise: toNum(mise),
         statut: status,
         placed_at: result.placed_at_iso,
@@ -304,7 +304,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
       <section className="rounded-xl border border-slate-200 bg-white p-4">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-semibold">{raw.bookmaker ?? "Bookmaker inconnu"} · {raw.ticket_type === "combo" ? `Combiné (${raw.nb_selections_declared ?? lines.length})` : "Simple"}</p>
+            <p className="text-sm font-semibold">{raw.bookmaker ?? "Bookmaker inconnu"} · {raw.ticket_type === "combo" ? `Combiné (${raw.nb_selections_declared ?? lines.length})${raw.insurance ? " · assuré" : ""}` : "Simple"}</p>
             <p className="text-xs text-slate-500">{raw.placed_at ? `Ticket du ${raw.placed_at}` : "Date du ticket non lue"}{raw.coupon_code ? ` · coupon ${raw.coupon_code}` : ""}</p>
           </div>
           <button className="text-xs text-slate-600 underline" onClick={() => { setResult(null); setLines([]); setQueue([]); setDone(null); setDetected(null); }}>Recommencer</button>

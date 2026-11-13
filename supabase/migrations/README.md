@@ -39,3 +39,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0029_source_link.sql | 2026-11-12 | `sources.lien` (page du tipster) et `set_source_link()` : le créateur le modifie, tout utilisateur peut le renseigner sur une source partagée qui n'en a pas |
 | 0030_convert_bet_to_test.sql | 2026-11-12 | `convert_bet_to_test()` : un pari réel non joué devient un test ; les mouvements de bankroll sont compensés par un ajustement, rien n'est supprimé |
 | 0031_correct_bet_result.sql | 2026-11-13 | `correct_bet_result()` : corriger le résultat d'un pari déjà réglé ; écart de bankroll compensé par un ajustement, changement journalisé |
+| 0032_bet_assurance.sql | 2026-11-13 | Combiné « Assurance » : `bets.assurance`, `finalize_bet()` rembourse la mise si une seule sélection perd, `set_bet_assurance()` |

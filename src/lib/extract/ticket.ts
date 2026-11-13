@@ -30,6 +30,7 @@ const rawTicket = z.object({
   kind: z.enum(["ticket", "pronos"]).optional(), // ticket de bookmaker, ou pronos publiés par un tipster
   bookmaker: z.string().nullable(),
   ticket_type: z.enum(["single", "combo", "unknown"]),
+  insurance: z.boolean().optional(),             // combiné « Assurance » : mise remboursée si une seule sélection perd
   nb_selections_declared: z.number().int().nullable(),
   selections: z.array(rawSelection),
   total_odds: z.number().nullable(),
@@ -53,11 +54,12 @@ export type RawTicket = z.infer<typeof rawTicket>;
 const SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["kind", "bookmaker", "ticket_type", "nb_selections_declared", "selections", "total_odds", "stake", "currency", "payout", "status", "placed_at", "coupon_code", "is_collapsed", "notes", "source"],
+  required: ["kind", "bookmaker", "ticket_type", "insurance", "nb_selections_declared", "selections", "total_odds", "stake", "currency", "payout", "status", "placed_at", "coupon_code", "is_collapsed", "notes", "source"],
   properties: {
     kind: { type: "string", enum: ["ticket", "pronos"], description: "ticket : ticket ou coupon d'une application de bookmaker. pronos : pronostics publiés par un tipster (message Telegram/WhatsApp, post, vidéo), même présentés en liste ou avec une cote totale." },
     bookmaker: { type: ["string", "null"], description: "Nom du bookmaker (Betclic, 1xBet, Premier Bet…) ou null" },
     ticket_type: { type: "string", enum: ["single", "combo", "unknown"] },
+    insurance: { type: "boolean", description: "true si le ticket porte la mention « Assurance » (combiné assuré Betclic) ou le statut « Assuré »" },
     nb_selections_declared: { type: ["integer", "null"], description: "Nombre de sélections annoncé par le ticket, ex. 'Combiné (3)' → 3" },
     selections: {
       type: "array",
@@ -117,6 +119,8 @@ const rawMulti = z.object({ tickets: z.array(rawTicket).min(1) });
 const SYSTEM = `Tu lis des tickets de paris sportifs (captures d'écran ou texte) d'applications de bookmakers utilisées en Côte d'Ivoire : Betclic, 1xBet, Premier Bet, Betway, etc.
 Tu copies ce qui est affiché, tu n'inventes rien et tu ne calcules rien. Si une information n'est pas visible, renvoie null.
 Conventions : l'équipe à gauche du score est à domicile, celle à droite à l'extérieur. Un nom de sélection en vert avec une coche signifie gagnée, en rouge avec une croix perdue. Les cotes utilisent la virgule décimale en français : "1,47" vaut 1.47. Les montants "5 000 F" valent 5000.
+Combiné « Assurance » (Betclic) : insurance vaut true ; un ticket au statut « Assuré » a été remboursé (status void), sa cote barrée n'est pas la cote totale : total_odds est la cote d'origine (non barrée… c'est-à-dire la plus haute, ex. 10,03 et non 6,59).
+Marchés d'une seule équipe ou à écart : recopie le libellé du marché en entier, équipe comprise (« Total de buts (t. rég) - Sierra Leone », « Écart de buts (t. rég) »), et tout le choix (« Madagascar ne perd pas ou perd de 1 but exactement »).
 Pour un combiné, une ligne par sélection, dans l'ordre affiché. Si le ticket est replié (pas de détail des lignes), selections est vide et is_collapsed vaut true.
 Pronos de tipsters (kind = pronos) : messages Telegram ou WhatsApp, posts, vidéos TikTok, Instagram ou Facebook.
 - Un ✅ après une option veut dire « oui, je joue cette option » : « Espagne ✅ » = victoire de l'Espagne, « BTTS ✅ » = les deux marquent, oui. Un ❌ veut dire « non » (« BTTS ❌ » = non). Recopie ces emojis dans pick_text. Ce ne sont jamais des résultats : outcome vaut unknown, sauf si le message dit explicitement « gagné » ou « perdu » pour la ligne. 🔥 💚 🎯 sont de la décoration.
@@ -147,7 +151,7 @@ export function normalizePick(marketText: string, pickText: string, home: string
   const m = marketText.toLowerCase();
   // ✅ = « oui, cette option » ; ❌ = « non ». Les autres emojis sont de la décoration.
   const oui = /[✅✔☑]/u.test(pickText) || /[✅✔☑]/u.test(marketText), non = /[❌✖🚫]/u.test(pickText);
-  const p = pickText.toLowerCase().replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ").replace(/\s+/g, " ").trim().replace(/^[–—-]\s*|\s*[–—-]$/g, "").trim();
+  const p = pickText.toLowerCase().replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ").replace(/\s+/g, " ").trim().replace(/^[–—-](?!\s*(?:de\b|\d))\s*|\s*[–—-]$/g, "").trim();
   if (!p && oui && team) { const sd = (home && Math.max(teamSimilarity(team, home), ...(alias?.home ?? []).map((x) => teamSimilarity(team, x))) >= (away ? Math.max(teamSimilarity(team, away), ...(alias?.away ?? []).map((x) => teamSimilarity(team, x))) : 0)) ? "1" : "2"; if (home || away) return { market_code: "1X2", market_param: null, selection: sd, label_pick: `${team} gagne`, ok: true }; }
   if (!p) return { market_code: "1X2", market_param: null, selection: "", label_pick: "Choix non visible", ok: false, reason: "Le choix n'est pas écrit (prono dit à l'oral ?) : choisis-le." };
   const side = (name: string): "1" | "2" | null => {
@@ -231,6 +235,17 @@ export function normalizePick(marketText: string, pickText: string, home: string
     if (r) return { market_code: `${pre}1X2`, market_param: null, selection: r, label_pick: pickText, ok: true };
     return { market_code: `${pre}1X2`, market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari de mi-temps : choisis le marché et le choix." };
   }
+  // Total de buts d'une seule équipe : « Total de buts (t. rég) - Sierra Leone » / « - de 1,5 »
+  { const mt = m.match(/(?:total|nombre)[^–—-]*buts?[^–—-]*\s[–—-]\s*(.+)$/); const ts = mt ? side(mt[1].trim()) : null; const o = ts ? ouLine(p) : null;
+    if (ts && o) return { market_code: `TT${ts}`, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true }; }
+  // Écart de buts : « Madagascar ne perd pas ou perd de 1 but exactement » = handicap +1,5 ; « gagne de 2 buts ou plus » = handicap -1,5
+  if (/écart de buts|ecart de buts|ne perd pas ou perd|gagne (de|par) \d buts? ou plus/.test(all)) {
+    const a = p.match(/^(.*?)\s+ne perd pas ou perd (?:de|par) (\d) buts?(?: exactement| ou moins| maximum)?$/), b = p.match(/^(.*?)\s+gagne (?:de|par) (\d) buts? ou plus$/);
+    const sd = a ? side(a[1]) : b ? side(b[1]) : null;
+    if (sd && a) return { market_code: "AH", market_param: Number(a[2]) + 0.5, selection: sd, label_pick: pickText, ok: true };
+    if (sd && b) return { market_code: "AH", market_param: -(Number(b[2]) - 0.5), selection: sd, label_pick: pickText, ok: true };
+    return { market_code: "AH", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari sur l’écart de buts : formulation pas reconnue. Choisis le handicap à la main." };
+  }
   // Combinés écrits dans le choix : « Angleterre ou Nul & +1.5 buts », « Ghana gagne & +1.5 buts », « double + 1,5 buts »
   {
     const btts = (x: string) => (/(2|deux) (équipes )?marquent|btts|\bgg\b/.test(x) ? (/pas|\bnon\b/.test(x) ? "Non" : "Oui") : null);
@@ -305,8 +320,11 @@ export function normalizePick(marketText: string, pickText: string, home: string
     if (r && s) return { market_code: "AH", market_param: Number(r[2].replace(",", ".")), selection: s, label_pick: pickText, ok: true };
     return { market_code: "AH", market_param: null, selection: pickText, label_pick: pickText, ok: false };
   }
-  // Par défaut : résultat du match
+  // Par défaut : résultat du match — seulement si le marché le dit, ou si le choix est juste un nom d'équipe.
+  // Un marché inconnu dont le choix contient un nom d'équipe n'est pas une victoire : on le signale au lieu de deviner.
   const r = isDraw(p) ? "N" : side(p);
+  const connu = !m.trim() || /résultat|resultat|1x2|vainqueur|issue du match|match winner/.test(m) || p.split(" ").length <= 3;
+  if (r && !connu) return { market_code: "1X2", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: `Marché « ${marketText} » pas reconnu : choisis-le à la main, sinon la ligne est écartée.` };
   return { market_code: "1X2", market_param: null, selection: r ?? pickText, label_pick: pickText, ok: !!r };
 }
 

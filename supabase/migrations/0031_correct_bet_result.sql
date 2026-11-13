@@ -12,8 +12,9 @@ begin
   if p_result not in ('gagne', 'perdu', 'rembourse') then raise exception 'résultat invalide'; end if;
   if b.statut::text = p_result::text then return; end if;
 
-  -- Cote du ticket : produit des cotes des sélections quand le détail existe, sinon la cote totale enregistrée
-  select coalesce(exp(sum(ln(cote))), b.cote_totale) into v_cote from betwise.bet_selections where bet_id = b.id;
+  -- Cote du ticket telle qu'enregistrée (c'est sur elle que le bookmaker paie) ; à défaut, produit des cotes des sélections
+  select coalesce(b.cote_totale, exp(sum(ln(cote)))) into v_cote from betwise.bet_selections where bet_id = b.id;
+  v_cote := coalesce(v_cote, b.cote_totale);
   v_gain := case p_result when 'gagne' then round(b.mise * v_cote, 2) - b.mise when 'perdu' then -b.mise else 0 end;
 
   if not b.virtuel then
@@ -27,8 +28,7 @@ begin
 
   insert into betwise.bet_versions (bet_id, changes, changed_by)
   values (b.id, jsonb_build_object('statut', jsonb_build_object('avant', b.statut, 'apres', p_result)), uid);
-  update betwise.bets set statut = p_result::text::betwise.bet_status, gain_net = v_gain, settled_at = now(),
-         cote_totale = case when p_result = 'gagne' then round(v_cote, 3) else cote_totale end where id = b.id;
+  update betwise.bets set statut = p_result::text::betwise.bet_status, gain_net = v_gain, settled_at = now() where id = b.id;
   -- Les résultats ligne par ligne ne sont pas touchés : ils servent à noter les sources et restent ceux des matchs.
 end $function$;
 

@@ -577,6 +577,7 @@ export type Database = {
           coupon_externe: string | null
           bookmaker: string | null
           ticket_fingerprint: string | null
+          assurance: boolean
           virtuel: boolean
         }
         Insert: {
@@ -599,6 +600,7 @@ export type Database = {
           coupon_externe?: string | null
           bookmaker?: string | null
           ticket_fingerprint?: string | null
+          assurance?: boolean
           virtuel?: boolean
         }
         Update: {
@@ -621,6 +623,7 @@ export type Database = {
           coupon_externe?: string | null
           bookmaker?: string | null
           ticket_fingerprint?: string | null
+          assurance?: boolean
           virtuel?: boolean
         }
         Relationships: [
@@ -1595,6 +1598,13 @@ export type Database = {
         Args: {
           p_bet_id: string
           p_result: Database["betwise"]["Enums"]["settle_result"]
+        }
+        Returns: undefined
+      }
+      set_bet_assurance: {
+        Args: {
+          p_bet_id: string
+          p_on: boolean
         }
         Returns: undefined
       }
