@@ -1591,6 +1591,13 @@ export type Database = {
         }
         Returns: Database["betwise"]["Tables"]["bankroll_transactions"]["Row"]
       }
+      correct_bet_result: {
+        Args: {
+          p_bet_id: string
+          p_result: Database["betwise"]["Enums"]["settle_result"]
+        }
+        Returns: undefined
+      }
       settle_bet: {
         Args: {
           p_bet_id: string

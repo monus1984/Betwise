@@ -107,6 +107,7 @@ FUNCTIONS = {
     "ensure_profile": ([("p_pseudo", "text", True)], "row:profiles"),
     "place_bet": ([("p_mise", "numeric", False), ("p_selections", "jsonb", False), ("p_source_import", "enum:import_channel", True), ("p_raw_text", "text", True), ("p_upload_id", "uuid", True), ("p_placed_at", "timestamptz", True), ("p_summary", "jsonb", True), ("p_virtuel", "bool", True)], "uuid"),
     "bankroll_move": ([("p_type", "enum:tx_type", False), ("p_montant", "numeric", False), ("p_note", "text", True)], "row:bankroll_transactions"),
+    "correct_bet_result": ([("p_bet_id", "uuid", False), ("p_result", "enum:settle_result", False)], "void"),
     "settle_bet": ([("p_bet_id", "uuid", False), ("p_result", "enum:settle_result", False)], "row:bets"),
     "settle_selection": ([("p_market", "text", False), ("p_param", "numeric", False), ("p_selection", "text", False), ("p_home", "int4", False), ("p_away", "int4", False), ("p_ht_home", "int4", True), ("p_ht_away", "int4", True)], "enum:settle_result"),
     "settle_pending": ([], "setof:matchs:int4,selections_reglees:int4,pronos_regles:int4,paris_finalises:int4"),

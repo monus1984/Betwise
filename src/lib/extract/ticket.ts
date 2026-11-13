@@ -125,6 +125,7 @@ Pronos de tipsters (kind = pronos) : messages Telegram ou WhatsApp, posts, vidé
 - « COTE 3 », « COUPON COTE 4 », « cote 3 » en tête d'une publication : c'est la cote totale annoncée d'un combiné (total_odds = 3, ticket_type combo). Ce n'est la cote d'aucune ligne : odds reste null pour chaque sélection.
 - Ligne qui ne nomme qu'une équipe (« ESPAGNE VICTOIRE », « France → Win », « England — Victoire », « Lettonie+1,5 BUTS DANS LE MATCHS », « Espagne double+1,5 BUTS ») : team_only = l'équipe, pick_text = le reste de la ligne recopié tel quel (« VICTOIRE », « Win », « +1,5 BUTS DANS LE MATCHS », « double+1,5 BUTS »).
 - Ligne « Équipe A - Équipe B » suivie du choix sur la même ligne ou la suivante (« 👉Angleterre ou Nul & +1.5 buts », « ➡️RDC gagne & +1.5 buts », « au moins une équipe marque+1,5 BUTS », « 1X », « V1 ») : home_team, away_team, et tout le choix dans pick_text, sans le couper.
+- Pari sur un joueur (tirs, tirs cadrés, passes, buteur) : recopie le nom du joueur dans pick_text et garde le mot « joueur » dans market_text s'il est affiché. Ne le transforme jamais en pari sur le match.
 - Les mentions d'offres de bookmaker (« 2UP », « boost ») ne sont pas des choix : ignore-les.
 - Les drapeaux affichés identifient les pays : utilise-les pour nommer les équipes quand le texte est caché ou coupé.
 - Une fiche de match affichée sans choix écrit (le tipster parle) donne une sélection avec home_team, away_team, kickoff et pick_text vide.
@@ -191,6 +192,10 @@ export function normalizePick(marketText: string, pickText: string, home: string
   if (stat) {
     if (/\d\s*buts?\b|\bbuts?\s*\+|\bmarque/.test(all)) return { market_code: stat, market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari qui mêle buts et statistiques (corners, cartons) : pas encore suivi. Retire la ligne ou saisis-la à la main." };
     const o = ouLine(p), t = mention();
+    // Statistique d'un joueur (« Mbappé : plus de 1,5 tir cadré ») : BETWISE ne suit que les totaux du match ou d'une équipe.
+    // La lire comme un total du match la ferait gagner presque à coup sûr : on la signale au lieu de la régler de travers.
+    const joueur = /joueur|player/.test(all) || (!!o && !t && ((stat === "SOT" && o.line <= 3.5) || (stat === "SHOT" && o.line <= 6.5)));
+    if (joueur) return { market_code: stat, market_param: o?.line ?? null, selection: pickText, label_pick: pickText, ok: false, reason: "Statistique d’un joueur (tirs, tirs cadrés…) : pas suivie par BETWISE. La ligne est écartée ; règle ce ticket à la main." };
     if (stat === "CARD" && /rouge|red/.test(all) && !o) return { market_code: "RED", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
     if (o) return { market_code: t && stat !== "SHOT" ? `${stat}${t}` : stat, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
     if (stat === "CORN" && /le plus|plus de corners|most/.test(all)) { const r = isDraw(p) || /égalité|autant/.test(p) ? "N" : t; if (r) return { market_code: "CORN_1X2", market_param: null, selection: r, label_pick: pickText, ok: true }; }

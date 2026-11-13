@@ -74,6 +74,15 @@ function humanize(msg: string) {
   return "Enregistrement impossible : " + msg;
 }
 
+/** Corrige le résultat d'un pari déjà réglé (réglage automatique faux) ; la bankroll est ajustée. */
+export async function correctBetResult(betId: string, result: "gagne" | "perdu" | "rembourse") {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("correct_bet_result", { p_bet_id: betId, p_result: result });
+  if (error) return { ok: false as const, error: "Correction impossible : " + error.message };
+  revalidatePath("/"); revalidatePath("/paris", "layout");
+  return { ok: true as const };
+}
+
 /** « Je n'ai pas joué ce pari » : le pari réel devient un test, la bankroll est rétablie. */
 export async function convertBetToTest(betId: string) {
   const supabase = await createClient();

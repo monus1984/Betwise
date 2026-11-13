@@ -107,4 +107,12 @@ describe("matchSource", () => {
     expect(matchSource("Moi", src)).toBeNull();
     expect(matchSource(null, src)).toBeNull();
   });
+  it("statistique d'un joueur : jamais lue comme un total du match", () => {
+    for (const [m, pk] of [["Tirs cadrés du joueur", "Kylian Mbappé - Plus de 1,5"], ["Tirs cadrés", "Plus de 1,5"], ["Nombre de tirs cadrés", "+ de 0,5"]] as const) {
+      const r = normalizePick(m, pk, "Italie", "France");
+      expect(r.ok).toBe(false); expect(r.reason).toMatch(/joueur/);
+    }
+    expect(normalizePick("Total tirs cadrés", "Plus de 8,5", "Italie", "France")).toMatchObject({ market_code: "SOT", market_param: 8.5, selection: "Plus", ok: true });
+    expect(normalizePick("Tirs cadrés Italie", "Plus de 3,5", "Italie", "France")).toMatchObject({ market_code: "SOT1", ok: true });
+  });
 });
