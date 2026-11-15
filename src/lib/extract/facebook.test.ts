@@ -57,4 +57,11 @@ describe("pronos Facebook", () => {
     expect(parsePublished("il y a 15 heures", now)).toBe("2026-11-12T05:00:00.000Z");
     expect(parsePublished("07:47", now)).toBeNull();
   });
+  it("vidéo d'analyse : le prono affiché en bandeau", () => {
+    expect(n("LA BELGIQUE NE PERD PAS", "Belgique", "Italie")).toBe("DC 1N ok");
+    expect(n("L'Italie ne perd pas", "Belgique", "Italie")).toBe("DC N2 ok");
+    expect(n("ne perd pas", "Belgique", "Italie", "Belgique")).toBe("DC 1N ok");
+    expect(n("LA FRANCE GAGNE SANS ENCAISSER", "France", "Turquie")).toBe("WTN 1 ok");
+    expect(n("LES 2 ÉQUIPES MARQUENT", "Croatie", "Tchéquie")).toBe("BTTS Oui ok");
+  });
 });

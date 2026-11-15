@@ -320,6 +320,11 @@ export function normalizePick(marketText: string, pickText: string, home: string
     if (r && s) return { market_code: "AH", market_param: Number(r[2].replace(",", ".")), selection: s, label_pick: pickText, ok: true };
     return { market_code: "AH", market_param: null, selection: pickText, label_pick: pickText, ok: false };
   }
+  // « La Belgique ne perd pas », « invaincue », « pas de défaite » : double chance (l'équipe ou le nul), pas une victoire
+  { const np = p.match(/^(.*?)\s*(?:ne perd(?:ra)? pas|ne perdent pas|ne s['’]incline pas|reste invaincue?|pas de défaite)$/);
+    if (np) { const sd = np[1].trim() ? side(np[1].trim()) : teamSide;
+      if (sd) return { market_code: "DC", market_param: null, selection: sd === "1" ? "1N" : "N2", label_pick: pickText, ok: true };
+      return { market_code: "DC", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Double chance : équipe non reconnue." }; } }
   // Par défaut : résultat du match — seulement si le marché le dit, ou si le choix est juste un nom d'équipe.
   // Un marché inconnu dont le choix contient un nom d'équipe n'est pas une victoire : on le signale au lieu de deviner.
   const r = isDraw(p) ? "N" : side(p);
