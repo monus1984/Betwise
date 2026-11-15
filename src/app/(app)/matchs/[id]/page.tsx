@@ -15,6 +15,8 @@ import { StandingsTable } from "@/components/standings-table";
 import { STANDING_COMPS, latestStandings, type StandingRow } from "@/lib/matches/standings";
 import { GoalWatcher } from "@/components/goal-watcher";
 import { legFrom } from "@/lib/slip/leg";
+import { loadRecit } from "@/lib/matches/recit";
+import { MatchRecit } from "@/components/match-recit";
 
 export const dynamic = "force-dynamic";
 
@@ -72,6 +74,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const evts = [...(m.details?.evts ?? [])].sort((x, y) => x.m - y.m || (x.x ?? 0) - (y.x ?? 0));
   const mk = sg?.market ?? null;
   const onglet = tab ?? (m.statut === "programme" && sg ? "paris" : "analyse");
+  const recit = onglet === "analyse" && m.statut !== "termine" ? await loadRecit(supabase as never, m.id) : null;
   const picks = sg ? picksOf(sg).filter((p) => p.p >= 0.6 && p.p <= 0.95).slice(0, 4) : [];
   const parier = (market: string, sel: string, cote?: number, param?: number) => `/nouveau?match=${m.id}&market=${market}${param !== undefined ? `&param=${param}` : ""}&sel=${encodeURIComponent(sel)}${cote ? `&cote=${cote}` : ""}`;
 
@@ -132,6 +135,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
       {onglet === "analyse" && (
         <div className="space-y-3">
+          {recit && <MatchRecit match={{ id: m.id, home, away, kickoff: m.kickoff_at, comp: comp?.code_externe ?? "", ouvert: m.statut === "programme" }} etapes={recit.etapes} verdict={recit.verdict} autres={recit.autres} source={recit.source} />}
           {picks.length > 0 && (
             <Card title="Les issues les plus probables" note={sg!.source === "modele" ? "modèle BETWISE" : "d’après les cotes"}>
               <ul className="divide-y divide-line">

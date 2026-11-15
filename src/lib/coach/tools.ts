@@ -4,6 +4,7 @@
  * Confidentialité : aucun nom, e-mail ni montant en devise. Mises en « unités »
  * (1 unité = mise médiane de l'utilisateur), bankroll en pourcentages.
  */
+import { loadRecit } from "../matches/recit";
 import type { createClient } from "../supabase/server";
 import type { ChatTool } from "../llm/provider";
 import { loadSignals } from "../probs/signals";
@@ -43,7 +44,7 @@ export const COACH_TOOLS: ChatTool[] = [
   { name: "paris_en_cours", description: "Paris non réglés : sélections, matchs, cotes, probabilité implicite, et probabilité du modèle BETWISE quand elle existe (espérance estimée du ticket).", input_schema: { type: "object", properties: {} } },
   { name: "sources_suivies", description: "Sources de pronostics suivies par l'utilisateur avec leurs indicateurs (réussite, rendement, intervalle de confiance, statut d'évaluation).", input_schema: { type: "object", properties: {} } },
   { name: "detail_source", description: "Indicateurs détaillés d'une source par son nom (recherche approximative) : 4 périodes, détail par marché, compétition et niveau de risque.", input_schema: { type: "object", properties: { nom: { type: "string" } }, required: ["nom"] } },
-  { name: "analyse_match", description: "Matchs à venir (10 jours) d'une équipe : probabilités du modèle BETWISE, cotes de référence européennes, nombre de pronos enregistrés par les sources suivies.", input_schema: { type: "object", properties: { equipe: { type: "string", description: "Nom ou partie du nom, ex. « Arsenal », « Real »." } }, required: ["equipe"] } },
+  { name: "analyse_match", description: "Analyse des matchs à venir (10 jours) d'une équipe. Pour chaque match : le récit étape par étape (enjeu au classement, forme, dernier match, match aller, joueur du moment, chiffre qui pèse), le verdict BETWISE avec sa probabilité et sa catégorie, une option plus sûre et une plus osée, les probabilités du modèle, les cotes de référence, les pronos des sources suivies. À utiliser pour « analyse-moi X », « que penses-tu de X–Y », « ton avis sur le match de X ».", input_schema: { type: "object", properties: { equipe: { type: "string", description: "Nom ou partie du nom, ex. « Arsenal », « Real »." } }, required: ["equipe"] } },
 ];
 
 type BetRow = {
@@ -352,12 +353,20 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
       ]);
       const fids = (follows ?? []).map((f) => f.source_id);
       const { data: preds } = fids.length ? await db.from("predictions").select("match_id, market_code, selection, source:sources(nom, type)").in("match_id", mids).in("source_id", fids).neq("statut", "annule") : { data: [] };
+      const recits = new Map((await Promise.all(mids.map((id) => loadRecit(db as never, id)))).filter((r): r is NonNullable<typeof r> => !!r).map((r) => [r.matchId, r]));
       return ms.map((m) => {
+        const rc = recits.get(m.id);
         const e = (est ?? []).filter((x) => x.match_id === m.id);
         const j = (e[0]?.justification ?? null) as { lambda_dom?: number; lambda_ext?: number; score_probable?: string } | null;
         const ref = (code: string, sel: string) => (odds ?? []).find((o) => o.match_id === m.id && o.market_code === code && o.selection === sel)?.cote ?? null;
         return {
           match: `${one(m.home as One<{ nom: string }>)?.nom} – ${one(m.away as One<{ nom: string }>)?.nom}`, competition: one(m.competition as One<{ nom: string }>)?.nom, coup_envoi: m.kickoff_at,
+          recit: rc ? {
+            etapes: rc.etapes.map((x) => ({ etape: x.titre, faits: x.lignes })),
+            verdict: rc.verdict ? { choix: rc.verdict.label, chance_pct: pct(rc.verdict.p), categorie: rc.verdict.categorie, cote_reference: rc.verdict.cote, cote_juste: Math.round(100 / rc.verdict.p) / 100 } : "pas de cote : pas d'avis",
+            autres: rc.autres.map((c) => ({ niveau: c.categorie === "sur" ? "plus sûr" : "plus osé", choix: c.label, chance_pct: pct(c.p), cote_reference: c.cote })),
+            note: "le verdict vient des cotes de référence, pas des étapes : elles donnent le contexte",
+          } : null,
           modele: e.length ? {
             probabilites_pct: Object.fromEntries(e.map((x) => [`${x.market_code} ${x.selection}`, pct(Number(x.probabilite))])),
             buts_attendus: j ? [j.lambda_dom, j.lambda_ext] : null, score_le_plus_probable: j?.score_probable ?? null,
