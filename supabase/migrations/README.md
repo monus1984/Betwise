@@ -42,3 +42,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0032_bet_assurance.sql | 2026-11-13 | Combiné « Assurance » : `bets.assurance`, `finalize_bet()` rembourse la mise si une seule sélection perd, `set_bet_assurance()` |
 | 0033_tts_usage.sql | 2026-11-15 | `tts_usage` et `tts_take()` : compteur quotidien par compte pour la voix (synthèse vocale Gemini) |
 | 0034_bankroll_align.sql | 2026-11-15 | `bankroll_align()` : recale la bankroll sur le solde réel du bookmaker par un mouvement d'ajustement noté |
+| 0035_cote_payee.sql | 2026-11-15 | `cote_payee()` : Betclic paie sur la cote totale arrondie à 2 décimales ; `place_bet`, `finalize_bet`, `settle_bet`, `correct_bet_result` l'utilisent |
