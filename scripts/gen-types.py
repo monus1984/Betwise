@@ -111,6 +111,7 @@ FUNCTIONS = {
     "correct_bet_result": ([("p_bet_id", "uuid", False), ("p_result", "enum:settle_result", False)], "void"),
     "set_bet_assurance": ([("p_bet_id", "uuid", False), ("p_on", "bool", False)], "void"),
     "tts_take": ([("p_max", "int4", False)], "bool"),
+    "bankroll_align": ([("p_solde", "numeric", False)], "numeric"),
     "settle_bet": ([("p_bet_id", "uuid", False), ("p_result", "enum:settle_result", False)], "row:bets"),
     "settle_selection": ([("p_market", "text", False), ("p_param", "numeric", False), ("p_selection", "text", False), ("p_home", "int4", False), ("p_away", "int4", False), ("p_ht_home", "int4", True), ("p_ht_away", "int4", True)], "enum:settle_result"),
     "settle_pending": ([], "setof:matchs:int4,selections_reglees:int4,pronos_regles:int4,paris_finalises:int4"),

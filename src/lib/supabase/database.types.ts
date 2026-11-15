@@ -1632,6 +1632,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      bankroll_align: {
+        Args: {
+          p_solde: number
+        }
+        Returns: number
+      }
       settle_bet: {
         Args: {
           p_bet_id: string

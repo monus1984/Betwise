@@ -54,6 +54,16 @@ export async function settleBet(betId: string, result: "gagne" | "perdu" | "remb
   return { ok: true as const };
 }
 
+/** Recale la bankroll sur le solde réel du bookmaker : un ajustement égal à l'écart, visible dans le journal. */
+export async function bankrollAlign(formData: FormData) {
+  const solde = Number(String(formData.get("solde") ?? "").replace(/\s/g, "").replace(",", "."));
+  if (!Number.isFinite(solde) || solde < 0) return;
+  const supabase = await createClient();
+  await supabase.rpc("bankroll_align", { p_solde: solde });
+  revalidatePath("/");
+  redirect("/");
+}
+
 export async function bankrollMove(formData: FormData) {
   const type = String(formData.get("type")) === "retrait" ? "retrait" : "depot";
   const montant = Number(String(formData.get("montant") ?? "").replace(/\s/g, "").replace(",", "."));

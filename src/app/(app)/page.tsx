@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/page-header";
 import { LineChart } from "@/components/line-chart";
 import { fcfa } from "@/components/ui";
 import { signOut } from "@/lib/auth/actions";
-import { bankrollMove } from "@/lib/bets/actions";
+import { bankrollAlign, bankrollMove } from "@/lib/bets/actions";
 import { loadDashboard, type Group } from "@/lib/stats/dashboard";
 import { createClient } from "@/lib/supabase/server";
 import { loadGoal } from "@/lib/coach/goal";
@@ -45,6 +45,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
   }).map((x) => x.bet_id)).size;
 
   const solde = Number(summary?.solde ?? 0), exposition = Number(summary?.exposition ?? 0);
+  const { data: journal } = await supabase.from("bankroll_transactions").select("id, type, montant, note, bet_id, at").order("at", { ascending: false }).limit(30);
   const [goal, { count: nbCoups }, { data: np }] = await Promise.all([loadGoal(supabase, solde), supabase.from("daily_picks").select("id", { count: "exact", head: true }).eq("jour", jourAbidjan()), supabase.from("notification_prefs").select("resultats, direct, coup_envoi, coups_du_jour, sources").maybeSingle()]);
   const ids = (follows ?? []).map((f) => f.source_id);
   const [{ data: trends }, { data: metrics }] = ids.length
@@ -193,6 +194,25 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
           <button className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white">OK</button>
         </form>
         <p className="mt-2 text-xs text-ink-muted">Le solde part de 0 : enregistre ton capital de départ comme premier dépôt.</p>
+      </details>
+
+      <details className="mt-3 rounded-xl border border-line bg-white p-4">
+        <summary className="cursor-pointer text-sm font-semibold">Mon solde ne correspond pas à celui du bookmaker</summary>
+        <p className="mt-2 text-xs text-ink-muted">Regarde d’abord le journal ci-dessous : un pari mal réglé ou jamais joué se corrige sur sa fiche (« Ce résultat est faux ? », « Je ne l’ai pas joué »). S’il reste un écart que tu n’expliques pas (dépôt, retrait ou pari non saisi), indique ton solde réel : BETWISE ajoute un seul mouvement d’ajustement, noté comme tel.</p>
+        <form action={bankrollAlign} className="mt-3 flex gap-2">
+          <input name="solde" inputMode="numeric" placeholder="Solde réel en F CFA" className="min-w-0 flex-1 rounded-lg border border-line px-3 py-2 text-base" required />
+          <button className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white">Recaler</button>
+        </form>
+        <h3 className="mt-4 text-xs font-semibold text-ink-muted">Journal de la bankroll (30 derniers mouvements)</h3>
+        <ul className="mt-1 divide-y divide-line text-[13px]">
+          {(journal ?? []).map((t) => (
+            <li key={t.id} className="flex items-center gap-2 py-1.5">
+              <span className="w-20 shrink-0 text-[11px] text-ink-muted">{new Date(t.at).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", timeZone: "Africa/Abidjan" })} {new Date(t.at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}</span>
+              {t.bet_id ? <Link href={`/paris/${t.bet_id}`} className="min-w-0 flex-1 truncate underline decoration-line">{t.note ?? t.type}</Link> : <span className="min-w-0 flex-1 truncate">{t.note ?? (t.type === "depot" ? "Dépôt" : t.type === "retrait" ? "Retrait" : t.type)}</span>}
+              <span className={`shrink-0 font-semibold tabular-nums ${Number(t.montant) >= 0 ? "text-gain" : "text-loss"}`}>{Number(t.montant) >= 0 ? "+" : "−"}{Math.abs(Math.round(Number(t.montant))).toLocaleString("fr-FR")}</span>
+            </li>
+          ))}
+        </ul>
       </details>
 
       <NotificationsCard prefs={{ resultats: np?.resultats ?? true, direct: np?.direct ?? true, coup_envoi: np?.coup_envoi ?? true, coups_du_jour: np?.coups_du_jour ?? true, sources: np?.sources ?? true }} />
