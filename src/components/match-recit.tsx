@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { CAT_LABEL, CAT_STYLE } from "@/lib/coach/categories";
-import { pickVoice, spoken } from "@/lib/coach/voice";
+import { speakBlocks, stopSpeaking, unlockAudio } from "@/lib/coach/speak";
 import type { Choix, Etape } from "@/lib/matches/recit";
 import { AddToSlip } from "@/components/slip";
 import { legFrom } from "@/lib/slip/leg";
@@ -16,39 +16,15 @@ const cote = (c: Choix) => (c.cote ? c.cote.toFixed(2).replace(".", ",") : `≈ 
 
 /** L'analyse d'un match, étape par étape, lue à voix haute si on le demande : l'étape en cours de lecture est mise en avant. */
 export function MatchRecit({ match, etapes, verdict, autres, source }: Props) {
-  const [canSpeak, setCanSpeak] = useState(false);
   const [lu, setLu] = useState<number | null>(null); // index de l'étape lue ; etapes.length = le verdict
-  const run = useRef(0);
-  useEffect(() => {
-    setCanSpeak("speechSynthesis" in window);
-    try { window.speechSynthesis?.getVoices(); } catch { /* chargées en arrière-plan */ }
-    return () => { try { window.speechSynthesis?.cancel(); } catch { /* ignore */ } };
-  }, []);
+  useEffect(() => () => stopSpeaking(), []);
 
   const blocs = [
     ...etapes.map((e) => `${e.titre}. ${e.lignes.join(" ")}`),
     verdict ? `Mon avis : ${verdict.label}. ${pct(verdict.p)} chances sur 100, catégorie ${CAT_LABEL[verdict.categorie]}.` : "Pas encore de cote sur ce match : je ne donne pas d’avis.",
   ];
-  const stop = () => { run.current++; try { window.speechSynthesis.cancel(); } catch { /* ignore */ } setLu(null); };
-  const lire = () => {
-    const synth = window.speechSynthesis; if (!synth) return;
-    synth.cancel();
-    const id = ++run.current, voice = pickVoice(synth.getVoices());
-    const dire = (i: number) => {
-      if (id !== run.current) return;
-      if (i >= blocs.length) { setLu(null); return; }
-      setLu(i);
-      const phrases = spoken(blocs[i]).split(/(?<=[.!?:])\s+/).filter(Boolean);
-      phrases.forEach((ph, k) => {
-        const u = new SpeechSynthesisUtterance(ph);
-        u.lang = voice?.lang ?? "fr-FR"; u.rate = 0.95; u.pitch = 1.06;
-        if (voice) u.voice = voice as SpeechSynthesisVoice;
-        if (k === phrases.length - 1) { u.onend = () => dire(i + 1); u.onerror = () => { if (id === run.current) setLu(null); }; }
-        synth.speak(u);
-      });
-    };
-    dire(0);
-  };
+  const stop = () => { stopSpeaking(); setLu(null); };
+  const lire = () => { unlockAudio(); setLu(0); speakBlocks([`${match.home} contre ${match.away}. ${blocs[0]}`, ...blocs.slice(1)], setLu); };
 
   const leg = (c: Choix) => legFrom({ matchId: match.id, home: match.home, away: match.away, kickoff: match.kickoff, comp: match.comp, market: c.market, param: c.param, sel: c.sel, p: c.p, cote: c.cote });
   const actif = (i: number) => (lu === i ? "border-brand bg-brand/5" : "border-line bg-white");
@@ -57,7 +33,7 @@ export function MatchRecit({ match, etapes, verdict, autres, source }: Props) {
     <section className="space-y-2" aria-label="Analyse du match">
       <div className="flex items-center justify-between gap-3 px-1">
         <h2 className="font-display text-lg font-semibold">L’analyse BETWISE</h2>
-        {canSpeak && (
+        {(
           <button type="button" onClick={lu === null ? lire : stop} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${lu === null ? "bg-pitch text-white" : "border border-line bg-white text-ink"}`}>
             {lu === null ? "▶ Écouter l’analyse" : "■ Arrêter"}
           </button>

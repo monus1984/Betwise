@@ -59,6 +59,7 @@ TABLES = {
     "conversations": "id:uuid= user_id:uuid titre:text? created_at:timestamptz=",
     "messages": "id:uuid= conversation_id:uuid role:text contenu:text? fonctions:jsonb? tokens_in:int4? tokens_out:int4? created_at:timestamptz=",
     "feedback": "id:uuid= user_id:uuid? ecran:text? message:text created_at:timestamptz=",
+    "tts_usage": "user_id:uuid jour:date= n:int4=",
     "bet_versions": "id:uuid= bet_id:uuid selection_id:uuid? changes:jsonb changed_by:uuid? changed_at:timestamptz=",
 }
 
@@ -109,6 +110,7 @@ FUNCTIONS = {
     "bankroll_move": ([("p_type", "enum:tx_type", False), ("p_montant", "numeric", False), ("p_note", "text", True)], "row:bankroll_transactions"),
     "correct_bet_result": ([("p_bet_id", "uuid", False), ("p_result", "enum:settle_result", False)], "void"),
     "set_bet_assurance": ([("p_bet_id", "uuid", False), ("p_on", "bool", False)], "void"),
+    "tts_take": ([("p_max", "int4", False)], "bool"),
     "settle_bet": ([("p_bet_id", "uuid", False), ("p_result", "enum:settle_result", False)], "row:bets"),
     "settle_selection": ([("p_market", "text", False), ("p_param", "numeric", False), ("p_selection", "text", False), ("p_home", "int4", False), ("p_away", "int4", False), ("p_ht_home", "int4", True), ("p_ht_away", "int4", True)], "enum:settle_result"),
     "settle_pending": ([], "setof:matchs:int4,selections_reglees:int4,pronos_regles:int4,paris_finalises:int4"),

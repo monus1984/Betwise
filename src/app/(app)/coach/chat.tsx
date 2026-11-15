@@ -1,9 +1,9 @@
 "use client";
 
+import { speakText, stopSpeaking, unlockAudio } from "@/lib/coach/speak";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Notice } from "@/components/ui";
-import { pickVoice, spoken } from "@/lib/coach/voice";
 
 export type ChatMsg = { id?: string; role: "user" | "assistant"; text: string; fonctions?: string[] };
 
@@ -32,19 +32,19 @@ export function CoachChat({ initialId, initial, suggestions }: { initialId: stri
     setCanSpeak("speechSynthesis" in window);
     try { window.speechSynthesis?.getVoices(); } catch { /* la liste des voix se charge en arrière-plan */ }
     try { const on = localStorage.getItem("betwise.coach.voix") === "1"; setVoiceOut(on); voiceOutRef.current = on; } catch { /* ignore */ }
-    return () => { try { rec.current?.abort(); window.speechSynthesis?.cancel(); } catch { /* ignore */ } };
+    return () => { try { rec.current?.abort(); stopSpeaking(); } catch { /* ignore */ } };
   }, []);
   function setVoice(on: boolean) {
     setVoiceOut(on); voiceOutRef.current = on;
     try { localStorage.setItem("betwise.coach.voix", on ? "1" : "0"); } catch { /* ignore */ }
-    if (on) unlockSpeech(); else window.speechSynthesis?.cancel();
+    if (on) unlockAudio(); else stopSpeaking();
   }
   function listen() {
     const Ctor = recCtor();
     if (!Ctor || busy) return;
     if (listening) { rec.current?.stop(); return; }
-    window.speechSynthesis?.cancel();
-    unlockSpeech(); // sur iPhone, la lecture à voix haute doit être autorisée par un geste
+    stopSpeaking();
+    unlockAudio(); // sur iPhone, la lecture à voix haute doit être autorisée par un geste
     const r = new Ctor();
     r.lang = "fr-FR"; r.interimResults = true; r.continuous = false;
     let final = "";
@@ -71,7 +71,7 @@ export function CoachChat({ initialId, initial, suggestions }: { initialId: stri
       if (j.conversationId) setId(j.conversationId);
       if (!r.ok) { setErr(j.error ?? "Erreur."); return; }
       setMsgs((m) => [...m, { id: j.reply.id, role: "assistant", text: j.reply.text, fonctions: j.reply.fonctions }]);
-      if (voiceOutRef.current) speak(j.reply.text);
+      if (voiceOutRef.current) speakText(j.reply.text);
       if (typeof j.restant === "number") setLeft(j.restant);
     } catch {
       setErr("Pas de connexion. Réessaie.");
@@ -106,7 +106,7 @@ export function CoachChat({ initialId, initial, suggestions }: { initialId: stri
           <div key={m.id ?? i} className={m.role === "user" ? "flex justify-end" : ""}>
             <div className={m.role === "user" ? "max-w-[85%] rounded-2xl rounded-br-sm bg-slate-900 px-3.5 py-2.5 text-sm text-white" : "rounded-2xl rounded-bl-sm border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800"}>
               {m.role === "assistant" ? <Rich text={m.text || "Réponse vide : repose ta question."} /> : m.text}
-              {m.role === "assistant" && canSpeak && !!m.text && <button type="button" onClick={() => speak(m.text)} className="mt-1.5 text-[11px] font-medium text-brand">🔊 Écouter</button>}
+              {m.role === "assistant" && canSpeak && !!m.text && <button type="button" onClick={() => { unlockAudio(); speakText(m.text); }} className="mt-1.5 text-[11px] font-medium text-brand">🔊 Écouter</button>}
               {m.role === "assistant" && !!m.fonctions?.length && (
                 <p className="mt-2 border-t border-slate-100 pt-1.5 text-[11px] text-slate-400">Données consultées : {[...new Set(m.fonctions)].map((f) => FN_LABEL[f] ?? f).join(", ")}</p>
               )}
@@ -143,25 +143,6 @@ function recCtor(): (new () => SpeechRec) | null {
   const w = window as unknown as { SpeechRecognition?: new () => SpeechRec; webkitSpeechRecognition?: new () => SpeechRec };
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
-function unlockSpeech() {
-  try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; window.speechSynthesis.speak(u); } catch { /* ignore */ }
-}
-/** Phrases courtes dites une à une : le débit respire mieux qu'un bloc lu d'une traite. */
-function speak(text: string) {
-  try {
-    const synth = window.speechSynthesis; if (!synth) return;
-    synth.cancel();
-    const voice = pickVoice(synth.getVoices());
-    const parts = spoken(text).split(/(?<=[.!?:])\s+/).map((x) => x.trim()).filter(Boolean);
-    for (const part of parts) {
-      const u = new SpeechSynthesisUtterance(part);
-      u.lang = voice?.lang ?? "fr-FR"; u.rate = 0.92; u.pitch = 1.06; // débit posé, voix un peu plus claire que le réglage du téléphone
-      if (voice) u.voice = voice as SpeechSynthesisVoice;
-      synth.speak(u);
-    }
-  } catch { /* ignore */ }
-}
-
 /** Rendu minimal : paragraphes, listes « - », gras **…**. Pas de HTML injecté. */
 function Rich({ text }: { text: string }) {
   const blocks = text.split(/\n{2,}/);

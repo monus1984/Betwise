@@ -1478,6 +1478,24 @@ export type Database = {
         }
         Relationships: []
       }
+      tts_usage: {
+        Row: {
+          user_id: string
+          jour: string
+          n: number
+        }
+        Insert: {
+          user_id: string
+          jour?: string
+          n?: number
+        }
+        Update: {
+          user_id?: string
+          jour?: string
+          n?: number
+        }
+        Relationships: []
+      }
       bet_versions: {
         Row: {
           id: string
@@ -1607,6 +1625,12 @@ export type Database = {
           p_on: boolean
         }
         Returns: undefined
+      }
+      tts_take: {
+        Args: {
+          p_max: number
+        }
+        Returns: boolean
       }
       settle_bet: {
         Args: {
