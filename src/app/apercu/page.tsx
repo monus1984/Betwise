@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
-import { PageHeader } from "@/components/page-header";
 import { Badge, Button, Card, Chip, Empty, Field, Input, Notice, fcfa, type Etat } from "@/components/ui";
 import { LineChart } from "@/components/line-chart";
 import { TabBar } from "@/components/tab-bar";
 import { ThemeChoice } from "@/components/theme-choice";
+import { Sparkline } from "@/components/sparkline";
+import { Mark } from "@/components/icons";
 
 /**
  * Planche des composants communs, pour contrôler les deux thèmes sans compte.
@@ -15,7 +16,29 @@ export default function Apercu() {
   const pts = [1200, -800, 2400, 1900, 3100, 2200, 4600].map((y, i, a) => ({ at: `2026-01-0${i + 1}`, y, delta: i ? y - a[i - 1] : y, libelle: `Pari fictif ${i + 1}` }));
   return (
     <div className="mx-auto max-w-xl px-4 pb-44 pt-[max(1.25rem,env(safe-area-inset-top))]">
-      <PageHeader title="Planche de contrôle" subtitle="Données fictives, réservées au développement." />
+      <p className="mb-3 rounded-lg bg-surface-2 px-3 py-1.5 text-center text-[11px] text-ink-muted">Planche de contrôle · données fictives, réservées au développement</p>
+      <header className="mb-4 flex items-center justify-between gap-3"><span className="flex items-center gap-2"><Mark className="h-7 w-7" /><span className="text-lg font-bold tracking-tight">APPLI</span></span></header>
+      <h1 className="text-2xl font-bold leading-tight tracking-tight">Bonjour Testeur</h1>
+      <p className="mb-3 text-[13px] text-ink-muted">Ton aperçu du jour</p>
+      <div className="card-hero rounded-2xl p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div><p className="text-[13px] font-medium text-ink-soft">Ta bankroll</p><p className="mt-0.5 text-[34px] font-bold leading-none tabular-nums">{fcfa(123456)}</p></div>
+          <div className="flex flex-col items-end gap-1"><Sparkline values={[0, 1200, -800, 2400, 1900, 3100, 2200, 4600]} className="h-11 w-28" label="Tendance" /><span className="rounded-full bg-gain-soft px-2 py-0.5 text-[11px] font-semibold text-gain-ink">+4 600 F · 7 j</span></div>
+        </div>
+        <p className="mt-2 text-[11px] text-ink-muted">Compte A 100 000 F · Compte B 23 456 F</p>
+      </div>
+      <div className="mt-2 grid grid-cols-3 gap-2">
+        {[["En jeu", "6 000 F", "2 paris en cours"], ["Rendement", "+9 %", "+4 118 F net"], ["Paris gagnés", "4 sur 17", "24 % · attendu 18 %"]].map(([a, b, c]) => <div key={a} className="tile p-3"><p className="text-[11px] text-ink-muted">{a}</p><p className="mt-0.5 text-lg font-bold leading-tight tabular-nums">{b}</p><p className="text-[10px] text-ink-muted">{c}</p></div>)}
+      </div>
+      <div className="mt-3 flex items-center gap-3 rounded-2xl border border-draw/50 bg-draw-soft p-3">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0 text-draw"><path d="M12 3 2.5 20h19L12 3Z" /><path d="M12 10v4.5" /><path d="M12 17.3v.2" /></svg>
+        <span className="min-w-0 flex-1"><span className="block text-[11px] font-semibold uppercase tracking-wide text-draw">Point de vigilance</span><span className="block text-sm font-semibold leading-snug text-draw-ink">Un pari en cours engage 14 % de ta bankroll</span><span className="mt-0.5 block text-[12px] leading-snug text-draw-ink">Règle : pas plus de 10 % sur un seul pari.</span></span>
+        <span aria-hidden className="text-draw">›</span>
+      </div>
+      <h2 className="mt-5 text-base font-bold">Que veux-tu faire ?</h2>
+      <div className="mb-6 mt-2 grid grid-cols-2 gap-2">
+        {["Scanner un ticket", "Analyser un match"].map((t) => <div key={t} className="tile tile-action flex flex-col items-center gap-2 px-3 py-4 text-center text-sm font-medium"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden className="text-brand"><circle cx="12" cy="12" r="9" /><path d="M8 12h8M12 8v8" /></svg>{t}</div>)}
+      </div>
       <div className="space-y-4">
         <Card><ThemeChoice /></Card>
         <Card>

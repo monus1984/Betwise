@@ -1,12 +1,12 @@
 import { APP_NAME } from "@/lib/app-name";
 import Link from "next/link";
-import { PageHeader } from "@/components/page-header";
+import { Sparkline } from "@/components/sparkline";
 import { fcfa } from "@/components/ui";
 import { loadDashboard } from "@/lib/stats/dashboard";
 import { vigilance } from "@/lib/stats/vigilance";
 import { comptes as calculer, type Mouvement } from "@/lib/bankroll/comptes";
 import { createClient } from "@/lib/supabase/server";
-import { IconCamera, IconChat, IconCompass, IconTile, IconWallet } from "@/components/icons";
+import { Mark } from "@/components/icons";
 import { InstallButton } from "@/components/install-button";
 
 export const dynamic = "force-dynamic";
@@ -72,92 +72,98 @@ export default async function Home() {
 
   return (
     <>
-      <PageHeader title={`Salut ${profile?.pseudo ?? ""}`}
-        action={<span className="flex gap-2">
-          <Link href="/notifications" aria-label={cloche ? `Notifications, ${nonLues} non lues` : "Notifications"}><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="inline align-[-2px]"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>{cloche > 0 && <span className="ml-1 tabular-nums">{(nonLues ?? 0) > 99 ? "99+" : cloche}</span>}</Link>
-          <Link href="/reglages" aria-label="Réglages"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="inline align-[-2px]"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" /></svg></Link>
-        </span>} />
+      {/* En-tête : le nom, la cloche, les réglages. Pas de bandeau : l'écran commence par le solde. */}
+      <header className="mb-4 flex items-center justify-between gap-3">
+        <span className="flex items-center gap-2"><Mark className="h-7 w-7" /><span className="text-lg font-bold tracking-tight">{APP_NAME}</span></span>
+        <span className="flex items-center gap-1">
+          <Link href="/notifications" aria-label={cloche ? `Notifications, ${nonLues} non lues` : "Notifications"} className="relative flex h-10 w-10 items-center justify-center rounded-full text-ink-soft active:bg-surface-2">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
+            {cloche > 0 && <span className="absolute right-0 top-0.5 min-w-[18px] rounded-full bg-brand px-1 text-center text-[10px] font-bold leading-[18px] text-on-fill">{(nonLues ?? 0) > 99 ? "99+" : cloche}</span>}
+          </Link>
+          <Link href="/reglages" aria-label="Réglages" className="flex h-10 w-10 items-center justify-center rounded-full text-ink-soft active:bg-surface-2">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
+          </Link>
+        </span>
+      </header>
+      <h1 className="text-2xl font-bold leading-tight tracking-tight">Bonjour {profile?.pseudo ?? ""}</h1>
+      <p className="mb-3 text-[13px] text-ink-muted">Ton aperçu du jour</p>
 
       {/* 1. Où j'en suis */}
-      <section className="rounded-2xl border border-line bg-surface p-4 shadow-card">
-        <div className="flex items-end justify-between gap-3">
+      <Link href="/bankroll" className="card-hero block rounded-2xl p-4 active:opacity-90">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs text-ink-muted">Solde disponible</p>
-            <p className="text-4xl font-bold leading-tight tabular-nums">{fcfa(solde)}</p>
+            <p className="text-[13px] font-medium text-ink-soft">Ta bankroll</p>
+            <p className="mt-0.5 text-[34px] font-bold leading-none tabular-nums">{fcfa(solde)}</p>
           </div>
-          <Link href="/bankroll" className="shrink-0 pb-1.5 text-xs font-medium text-brand">Ma bankroll ›</Link>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <Sparkline values={[0, ...d.courbe.map((x) => x.cumul)].slice(-30)} className="h-11 w-28" label="Tendance des gains moins pertes" />
+            {d.courbe.length > 0 && <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums ${sept > 0 ? "bg-gain-soft text-gain-ink" : sept < 0 ? "bg-loss-soft text-loss-ink" : "bg-surface-2 text-ink-soft"}`}>{signedF(sept)} · 7 j</span>}
+          </div>
         </div>
-        {parCompte.length > 1 && (
-          <p className="mt-1 text-[12px] text-ink-muted">{parCompte.map((c) => `${c.nom} ${fcfa(c.solde)}`).join(" · ")}</p>
-        )}
-        <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-line pt-3">
-          <div>
-            <dt className="text-[11px] text-ink-muted">Gains moins pertes</dt>
-            <dd className={`text-base font-bold tabular-nums ${tone(net)}`}>{signedF(net)}</dd>
-            <dd className="text-[10px] text-ink-muted">{pl(Number(summary?.nb_regles ?? 0), "pari")}, hors dépôts</dd>
-          </div>
-          <div>
-            <dt className="text-[11px] text-ink-muted">7 derniers jours</dt>
-            <dd className={`text-base font-bold tabular-nums ${tone(sept)}`}>{signedF(sept)}</dd>
-            <dd className="text-[10px] text-ink-muted">paris réglés</dd>
-          </div>
-          <div>
-            <dt className="text-[11px] text-ink-muted">En jeu</dt>
-            <dd className="text-base font-bold tabular-nums">{fcfa(exposition)}</dd>
-            <dd className="text-[10px] text-ink-muted">{d.enCours > 0 ? <Link href="/paris" className="underline">{pl(d.enCours, "pari")} en cours</Link> : "aucun pari"}</dd>
-          </div>
-        </dl>
-        <p className="mt-2 text-[10px] text-ink-muted">Calculé à {maj} d’après tes paris enregistrés. {joursSansComparaison === null ? "Jamais comparé au solde d’un bookmaker." : `Comparé au bookmaker il y a ${joursSansComparaison === 0 ? "moins d’un jour" : pl(joursSansComparaison, "jour")}.`}</p>
-      </section>
+        <p className="mt-2 flex items-baseline justify-between gap-3 text-[11px] text-ink-muted">
+          <span className="min-w-0 truncate">{parCompte.length > 1 ? parCompte.map((c) => `${c.nom} ${fcfa(c.solde)}`).join(" · ") : "Solde disponible"}</span>
+          <span className="shrink-0">Calculé à {maj}</span>
+        </p>
+      </Link>
+
+      <dl className="mt-2 grid grid-cols-3 gap-2">
+        <Link href="/paris" className="tile p-3 active:bg-surface-2">
+          <dt className="text-[11px] text-ink-muted">En jeu</dt>
+          <dd className="mt-0.5 text-lg font-bold leading-tight tabular-nums">{fcfa(exposition)}</dd>
+          <dd className="text-[10px] text-ink-muted">{d.enCours > 0 ? `${pl(d.enCours, "pari")} en cours` : "aucun pari"}</dd>
+        </Link>
+        <Link href="/bilan" className="tile p-3 active:bg-surface-2">
+          <dt className="text-[11px] text-ink-muted">Rendement</dt>
+          <dd className={`mt-0.5 text-lg font-bold leading-tight tabular-nums ${tone(d.rendement)}`}>{pct(d.rendement, true)}</dd>
+          <dd className="text-[10px] text-ink-muted">{signedF(net)} net</dd>
+        </Link>
+        <Link href="/bilan" className="tile p-3 active:bg-surface-2">
+          <dt className="text-[11px] text-ink-muted">Paris gagnés</dt>
+          <dd className="mt-0.5 text-lg font-bold leading-tight tabular-nums">{d.regles ? `${d.gagnes} sur ${d.gagnes + d.perdus}` : "—"}</dd>
+          <dd className="text-[10px] text-ink-muted">{d.regles ? `${pct(d.reussite)} · attendu ${pct(d.attendu)}` : "aucun réglé"}</dd>
+        </Link>
+      </dl>
+      {d.regles > 0 && d.regles < 30 && <p className="mt-1.5 px-1 text-[10px] text-ink-muted">Sur {pl(d.regles, "pari")} réglé{d.regles > 1 ? "s" : ""}, ces chiffres donnent une tendance, pas une preuve. {joursSansComparaison === null ? "Solde jamais comparé à un bookmaker." : `Solde comparé au bookmaker il y a ${joursSansComparaison === 0 ? "moins d’un jour" : pl(joursSansComparaison, "jour")}.`}</p>}
 
       {/* Points de vigilance : des règles fixes, jamais un avis */}
       {alertes.length > 0 && (
         <section className="mt-3 space-y-2" aria-label="Points de vigilance">
           {alertes.map((a) => (
-            <div key={a.cle} className="rounded-xl border border-draw/40 bg-draw-soft p-3">
-              <p className="text-sm font-semibold text-draw-ink">{a.titre}</p>
-              <p className="mt-0.5 text-[12px] leading-snug text-draw-ink">{a.regle}</p>
-            </div>
+            <Link key={a.cle} href={a.cle === "serie" || a.cle === "combines" ? "/bilan" : "/paris"} className="flex items-center gap-3 rounded-2xl border border-draw/50 bg-draw-soft p-3 active:opacity-90">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0 text-draw"><path d="M12 3 2.5 20h19L12 3Z" /><path d="M12 10v4.5" /><path d="M12 17.3v.2" /></svg>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[11px] font-semibold uppercase tracking-wide text-draw">Point de vigilance</span>
+                <span className="block text-sm font-semibold leading-snug text-draw-ink">{a.titre}</span>
+                <span className="mt-0.5 block text-[12px] leading-snug text-draw-ink">{a.regle}</span>
+              </span>
+              <span aria-hidden className="text-draw">›</span>
+            </Link>
           ))}
         </section>
       )}
 
       {/* 2. Ce qui attend une action */}
-      <h2 className="mt-5 text-base font-bold">À faire</h2>
-      {rienAFaire ? (
-        <p className="mt-2 rounded-xl border border-line bg-surface p-3 text-sm text-ink-muted">Rien à faire pour l’instant. Les résultats à confirmer apparaîtront ici à la fin des matchs.</p>
-      ) : (
-        <ul className="mt-2 space-y-2">
-          {aConfirmer > 0 && <Todo href="/paris" fort titre={`${pl(aConfirmer, "résultat")} à confirmer`} texte={`Les matchs sont joués. ${APP_NAME} propose un résultat : rien n’entre dans ta bankroll avant ton accord.`} />}
-          {aRegler > 0 && <Todo href="/paris" titre={`${pl(aRegler, "pari")} à régler à la main`} texte={`Match non suivi ou statistiques non publiées : ${APP_NAME} ne peut pas proposer de résultat.`} />}
-          {aComparer && <Todo href="/bankroll?v=comptes" titre="Comparer ton solde à celui du bookmaker" texte={joursSansComparaison === null ? "Jamais fait. C’est le contrôle qui attrape un pari oublié ou mal réglé." : `Dernière comparaison il y a ${pl(joursSansComparaison, "jour")}.`} />}
-        </ul>
+      {!rienAFaire && (
+        <>
+          <h2 className="mt-5 text-base font-bold">À faire</h2>
+          <ul className="mt-2 space-y-2">
+            {aConfirmer > 0 && <Todo href="/paris" fort titre={`${pl(aConfirmer, "résultat")} à confirmer`} texte={`Les matchs sont joués. ${APP_NAME} propose un résultat : rien n’entre dans ta bankroll avant ton accord.`} />}
+            {aRegler > 0 && <Todo href="/paris" titre={`${pl(aRegler, "pari")} à régler à la main`} texte={`Match non suivi ou statistiques non publiées : ${APP_NAME} ne peut pas proposer de résultat.`} />}
+            {aComparer && <Todo href="/bankroll?v=comptes" titre="Comparer ton solde à celui du bookmaker" texte={joursSansComparaison === null ? "Jamais fait. C’est le contrôle qui attrape un pari oublié ou mal réglé." : `Dernière comparaison il y a ${pl(joursSansComparaison, "jour")}.`} />}
+          </ul>
+        </>
       )}
 
       {/* 3. Les gestes courants */}
-      <h2 className="mt-5 text-base font-bold">Actions rapides</h2>
+      <h2 className="mt-5 text-base font-bold">Que veux-tu faire ?</h2>
       <section className="mt-2 grid grid-cols-2 gap-2">
-        <Action href="/import" tone="info" icon={<IconCamera width={18} height={18} />}>Importer un ticket</Action>
-        <Action href="/matchs" tone="terrain" icon={<IconCompass width={18} height={18} />}>Analyser un match</Action>
-        <Action href="/sources" tone="conseil" icon={<IconChat width={18} height={18} />}>Comparer mes sources</Action>
-        <Action href={`/coach?v=discussion&q=${encodeURIComponent("Fais-moi un point sur ma bankroll et mes mises récentes.")}`} tone="conseil" icon={<IconWallet width={18} height={18} />}>Point bankroll</Action>
+        <Action href="/import" icon={<><path d="M4 8V6a2 2 0 0 1 2-2h2" /><path d="M16 4h2a2 2 0 0 1 2 2v2" /><path d="M20 16v2a2 2 0 0 1-2 2h-2" /><path d="M8 20H6a2 2 0 0 1-2-2v-2" /><path d="M8 9.5h8M8 12h8M8 14.5h5" /></>}>Scanner un ticket</Action>
+        <Action href="/matchs" icon={<><circle cx="12" cy="12" r="9" /><path d="m12 7.5 4 2.9-1.5 4.7h-5L8 10.4l4-2.9Z" /><path d="M12 3v4.5M3.6 9.3 8 10.4M5.9 18.3l3.6-3.2M18.1 18.3l-3.6-3.2M20.4 9.3 16 10.4" /></>}>Analyser un match</Action>
+        <Action href="/sources" icon={<><circle cx="9" cy="8" r="3.2" /><path d="M3 19a6 6 0 0 1 12 0" /><circle cx="17" cy="9" r="2.4" /><path d="M16 14.2a4.6 4.6 0 0 1 5 4.6" /></>}>Comparer mes sources</Action>
+        <Action href="/coach?v=discussion" icon={<><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" /><path d="M9 11.5h.01M12 11.5h.01M15 11.5h.01" /></>}>Parler au coach</Action>
       </section>
 
-      {/* Repères : deux chiffres et les sources, le détail est ailleurs */}
-      <section className="mt-5 rounded-xl border border-line bg-surface p-4 shadow-card">
-        <div className="flex items-baseline justify-between gap-2"><h2 className="text-sm font-semibold">Mes paris réels</h2><Link href="/bilan" className="text-xs font-medium text-brand">Bilan détaillé ›</Link></div>
-        {d.regles === 0 ? <p className="mt-2 text-sm text-ink-muted">Aucun pari réglé pour l’instant.</p> : (
-          <>
-            <dl className="mt-2 grid grid-cols-2 gap-3">
-              <div><dt className="text-[11px] text-ink-muted">Rendement</dt><dd className={`text-lg font-bold tabular-nums ${tone(d.rendement)}`}>{pct(d.rendement, true)}</dd><dd className="text-[10px] text-ink-muted">gain net / mises</dd></div>
-              <div><dt className="text-[11px] text-ink-muted">Paris gagnés</dt><dd className="text-lg font-bold tabular-nums">{d.gagnes} sur {d.gagnes + d.perdus}</dd><dd className="text-[10px] text-ink-muted">{pct(d.reussite)} ; attendu à ces cotes : {pct(d.attendu)}</dd></div>
-            </dl>
-            {d.regles < 30 && <p className="mt-2 text-[11px] text-ink-muted">Sur {pl(d.regles, "pari")} seulement, ces chiffres donnent une tendance, pas une preuve.</p>}
-          </>
-        )}
-      </section>
-
-      <section className="mt-3 rounded-xl border border-line bg-surface p-4 shadow-card">
+      <section className="mt-5 rounded-2xl border border-line bg-surface p-4">
         <div className="flex items-baseline justify-between gap-2"><h2 className="text-sm font-semibold">Mes sources suivies</h2><Link href="/sources" className="text-xs font-medium text-brand">Toutes ›</Link></div>
         {sources.length === 0 ? <p className="mt-2 text-sm text-ink-muted">Aucune pour l’instant. <Link href="/sources" className="text-brand underline">Ajoute un tipster, une page ou un canal</Link> pour le noter sur ses vrais résultats.</p> : (
           <ul className="mt-2 divide-y divide-line">
@@ -176,13 +182,18 @@ export default async function Home() {
 function Todo({ href, titre, texte, fort }: { href: string; titre: string; texte: string; fort?: boolean }) {
   return (
     <li>
-      <Link href={href} className={`flex items-center gap-3 rounded-xl border p-3 active:opacity-80 ${fort ? "border-draw/40 bg-draw-soft" : "border-line bg-surface"}`}>
+      <Link href={href} className={`flex items-center gap-3 rounded-xl border p-3 active:opacity-80 ${fort ? "border-brand/40 bg-brand-soft" : "border-line bg-surface"}`}>
         <span className="min-w-0 flex-1"><b className="block text-sm">{titre}</b><span className="block text-[12px] leading-snug text-ink-muted">{texte}</span></span>
         <span className="text-brand">›</span>
       </Link>
     </li>
   );
 }
-function Action({ href, tone, icon, children }: { href: string; tone: "info" | "terrain" | "conseil"; icon: React.ReactNode; children: React.ReactNode }) {
-  return <Link href={href} className="flex items-center gap-2.5 rounded-2xl border border-line bg-surface p-3 text-sm font-medium shadow-card active:bg-surface-2"><IconTile size="sm" tone={tone}>{icon}</IconTile>{children}</Link>;
+function Action({ href, icon, children }: { href: string; icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <Link href={href} className="tile tile-action flex flex-col items-center gap-2 px-3 py-4 text-center text-sm font-medium">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="text-brand">{icon}</svg>
+      {children}
+    </Link>
+  );
 }

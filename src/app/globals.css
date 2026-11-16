@@ -177,3 +177,19 @@ a, button { touch-action: manipulation; }
 /* Repère de saisie au clavier, visible dans les deux thèmes */
 :focus-visible { outline: 2px solid rgb(var(--c-brand)); outline-offset: 2px; }
 input, select, textarea { color: rgb(var(--c-ink)); }
+
+/* Carte mise en avant (solde) : léger dégradé, liseré et halo à la couleur d'action. */
+.card-hero {
+  border: 1px solid rgb(var(--c-brand) / .35);
+  background: linear-gradient(140deg, rgb(var(--c-surface)) 0%, rgb(var(--c-surface2)) 100%);
+  box-shadow: 0 0 0 1px rgb(var(--c-brand) / .06), 0 14px 32px -18px rgb(var(--c-brand) / .55);
+}
+/* Tuile : carte courte pour un chiffre ou une action */
+.tile { border: 1px solid rgb(var(--c-line)); background: rgb(var(--c-surface)); border-radius: 1rem; }
+.tile-action { border-color: rgb(var(--c-brand) / .28); }
+.tile-action:active { background: rgb(var(--c-brand-soft)); }
+/* Fond du thème sombre : une lueur discrète en haut de l'écran */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body { background: radial-gradient(120% 360px at 50% -140px, rgb(var(--c-brand) / .14), transparent 70%) fixed, rgb(var(--c-canvas)); }
+}
+:root[data-theme="dark"] body { background: radial-gradient(120% 360px at 50% -140px, rgb(var(--c-brand) / .14), transparent 70%) fixed, rgb(var(--c-canvas)); }
