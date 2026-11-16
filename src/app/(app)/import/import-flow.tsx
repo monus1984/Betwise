@@ -41,6 +41,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
   const [text, setText] = useState(initialText);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [note, setNote] = useState<{ text: string; betId: string } | null>(null);
   const [result, setResult] = useState<Extracted | null>(null);
   const [queue, setQueue] = useState<Extracted[]>([]);   // tickets lus dans le même envoi, en attente
   const [done, setDone] = useState<{ n: number; total: number } | null>(null);
@@ -239,9 +240,20 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
         })),
       });
       if (!res.ok) { setError(res.error); return; }
+      if (res.note) { setNote({ text: res.note, betId: res.betId }); return; }
       if (next(true)) return;
       router.push(test ? "/paris?vue=tests&ajout=1" : "/import?ok=1&next=" + (status === "en_cours" ? "paris" : "regles"));
     });
+  }
+
+  // Pari enregistré, mais corrigé d'après les scores : on le dit avant de quitter l'écran
+  if (note) {
+    return (
+      <div className="space-y-4">
+        <Notice kind="info">Pari enregistré. {note.text}</Notice>
+        <Button onClick={() => router.push(`/paris/${note.betId}`)}>Voir le pari</Button>
+      </div>
+    );
   }
 
   // ---------- Étape 1 : entrée ----------

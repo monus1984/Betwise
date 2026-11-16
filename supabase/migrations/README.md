@@ -45,3 +45,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0035_cote_payee.sql | 2026-11-15 | `cote_payee()` : Betclic paie sur la cote totale arrondie à 2 décimales ; `place_bet`, `finalize_bet`, `settle_bet`, `correct_bet_result` l'utilisent |
 | 0036_confirmation_and_grants.sql | 2026-11-16 | Paris réels : résultat proposé (`bets.resultat_propose`), bankroll écrite seulement à la confirmation ; écritures directes retirées aux comptes connectés sur 23 tables ; ancien `place_bet` à 6 arguments fermé |
 | 0037_bankroll_verifie_at.sql | 2026-11-16 | `bankrolls.verifie_at` : date du dernier rapprochement avec le solde du bookmaker |
+| 0038_bet_recheck.sql | 2026-11-16 | `bet_recheck()` : après un import, sélections remises d’accord avec les scores, ticket « perdu » sans sélection perdue rouvert ; `settle_bet` ne marque plus perdues les sélections non jouées |

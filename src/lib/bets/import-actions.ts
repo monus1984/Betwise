@@ -31,7 +31,7 @@ const schema = z.object({
 });
 export type ImportedBetInput = z.infer<typeof schema>;
 
-export async function placeImportedBet(input: ImportedBetInput): Promise<{ ok: true; betId: string } | { ok: false; error: string }> {
+export async function placeImportedBet(input: ImportedBetInput): Promise<{ ok: true; betId: string; note?: string } | { ok: false; error: string }> {
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Saisie invalide" };
   const d = parsed.data;
@@ -60,7 +60,11 @@ export async function placeImportedBet(input: ImportedBetInput): Promise<{ ok: t
   }
   // Combiné assuré : posé après coup (le pari est recalculé si une seule sélection est déjà perdue)
   if (d.assurance && data) await supabase.rpc("set_bet_assurance", { p_bet_id: data as string, p_on: true });
+  // Les statuts lus sur l'image ne font pas foi : on remet le pari d'accord avec les scores en base
+  // (match pas encore joué = en attente ; ticket « perdu » sans sélection perdue = rouvert).
+  let note: string | undefined;
+  if (data) { const { data: msg } = await supabase.rpc("bet_recheck", { p_bet_id: data as string }); if (typeof msg === "string" && msg) note = msg; }
   revalidatePath("/"); revalidatePath("/paris");
   if (d.virtuel) revalidatePath("/sources", "layout");
-  return { ok: true, betId: data as string };
+  return { ok: true, betId: data as string, note };
 }

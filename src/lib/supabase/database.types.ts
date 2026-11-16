@@ -1650,6 +1650,12 @@ export type Database = {
         }
         Returns: number
       }
+      bet_recheck: {
+        Args: {
+          p_bet_id: string
+        }
+        Returns: string
+      }
       settle_bet: {
         Args: {
           p_bet_id: string
