@@ -126,3 +126,16 @@ describe("matchSource", () => {
     expect(normalizePick("Marché exotique", "Madagascar marque dans les deux périodes du match", "Madagascar", "Guinée-Bissau").ok).toBe(false);
   });
 });
+
+describe("handicap 1xBet", () => {
+  const n = (m: string, p: string) => normalizePick(m, p, "République centrafricaine", "Benin");
+  it("« Handicap 2 (-1) » = handicap asiatique sur l'équipe 2, où qu'il soit écrit", () => {
+    for (const [m, p] of [["", "Handicap 2 (-1)"], ["Handicap", "2 (-1)"], ["Handicap 2", "-1"], ["Handicap", "Handicap 2 (-1)"]] as const)
+      expect(n(m, p)).toMatchObject({ market_code: "AH", market_param: -1, selection: "2", ok: true });
+    expect(n("", "Handicap 2 (-1.5)")).toMatchObject({ market_code: "AH", market_param: -1.5, selection: "2" });
+    expect(n("", "Handicap 1 (+1,5)")).toMatchObject({ market_code: "AH", market_param: 1.5, selection: "1" });
+  });
+  it("le handicap européen reste à part", () => {
+    expect(n("Handicap européen", "Bénin (-1)").market_code).toBe("EH");
+  });
+});

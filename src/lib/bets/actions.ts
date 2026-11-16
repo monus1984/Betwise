@@ -120,6 +120,7 @@ export async function setSelectionOrigin(selectionId: string, sourceId: string) 
 }
 
 export async function updateSelection(input: { selectionId: string; cote?: number; matchId?: string | null; matchLibre?: string | null; clearMatch?: boolean; marketCode?: string; marketParam?: number | null; selection?: string }) {
+  if (input.marketCode !== undefined && input.selection !== undefined && !String(input.selection ?? "").trim()) return { ok: false as const, error: "Choisis la sélection avant d’enregistrer." };
   const supabase = await createClient();
   const { error } = await supabase.rpc("update_selection", {
     p_selection_id: input.selectionId,

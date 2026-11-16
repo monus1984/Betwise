@@ -94,6 +94,8 @@ function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index
 
   function save() {
     setErr(null); setSaved(false);
+    // Un marché sans choix ne peut pas être réglé : la ligne resterait « en attente » pour toujours.
+    if (!locked && !selection.trim()) { setErr("Choisis la sélection (équipe 1 ou 2, Plus ou Moins…) avant d’enregistrer."); return; }
     start(async () => {
       const r = await updateSelection({
         selectionId: s.id,
