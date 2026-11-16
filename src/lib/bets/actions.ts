@@ -167,3 +167,13 @@ export async function bankrollAlignBk(formData: FormData) {
   revalidatePath("/"); revalidatePath("/bankroll");
   redirect(error ? "/bankroll?v=comptes&err=serveur" : "/bankroll?v=comptes&ok=recalage");
 }
+
+/** Cashout : le montant encaissé chez le bookmaker règle le pari, quels que soient les matchs encore en cours. */
+export async function cashoutBet(betId: string, montant: number) {
+  if (!Number.isFinite(montant) || montant <= 0) return { ok: false as const, error: "Indique le montant encaissé." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("cashout_bet", { p_bet_id: betId, p_montant: montant });
+  if (error) return { ok: false as const, error: humanize(error.message) };
+  revalidatePath("/paris", "layout"); revalidatePath("/"); revalidatePath("/bankroll");
+  return { ok: true as const };
+}

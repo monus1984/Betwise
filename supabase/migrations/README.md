@@ -47,3 +47,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0037_bankroll_verifie_at.sql | 2026-11-16 | `bankrolls.verifie_at` : date du dernier rapprochement avec le solde du bookmaker |
 | 0038_bet_recheck.sql | 2026-11-16 | `bet_recheck()` : après un import, sélections remises d’accord avec les scores, ticket « perdu » sans sélection perdue rouvert ; `settle_bet` ne marque plus perdues les sélections non jouées |
 | 0039_bankroll_par_bookmaker.sql | 2026-11-16 | `bankroll_transactions.bookmaker`, vue `my_bankroll_journal`, `bankroll_move_bk()`, `bankroll_align_bk()` : solde et recalage par bookmaker ; `notifications_read()` |
+| 0042_cashout.sql | 2026-11-16 | `bets.cashout`, `cashout_bet()` : pari réglé sur le montant encaissé chez le bookmaker |

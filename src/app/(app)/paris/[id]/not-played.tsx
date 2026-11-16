@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { convertBetToTest, correctBetResult } from "@/lib/bets/actions";
+import { cashoutBet, convertBetToTest, correctBetResult } from "@/lib/bets/actions";
 
 /** Ticket importé (d'un groupe, d'un tipster) mais jamais joué : le passer en test rétablit la bankroll. */
 export function NotPlayed({ betId }: { betId: string }) {
@@ -49,6 +49,34 @@ export function CorrectResult({ betId, statut, test }: { betId: string; statut: 
           <button type="button" disabled={pending} onClick={() => start(async () => { const r = await correctBetResult(betId, pick); if (r.ok) { setPick(null); router.refresh(); } else setErr(r.error); })} className="rounded-lg bg-inverse px-3 py-2 text-sm font-semibold text-on-inverse disabled:opacity-50">{pending ? "Correction…" : `Confirmer : ${RES[pick].toLowerCase()}`}</button>
           <button type="button" onClick={() => setPick(null)} className="text-sm text-ink-muted">Annuler</button>
         </div>
+      )}
+      {err && <p className="mt-2 text-xs text-loss-ink">{err}</p>}
+    </section>
+  );
+}
+
+/** Cashout fait chez le bookmaker : on saisit le montant reçu, c'est lui qui entre dans la bankroll. */
+export function Cashout({ betId, mise }: { betId: string; mise: number }) {
+  const [open, setOpen] = useState(false);
+  const [val, setVal] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  const router = useRouter();
+  const montant = Number(val.replace(/\s/g, "").replace(",", "."));
+  return (
+    <section className="mt-4 rounded-xl border border-line bg-surface p-3">
+      <h2 className="text-sm font-semibold">Tu as fait un cashout ?</h2>
+      <p className="mt-1 text-xs text-ink-muted">Saisis le montant encaissé chez ton bookmaker. Il règle le pari tout de suite, même si des matchs sont encore en cours.</p>
+      {!open ? (
+        <button type="button" onClick={() => setOpen(true)} className="mt-2 rounded-lg border border-brand/40 px-3 py-2 text-sm font-medium text-brand">Enregistrer un cashout</button>
+      ) : (
+        <form className="mt-2 flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); start(async () => { const r = await cashoutBet(betId, montant); if (r.ok) router.refresh(); else setErr(r.error); }); }}>
+          <label className="min-w-0 flex-1"><span className="mb-1 block text-xs font-medium text-ink-soft">Montant encaissé (F CFA)</span>
+            <input value={val} onChange={(e) => setVal(e.target.value)} inputMode="numeric" required className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-base" /></label>
+          <button disabled={pending || !(montant > 0)} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-fill disabled:opacity-50">{pending ? "Enregistrement…" : "Valider"}</button>
+          <button type="button" onClick={() => { setOpen(false); setErr(null); }} className="px-2 py-2 text-sm text-ink-muted">Annuler</button>
+          {montant > 0 && <p className="w-full text-xs text-ink-muted">Résultat du pari : {montant - mise >= 0 ? "+" : "−"}{Math.abs(Math.round(montant - mise)).toLocaleString("fr-FR")} F pour {Math.round(mise).toLocaleString("fr-FR")} F misés.</p>}
+        </form>
       )}
       {err && <p className="mt-2 text-xs text-loss-ink">{err}</p>}
     </section>

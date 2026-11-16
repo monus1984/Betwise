@@ -6,7 +6,7 @@ import { loadSourceOptions } from "@/lib/sources/options";
 import { loadSignals } from "@/lib/probs/signals";
 import { analyzeTicket } from "@/lib/probs/ticket";
 import { TicketAnalysisCard } from "./ticket-analysis";
-import { CorrectResult, NotPlayed } from "./not-played";
+import { Cashout, CorrectResult, NotPlayed } from "./not-played";
 import { ConfirmResult } from "../confirm-result";
 import { BetEditor, type EditableBet } from "./editor";
 
@@ -21,7 +21,7 @@ export default async function BetPage({ params }: { params: Promise<{ id: string
 
   const { data } = await supabase
     .from("bets")
-    .select("id, type, mise, cote_totale, statut, gain_net, placed_at, created_at, bookmaker, detail_complet, nb_selections, source_import, virtuel, resultat_propose, gain_propose, bet_selections(id, match_id, match_libre, market_code, market_param, selection, cote, resultat, risque_calcule, origin_source_id, match:matches(id, kickoff_at, statut, score_home, score_away, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe)))")
+    .select("id, type, mise, cote_totale, statut, gain_net, placed_at, created_at, bookmaker, detail_complet, nb_selections, source_import, virtuel, resultat_propose, gain_propose, cashout, bet_selections(id, match_id, match_libre, market_code, market_param, selection, cote, resultat, risque_calcule, origin_source_id, match:matches(id, kickoff_at, statut, score_home, score_away, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe)))")
     .eq("id", id)
     .maybeSingle();
   if (!data) notFound();
@@ -57,7 +57,9 @@ export default async function BetPage({ params }: { params: Promise<{ id: string
       {analysis && <TicketAnalysisCard a={analysis} />}
       {b.statut === "en_cours" && <ConfirmResult betId={b.id} propose={b.resultat_propose && b.resultat_propose !== "en_attente" ? b.resultat_propose : null} gainPropose={b.gain_propose === null ? null : Number(b.gain_propose)} mise={Number(b.mise)} />}
       <BetEditor bet={bet} sources={sources} markets={markets ?? []} />
-      {(b.statut === "gagne" || b.statut === "perdu" || b.statut === "rembourse") && <CorrectResult betId={b.id} statut={b.statut} test={b.virtuel} />}
+      {b.statut === "en_cours" && !b.virtuel && <Cashout betId={b.id} mise={Number(b.mise)} />}
+      {b.cashout !== null && b.cashout !== undefined && <p className="mt-4 rounded-xl border border-info/30 bg-info-soft p-3 text-sm text-info-ink">Réglé par cashout : {Math.round(Number(b.cashout)).toLocaleString("fr-FR")} F encaissés. Les lignes dont le match n’était pas terminé restent « en attente ».</p>}
+      {b.cashout === null && (b.statut === "gagne" || b.statut === "perdu" || b.statut === "rembourse") && <CorrectResult betId={b.id} statut={b.statut} test={b.virtuel} />}
       {!b.virtuel && b.statut !== "annule" && <NotPlayed betId={b.id} />}
 
       <section className="mt-6">

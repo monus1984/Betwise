@@ -585,6 +585,7 @@ export type Database = {
           propose_at: string | null
           assurance: boolean
           virtuel: boolean
+          cashout: number | null
         }
         Insert: {
           id?: string
@@ -611,6 +612,7 @@ export type Database = {
           propose_at?: string | null
           assurance?: boolean
           virtuel?: boolean
+          cashout?: number | null
         }
         Update: {
           id?: string
@@ -637,6 +639,7 @@ export type Database = {
           propose_at?: string | null
           assurance?: boolean
           virtuel?: boolean
+          cashout?: number | null
         }
         Relationships: [
           {
@@ -1671,6 +1674,13 @@ export type Database = {
           p_bet_id: string
         }
         Returns: string
+      }
+      cashout_bet: {
+        Args: {
+          p_bet_id: string
+          p_montant: number
+        }
+        Returns: Database["betwise"]["Tables"]["bets"]["Row"]
       }
       bankroll_move_bk: {
         Args: {
