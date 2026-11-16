@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/app-name";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { fcfa } from "@/components/ui";
@@ -62,11 +63,11 @@ export default async function Home() {
 
   return (
     <>
-      <PageHeader title={`Salut ${profile?.pseudo ?? ""}`} subtitle="Où tu en es, et ce qui t’attend." tall photo
+      <PageHeader title={`Salut ${profile?.pseudo ?? ""}`} subtitle="Où tu en es, et ce qui t’attend." tall
         action={<Link href="/reglages" aria-label="Réglages">Réglages</Link>} />
 
       {/* 1. Où j'en suis */}
-      <section className="relative z-10 -mt-9 rounded-2xl border border-line bg-white p-4 shadow-card">
+      <section className="relative z-10 -mt-9 rounded-2xl border border-line bg-surface p-4 shadow-card">
         <div className="flex items-center gap-3">
           <IconTile tone="terrain"><IconWallet /></IconTile>
           <div className="min-w-0 flex-1">
@@ -92,11 +93,11 @@ export default async function Home() {
       {/* 2. Ce qui attend une action */}
       <h2 className="mt-5 text-base font-bold">À faire</h2>
       {rienAFaire ? (
-        <p className="mt-2 rounded-xl border border-line bg-white p-3 text-sm text-ink-muted">Rien à faire pour l’instant. Les résultats à confirmer apparaîtront ici à la fin des matchs.</p>
+        <p className="mt-2 rounded-xl border border-line bg-surface p-3 text-sm text-ink-muted">Rien à faire pour l’instant. Les résultats à confirmer apparaîtront ici à la fin des matchs.</p>
       ) : (
         <ul className="mt-2 space-y-2">
-          {aConfirmer > 0 && <Todo href="/paris" fort titre={`${pl(aConfirmer, "résultat")} à confirmer`} texte="Les matchs sont joués. BETWISE propose un résultat : rien n’entre dans ta bankroll avant ton accord." />}
-          {aRegler > 0 && <Todo href="/paris" titre={`${pl(aRegler, "pari")} à régler à la main`} texte="Match non suivi ou statistiques non publiées : BETWISE ne peut pas proposer de résultat." />}
+          {aConfirmer > 0 && <Todo href="/paris" fort titre={`${pl(aConfirmer, "résultat")} à confirmer`} texte={`Les matchs sont joués. ${APP_NAME} propose un résultat : rien n’entre dans ta bankroll avant ton accord.`} />}
+          {aRegler > 0 && <Todo href="/paris" titre={`${pl(aRegler, "pari")} à régler à la main`} texte={`Match non suivi ou statistiques non publiées : ${APP_NAME} ne peut pas proposer de résultat.`} />}
           {aComparer && <Todo href="/reglages#solde" titre="Comparer ton solde à celui du bookmaker" texte={joursSansComparaison === null ? "Jamais fait. C’est le contrôle qui attrape un pari oublié ou mal réglé." : `Dernière comparaison il y a ${pl(joursSansComparaison, "jour")}.`} />}
         </ul>
       )}
@@ -111,7 +112,7 @@ export default async function Home() {
       </section>
 
       {/* Repères : deux chiffres et les sources, le détail est ailleurs */}
-      <section className="mt-5 rounded-xl border border-line bg-white p-4 shadow-card">
+      <section className="mt-5 rounded-xl border border-line bg-surface p-4 shadow-card">
         <div className="flex items-baseline justify-between gap-2"><h2 className="text-sm font-semibold">Mes paris réels</h2><Link href="/bilan" className="text-xs font-medium text-brand">Bilan détaillé ›</Link></div>
         {d.regles === 0 ? <p className="mt-2 text-sm text-ink-muted">Aucun pari réglé pour l’instant.</p> : (
           <>
@@ -124,7 +125,7 @@ export default async function Home() {
         )}
       </section>
 
-      <section className="mt-3 rounded-xl border border-line bg-white p-4 shadow-card">
+      <section className="mt-3 rounded-xl border border-line bg-surface p-4 shadow-card">
         <div className="flex items-baseline justify-between gap-2"><h2 className="text-sm font-semibold">Mes sources suivies</h2><Link href="/sources" className="text-xs font-medium text-brand">Toutes ›</Link></div>
         {sources.length === 0 ? <p className="mt-2 text-sm text-ink-muted">Aucune pour l’instant. <Link href="/sources" className="text-brand underline">Ajoute un tipster, une page ou un canal</Link> pour le noter sur ses vrais résultats.</p> : (
           <ul className="mt-2 divide-y divide-line">
@@ -143,7 +144,7 @@ export default async function Home() {
 function Todo({ href, titre, texte, fort }: { href: string; titre: string; texte: string; fort?: boolean }) {
   return (
     <li>
-      <Link href={href} className={`flex items-center gap-3 rounded-xl border p-3 active:opacity-80 ${fort ? "border-amber-300 bg-amber-50" : "border-line bg-white"}`}>
+      <Link href={href} className={`flex items-center gap-3 rounded-xl border p-3 active:opacity-80 ${fort ? "border-draw/40 bg-draw-soft" : "border-line bg-surface"}`}>
         <span className="min-w-0 flex-1"><b className="block text-sm">{titre}</b><span className="block text-[12px] leading-snug text-ink-muted">{texte}</span></span>
         <span className="text-brand">›</span>
       </Link>
@@ -151,5 +152,5 @@ function Todo({ href, titre, texte, fort }: { href: string; titre: string; texte
   );
 }
 function Action({ href, tone, icon, children }: { href: string; tone: "info" | "terrain" | "conseil"; icon: React.ReactNode; children: React.ReactNode }) {
-  return <Link href={href} className="flex items-center gap-2.5 rounded-2xl border border-line bg-white p-3 text-sm font-medium shadow-card active:bg-surface-2"><IconTile size="sm" tone={tone}>{icon}</IconTile>{children}</Link>;
+  return <Link href={href} className="flex items-center gap-2.5 rounded-2xl border border-line bg-surface p-3 text-sm font-medium shadow-card active:bg-surface-2"><IconTile size="sm" tone={tone}>{icon}</IconTile>{children}</Link>;
 }

@@ -51,11 +51,11 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
         action={!isSystem ? <FollowButton sourceId={id} following={!!f} /> : undefined}
       />
       {!isSystem && <SourceLink sourceId={id} type={s.type} url={linkOf(s)} saved={!!s.lien} canEdit={s.created_by === user!.id || (s.visibilite === "partagee" && !s.lien)} />}
-      {sp.existante && <p className="mb-4 rounded-lg border border-sky-200 bg-sky-50 p-3 text-sm text-sky-900">Cette source existait déjà en partagé : tu la suis maintenant, son historique est commun.</p>}
-      {sp.ajout && !sp.doublon && <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Prono enregistré.</p>}
-      {sp.doublon && <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">Ce prono existait déjà pour cette source (même match, marché et sélection le même jour) : rien n’a été ajouté.</p>}
+      {sp.existante && <p className="mb-4 rounded-lg border border-info/30 bg-info-soft p-3 text-sm text-info-ink">Cette source existait déjà en partagé : tu la suis maintenant, son historique est commun.</p>}
+      {sp.ajout && !sp.doublon && <p className="mb-4 rounded-lg border border-gain/30 bg-gain-soft p-3 text-sm text-gain-ink">Prono enregistré.</p>}
+      {sp.doublon && <p className="mb-4 rounded-lg border border-draw/40 bg-draw-soft p-3 text-sm text-draw-ink">Ce prono existait déjà pour cette source (même match, marché et sélection le même jour) : rien n’a été ajouté.</p>}
 
-      <section className="rounded-2xl bg-slate-900 p-5 text-white">
+      <section className="rounded-2xl bg-pitch p-5 text-white">
         <div className="flex items-baseline justify-between">
           <p className="text-xs uppercase tracking-wide text-slate-300">Tendance</p>
           <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px]">{evalStatus(declares)} · {declares} prono{declares > 1 ? "s" : ""}</span>
@@ -64,20 +64,20 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
           {regles ? `${gagnes} gagné${gagnes > 1 ? "s" : ""} sur ${regles}` : "—"}
         </p>
         <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
-          <div><p className="text-[11px] uppercase tracking-wide text-slate-400">Réussite</p><p className="font-semibold">{regles ? `${Math.round((100 * gagnes) / regles)} %` : "—"}</p></div>
-          <div><p className="text-[11px] uppercase tracking-wide text-slate-400">Rendement</p><p className={`font-semibold ${unites >= 0 ? "text-emerald-300" : "text-red-300"}`}>{avecCote ? `${unites >= 0 ? "+" : ""}${unites.toFixed(1)} u / ${avecCote}` : "—"}</p></div>
-          <div><p className="text-[11px] uppercase tracking-wide text-slate-400">Vérifiés</p><p className="font-semibold">{n(t?.nb_verifies)}/{declares}</p></div>
+          <div><p className="text-[11px] uppercase tracking-wide text-white/60">Réussite</p><p className="font-semibold">{regles ? `${Math.round((100 * gagnes) / regles)} %` : "—"}</p></div>
+          <div><p className="text-[11px] uppercase tracking-wide text-white/60">Rendement</p><p className={`font-semibold ${unites >= 0 ? "text-band-gain" : "text-band-loss"}`}>{avecCote ? `${unites >= 0 ? "+" : ""}${unites.toFixed(1)} u / ${avecCote}` : "—"}</p></div>
+          <div><p className="text-[11px] uppercase tracking-wide text-white/60">Vérifiés</p><p className="font-semibold">{n(t?.nb_verifies)}/{declares}</p></div>
         </div>
-        {declares > 0 && declares < 30 && <p className="mt-3 text-[11px] text-slate-400">Moins de 30 pronos : une tendance, pas un jugement. Le compte est affiché pour que tu juges toi-même.</p>}
+        {declares > 0 && declares < 30 && <p className="mt-3 text-[11px] text-white/60">Moins de 30 pronos : une tendance, pas un jugement. Le compte est affiché pour que tu juges toi-même.</p>}
       </section>
 
       <div className="mt-4 flex gap-2">
         {(["30j", "90j", "180j", "total"] as const).map((k) => (
-          <Link key={k} href={`/sources/${id}?p=${k}`} className={`rounded-full px-3 py-1 text-xs ${periode === k ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700"}`}>{k === "total" ? "Depuis le début" : k.replace("j", " jours")}</Link>
+          <Link key={k} href={`/sources/${id}?p=${k}`} className={`rounded-full px-3 py-1 text-xs ${periode === k ? "bg-inverse text-on-inverse" : "border border-slate-300 bg-surface text-slate-700"}`}>{k === "total" ? "Depuis le début" : k.replace("j", " jours")}</Link>
         ))}
       </div>
 
-      <section className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
+      <section className="mt-3 rounded-xl border border-slate-200 bg-surface p-4">
         <div className="mb-2 flex items-baseline justify-between">
           <h2 className="text-sm font-semibold">Rendement cumulé</h2>
           <span className="text-[11px] text-slate-500">mise fixe de 1 unité par prono</span>
@@ -88,7 +88,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
             <p className="text-[11px] uppercase tracking-wide text-slate-500">Rendement moyen</p>
             <p className="font-semibold tabular-nums">{met?.rendement !== null && met?.rendement !== undefined ? `${Number(met.rendement) >= 0 ? "+" : ""}${(Number(met.rendement) * 100).toFixed(1)} %` : "—"}</p>
             {met?.ic_bas !== null && met?.ic_bas !== undefined && (
-              <p className={`text-[11px] ${Number(met.ic_bas) > 0 ? "text-emerald-700" : Number(met.ic_haut) < 0 ? "text-red-700" : "text-slate-500"}`}>
+              <p className={`text-[11px] ${Number(met.ic_bas) > 0 ? "text-gain-ink" : Number(met.ic_haut) < 0 ? "text-loss-ink" : "text-slate-500"}`}>
                 {Number(met.ic_bas) > 0 ? "établi positif" : Number(met.ic_haut) < 0 ? "établi négatif" : "non établi"} · 90 % entre {(Number(met.ic_bas) * 100).toFixed(0)} et {(Number(met.ic_haut) * 100).toFixed(0)} %
               </p>
             )}
@@ -108,7 +108,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
       </section>
 
       {(axes ?? []).some((a) => a.axe === "competition") && (
-        <section className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
+        <section className="mt-3 rounded-xl border border-slate-200 bg-surface p-4">
           <h2 className="mb-2 text-sm font-semibold">Par compétition et par marché</h2>
           <table className="w-full text-xs">
             <thead><tr className="text-left text-slate-500"><th className="py-1 font-medium">Axe</th><th className="py-1 text-right font-medium">Pronos</th><th className="py-1 text-right font-medium">Gagnés</th><th className="py-1 text-right font-medium">Rendement</th></tr></thead>
@@ -118,7 +118,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
                   <td className="py-1">{a.axe === "competition" ? compLabel(a.valeur) : a.valeur}</td>
                   <td className="py-1 text-right tabular-nums">{Number(a.nb_declares)}</td>
                   <td className="py-1 text-right tabular-nums">{Number(a.nb_gagnes)}</td>
-                  <td className={`py-1 text-right tabular-nums ${a.rendement === null ? "text-slate-400" : Number(a.rendement) >= 0 ? "text-emerald-700" : "text-red-700"}`}>{a.rendement === null ? "—" : `${Number(a.rendement) >= 0 ? "+" : ""}${(Number(a.rendement) * 100).toFixed(0)} %`}</td>
+                  <td className={`py-1 text-right tabular-nums ${a.rendement === null ? "text-slate-400" : Number(a.rendement) >= 0 ? "text-gain-ink" : "text-loss-ink"}`}>{a.rendement === null ? "—" : `${Number(a.rendement) >= 0 ? "+" : ""}${(Number(a.rendement) * 100).toFixed(0)} %`}</td>
                 </tr>
               ))}
             </tbody>
@@ -140,13 +140,13 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
       </section>
 
       {s.type !== "modele_betwise" && (
-        <Link href={`/sources/${id}/prono`} className="mt-4 block rounded-lg bg-slate-900 py-3 text-center text-base font-medium text-white">+ Enregistrer un prono de cette source</Link>
+        <Link href={`/sources/${id}/prono`} className="mt-4 block rounded-lg bg-inverse py-3 text-center text-base font-medium text-on-inverse">+ Enregistrer un prono de cette source</Link>
       )}
 
       <section className="mt-5">
         <h2 className="mb-2 text-sm font-semibold">Historique des pronos</h2>
         {(preds ?? []).length === 0 ? (
-          <p className="rounded-lg border border-dashed border-slate-300 bg-white p-5 text-center text-sm text-slate-600">Aucun prono enregistré. Rien ne s’efface jamais ici : chaque prono garde son résultat.</p>
+          <p className="rounded-lg border border-dashed border-slate-300 bg-surface p-5 text-center text-sm text-slate-600">Aucun prono enregistré. Rien ne s’efface jamais ici : chaque prono garde son résultat.</p>
         ) : (
           <ul className="space-y-2">
             {(preds ?? []).map((p) => {

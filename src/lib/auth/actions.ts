@@ -1,4 +1,5 @@
 "use server";
+import { APP_NAME } from "@/lib/app-name";
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -40,7 +41,7 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   const majeur = formData.get("majeur") === "on";
   if (!email || !password || !pseudo) return { error: "Tous les champs sont requis." };
   if (password.length < 8) return { error: "Mot de passe : 8 caractères minimum." };
-  if (!majeur) return { error: "BETWISE est réservé aux personnes majeures." };
+  if (!majeur) return { error: `${APP_NAME} est réservé aux personnes majeures.` };
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({

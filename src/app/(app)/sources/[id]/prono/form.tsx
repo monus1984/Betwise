@@ -47,9 +47,9 @@ export function NewPredictionForm({ sourceId, markets }: { sourceId: string; mar
 
   return (
     <div className="space-y-4">
-      <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+      <section className="space-y-3 rounded-xl border border-slate-200 bg-surface p-4">
         <MatchPicker line={{ query, match }} onChange={(p) => { if (p.query !== undefined) setQuery(p.query); if (p.match !== undefined) setMatch(p.match); }} />
-        <p className={`text-xs ${willBeVerified ? "text-emerald-700" : "text-slate-500"}`}>
+        <p className={`text-xs ${willBeVerified ? "text-gain-ink" : "text-slate-500"}`}>
           {match
             ? willBeVerified
               ? "Match à venir : ce prono sera marqué Vérifié (enregistré avant le coup d’envoi)."
@@ -59,7 +59,7 @@ export function NewPredictionForm({ sourceId, markets }: { sourceId: string; mar
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Marché">
-            <select value={market} onChange={(e) => { setMarket(e.target.value); setSelection(""); setParam(e.target.value === "OU" ? "2.5" : ""); }} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base">
+            <select value={market} onChange={(e) => { setMarket(e.target.value); setSelection(""); setParam(e.target.value === "OU" ? "2.5" : ""); }} className="w-full rounded-lg border border-slate-300 bg-surface px-3 py-3 text-base">
               <MarketOptions markets={markets} />
             </select>
           </Field>

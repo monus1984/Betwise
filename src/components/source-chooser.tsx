@@ -44,7 +44,7 @@ export function SourceChooser({ sources, value, onChange, onCreated, size = "md"
       <div className="flex flex-wrap gap-1.5">
         {sources.map((s) => (
           <button key={s.id} type="button" onClick={() => onChange(s.id)}
-            className={`inline-flex items-center gap-1 rounded-full border transition ${chip} ${value === s.id ? "border-ink bg-ink text-white" : "border-line bg-white text-ink-soft active:bg-surface-2"}`}>
+            className={`inline-flex items-center gap-1 rounded-full border transition ${chip} ${value === s.id ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft active:bg-surface-2"}`}>
             <span aria-hidden className="text-[0.9em]">{TYPE_ICON[s.type ?? ""] ?? "•"}</span>{s.nom}
           </button>
         ))}
@@ -56,15 +56,15 @@ export function SourceChooser({ sources, value, onChange, onCreated, size = "md"
         <div className="space-y-2 rounded-xl border border-line bg-surface-2 p-3">
           <input autoFocus value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Nom du tipster, de la page ou du canal"
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); create(); } }}
-            className="w-full rounded-lg border border-line bg-white px-3 py-2.5 text-base outline-none focus:border-ink" />
+            className="w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-base outline-none focus:border-inverse" />
           <div className="flex flex-wrap gap-1.5">
             {TYPES.map((t) => (
-              <button key={t.v} type="button" onClick={() => setType(t.v)} className={`rounded-full border px-2.5 py-1 text-xs ${type === t.v ? "border-ink bg-ink text-white" : "border-line bg-white text-ink-soft"}`}>{TYPE_ICON[t.v]} {t.label}</button>
+              <button key={t.v} type="button" onClick={() => setType(t.v)} className={`rounded-full border px-2.5 py-1 text-xs ${type === t.v ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft"}`}>{TYPE_ICON[t.v]} {t.label}</button>
             ))}
           </div>
           {err && <p className="text-xs text-loss">{err}</p>}
           <div className="flex gap-2">
-            <button type="button" disabled={pending || nom.trim().length < 2} onClick={create} className="flex-1 rounded-lg bg-ink py-2 text-sm font-medium text-white disabled:opacity-40">{pending ? "Ajout…" : "Ajouter et choisir"}</button>
+            <button type="button" disabled={pending || nom.trim().length < 2} onClick={create} className="flex-1 rounded-lg bg-inverse py-2 text-sm font-medium text-on-inverse disabled:opacity-40">{pending ? "Ajout…" : "Ajouter et choisir"}</button>
             <button type="button" onClick={() => { setAdding(false); setErr(null); }} className="rounded-lg px-3 py-2 text-sm text-ink-muted">Annuler</button>
           </div>
           <p className="text-[11px] text-ink-muted">Elle sera suivie et notée automatiquement. Si elle existe déjà sous ce nom, c’est elle qui est reprise.</p>

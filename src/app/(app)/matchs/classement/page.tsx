@@ -26,13 +26,13 @@ export default async function ClassementPage({ searchParams }: { searchParams: P
       <Link href="/matchs" className="mb-3 inline-block text-sm text-ink-muted">‹ Matchs</Link>
       <nav className="-mx-4 mb-4 overflow-x-auto px-4" aria-label="Compétitions">
         <div className="flex w-max gap-1.5">
-          {STANDING_COMPS.map((c) => <Link key={c} href={`/matchs/classement?c=${c}`} scroll={false} className={`rounded-full border px-3 py-1.5 text-xs ${comp === c ? "border-ink bg-ink text-white" : "border-line bg-white text-ink-soft"}`}>{COMP_FLAG[c] ?? "⚽"} {COMP_SHORT[c] ?? c}</Link>)}
+          {STANDING_COMPS.map((c) => <Link key={c} href={`/matchs/classement?c=${c}`} scroll={false} className={`rounded-full border px-3 py-1.5 text-xs ${comp === c ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft"}`}>{COMP_FLAG[c] ?? "⚽"} {COMP_SHORT[c] ?? c}</Link>)}
         </div>
       </nav>
       {rows.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-line bg-white p-6 text-center text-sm text-ink-muted">Pas encore de classement pour cette compétition. Les classements sont mis à jour toutes les trois heures ; certaines compétitions n’en publient pas avant le début de la phase de groupes.</div>
+        <div className="rounded-xl border border-dashed border-line bg-surface p-6 text-center text-sm text-ink-muted">Pas encore de classement pour cette compétition. Les classements sont mis à jour toutes les trois heures ; certaines compétitions n’en publient pas avant le début de la phase de groupes.</div>
       ) : groups.map((g) => (
-        <section key={g} className="mb-3 rounded-xl border border-line bg-white p-3 shadow-card">
+        <section key={g} className="mb-3 rounded-xl border border-line bg-surface p-3 shadow-card">
           {g && <h2 className="mb-1 text-xs font-semibold text-ink-soft">{g}</h2>}
           <StandingsTable rows={rows.filter((r) => r.groupe === g)} highlight={highlight} />
         </section>

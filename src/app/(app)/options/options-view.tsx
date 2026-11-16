@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/app-name";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { CoachNav } from "@/components/coach-nav";
@@ -49,12 +50,12 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
   };
   const saisir = (legs: Option[], test: boolean) => `/nouveau?${new URLSearchParams({ legs: legsParam(legs), ...(test ? { test: "1" } : {}), ...(modele?.id ? { origin: modele.id } : {}) }).toString()}`;
 
-  const chip = (active: boolean) => `shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium ${active ? "border-brand bg-brand text-white" : "border-line bg-white text-ink-soft"}`;
-  const small = (active: boolean) => `shrink-0 rounded-full border px-2.5 py-1 text-xs ${active ? "border-ink bg-ink text-white" : "border-line bg-white text-ink-soft"}`;
+  const chip = (active: boolean) => `shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium ${active ? "border-brand bg-brand text-on-fill" : "border-line bg-surface text-ink-soft"}`;
+  const small = (active: boolean) => `shrink-0 rounded-full border px-2.5 py-1 text-xs ${active ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft"}`;
 
   return (
     <>
-      <PageHeader title="Options du jour" subtitle="Choisis ton taux de réussite : BETWISE te donne les paris qui y correspondent, en simple ou en combiné." />
+      <PageHeader title="Options du jour" subtitle={`Choisis ton taux de réussite : ${APP_NAME} te donne les paris qui y correspondent, en simple ou en combiné.`} />
       <CoachNav current="options" />
 
       <div className="mb-3 flex gap-1.5 overflow-x-auto">
@@ -62,7 +63,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
       </div>
 
       {/* Réussite visée */}
-      <section className="mb-3 rounded-xl border border-line bg-white p-3 shadow-card">
+      <section className="mb-3 rounded-xl border border-line bg-surface p-3 shadow-card">
         <p className="mb-2 text-xs font-semibold text-ink-soft">Réussite visée par sélection : <span className="tabular-nums text-ink">{min} à {max} %</span> <span className="font-normal text-ink-muted">· cotes justes {C(100 / max)} à {C(100 / min)}</span></p>
         <div className="mb-2 flex flex-wrap gap-1.5">
           {PRESETS.map((p) => <Link key={p.k} href={q({ min: p.min, max: p.max, m: null })} scroll={false} className={chip(min === p.min && max === p.max)}>{p.label} <span className="opacity-70">{p.min}–{p.max} %</span></Link>)}
@@ -72,14 +73,14 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
           <label className="text-[11px] text-ink-muted">De<input name="min" type="number" min={30} max={97} defaultValue={min} className="mt-0.5 block w-16 rounded-lg border border-line px-2 py-1.5 text-sm tabular-nums text-ink" /></label>
           <label className="text-[11px] text-ink-muted">à<input name="max" type="number" min={31} max={99} defaultValue={max} className="mt-0.5 block w-16 rounded-lg border border-line px-2 py-1.5 text-sm tabular-nums text-ink" /></label>
           <span className="pb-2 text-sm text-ink-muted">%</span>
-          <button className="ml-auto rounded-lg bg-ink px-3 py-2 text-xs font-medium text-white">Appliquer</button>
+          <button className="ml-auto rounded-lg bg-inverse px-3 py-2 text-xs font-medium text-on-inverse">Appliquer</button>
         </form>
       </section>
 
       {/* Simples / combinés */}
       <div className="mb-3 grid grid-cols-2 rounded-xl border border-line bg-surface-2 p-1 text-sm font-medium">
-        <Link href={q({ vue: "simples" })} scroll={false} className={`rounded-lg py-2 text-center ${vue === "simples" ? "bg-white shadow-card" : "text-ink-muted"}`}>En simple</Link>
-        <Link href={q({ vue: "combines", m: null })} scroll={false} className={`rounded-lg py-2 text-center ${vue === "combines" ? "bg-white shadow-card" : "text-ink-muted"}`}>En combiné</Link>
+        <Link href={q({ vue: "simples" })} scroll={false} className={`rounded-lg py-2 text-center ${vue === "simples" ? "bg-surface shadow-card" : "text-ink-muted"}`}>En simple</Link>
+        <Link href={q({ vue: "combines", m: null })} scroll={false} className={`rounded-lg py-2 text-center ${vue === "combines" ? "bg-surface shadow-card" : "text-ink-muted"}`}>En combiné</Link>
       </div>
 
       <div className="mb-3 flex gap-1.5 overflow-x-auto">
@@ -93,7 +94,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
         singles.length === 0 ? <Empty>Aucune option entre {min} et {max} % sur cette période. Élargis la fourchette.</Empty> : (
           <>
             {focus && <p className="mb-2 text-xs text-ink-muted">Toutes les options de {focus[0] ? `${focus[0].home} – ${focus[0].away}` : "ce match"} dans ta fourchette · <Link href={q({ m: null })} className="text-brand">revenir à la liste</Link></p>}
-            <ul className="overflow-hidden rounded-xl border border-line bg-white shadow-card">
+            <ul className="overflow-hidden rounded-xl border border-line bg-surface shadow-card">
               {singles.slice(0, shown).map((o, i) => <SingleRow key={`${o.matchId}-${o.market}-${o.param}-${o.sel}`} o={o} first={i === 0} tester={saisir([o], true)} more={focus ? null : q({ m: o.matchId })} />)}
             </ul>
             <p className="mt-2 px-1 text-[11px] leading-relaxed text-ink-muted">
@@ -105,14 +106,14 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
 
       {vue === "combines" && nbCouverts > 0 && (
         <>
-          <section className="mb-3 rounded-xl border border-line bg-white p-3 shadow-card">
+          <section className="mb-3 rounded-xl border border-line bg-surface p-3 shadow-card">
             <p className="mb-2 text-xs font-semibold text-ink-soft">Cote recherchée</p>
             <div className="flex flex-wrap items-center gap-1.5">
               {CIBLES.map((c) => <Link key={c} href={q({ cible: c })} scroll={false} className={chip(cible === c)}>{C(c)}</Link>)}
               <form action="/options" className="flex items-center gap-1.5">
                 {Object.entries({ per, min, max, vue, ...(fam ? { fam } : {}) }).map(([k, v]) => <input key={k} type="hidden" name={k} value={String(v)} />)}
                 <input name="cible" inputMode="decimal" defaultValue={CIBLES.includes(cible) ? "" : String(cible)} placeholder="autre" className="w-16 rounded-lg border border-line px-2 py-1.5 text-xs tabular-nums" />
-                <button className="rounded-lg bg-ink px-2.5 py-1.5 text-xs font-medium text-white">OK</button>
+                <button className="rounded-lg bg-inverse px-2.5 py-1.5 text-xs font-medium text-on-inverse">OK</button>
               </form>
             </div>
             <p className="mt-2 text-[11px] leading-relaxed text-ink-muted">
@@ -120,7 +121,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
             </p>
           </section>
           {combos.length === 0 ? <Empty>Aucune option dans ta fourchette pour composer un combiné.</Empty> : combos.map((c, k) => (
-            <section key={k} className="mb-3 overflow-hidden rounded-xl border border-line bg-white shadow-card">
+            <section key={k} className="mb-3 overflow-hidden rounded-xl border border-line bg-surface shadow-card">
               <header className="flex items-baseline justify-between border-b border-line bg-surface-2 px-3 py-2">
                 <span className="text-xs font-semibold">Combiné {k + 1} · {c.legs.length} sélection{c.legs.length > 1 ? "s" : ""}</span>
                 <span className="text-xs tabular-nums text-ink-muted">cote ≈ <b className="text-ink">{C(c.cote)}</b></span>
@@ -144,7 +145,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
                 </span>
                 <AddAllToSlip legs={c.legs.map((o) => legFrom({ ...o, cote: o.cote }))} />
                 <Link href={saisir(c.legs, true)} className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium">Tester</Link>
-                <Link href={saisir(c.legs, false)} className="rounded-lg bg-brand px-2.5 py-1.5 text-xs font-medium text-white">Parier</Link>
+                <Link href={saisir(c.legs, false)} className="rounded-lg bg-brand px-2.5 py-1.5 text-xs font-medium text-on-fill">Parier</Link>
               </footer>
             </section>
           ))}
@@ -181,5 +182,5 @@ function SingleRow({ o, first, tester, more }: { o: Option; first: boolean; test
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
-  return <div className="mb-3 rounded-xl border border-dashed border-line bg-white p-6 text-center text-sm text-ink-muted">{children}</div>;
+  return <div className="mb-3 rounded-xl border border-dashed border-line bg-surface p-6 text-center text-sm text-ink-muted">{children}</div>;
 }

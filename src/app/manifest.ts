@@ -1,14 +1,15 @@
+import { APP_NAME } from "@/lib/app-name";
 import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "BETWISE",
-    short_name: "BETWISE",
+    name: APP_NAME,
+    short_name: APP_NAME,
     description: "Comprends, mesure et maîtrise tes décisions de pari.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0e3b2e",
-    theme_color: "#0e3b2e",
+    background_color: "#0B2B4C",
+    theme_color: "#0B2B4C",
     lang: "fr",
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png" },

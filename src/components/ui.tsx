@@ -17,7 +17,7 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
     <input
       {...props}
       className={
-        "w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 " +
+        "w-full rounded-lg border border-slate-300 bg-surface px-3 py-3 text-base outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 " +
         (props.className ?? "")
       }
     />
@@ -27,15 +27,15 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
 export function Button({ variant = "primary", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "danger" }) {
   const base = "inline-flex w-full items-center justify-center rounded-xl px-4 py-3 text-base font-semibold transition disabled:opacity-50";
   const styles = {
-    primary: "bg-brand text-white shadow-[0_6px_14px_-8px_rgba(212,80,12,.8)] active:brightness-90",
+    primary: "bg-brand text-on-fill active:brightness-90",
     ghost: "bg-slate-100 text-slate-900 active:bg-slate-200",
-    danger: "bg-red-600 text-white active:bg-red-700",
+    danger: "bg-loss text-on-fill active:bg-loss",
   }[variant];
   return <button {...props} className={`${base} ${styles} ${props.className ?? ""}`} />;
 }
 
 export function Notice({ kind = "error", children }: { kind?: "error" | "info"; children: ReactNode }) {
-  const cls = kind === "error" ? "border-red-200 bg-red-50 text-red-800" : "border-sky-200 bg-sky-50 text-sky-900";
+  const cls = kind === "error" ? "border-loss/30 bg-loss-soft text-loss-ink" : "border-info/30 bg-info-soft text-info-ink";
   return <p className={`rounded-lg border p-3 text-sm ${cls}`}>{children}</p>;
 }
 
@@ -46,11 +46,43 @@ export function Chip({ active, children, ...props }: ButtonHTMLAttributes<HTMLBu
       {...props}
       className={
         "shrink-0 rounded-full border px-3 py-1.5 text-sm transition " +
-        (active ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white text-slate-700 active:bg-slate-100")
+        (active ? "border-inverse bg-inverse text-on-inverse" : "border-slate-300 bg-surface text-slate-700 active:bg-slate-100")
       }
     >
       {children}
     </button>
+  );
+}
+
+/** Carte : le conteneur de base de tous les écrans. */
+export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <section className={`rounded-2xl border border-line bg-surface p-4 ${className}`}>{children}</section>;
+}
+
+export type Etat = "gagne" | "perdu" | "rembourse" | "en_cours" | "a_confirmer" | "test" | "estimation";
+const ETAT: Record<Etat, [string, string]> = {
+  gagne: ["Gagné", "bg-gain-soft text-gain-ink"],
+  perdu: ["Perdu", "bg-loss-soft text-loss-ink"],
+  rembourse: ["Remboursé", "bg-surface-2 text-ink-soft"],
+  en_cours: ["En cours", "bg-info-soft text-info-ink"],
+  a_confirmer: ["À confirmer", "bg-draw-soft text-draw-ink"],
+  test: ["Test", "bg-surface-2 text-ink-soft"],
+  estimation: ["Estimation", "bg-draw-soft text-draw-ink"],
+};
+/** Pastille d'état : toujours un mot, jamais la couleur seule. */
+export function Badge({ etat, children }: { etat: Etat; children?: ReactNode }) {
+  const [mot, cls] = ETAT[etat];
+  return <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${cls}`}>{children ?? mot}</span>;
+}
+
+/** État vide ou donnée indisponible : dit ce qui manque et, si possible, quoi faire. */
+export function Empty({ titre, children, action }: { titre: string; children?: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-line px-4 py-8 text-center">
+      <p className="text-sm font-semibold text-ink">{titre}</p>
+      {children && <p className="mx-auto mt-1 max-w-[36ch] text-[13px] leading-relaxed text-ink-muted">{children}</p>}
+      {action && <div className="mt-4 flex justify-center">{action}</div>}
+    </div>
   );
 }
 
@@ -59,9 +91,9 @@ export const fcfa = (n: number) =>
 
 export const RISK_LABEL: Record<"prudent" | "moyen" | "risque", string> = { prudent: "Prudent", moyen: "Moyen", risque: "Risqué" };
 export const RISK_CLASS: Record<"prudent" | "moyen" | "risque", string> = {
-  prudent: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  moyen: "bg-amber-50 text-amber-800 border-amber-200",
-  risque: "bg-red-50 text-red-800 border-red-200",
+  prudent: "bg-gain-soft text-gain-ink border-gain/30",
+  moyen: "bg-draw-soft text-draw-ink border-draw/40",
+  risque: "bg-loss-soft text-loss-ink border-loss/30",
 };
 export function riskFromOdds(c: number): "prudent" | "moyen" | "risque" {
   return c < 1.5 ? "prudent" : c <= 2.2 ? "moyen" : "risque";

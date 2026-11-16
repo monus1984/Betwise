@@ -24,11 +24,11 @@ export default async function BilanPage({ searchParams }: { searchParams: Promis
     <>
       <PageHeader title="Mon bilan" subtitle="Tes paris réels réglés. Les tests n’y entrent pas." action={<Link href="/paris">Mes paris</Link>} />
       <nav className="flex gap-1.5" aria-label="Période">
-        {PERIODS.map((x) => <Link key={x.k} href={`/bilan?p=${x.k}`} scroll={false} className={`rounded-full border px-3 py-1 text-xs ${period.k === x.k ? "border-ink bg-ink text-white" : "border-line bg-white text-ink-soft"}`}>{x.t}</Link>)}
+        {PERIODS.map((x) => <Link key={x.k} href={`/bilan?p=${x.k}`} scroll={false} className={`rounded-full border px-3 py-1 text-xs ${period.k === x.k ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft"}`}>{x.t}</Link>)}
       </nav>
 
       {d.regles === 0 ? (
-        <section className="mt-3 rounded-xl border border-dashed border-line bg-white p-6 text-center text-sm text-ink-muted">
+        <section className="mt-3 rounded-xl border border-dashed border-line bg-surface p-6 text-center text-sm text-ink-muted">
           Aucun pari réglé sur cette période. <Link href="/nouveau" className="text-brand underline">Saisis un pari</Link> ou <Link href="/import" className="text-brand underline">importe un ticket</Link> : le tableau se remplit tout seul après les matchs.
         </section>
       ) : (
@@ -58,7 +58,7 @@ export default async function BilanPage({ searchParams }: { searchParams: Promis
                     </div>
                     <div className="relative mt-1 h-2 rounded-full bg-surface-2">
                       <div className={`h-2 rounded-full ${o.reussite >= o.attendu ? "bg-gain" : "bg-loss"}`} style={{ width: `${o.reussite * 100}%` }} />
-                      <div className="absolute -top-1 h-4 w-0.5 rounded bg-ink" style={{ left: `calc(${o.attendu * 100}% - 1px)` }} title="Réussite attendue à ces cotes" />
+                      <div className="absolute -top-1 h-4 w-0.5 rounded bg-inverse" style={{ left: `calc(${o.attendu * 100}% - 1px)` }} title="Réussite attendue à ces cotes" />
                     </div>
                   </li>
                 ))}
@@ -82,7 +82,7 @@ export default async function BilanPage({ searchParams }: { searchParams: Promis
               <Fact k="…à une sélection près" v={String(d.discipline.combinesAUnePres)} />
             </dl>
             {d.discipline.miseApresPerte && d.discipline.miseApresGain && d.discipline.miseApresPerte > d.discipline.miseApresGain * 1.25 && (
-              <p className="mt-3 rounded-lg bg-amber-50 p-2.5 text-xs text-amber-900">Tu mises {Math.round((d.discipline.miseApresPerte / d.discipline.miseApresGain - 1) * 100)} % de plus après une perte qu’après un gain. C’est le réflexe de vouloir se refaire : une mise fixe protège mieux ta bankroll.</p>
+              <p className="mt-3 rounded-lg bg-draw-soft p-2.5 text-xs text-draw-ink">Tu mises {Math.round((d.discipline.miseApresPerte / d.discipline.miseApresGain - 1) * 100)} % de plus après une perte qu’après un gain. C’est le réflexe de vouloir se refaire : une mise fixe protège mieux ta bankroll.</p>
             )}
           </Card>
         </>
@@ -94,7 +94,7 @@ export default async function BilanPage({ searchParams }: { searchParams: Promis
 
 function Kpi({ label, value, sub, cls = "" }: { label: string; value: string; sub?: string; cls?: string }) {
   return (
-    <div className="rounded-xl border border-line bg-white p-2.5 shadow-card">
+    <div className="rounded-xl border border-line bg-surface p-2.5 shadow-card">
       <p className="text-[10px] uppercase tracking-wide text-ink-muted">{label}</p>
       <p className={`mt-0.5 text-[15px] font-bold tabular-nums ${cls}`}>{value}</p>
       {sub && <p className="text-[10px] text-ink-muted">{sub}</p>}
@@ -103,7 +103,7 @@ function Kpi({ label, value, sub, cls = "" }: { label: string; value: string; su
 }
 function Card({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
   return (
-    <section className="mt-3 rounded-xl border border-line bg-white p-4 shadow-card">
+    <section className="mt-3 rounded-xl border border-line bg-surface p-4 shadow-card">
       <div className="mb-3 flex items-baseline justify-between gap-2"><h2 className="text-sm font-semibold">{title}</h2>{note && <span className="text-[11px] text-ink-muted">{note}</span>}</div>
       {children}
     </section>

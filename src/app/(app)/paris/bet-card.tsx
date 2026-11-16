@@ -41,9 +41,9 @@ export type BetRow = {
 
 const STATUT: Record<BetRow["statut"], { label: string; cls: string }> = {
   en_cours: { label: "En cours", cls: "bg-slate-100 text-slate-700" },
-  gagne: { label: "Gagné", cls: "bg-emerald-100 text-emerald-800" },
-  perdu: { label: "Perdu", cls: "bg-red-100 text-red-800" },
-  rembourse: { label: "Remboursé", cls: "bg-amber-100 text-amber-800" },
+  gagne: { label: "Gagné", cls: "bg-gain-soft text-gain-ink" },
+  perdu: { label: "Perdu", cls: "bg-loss-soft text-loss-ink" },
+  rembourse: { label: "Remboursé", cls: "bg-draw-soft text-draw-ink" },
   annule: { label: "Annulé", cls: "bg-slate-100 text-slate-500" },
 };
 
@@ -57,7 +57,7 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
   const recent = Date.now() - Date.parse(bet.created_at) < 24 * 3600000;
 
   return (
-    <li className="rounded-xl border border-slate-200 bg-white p-4">
+    <li className="rounded-xl border border-slate-200 bg-surface p-4">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <p className="text-sm text-slate-500">
@@ -66,14 +66,14 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
           <p className="text-base font-semibold">
             Mise {fcfa(Number(bet.mise))}
             {bet.statut !== "en_cours" && bet.gain_net !== null && (
-              <span className={`ml-2 ${Number(bet.gain_net) >= 0 ? "text-emerald-700" : "text-red-700"}`}>
+              <span className={`ml-2 ${Number(bet.gain_net) >= 0 ? "text-gain-ink" : "text-loss-ink"}`}>
                 {Number(bet.gain_net) >= 0 ? "+" : ""}{fcfa(Number(bet.gain_net))}
               </span>
             )}
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
-          <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${aConfirmer ? "bg-amber-100 text-amber-900" : st.cls}`}>{aConfirmer ? "À confirmer" : st.label}</span>
+          <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${aConfirmer ? "bg-draw-soft text-draw-ink" : st.cls}`}>{aConfirmer ? "À confirmer" : st.label}</span>
           <Link href={`/paris/${bet.id}`} className="text-[11px] font-medium text-brand">Analyser · modifier ›</Link>
         </div>
       </div>
@@ -85,7 +85,7 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
           return (
             <li key={s.id} className="flex items-start justify-between gap-3 text-sm">
               <div className="min-w-0">
-                <p className="truncate font-medium">{s.resultat === "gagne" ? <span className="text-emerald-700">✓ </span> : s.resultat === "perdu" ? <span className="text-red-700">✗ </span> : s.resultat === "rembourse" ? <span className="text-amber-700">↩ </span> : null}{label}</p>
+                <p className="truncate font-medium">{s.resultat === "gagne" ? <span className="text-gain-ink">✓ </span> : s.resultat === "perdu" ? <span className="text-loss-ink">✗ </span> : s.resultat === "rembourse" ? <span className="text-draw-ink">↩ </span> : null}{label}</p>
                 <div className="text-xs text-slate-500">
                   {marketLabel(s.market_code, s.market_param, s.selection)} · cote {Number(s.cote).toFixed(2)} · <OriginPicker selectionId={s.id} current={s.origin_source_id} currentName={one(s.origin)?.nom ?? "—"} sources={sources} />
                 </div>
@@ -99,7 +99,7 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
       </ul>
 
       {bet.statut === "en_cours" && <ConfirmResult betId={bet.id} propose={propose} gainPropose={bet.gain_propose ?? null} mise={Number(bet.mise)} />}
-      {!bet.detail_complet && <p className="mt-2 text-[11px] text-amber-700">Détail des sélections non lu (ticket replié) : compte dans la bankroll, pas dans la notation des sources.</p>}
+      {!bet.detail_complet && <p className="mt-2 text-[11px] text-draw-ink">Détail des sélections non lu (ticket replié) : compte dans la bankroll, pas dans la notation des sources.</p>}
       {recent && (
         <div className="mt-2 text-right">
           {!confirmDel ? (
@@ -107,14 +107,14 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
           ) : (
             <span className="text-[11px] text-slate-600">
               Supprimer ce pari et ses mouvements ?{" "}
-              <button disabled={pending} onClick={() => start(async () => { const r = await deleteDuplicateBet(bet.id); if (!r.ok) setErr(r.error); })} className="font-medium text-red-700 underline">Oui</button>
+              <button disabled={pending} onClick={() => start(async () => { const r = await deleteDuplicateBet(bet.id); if (!r.ok) setErr(r.error); })} className="font-medium text-loss-ink underline">Oui</button>
               {" · "}
               <button onClick={() => setConfirmDel(false)} className="underline">Non</button>
             </span>
           )}
         </div>
       )}
-      {err && <p className="mt-2 text-xs text-red-700">{err}</p>}
+      {err && <p className="mt-2 text-xs text-loss-ink">{err}</p>}
     </li>
   );
 }

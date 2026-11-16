@@ -46,7 +46,7 @@ export default async function NouveauPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHeader title={test ? "Tester un choix" : "Nouveau pari"} subtitle={test ? "Enregistré et suivi comme un pari, sans toucher à ta bankroll." : "Trois champs, et l’origine de ton choix."} action={<a href="/import" className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium">Importer un ticket</a>} />
+      <PageHeader title={test ? "Tester un choix" : "Nouveau pari"} subtitle={test ? "Enregistré et suivi comme un pari, sans toucher à ta bankroll." : "Trois champs, et l’origine de ton choix."} action={<a href="/import" className="rounded-lg border border-slate-300 bg-surface px-3 py-2 text-sm font-medium">Importer un ticket</a>} />
       <NewBetForm sources={ordered} markets={markets ?? []} defaultOrigin={mine?.id ?? null} legs={legs} initialTest={test} upcoming={upcoming} fromCoupon={sp.from === "coupon"} />
     </>
   );

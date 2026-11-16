@@ -25,14 +25,14 @@ function Progress({ goal: g, onEdit }: { goal: GoalState; onEdit: () => void }) 
   const pct = Math.max(0, Math.min(1, g.progression));
   const s = STATUT[g.statut];
   return (
-    <section className="mt-3 rounded-xl border border-line bg-white p-4 shadow-card">
+    <section className="mt-3 rounded-xl border border-line bg-surface p-4 shadow-card">
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-sm font-semibold">Objectif : {F(g.cible)}</h2>
         <button onClick={onEdit} className="text-xs text-brand">Modifier</button>
       </div>
       <div className="relative mt-3 h-3 rounded-full bg-surface-2">
         <div className={`h-3 rounded-full ${g.progression >= 0 ? "bg-gain" : "bg-loss"}`} style={{ width: `${Math.max(2, pct * 100)}%` }} />
-        <div className="absolute -top-1 h-5 w-0.5 rounded bg-ink" style={{ left: `calc(${g.tempsEcoule * 100}% - 1px)` }} title="Où tu devrais être aujourd'hui" />
+        <div className="absolute -top-1 h-5 w-0.5 rounded bg-inverse" style={{ left: `calc(${g.tempsEcoule * 100}% - 1px)` }} title="Où tu devrais être aujourd'hui" />
       </div>
       <div className="mt-1.5 flex justify-between text-[11px] tabular-nums text-ink-muted"><span>départ {F(g.depart)}</span><span>{F(g.solde)} · {g.joursRestants} j restants</span></div>
       <p className={`mt-2 text-sm font-medium ${s.c}`}>{s.t}</p>
@@ -87,14 +87,14 @@ function GoalForm({ solde, onCancel }: { solde: number; onCancel?: () => void })
     </section>
   );
   return (
-    <section className="mt-3 rounded-xl border border-line bg-white p-4 shadow-card">
+    <section className="mt-3 rounded-xl border border-line bg-surface p-4 shadow-card">
       <div className="flex items-baseline justify-between"><h2 className="text-sm font-semibold">Ton objectif</h2>{onCancel && <button onClick={onCancel} className="text-xs text-ink-muted">Annuler</button>}</div>
       <p className="mt-1 text-xs text-ink-muted">Bankroll actuelle : {F(solde)}. Combien veux-tu atteindre, et en combien de temps ?</p>
       <div className="mt-3 flex items-center gap-2">
         <input inputMode="numeric" value={cible} onChange={(e) => setCible(e.target.value)} className="min-w-0 flex-1 rounded-lg border border-line px-3 py-2.5 text-base tabular-nums" placeholder="ex. 50 000" />
         <span className="text-sm text-ink-muted">F</span>
       </div>
-      <div className="mt-2 flex gap-1.5">{DELAIS.map((d) => <button key={d} onClick={() => setJours(d)} className={`flex-1 rounded-full border py-1.5 text-xs ${jours === d ? "border-ink bg-ink text-white" : "border-line text-ink-soft"}`}>{d} jours</button>)}</div>
+      <div className="mt-2 flex gap-1.5">{DELAIS.map((d) => <button key={d} onClick={() => setJours(d)} className={`flex-1 rounded-full border py-1.5 text-xs ${jours === d ? "border-inverse bg-inverse text-on-inverse" : "border-line text-ink-soft"}`}>{d} jours</button>)}</div>
 
       {loading && <p className="mt-3 text-xs text-ink-muted">Calcul…</p>}
       {!loading && prev && (
@@ -106,8 +106,8 @@ function GoalForm({ solde, onCancel }: { solde: number; onCancel?: () => void })
       )}
       {err && <p className="mt-2 text-xs text-loss">{err}</p>}
       <div className="mt-3 flex gap-2">
-        <button disabled={pending || !(c > solde)} onClick={() => save(c)} className="flex-1 rounded-lg bg-ink py-2.5 text-sm font-medium text-white disabled:opacity-40">Valider {c > solde ? F(c) : ""}</button>
-        {prev?.raisonnable && prev.objectif.pAtteindre < 0.4 && <button disabled={pending} onClick={() => save(prev.raisonnable!.cible)} className="flex-1 rounded-lg border border-ink py-2.5 text-sm font-medium">Prendre {F(prev.raisonnable.cible)}</button>}
+        <button disabled={pending || !(c > solde)} onClick={() => save(c)} className="flex-1 rounded-lg bg-inverse py-2.5 text-sm font-medium text-on-inverse disabled:opacity-40">Valider {c > solde ? F(c) : ""}</button>
+        {prev?.raisonnable && prev.objectif.pAtteindre < 0.4 && <button disabled={pending} onClick={() => save(prev.raisonnable!.cible)} className="flex-1 rounded-lg border border-inverse py-2.5 text-sm font-medium">Prendre {F(prev.raisonnable.cible)}</button>}
       </div>
     </section>
   );

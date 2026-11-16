@@ -41,7 +41,7 @@ export function OriginPicker({ selectionId, current, currentName, sources }: { s
       {state === "saved" && !pending && <span className="ml-1 text-gain">✓ enregistré</span>}
       {err && <span className="ml-1 text-loss">{err}</span>}
       {open && (
-        <span className="mt-2 block rounded-xl border border-line bg-white p-2.5 shadow-card">
+        <span className="mt-2 block rounded-xl border border-line bg-surface p-2.5 shadow-card">
           <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-wide text-ink-muted">Ce choix vient de…</span>
           <SourceChooser size="sm" sources={list} value={value} onChange={choose} onCreated={(s) => setList((l) => [...l, s])} />
         </span>

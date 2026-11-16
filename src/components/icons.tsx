@@ -16,8 +16,8 @@ export const IconFlame = (p: P) => <svg {...S} {...p}><path d="M12 21c-3.6 0-6.5
 export const IconWallet = (p: P) => <svg {...S} {...p}><path d="M4 7.5h14.5a1.5 1.5 0 011.5 1.5v9a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 18z" /><path d="M4 7.5V6a1.5 1.5 0 011.5-1.5H16" /><circle cx="16" cy="13.5" r="1.2" fill="currentColor" /></svg>;
 
 const TONES = {
-  conseil: "bg-brand-soft text-brand", test: "bg-violet-100 text-violet-700", alerte: "bg-amber-100 text-amber-700", info: "bg-sky-100 text-sky-700",
-  gain: "bg-emerald-100 text-gain", terrain: "bg-pitch text-white", neutre: "bg-surface-2 text-ink-soft", perte: "bg-red-100 text-loss",
+  conseil: "bg-brand-soft text-brand", test: "bg-surface-2 text-ink-soft", alerte: "bg-draw-soft text-draw-ink", info: "bg-info-soft text-info-ink",
+  gain: "bg-gain-soft text-gain", terrain: "bg-pitch text-white", neutre: "bg-surface-2 text-ink-soft", perte: "bg-loss-soft text-loss",
 } as const;
 export type Tone = keyof typeof TONES;
 /** Pastille d'icône : la couleur dit de quoi il s'agit avant qu'on lise. */
@@ -25,14 +25,14 @@ export function IconTile({ tone = "neutre", children, size = "md" }: { tone?: To
   return <span className={`flex shrink-0 items-center justify-center rounded-xl ${size === "sm" ? "h-8 w-8" : "h-10 w-10"} ${TONES[tone]}`}>{children}</span>;
 }
 
-/** Le signe BETWISE : le rond central et la ligne médiane d'un terrain, le ballon orange au centre. */
+/** Le signe BETWISE : le rond central et la ligne médiane d'un terrain, le ballon turquoise au centre. */
 export function Mark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 48 48" className={className} aria-hidden>
-      <rect width="48" height="48" rx="12" fill="#0a2b22" />
+      <rect width="48" height="48" rx="12" fill="#0B2B4C" />
       <path d="M24 4v40" stroke="#fff" strokeOpacity=".55" strokeWidth="2" />
       <circle cx="24" cy="24" r="12.5" fill="none" stroke="#fff" strokeWidth="2.5" />
-      <circle cx="24" cy="24" r="5" fill="#f26a1b" />
+      <circle cx="24" cy="24" r="5" fill="#20BFA0" />
     </svg>
   );
 }

@@ -1,4 +1,5 @@
 "use client";
+import { APP_NAME } from "@/lib/app-name";
 
 import { useEffect, useState, useTransition } from "react";
 import { IconBell, IconTile } from "@/components/icons";
@@ -65,7 +66,7 @@ export function NotificationsCard({ prefs }: { prefs: NotifPrefs }) {
   function toggle(k: keyof NotifPrefs) { const on = !p[k]; setP({ ...p, [k]: on }); start(async () => { const r = await setNotifPref(k, on); if (!r.ok) setP((x) => ({ ...x, [k]: !on })); }); }
 
   return (
-    <details className="mt-3 rounded-2xl border border-line bg-white p-4 shadow-card" open={state === "inactif"}>
+    <details className="mt-3 rounded-2xl border border-line bg-surface p-4 shadow-card" open={state === "inactif"}>
       <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-semibold">
         <span className="flex items-center gap-2"><IconTile size="sm" tone="alerte"><IconBell width={18} height={18} /></IconTile>Notifications</span>
         <span className={`text-xs font-normal ${state === "actif" ? "text-gain" : "text-ink-muted"}`}>{state === "actif" ? "activées sur ce téléphone" : state === "chargement" ? "…" : "désactivées"}</span>
@@ -73,18 +74,18 @@ export function NotificationsCard({ prefs }: { prefs: NotifPrefs }) {
       <div className="mt-3 space-y-3">
         {state === "indisponible" && (
           <p className="text-xs leading-relaxed text-ink-muted">
-            {ios && !installe ? "Sur iPhone, les notifications ne marchent que si BETWISE est installée sur l’écran d’accueil : dans Safari, touche Partager puis « Sur l’écran d’accueil », ouvre BETWISE depuis cette icône et reviens ici." : "Ce navigateur ne permet pas les notifications. Sur Android, utilise Chrome ; sur iPhone, installe BETWISE sur l’écran d’accueil (iOS 16.4 ou plus récent)."}
+            {ios && !installe ? `Sur iPhone, les notifications ne marchent que si ${APP_NAME} est installée sur l’écran d’accueil : dans Safari, touche Partager puis « Sur l’écran d’accueil », ouvre ${APP_NAME} depuis cette icône et reviens ici.` : `Ce navigateur ne permet pas les notifications. Sur Android, utilise Chrome ; sur iPhone, installe ${APP_NAME} sur l’écran d’accueil (iOS 16.4 ou plus récent).`}
           </p>
         )}
-        {state === "refuse" && <p className="text-xs leading-relaxed text-ink-muted">Les notifications sont bloquées pour BETWISE sur ce téléphone. Autorise-les dans les réglages du navigateur (ou de l’application), puis reviens ici.</p>}
-        {state === "inactif" && <button type="button" onClick={activer} disabled={busy} className="w-full rounded-xl bg-brand py-2.5 text-sm font-semibold text-white disabled:opacity-50">{busy ? "Activation…" : "Activer sur ce téléphone"}</button>}
+        {state === "refuse" && <p className="text-xs leading-relaxed text-ink-muted">Les notifications sont bloquées pour {APP_NAME} sur ce téléphone. Autorise-les dans les réglages du navigateur (ou de l’application), puis reviens ici.</p>}
+        {state === "inactif" && <button type="button" onClick={activer} disabled={busy} className="w-full rounded-xl bg-brand py-2.5 text-sm font-semibold text-on-fill disabled:opacity-50">{busy ? "Activation…" : "Activer sur ce téléphone"}</button>}
         {(state === "actif" || state === "inactif") && (
           <ul className="divide-y divide-line">
             {TYPES.map((t) => (
               <li key={t.k} className="flex items-center gap-3 py-2">
                 <span className="min-w-0 flex-1"><span className="block text-sm">{t.t}</span><span className="block text-[11px] text-ink-muted">{t.d}</span></span>
                 <button type="button" role="switch" aria-checked={p[t.k]} aria-label={t.t} onClick={() => toggle(t.k)} className={`relative h-6 w-11 shrink-0 rounded-full transition ${p[t.k] ? "bg-brand" : "bg-slate-300"}`}>
-                  <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${p[t.k] ? "left-[22px]" : "left-0.5"}`} />
+                  <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow transition-all ${p[t.k] ? "left-[22px]" : "left-0.5"}`} />
                 </button>
               </li>
             ))}

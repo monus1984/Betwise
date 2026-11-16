@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/app-name";
 /**
  * Le jour vu par l'abonné : coups du jour BETWISE, et ses propres choix (paris en cours, pronos de ses sources)
  * confrontés aux probabilités BETWISE et rangés dans les mêmes catégories.
@@ -68,7 +69,7 @@ export async function loadToday(db: Db, userId: string) {
     const categorie = p !== null ? categorieOf(p) : r.cote ? categorieFromOdds(r.cote) : null;
     const value = p !== null && r.cote ? p * r.cote - 1 : null;
     const verdict = p === null ? (r.cote ? "pas de cote de référence : classé d’après sa cote" : "pas de données sur ce match")
-      : p >= 0.667 ? `BETWISE confirme : ${Math.round(p * 100)} %` : p >= 0.5 ? `BETWISE est partagé : ${Math.round(p * 100)} %` : `BETWISE n’y croit pas : ${Math.round(p * 100)} %`;
+      : p >= 0.667 ? `${APP_NAME} confirme : ${Math.round(p * 100)} %` : p >= 0.5 ? `${APP_NAME} est partagé : ${Math.round(p * 100)} %` : `${APP_NAME} n’y croit pas : ${Math.round(p * 100)} %`;
     const tone: TheirPick["tone"] = p === null ? "none" : p >= 0.667 ? "good" : p >= 0.5 ? "mid" : "bad";
     return { qui: r.qui, type: r.type, match_id: r.m.id, match: `${h} – ${a}`, kickoff: r.m.kickoff_at, selection: pickLabel(r.market_code, r.market_param === null ? null : Number(r.market_param), r.selection, h, a),
       cote: r.cote, p, categorie, tone, aussiBetwise: betwiseKeys.has(key(r.m.id, r.market_code, r.market_param, r.selection)),

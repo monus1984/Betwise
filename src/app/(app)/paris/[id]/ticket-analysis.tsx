@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/app-name";
 import type { TicketAnalysis } from "@/lib/probs/ticket";
 import { CAT_LABEL, CAT_STYLE, categorieOf } from "@/lib/coach/categories";
 
@@ -8,8 +9,8 @@ export function TicketAnalysisCard({ a }: { a: TicketAnalysis }) {
   const combo = a.lignes.length > 1;
   const pct = (x: number) => `${x >= 0.1 ? Math.round(x * 100) : (x * 100).toFixed(1).replace(".", ",")} %`;
   return (
-    <section className="mb-4 rounded-xl border border-line bg-white p-4 shadow-card">
-      <div className="mb-3 flex items-baseline justify-between"><h2 className="text-sm font-semibold">Analyse du ticket</h2><span className="text-[11px] text-ink-muted">probabilités BETWISE</span></div>
+    <section className="mb-4 rounded-xl border border-line bg-surface p-4 shadow-card">
+      <div className="mb-3 flex items-baseline justify-between"><h2 className="text-sm font-semibold">Analyse du ticket</h2><span className="text-[11px] text-ink-muted">probabilités {APP_NAME}</span></div>
 
       <div className="grid grid-cols-3 gap-2 text-center">
         <div className="rounded-lg bg-surface-2 p-2"><p className="text-[11px] text-ink-muted">Chances de passer</p><p className="text-lg font-bold tabular-nums">{pct(a.pTicket)}</p></div>

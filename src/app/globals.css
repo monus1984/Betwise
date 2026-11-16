@@ -1,60 +1,153 @@
-@import "@fontsource/barlow/400.css";
-@import "@fontsource/barlow/500.css";
-@import "@fontsource/barlow/600.css";
-@import "@fontsource/barlow-condensed/600.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
 @import "@fontsource/barlow-condensed/700.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Deux thèmes, un seul jeu de composants. Chaque couleur est une variable (triplet RVB, pour que les opacités
+ * Tailwind fonctionnent). Les valeurs viennent de src/lib/theme-tokens.json, que le test de contraste relit.
+ * Thème : celui du téléphone, sauf choix explicite dans Réglages (attribut data-theme posé sur <html>).
+ */
 :root {
   color-scheme: light;
+  --c-canvas: 243 244 246;
+  --c-surface: 255 255 255;
+  --c-surface2: 238 241 244;
+  --c-ink: 11 43 76;
+  --c-ink-soft: 51 75 99;
+  --c-ink-muted: 91 107 123;
+  --c-line: 223 228 234;
+  --c-brand: 12 110 92;
+  --c-brand-soft: 224 244 239;
+  --c-on-fill: 255 255 255;
+  --c-inverse: 11 43 76;
+  --c-on-inverse: 255 255 255;
+  --c-gain: 19 117 55;
+  --c-gain-soft: 231 245 236;
+  --c-gain-ink: 20 83 45;
+  --c-loss: 180 64 58;
+  --c-loss-soft: 251 234 232;
+  --c-loss-ink: 140 42 37;
+  --c-draw: 161 98 7;
+  --c-draw-soft: 252 243 220;
+  --c-draw-ink: 122 74 5;
+  --c-info: 37 99 235;
+  --c-info-soft: 232 240 254;
+  --c-info-ink: 30 58 138;
+  --c-pitch: 11 43 76;
+  --c-pitch-deep: 8 27 43;
+  --c-pitch-light: 21 64 107;
+  --c-s50: 246 247 249;
+  --c-s100: 238 241 244;
+  --c-s200: 223 228 234;
+  --c-s300: 198 206 216;
+  --c-s400: 105 119 134;
+  --c-s500: 91 107 123;
+  --c-s600: 72 88 105;
+  --c-s700: 51 75 99;
+  --c-s800: 27 53 80;
+  --c-s900: 11 43 76;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+  color-scheme: dark;
+  --c-canvas: 8 27 43;
+  --c-surface: 19 47 69;
+  --c-surface2: 27 59 85;
+  --c-ink: 243 245 247;
+  --c-ink-soft: 201 211 220;
+  --c-ink-muted: 157 176 191;
+  --c-line: 39 71 95;
+  --c-brand: 32 191 160;
+  --c-brand-soft: 18 65 74;
+  --c-on-fill: 7 26 38;
+  --c-inverse: 243 245 247;
+  --c-on-inverse: 8 27 43;
+  --c-gain: 107 203 119;
+  --c-gain-soft: 22 61 51;
+  --c-gain-ink: 166 227 176;
+  --c-loss: 240 138 128;
+  --c-loss-soft: 71 40 44;
+  --c-loss-ink: 247 181 174;
+  --c-draw: 233 182 91;
+  --c-draw-soft: 64 55 31;
+  --c-draw-ink: 243 208 138;
+  --c-info: 127 178 240;
+  --c-info-soft: 24 58 92;
+  --c-info-ink: 181 211 247;
+  --c-pitch: 14 38 56;
+  --c-pitch-deep: 6 21 33;
+  --c-pitch-light: 23 53 77;
+  --c-s50: 23 53 77;
+  --c-s100: 27 59 85;
+  --c-s200: 39 71 95;
+  --c-s300: 58 91 116;
+  --c-s400: 138 160 178;
+  --c-s500: 157 176 191;
+  --c-s600: 179 193 205;
+  --c-s700: 201 211 220;
+  --c-s800: 227 232 237;
+  --c-s900: 243 245 247;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --c-canvas: 8 27 43;
+  --c-surface: 19 47 69;
+  --c-surface2: 27 59 85;
+  --c-ink: 243 245 247;
+  --c-ink-soft: 201 211 220;
+  --c-ink-muted: 157 176 191;
+  --c-line: 39 71 95;
+  --c-brand: 32 191 160;
+  --c-brand-soft: 18 65 74;
+  --c-on-fill: 7 26 38;
+  --c-inverse: 243 245 247;
+  --c-on-inverse: 8 27 43;
+  --c-gain: 107 203 119;
+  --c-gain-soft: 22 61 51;
+  --c-gain-ink: 166 227 176;
+  --c-loss: 240 138 128;
+  --c-loss-soft: 71 40 44;
+  --c-loss-ink: 247 181 174;
+  --c-draw: 233 182 91;
+  --c-draw-soft: 64 55 31;
+  --c-draw-ink: 243 208 138;
+  --c-info: 127 178 240;
+  --c-info-soft: 24 58 92;
+  --c-info-ink: 181 211 247;
+  --c-pitch: 14 38 56;
+  --c-pitch-deep: 6 21 33;
+  --c-pitch-light: 23 53 77;
+  --c-s50: 23 53 77;
+  --c-s100: 27 59 85;
+  --c-s200: 39 71 95;
+  --c-s300: 58 91 116;
+  --c-s400: 138 160 178;
+  --c-s500: 157 176 191;
+  --c-s600: 179 193 205;
+  --c-s700: 201 211 220;
+  --c-s800: 227 232 237;
+  --c-s900: 243 245 247;
 }
 
-/* Fond de l'appli : une lumière de projecteur très légère en haut, puis le gris-vert du reste */
-body {
-  background:
-    radial-gradient(120% 320px at 50% -120px, rgba(14, 59, 46, .10), transparent 70%),
-    #eef2ef;
-  background-attachment: fixed;
-}
+body { background: rgb(var(--c-canvas)); }
 
-/*
- * Le terrain : bandes de tonte, lumière des projecteurs et lignes de craie (rond central, ligne médiane).
- * Sert aux bandeaux de page et au tableau d'affichage d'un match.
- */
+/* Bandeau de page et tableau d'affichage d'un match : bleu nuit dans les deux thèmes, texte blanc. */
 .pitch {
   position: relative;
   isolation: isolate;
   color: #fff;
-  background:
-    radial-gradient(90% 140% at 0% 0%, rgba(255, 255, 255, .13), transparent 55%),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, .035) 0 34px, transparent 34px 68px),
-    linear-gradient(160deg, #17513f 0%, #0e3b2e 45%, #0a2b22 100%);
-}
-.pitch::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 260' fill='none' stroke='white' stroke-width='2'%3E%3Ccircle cx='330' cy='130' r='78'/%3E%3Ccircle cx='330' cy='130' r='4' fill='white'/%3E%3Cpath d='M330 -40V300'/%3E%3C/svg%3E") right -30px center / auto 185% no-repeat;
-  opacity: .16;
-  pointer-events: none;
+  background: linear-gradient(160deg, rgb(var(--c-pitch-light)) 0%, rgb(var(--c-pitch)) 50%, rgb(var(--c-pitch-deep)) 100%);
 }
 
-/* Variante photo (accueil, connexion) : le stade de nuit sous un voile vert, pour que le texte reste net */
-.pitch-photo {
-  background:
-    linear-gradient(180deg, rgba(10, 43, 34, .78) 0%, rgba(10, 43, 34, .62) 45%, rgba(10, 43, 34, .88) 100%),
-    url("/bandeaux/stade-nuit.webp") center 35% / cover no-repeat,
-    #0a2b22;
-}
-.pitch-photo::after { display: none; }
-
-/* Chiffres et titres « tableau d'affichage » */
-.font-display { letter-spacing: .005em; font-feature-settings: "tnum" 1, "lnum" 1; }
+/* Chiffres alignés partout où des montants se comparent */
+.font-display, .tabular-nums { font-feature-settings: "tnum" 1, "lnum" 1; }
 
 /* Zone sûre sur les téléphones à encoche */
 body {
@@ -70,7 +163,7 @@ nav.overflow-x-auto::-webkit-scrollbar { display: none; }
 a, button { touch-action: manipulation; }
 
 @keyframes bw-pulse { 0%, 100% { opacity: 1 } 50% { opacity: .45 } }
-.skeleton { background: #e1e8e4; border-radius: .75rem; animation: bw-pulse 1.4s ease-in-out infinite; }
+.skeleton { background: rgb(var(--c-s200)); border-radius: .75rem; animation: bw-pulse 1.4s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
 
@@ -80,3 +173,7 @@ a, button { touch-action: manipulation; }
 
 /* Repère de clavier visible partout */
 :focus-visible { outline: 2px solid #d4500c; outline-offset: 2px; }
+
+/* Repère de saisie au clavier, visible dans les deux thèmes */
+:focus-visible { outline: 2px solid rgb(var(--c-brand)); outline-offset: 2px; }
+input, select, textarea { color: rgb(var(--c-ink)); }

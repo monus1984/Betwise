@@ -14,7 +14,7 @@ export default function NouvelleSourcePage() {
       <PageHeader title="Nouvelle source" subtitle="Un pronostiqueur, une page, un canal, un site." />
       <form action={action} className="space-y-4">
         <Field label="Type">
-          <select name="type" className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base" defaultValue="tipster">
+          <select name="type" className="w-full rounded-lg border border-slate-300 bg-surface px-3 py-3 text-base" defaultValue="tipster">
             <option value="tipster">Pronostiqueur</option>
             <option value="canal_telegram">Canal Telegram</option>
             <option value="page_facebook">Page Facebook</option>

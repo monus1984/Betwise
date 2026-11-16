@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/app-name";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { fcfa } from "@/components/ui";
@@ -5,6 +6,7 @@ import { signOut } from "@/lib/auth/actions";
 import { bankrollAlign, bankrollMove } from "@/lib/bets/actions";
 import { createClient } from "@/lib/supabase/server";
 import { InstallButton } from "@/components/install-button";
+import { ThemeChoice } from "@/components/theme-choice";
 import { NotificationsCard } from "@/components/notifications-card";
 
 export const dynamic = "force-dynamic";
@@ -26,25 +28,25 @@ export default async function ReglagesPage() {
       <PageHeader title="Réglages" subtitle="Bankroll, notifications et compte." action={<Link href="/">Accueil</Link>} />
 
       <h2 className="text-base font-bold">Bankroll</h2>
-      <details className="mt-3 rounded-xl border border-line bg-white p-4">
+      <details className="mt-3 rounded-xl border border-line bg-surface p-4">
         <summary className="cursor-pointer text-sm font-semibold">Alimenter ou retirer la bankroll</summary>
         <form action={bankrollMove} className="mt-3 flex gap-2">
-          <select name="type" className="rounded-lg border border-line bg-white px-2 py-2 text-sm">
+          <select name="type" className="rounded-lg border border-line bg-surface px-2 py-2 text-sm">
             <option value="depot">Dépôt</option>
             <option value="retrait">Retrait</option>
           </select>
           <input name="montant" inputMode="numeric" placeholder="Montant F CFA" className="min-w-0 flex-1 rounded-lg border border-line px-3 py-2 text-base" required />
-          <button className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white">OK</button>
+          <button className="rounded-lg bg-inverse px-4 py-2 text-sm font-medium text-on-inverse">OK</button>
         </form>
         <p className="mt-2 text-xs text-ink-muted">Le solde part de 0 : enregistre ton capital de départ comme premier dépôt.</p>
       </details>
 
-      <details id="solde" open className="mt-3 rounded-xl border border-line bg-white p-4">
+      <details id="solde" open className="mt-3 rounded-xl border border-line bg-surface p-4">
         <summary className="cursor-pointer text-sm font-semibold">Comparer mon solde à celui du bookmaker</summary>
-        <p className="mt-2 text-xs text-ink-muted">Solde BETWISE : <b className="text-ink">{fcfa(solde)}</b>{verifie ? <> · dernière comparaison le {new Date(verifie).toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "Africa/Abidjan" })}</> : <> · jamais comparé</>}. Si ton bookmaker affiche autre chose, regarde d’abord le journal : un pari mal réglé ou jamais joué se corrige sur sa fiche. S’il reste un écart que tu n’expliques pas (dépôt, retrait ou pari non saisi), indique ton solde réel : BETWISE ajoute un seul mouvement d’ajustement, noté comme tel. Si les deux soldes sont égaux, saisis-le quand même : la comparaison est datée.</p>
+        <p className="mt-2 text-xs text-ink-muted">Solde {APP_NAME} : <b className="text-ink">{fcfa(solde)}</b>{verifie ? <> · dernière comparaison le {new Date(verifie).toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "Africa/Abidjan" })}</> : <> · jamais comparé</>}. Si ton bookmaker affiche autre chose, regarde d’abord le journal : un pari mal réglé ou jamais joué se corrige sur sa fiche. S’il reste un écart que tu n’expliques pas (dépôt, retrait ou pari non saisi), indique ton solde réel : {APP_NAME} ajoute un seul mouvement d’ajustement, noté comme tel. Si les deux soldes sont égaux, saisis-le quand même : la comparaison est datée.</p>
         <form action={bankrollAlign} className="mt-3 flex gap-2">
           <input name="solde" inputMode="numeric" placeholder="Solde réel en F CFA" className="min-w-0 flex-1 rounded-lg border border-line px-3 py-2 text-base" required />
-          <button className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white">Recaler</button>
+          <button className="rounded-lg bg-inverse px-4 py-2 text-sm font-medium text-on-inverse">Recaler</button>
         </form>
         <h3 className="mt-4 text-xs font-semibold text-ink-muted">Journal de la bankroll (30 derniers mouvements)</h3>
         <ul className="mt-1 divide-y divide-line text-[13px]">
@@ -62,9 +64,15 @@ export default async function ReglagesPage() {
       <h2 className="mt-6 text-base font-bold">Notifications</h2>
       <NotificationsCard prefs={{ resultats: np?.resultats ?? true, direct: np?.direct ?? true, coup_envoi: np?.coup_envoi ?? true, coups_du_jour: np?.coups_du_jour ?? true, sources: np?.sources ?? true }} />
 
+      <h2 className="mt-6 text-base font-bold">Apparence</h2>
+      <div className="mt-3 rounded-xl border border-line bg-surface p-4">
+        <ThemeChoice />
+        <p className="mt-2 text-xs text-ink-muted">Le choix reste sur ce téléphone.</p>
+      </div>
+
       <h2 className="mt-6 text-base font-bold">Application et compte</h2>
       <div className="mt-3"><InstallButton /></div>
-      <section className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-line bg-white p-4">
+      <section className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4">
         <p className="min-w-0 truncate text-sm text-ink-muted">Connecté : {user?.email}</p>
         <form action={signOut}><button className="rounded-lg border border-line px-3 py-2 text-sm font-medium">Déconnexion</button></form>
       </section>

@@ -1,4 +1,5 @@
 "use client";
+import { APP_NAME } from "@/lib/app-name";
 
 import { speakText, stopSpeaking, unlockAudio } from "@/lib/coach/speak";
 import Link from "next/link";
@@ -53,7 +54,7 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
       for (let i = e.resultIndex; i < e.results.length; i++) { const t = e.results[i][0].transcript; if (e.results[i].isFinal) final += t; else interim += t; }
       setText((final + interim).trim());
     };
-    r.onerror = (e) => { setListening(false); if (e.error === "not-allowed" || e.error === "service-not-allowed") setErr("Micro refusé : autorise le micro pour BETWISE dans les réglages du navigateur."); else if (e.error !== "aborted" && e.error !== "no-speech") setErr("La dictée n’a pas fonctionné. Réessaie ou écris ta question."); };
+    r.onerror = (e) => { setListening(false); if (e.error === "not-allowed" || e.error === "service-not-allowed") setErr(`Micro refusé : autorise le micro pour ${APP_NAME} dans les réglages du navigateur.`); else if (e.error !== "aborted" && e.error !== "no-speech") setErr("La dictée n’a pas fonctionné. Réessaie ou écris ta question."); };
     r.onend = () => { setListening(false); const q = final.trim(); if (q) { if (!voiceOutRef.current) setVoice(true); send(q); } };
     rec.current = r; setErr(null); setListening(true);
     try { r.start(); } catch { setListening(false); }
@@ -84,7 +85,7 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
     <div className="pb-28">
       <div className="mb-3 flex items-center justify-between gap-3">
         {canSpeak ? (
-          <button type="button" onClick={() => setVoice(!voiceOut)} aria-pressed={voiceOut} className={`rounded-full border px-3 py-1 text-xs font-medium ${voiceOut ? "border-brand bg-brand text-white" : "border-line bg-white text-ink-soft"}`}>
+          <button type="button" onClick={() => setVoice(!voiceOut)} aria-pressed={voiceOut} className={`rounded-full border px-3 py-1 text-xs font-medium ${voiceOut ? "border-brand bg-brand text-on-fill" : "border-line bg-surface text-ink-soft"}`}>
             {voiceOut ? "🔊 Réponses à voix haute" : "🔈 Voix coupée"}
           </button>
         ) : <span />}
@@ -95,7 +96,7 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
         <div className="mb-4 space-y-2">
           <p className="text-sm text-slate-600">Quelques questions pour commencer :</p>
           {suggestions.map((s) => (
-            <button key={s} onClick={() => send(s)} disabled={busy} className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-left text-sm active:bg-slate-50">{s}</button>
+            <button key={s} onClick={() => send(s)} disabled={busy} className="block w-full rounded-lg border border-slate-200 bg-surface px-3 py-2.5 text-left text-sm active:bg-slate-50">{s}</button>
           ))}
           <p className="pt-2 text-[11px] text-slate-400">Le coach ne reçoit ni ton nom ni tes montants en F CFA : il raisonne en unités (ta mise habituelle) et en pourcentages.</p>
         </div>
@@ -104,7 +105,7 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
       <div className="space-y-3">
         {msgs.map((m, i) => (
           <div key={m.id ?? i} className={m.role === "user" ? "flex justify-end" : ""}>
-            <div className={m.role === "user" ? "max-w-[85%] rounded-2xl rounded-br-sm bg-slate-900 px-3.5 py-2.5 text-sm text-white" : "rounded-2xl rounded-bl-sm border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800"}>
+            <div className={m.role === "user" ? "max-w-[85%] rounded-2xl rounded-br-sm bg-inverse px-3.5 py-2.5 text-sm text-on-inverse" : "rounded-2xl rounded-bl-sm border border-slate-200 bg-surface px-3.5 py-3 text-sm text-slate-800"}>
               {m.role === "assistant" ? <Rich text={m.text || "Réponse vide : repose ta question."} /> : m.text}
               {m.role === "assistant" && canSpeak && !!m.text && <button type="button" onClick={() => { unlockAudio(); speakText(m.text); }} className="mt-1.5 text-[11px] font-medium text-brand">🔊 Écouter</button>}
               {m.role === "assistant" && !!m.fonctions?.length && (
@@ -122,12 +123,12 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
         <div className="mx-auto flex max-w-xl items-end gap-2">
           {canListen && (
             <button type="button" onClick={listen} disabled={busy} aria-label={listening ? "Arrêter la dictée" : "Poser la question à la voix"} aria-pressed={listening}
-              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-lg disabled:opacity-40 ${listening ? "animate-pulse border-loss bg-loss text-white" : "border-slate-300 bg-white"}`}>🎙️</button>
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-lg disabled:opacity-40 ${listening ? "animate-pulse border-loss bg-loss text-on-fill" : "border-slate-300 bg-surface"}`}>🎙️</button>
           )}
           <textarea value={text} onChange={(e) => setText(e.target.value)} rows={1} maxLength={1500} placeholder={listening ? "Je t’écoute…" : "Pose ta question…"}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(text); } }}
-            className="max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-base" />
-          <button type="submit" disabled={busy || !text.trim()} className="h-11 rounded-xl bg-slate-900 px-4 text-sm font-medium text-white disabled:opacity-40">Envoyer</button>
+            className="max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border border-slate-300 bg-surface px-3 py-2.5 text-base" />
+          <button type="submit" disabled={busy || !text.trim()} className="h-11 rounded-xl bg-inverse px-4 text-sm font-medium text-on-inverse disabled:opacity-40">Envoyer</button>
         </div>
         {left !== null && left <= 5 && <p className="mx-auto mt-1 max-w-xl text-[11px] text-slate-500">Encore {left} question{left > 1 ? "s" : ""} aujourd’hui.</p>}
       </form>

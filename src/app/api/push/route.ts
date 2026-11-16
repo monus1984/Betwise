@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/app-name";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
     await admin.from("notification_prefs").upsert({ user_id: user.id }, { onConflict: "user_id", ignoreDuplicates: true });
   }
   if (body?.test) {
-    await admin.from("notifications").insert({ user_id: user.id, type: "test", cle: `test:${Date.now()}`, titre: "🔔 BETWISE", corps: "Les notifications fonctionnent sur ce téléphone.", url: "/" });
+    await admin.from("notifications").insert({ user_id: user.id, type: "test", cle: `test:${Date.now()}`, titre: `🔔 ${APP_NAME}`, corps: "Les notifications fonctionnent sur ce téléphone.", url: "/" });
     const r = await sendPending(admin, user.id);
     if (!r.envois) return NextResponse.json({ error: "Aucun téléphone abonné n’a reçu le test. Réactive les notifications." }, { status: 409 });
   }

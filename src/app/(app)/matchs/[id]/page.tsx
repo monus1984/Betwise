@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/app-name";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RISK_CLASS, RISK_LABEL, riskFromOdds } from "@/components/ui";
@@ -94,7 +95,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
           <div className="flex flex-col items-center gap-1.5 text-center"><TeamBadge name={home} size={44} /><span className="flex items-center gap-0.5 text-sm font-medium leading-tight">{shortName(home)}<FollowStar teamId={m.home_team_id} initial={teamOn.has(m.home_team_id)} light small /></span></div>
           <div className="text-center">
             {m.statut === "termine" ? <p className="font-display text-5xl font-bold tabular-nums">{m.score_home} – {m.score_away}</p>
-              : m.statut === "en_cours" && m.score_home !== null ? <><p className="font-display text-5xl font-bold tabular-nums">{m.score_home} – {m.score_away}</p><p className="text-[11px] font-semibold text-red-300">{Date.now() - Date.parse(m.kickoff_at) > 3.5 * 3600000 ? "fin du match à confirmer par la source" : `● ${m.minute ? `${m.minute}’` : "en direct"}`}</p></>
+              : m.statut === "en_cours" && m.score_home !== null ? <><p className="font-display text-5xl font-bold tabular-nums">{m.score_home} – {m.score_away}</p><p className="text-[11px] font-semibold text-band-loss">{Date.now() - Date.parse(m.kickoff_at) > 3.5 * 3600000 ? "fin du match à confirmer par la source" : `● ${m.minute ? `${m.minute}’` : "en direct"}`}</p></>
               : <><p className="font-display text-4xl font-bold tabular-nums">{new Date(m.kickoff_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: TZ })}</p><p className="text-[11px] text-white/60">{countdown(m.kickoff_at)}</p></>}
           </div>
           <div className="flex flex-col items-center gap-1.5 text-center"><TeamBadge name={away} size={44} /><span className="flex items-center gap-0.5 text-sm font-medium leading-tight">{shortName(away)}<FollowStar teamId={m.away_team_id} initial={teamOn.has(m.away_team_id)} light small /></span></div>
@@ -102,14 +103,14 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         {(model || market) && (
           <div className="mt-4">
             <ProbBar p={market ?? model!} light />
-            <p className="mt-1.5 text-center text-[11px] text-white/60">{market ? "Cotes de référence (marge retirée)" : "Modèle BETWISE"}</p>
+            <p className="mt-1.5 text-center text-[11px] text-white/60">{market ? "Cotes de référence (marge retirée)" : `Modèle ${APP_NAME}`}</p>
           </div>
         )}
       </header>
 
       {/* Chronologie du match : buts et cartons, domicile à gauche, extérieur à droite */}
       {evts.length > 0 && (
-        <section className="mb-3 rounded-xl border border-line bg-white p-3 shadow-card">
+        <section className="mb-3 rounded-xl border border-line bg-surface p-3 shadow-card">
           <ul className="space-y-1.5">
             {evts.map((e, i) => (
               <li key={i} className={`flex items-center gap-2 text-[13px] ${e.e === "2" ? "flex-row-reverse text-right" : ""}`}>
@@ -126,7 +127,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
       <nav className="sticky top-0 z-10 -mx-4 mb-3 bg-canvas/95 px-4 py-1.5 backdrop-blur">
         <div className="grid grid-cols-6 gap-0.5 rounded-xl bg-surface-2 p-1">
           {TABS.map((t) => (
-            <Link key={t.k} href={`/matchs/${m.id}?t=${t.k}`} scroll={false} replace className={`truncate rounded-lg px-1 py-1.5 text-center text-[12.5px] ${onglet === t.k ? "bg-white font-semibold text-ink shadow-card" : "text-ink-muted"}`}>
+            <Link key={t.k} href={`/matchs/${m.id}?t=${t.k}`} scroll={false} replace className={`truncate rounded-lg px-1 py-1.5 text-center text-[12.5px] ${onglet === t.k ? "bg-surface font-semibold text-ink shadow-card" : "text-ink-muted"}`}>
               {t.t}{t.k === "pronos" && preds?.length ? ` (${preds.length})` : ""}
             </Link>
           ))}
@@ -137,7 +138,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         <div className="space-y-3">
           {recit && <MatchRecit match={{ id: m.id, home, away, kickoff: m.kickoff_at, comp: comp?.code_externe ?? "", ouvert: m.statut === "programme" }} etapes={recit.etapes} verdict={recit.verdict} autres={recit.autres} source={recit.source} />}
           {picks.length > 0 && (
-            <Card title="Les issues les plus probables" note={sg!.source === "modele" ? "modèle BETWISE" : "d’après les cotes"}>
+            <Card title="Les issues les plus probables" note={sg!.source === "modele" ? `modèle ${APP_NAME}` : "d’après les cotes"}>
               <ul className="divide-y divide-line">
                 {picks.map((p) => (
                   <li key={`${p.market}${p.param}${p.sel}`} className="flex items-center gap-2">
@@ -164,7 +165,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
                   <Compare label="Les deux marquent" m={probOf(mk.grid, "BTTS", null, "Oui")!} />
                   <p className="mt-2 text-xs text-ink-soft">Buts attendus selon le marché <b className="tabular-nums">{fmtDec(mk.lh)} – {fmtDec(mk.la)}</b> (total {fmtDec(mk.lh + mk.la)})</p>
                 </Card>
-                <p className="px-1 text-[11px] leading-relaxed text-ink-muted">Le modèle BETWISE ne couvre pas encore ce match (sélections nationales, Ligue des champions). Ces chiffres sont déduits des cotes de référence : victoire, nul et plus/moins de 2,5 buts sont repris tels quels, les autres marchés en sont calculés.</p>
+                <p className="px-1 text-[11px] leading-relaxed text-ink-muted">Le modèle {APP_NAME} ne couvre pas encore ce match (sélections nationales, Ligue des champions). Ces chiffres sont déduits des cotes de référence : victoire, nul et plus/moins de 2,5 buts sont repris tels quels, les autres marchés en sont calculés.</p>
               </>
             ) : <Card><p className="text-sm text-ink-muted">Pas encore de cote ni d’estimation pour ce match. Elles arrivent chaque matin à partir de J-14.</p></Card>
           ) : (
@@ -211,7 +212,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
       )}
 
       {onglet === "forme" && standing.length > 0 && (
-        <section className="mb-3 rounded-xl border border-line bg-white p-3 shadow-card">
+        <section className="mb-3 rounded-xl border border-line bg-surface p-3 shadow-card">
           <div className="mb-1 flex items-baseline justify-between"><h2 className="text-sm font-semibold">Classement{standing[0].groupe ? ` · ${standing[0].groupe}` : ""}</h2><Link href={`/matchs/classement?c=${comp?.code_externe}&e=${m.home_team_id},${m.away_team_id}`} className="text-[11px] font-medium text-brand">tout le classement ›</Link></div>
           <StandingsTable rows={standing} highlight={[]} />
         </section>
@@ -260,7 +261,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
                 return (
                   <div key={k} className="mb-2.5">
                     <div className="mb-1 flex justify-between text-sm tabular-nums"><b>{a ?? "–"}</b><span className="text-xs text-ink-muted">{lab}</span><b>{b ?? "–"}</b></div>
-                    <div className="flex h-1.5 gap-0.5 overflow-hidden rounded-full"><div className="bg-brand" style={{ width: `${(na / tot) * 100}%` }} /><div className="flex-1 bg-ink" /></div>
+                    <div className="flex h-1.5 gap-0.5 overflow-hidden rounded-full"><div className="bg-brand" style={{ width: `${(na / tot) * 100}%` }} /><div className="flex-1 bg-inverse" /></div>
                   </div>
                 );
               })}
@@ -300,7 +301,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
                         </ul>
                       </div>
                     ))}
-                    <p className="text-[11px] text-ink-muted">Le modèle BETWISE ne tient pas encore compte de ces absences : à toi d’en juger le poids.</p>
+                    <p className="text-[11px] text-ink-muted">Le modèle {APP_NAME} ne tient pas encore compte de ces absences : à toi d’en juger le poids.</p>
                   </div>
                 )}
             </Card>
@@ -320,7 +321,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
                       <Link href={`/sources/${src?.id}`} className="block truncate font-medium">{src?.type === "modele_betwise" ? "📊 " : ""}{src?.nom}</Link>
                       <span className="text-xs text-ink-muted">{p.market_code}{p.market_param ? ` ${p.market_param}` : ""} · {p.selection}{p.cote_annoncee ? ` · cote ${Number(p.cote_annoncee).toFixed(2)}` : ""}</span>
                     </span>
-                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] ${p.resultat === "gagne" ? "bg-emerald-50 text-gain" : p.resultat === "perdu" ? "bg-red-50 text-loss" : p.statut === "verifie" ? "bg-brand-soft text-brand" : "bg-surface-2 text-ink-muted"}`}>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] ${p.resultat === "gagne" ? "bg-gain-soft text-gain" : p.resultat === "perdu" ? "bg-loss-soft text-loss" : p.statut === "verifie" ? "bg-brand-soft text-brand" : "bg-surface-2 text-ink-muted"}`}>
                       {p.resultat === "gagne" ? "gagné" : p.resultat === "perdu" ? "perdu" : p.statut === "verifie" ? "vérifié avant match" : "déclaré"}
                     </span>
                   </li>
@@ -333,7 +334,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
       {upcoming && (
         <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-10 px-4 pb-2">
-          <Link href={`/nouveau?match=${m.id}`} className="mx-auto block max-w-xl rounded-xl bg-ink py-3 text-center text-base font-medium text-white shadow-lg active:opacity-90">Parier sur ce match</Link>
+          <Link href={`/nouveau?match=${m.id}`} className="mx-auto block max-w-xl rounded-xl bg-inverse py-3 text-center text-base font-medium text-on-inverse shadow-lg active:opacity-90">Parier sur ce match</Link>
         </div>
       )}
     </div>
@@ -342,7 +343,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
 function Card({ title, note, children }: { title?: string; note?: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-line bg-white p-4 shadow-card">
+    <section className="rounded-xl border border-line bg-surface p-4 shadow-card">
       {title && <div className="mb-3 flex items-baseline justify-between gap-2"><h2 className="text-sm font-semibold">{title}</h2>{note && <span className="text-[11px] text-ink-muted">{note}</span>}</div>}
       {children}
     </section>
@@ -351,7 +352,7 @@ function Card({ title, note, children }: { title?: string; note?: string; childr
 
 function ProbBar({ p, light }: { p: { p1: number; pN: number; p2: number }; light?: boolean }) {
   const seg = [p.p1, p.pN, p.p2];
-  const cls = light ? ["bg-white", "bg-white/40", "bg-white/75"] : ["bg-brand", "bg-ink-muted/50", "bg-ink"];
+  const cls = light ? ["bg-white", "bg-white/40", "bg-white/75"] : ["bg-brand", "bg-ink-muted/50", "bg-inverse"];
   return (
     <div>
       <div className="flex h-2 overflow-hidden rounded-full">{seg.map((v, i) => <div key={i} className={`${cls[i]} ${i ? "ml-0.5" : ""}`} style={{ width: `${v * 100}%` }} />)}</div>
@@ -367,7 +368,7 @@ function Compare({ label, m, k }: { label: string; m: number; k?: number }) {
       <div className="mb-1 flex justify-between text-sm"><span className="truncate">{label}</span><span className="tabular-nums"><b>{Math.round(m * 100)} %</b>{k !== undefined && <span className="ml-1.5 text-xs text-ink-muted">marché {Math.round(k * 100)} %</span>}</span></div>
       <div className="relative h-2 rounded-full bg-surface-2">
         <div className="h-2 rounded-full bg-brand" style={{ width: `${m * 100}%` }} />
-        {k !== undefined && <div className="absolute -top-1 h-4 w-0.5 rounded bg-ink" style={{ left: `calc(${k * 100}% - 1px)` }} />}
+        {k !== undefined && <div className="absolute -top-1 h-4 w-0.5 rounded bg-inverse" style={{ left: `calc(${k * 100}% - 1px)` }} />}
       </div>
     </div>
   );
@@ -390,10 +391,10 @@ function Verdict({ model, market, home, away }: { model: { p1: number; pN: numbe
 function FormCard({ team, form }: { team: string; form: Form }) {
   const pts = form.reduce((s, f) => s + (f.r === "V" ? 3 : f.r === "N" ? 1 : 0), 0);
   return (
-    <section className="rounded-xl border border-line bg-white p-4 shadow-card">
+    <section className="rounded-xl border border-line bg-surface p-4 shadow-card">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-semibold">{team}</h2>
-        <span className="flex gap-1">{[...form].reverse().map((f, i) => <span key={i} className={`flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold text-white ${f.r === "V" ? "bg-gain" : f.r === "N" ? "bg-draw" : "bg-loss"}`}>{f.r}</span>)}</span>
+        <span className="flex gap-1">{[...form].reverse().map((f, i) => <span key={i} className={`flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold text-on-fill ${f.r === "V" ? "bg-gain" : f.r === "N" ? "bg-draw" : "bg-loss"}`}>{f.r}</span>)}</span>
       </div>
       <ul className="divide-y divide-line text-sm">
         {form.map((f, i) => (

@@ -23,7 +23,7 @@ export function AddFab() {
       {open && <div className="fixed inset-0 z-30 bg-black/30" onClick={() => setOpen(false)} aria-hidden />}
       <div className="pointer-events-none fixed inset-x-0 z-30 mx-auto flex max-w-xl flex-col items-end gap-2 px-4" style={{ bottom: "calc(72px + env(safe-area-inset-bottom))" }}>
         {open && (
-          <ul className="pointer-events-auto w-full max-w-xs overflow-hidden rounded-2xl border border-line bg-white shadow-xl" aria-label="Ajouter">
+          <ul className="pointer-events-auto w-full max-w-xs overflow-hidden rounded-2xl border border-line bg-surface shadow-xl" aria-label="Ajouter">
             {CHOIX.map((c) => (
               <li key={c.href} className="border-t border-line first:border-t-0">
                 <Link href={c.href} className="block px-4 py-3 active:bg-surface-2"><span className="block text-sm font-semibold">{c.titre}</span><span className="block text-[12px] text-ink-muted">{c.texte}</span></Link>
@@ -32,7 +32,7 @@ export function AddFab() {
           </ul>
         )}
         <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={open ? "Fermer" : "Ajouter un pari, un test ou un import"}
-          className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-lg shadow-brand/40 transition active:scale-95">
+          className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand text-on-fill shadow-lg shadow-brand/40 transition active:scale-95">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" className={`transition-transform ${open ? "rotate-45" : ""}`} aria-hidden><path d="M12 5v14M5 12h14" /></svg>
         </button>
       </div>

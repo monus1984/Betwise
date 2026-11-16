@@ -1,4 +1,5 @@
 "use client";
+import { APP_NAME } from "@/lib/app-name";
 
 import Link from "next/link";
 import { useActionState } from "react";
@@ -20,7 +21,7 @@ export default function Page() {
       </Field>
       <label className="flex items-start gap-3 text-sm text-slate-700">
         <input type="checkbox" name="majeur" className="mt-1 h-4 w-4" required />
-        <span>J’ai 18 ans ou plus. BETWISE est un outil de suivi et d’analyse ; il ne prend aucune mise et ne promet aucun gain.</span>
+        <span>J’ai 18 ans ou plus. {APP_NAME} est un outil de suivi et d’analyse ; il ne prend aucune mise et ne promet aucun gain.</span>
       </label>
       {state?.error && <Notice>{state.error}</Notice>}
       {state?.info && <Notice kind="info">{state.info}</Notice>}

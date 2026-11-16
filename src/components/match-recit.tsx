@@ -1,4 +1,5 @@
 "use client";
+import { APP_NAME } from "@/lib/app-name";
 
 import { useEffect, useState } from "react";
 import { CAT_LABEL, CAT_STYLE } from "@/lib/coach/categories";
@@ -27,20 +28,20 @@ export function MatchRecit({ match, etapes, verdict, autres, source }: Props) {
   const lire = () => { unlockAudio(); setLu(0); speakBlocks([`${match.home} contre ${match.away}. ${blocs[0]}`, ...blocs.slice(1)], setLu); };
 
   const leg = (c: Choix) => legFrom({ matchId: match.id, home: match.home, away: match.away, kickoff: match.kickoff, comp: match.comp, market: c.market, param: c.param, sel: c.sel, p: c.p, cote: c.cote });
-  const actif = (i: number) => (lu === i ? "border-brand bg-brand/5" : "border-line bg-white");
+  const actif = (i: number) => (lu === i ? "border-brand bg-brand/5" : "border-line bg-surface");
 
   return (
     <section className="space-y-2" aria-label="Analyse du match">
       <div className="flex items-center justify-between gap-3 px-1">
-        <h2 className="font-display text-lg font-semibold">L’analyse BETWISE</h2>
+        <h2 className="font-display text-lg font-semibold">L’analyse {APP_NAME}</h2>
         {(
-          <button type="button" onClick={lu === null ? lire : stop} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${lu === null ? "bg-pitch text-white" : "border border-line bg-white text-ink"}`}>
+          <button type="button" onClick={lu === null ? lire : stop} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${lu === null ? "bg-pitch text-white" : "border border-line bg-surface text-ink"}`}>
             {lu === null ? "▶ Écouter l’analyse" : "■ Arrêter"}
           </button>
         )}
       </div>
 
-      {etapes.length === 0 && <p className="rounded-xl border border-line bg-white p-3 text-sm text-ink-muted">Pas encore assez de données sur ces deux équipes pour dérouler une analyse (classement, derniers matchs). Le verdict ci-dessous repose sur les cotes seules.</p>}
+      {etapes.length === 0 && <p className="rounded-xl border border-line bg-surface p-3 text-sm text-ink-muted">Pas encore assez de données sur ces deux équipes pour dérouler une analyse (classement, derniers matchs). Le verdict ci-dessous repose sur les cotes seules.</p>}
       <ol className="space-y-2">
         {etapes.map((e, i) => (
           <li key={e.cle} className={`rounded-xl border p-3 transition-colors ${actif(i)}`}>
@@ -50,7 +51,7 @@ export function MatchRecit({ match, etapes, verdict, autres, source }: Props) {
         ))}
       </ol>
 
-      <div className={`rounded-xl border-2 p-3 transition-colors ${lu === etapes.length ? "border-brand bg-brand/5" : "border-pitch/30 bg-white"}`}>
+      <div className={`rounded-xl border-2 p-3 transition-colors ${lu === etapes.length ? "border-brand bg-brand/5" : "border-pitch/30 bg-surface"}`}>
         <p className="text-[11px] font-semibold text-brand">Le verdict</p>
         {verdict ? (
           <>
@@ -71,7 +72,7 @@ export function MatchRecit({ match, etapes, verdict, autres, source }: Props) {
                 ))}
               </ul>
             )}
-            <p className="mt-2 text-[11px] leading-relaxed text-ink-muted">Le verdict est calculé d’après {source === "modele" ? "le modèle BETWISE" : "les cotes de référence"}, pas d’après les étapes ci-dessus : elles donnent le contexte, elles ne prouvent rien. « ≈ » : cote estimée, à comparer à celle de ton bookmaker.</p>
+            <p className="mt-2 text-[11px] leading-relaxed text-ink-muted">Le verdict est calculé d’après {source === "modele" ? `le modèle ${APP_NAME}` : "les cotes de référence"}, pas d’après les étapes ci-dessus : elles donnent le contexte, elles ne prouvent rien. « ≈ » : cote estimée, à comparer à celle de ton bookmaker.</p>
           </>
         ) : <p className="mt-1 text-sm text-ink-muted">Pas encore de cote sur ce match : pas d’avis pour l’instant.</p>}
       </div>

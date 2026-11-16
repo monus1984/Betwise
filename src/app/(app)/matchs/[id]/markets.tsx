@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/app-name";
 import Link from "next/link";
 import { OddButton } from "@/components/slip";
 import { shortName } from "@/components/match-ui";
@@ -76,14 +77,14 @@ export function MatchMarkets({ m, sg }: { m: M; sg: Signal }) {
         <Block title="Corners, cartons, tirs, buteurs" note="sans pourcentage">
           <div className="flex flex-wrap gap-1.5">
             {[["CORN", "Corners"], ["CARD", "Cartons"], ["RED", "Carton rouge"], ["SOT", "Tirs cadrés"], ["BUT", "Buteur"], ["BUT1", "Premier buteur"], ["QUALIF", "Qualification"], ["ET", "Prolongation"]].map(([code, label]) => (
-              <Link key={code} href={`/nouveau?match=${m.id}&market=${code}`} className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-medium">{label}</Link>
+              <Link key={code} href={`/nouveau?match=${m.id}&market=${code}`} className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium">{label}</Link>
             ))}
           </div>
-          <p className="mt-2 text-[11px] text-ink-muted">BETWISE enregistre et règle ces paris avec les statistiques du match, mais n’estime pas leurs chances : tu saisis la cote de ton bookmaker.</p>
+          <p className="mt-2 text-[11px] text-ink-muted">{APP_NAME} enregistre et règle ces paris avec les statistiques du match, mais n’estime pas leurs chances : tu saisis la cote de ton bookmaker.</p>
         </Block>
       )}
       <p className="px-1 text-[11px] leading-relaxed text-ink-muted">
-        Cote sans « ≈ » : cote de référence des bookmakers européens. « ≈ » : cote estimée à partir des probabilités, avec 5 % de marge ; ton bookmaker peut payer un peu plus ou moins. Les marchés de mi-temps supposent que 45 % des buts tombent avant la pause : pourcentages indicatifs, pas encore vérifiés sur notre historique. Le pourcentage est la chance de gagner d’après les cotes de référence, marge retirée{sg.source === "modele" ? " (ici le modèle BETWISE, faute de cote)" : ""}.
+        Cote sans « ≈ » : cote de référence des bookmakers européens. « ≈ » : cote estimée à partir des probabilités, avec 5 % de marge ; ton bookmaker peut payer un peu plus ou moins. Les marchés de mi-temps supposent que 45 % des buts tombent avant la pause : pourcentages indicatifs, pas encore vérifiés sur notre historique. Le pourcentage est la chance de gagner d’après les cotes de référence, marge retirée{sg.source === "modele" ? ` (ici le modèle ${APP_NAME}, faute de cote)` : ""}.
       </p>
     </div>
   );
@@ -91,7 +92,7 @@ export function MatchMarkets({ m, sg }: { m: M; sg: Signal }) {
 
 function Block({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-line bg-white p-3 shadow-card">
+    <section className="rounded-xl border border-line bg-surface p-3 shadow-card">
       <h3 className="mb-2 flex items-baseline justify-between text-xs font-semibold text-ink-soft">{title}{note && <span className="font-normal text-ink-muted">{note}</span>}</h3>
       {children}
     </section>

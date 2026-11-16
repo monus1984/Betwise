@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/app-name";
 /**
  * Extraction d'un ticket de pari (capture ou texte) → structure validée + rapprochement avec le référentiel.
  * Le LLM lit ; le code vérifie (schéma, produit des cotes, rapprochement des matchs, déduction 1/N/2).
@@ -199,7 +200,7 @@ export function normalizePick(marketText: string, pickText: string, home: string
     // Statistique d'un joueur (« Mbappé : plus de 1,5 tir cadré ») : BETWISE ne suit que les totaux du match ou d'une équipe.
     // La lire comme un total du match la ferait gagner presque à coup sûr : on la signale au lieu de la régler de travers.
     const joueur = /joueur|player/.test(all) || (!!o && !t && ((stat === "SOT" && o.line <= 3.5) || (stat === "SHOT" && o.line <= 6.5)));
-    if (joueur) return { market_code: stat, market_param: o?.line ?? null, selection: pickText, label_pick: pickText, ok: false, reason: "Statistique d’un joueur (tirs, tirs cadrés…) : pas suivie par BETWISE. La ligne est écartée ; règle ce ticket à la main." };
+    if (joueur) return { market_code: stat, market_param: o?.line ?? null, selection: pickText, label_pick: pickText, ok: false, reason: `Statistique d’un joueur (tirs, tirs cadrés…) : pas suivie par ${APP_NAME}. La ligne est écartée ; règle ce ticket à la main.` };
     if (stat === "CARD" && /rouge|red/.test(all) && !o) return { market_code: "RED", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
     if (o) return { market_code: t && stat !== "SHOT" ? `${stat}${t}` : stat, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
     if (stat === "CORN" && /le plus|plus de corners|most/.test(all)) { const r = isDraw(p) || /égalité|autant/.test(p) ? "N" : t; if (r) return { market_code: "CORN_1X2", market_param: null, selection: r, label_pick: pickText, ok: true }; }

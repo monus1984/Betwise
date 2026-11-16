@@ -1,4 +1,5 @@
 "use client";
+import { APP_NAME } from "@/lib/app-name";
 
 import { vraisemblance } from "@/lib/extract/plausibility";
 import { MarketOptions } from "@/components/market-options";
@@ -25,9 +26,9 @@ type Line = MatchedSelection & { key: number; origin: string | null; coteStr: st
 const cleDe = (l: { match: { id: string } | null; market_code: string; market_param: number | null; selection: string }) => `${l.match?.id ?? ""}|${l.market_code}|${l.market_param ?? ""}|${l.selection}`;
 
 const OUTCOME: Record<MatchedSelection["outcome"], { label: string; cls: string }> = {
-  won: { label: "Gagnée", cls: "bg-emerald-100 text-emerald-800" },
-  lost: { label: "Perdue", cls: "bg-red-100 text-red-800" },
-  void: { label: "Remboursée", cls: "bg-amber-100 text-amber-800" },
+  won: { label: "Gagnée", cls: "bg-gain-soft text-gain-ink" },
+  lost: { label: "Perdue", cls: "bg-loss-soft text-loss-ink" },
+  void: { label: "Remboursée", cls: "bg-draw-soft text-draw-ink" },
   pending: { label: "En cours", cls: "bg-slate-100 text-slate-700" },
   unknown: { label: "?", cls: "bg-slate-100 text-slate-500" },
 };
@@ -248,7 +249,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
     return (
       <div className="space-y-4">
         {justSaved && (
-          <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+          <div className="flex items-center justify-between rounded-lg border border-gain/30 bg-gain-soft p-3 text-sm text-gain-ink">
             <span>Ticket enregistré.</span>
             <a href={nextTab === "regles" ? "/paris?f=regles" : "/paris"} className="font-medium underline">Voir mes paris</a>
           </div>
@@ -256,14 +257,14 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
         {coupon && (
           <Notice kind="info">Lien {coupon.bookmaker} reconnu (coupon {coupon.code}). Il ne contient pas les sélections : ajoute une capture ou le texte du coupon.</Notice>
         )}
-        <section className="rounded-xl border border-slate-200 bg-white p-4">
+        <section className="rounded-xl border border-slate-200 bg-surface p-4">
           <h2 className="mb-2 text-sm font-semibold">Capture ou vidéo d’écran</h2>
           <p className="mb-3 text-xs text-slate-500">Déplie le ticket avant la capture. Un ticket long : plusieurs captures dans l’ordre (6 max), ou une vidéo d’écran en faisant défiler sans te presser. La vidéo est découpée sur ton téléphone, elle n’est pas envoyée.</p>
           <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={(e) => { const f = Array.from(e.target.files ?? []); e.target.value = ""; void onFiles(f); }} />
           <Button variant="ghost" onClick={() => fileRef.current?.click()} disabled={busy}>{busy ? stage ?? "Lecture en cours…" : "Choisir des captures ou une vidéo"}</Button>
           <p className="mt-2 text-[11px] text-slate-400">Betclic ne partage pas ses tickets : la capture d’écran est le seul moyen. Sur iPhone : Photos. Sur Android : Galerie ou Fichiers.</p>
         </section>
-        <section className="rounded-xl border border-slate-200 bg-white p-4">
+        <section className="rounded-xl border border-slate-200 bg-surface p-4">
           <h2 className="mb-2 text-sm font-semibold">Texte partagé ou lien</h2>
           <textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} placeholder={"Colle ici le texte partagé par l’app de paris, ou un lien xbet://…"} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
           <Button className="mt-2" onClick={onText} disabled={busy || text.trim().length < 5}>{busy ? "Lecture en cours…" : "Lire le texte"}</Button>
@@ -278,8 +279,8 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 rounded-xl border border-line bg-surface-2 p-1 text-sm font-medium" role="radiogroup" aria-label="Type d’enregistrement">
-        <button type="button" role="radio" aria-checked={!test} onClick={() => setTest(false)} className={`rounded-lg py-2 ${!test ? "bg-white shadow-card" : "text-ink-muted"}`}>J’ai parié</button>
-        <button type="button" role="radio" aria-checked={test} onClick={() => { setTest(true); if (!toNum(mise)) setMise("1000"); }} className={`rounded-lg py-2 ${test ? "bg-white shadow-card" : "text-ink-muted"}`}>Tester sans miser</button>
+        <button type="button" role="radio" aria-checked={!test} onClick={() => setTest(false)} className={`rounded-lg py-2 ${!test ? "bg-surface shadow-card" : "text-ink-muted"}`}>J’ai parié</button>
+        <button type="button" role="radio" aria-checked={test} onClick={() => { setTest(true); if (!toNum(mise)) setMise("1000"); }} className={`rounded-lg py-2 ${test ? "bg-surface shadow-card" : "text-ink-muted"}`}>Tester sans miser</button>
       </div>
       {done && (
         <div className="flex items-center justify-between rounded-xl border border-brand/30 bg-brand/5 px-3 py-2.5 text-sm">
@@ -289,7 +290,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
       )}
       {videoNote && <Notice kind="info">{videoNote}</Notice>}
       {detected && (
-        <div className="rounded-xl border border-line bg-white p-3 text-sm shadow-card">
+        <div className="rounded-xl border border-line bg-surface p-3 text-sm shadow-card">
           <p>
             <span className="text-ink-muted">Source repérée{detected.hint.platform && detected.hint.platform !== "autre" ? ` sur ${({ telegram: "Telegram", whatsapp: "WhatsApp", facebook: "Facebook", instagram: "Instagram", tiktok: "TikTok" } as Record<string, string>)[detected.hint.platform]}` : ""} : </span>
             <b>{detected.hint.name}</b>
@@ -299,7 +300,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
             <p className="mt-1.5 text-xs text-gain">✓ Appliquée à toutes les sélections ({srcList.find((x) => x.id === detected.sourceId)?.nom}). Tu peux changer l’origine ligne par ligne.</p>
           ) : (
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <button type="button" disabled={creating} onClick={createDetected} className="rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white">{creating ? "Création…" : "Créer cette source et l’appliquer"}</button>
+              <button type="button" disabled={creating} onClick={createDetected} className="rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-on-fill">{creating ? "Création…" : "Créer cette source et l’appliquer"}</button>
               <span className="text-[11px] text-ink-muted">ou choisis-la plus bas si elle existe sous un autre nom.{detected.hint.platform === "whatsapp" ? " Une source WhatsApp reste privée." : ""}</span>
             </div>
           )}
@@ -307,7 +308,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
       )}
       {raw.kind === "pronos" && <Notice kind="info">Pronos de tipster{separes ? ` : ${valides.length} pronos séparés, enregistrés chacun comme un ${test ? "test" : "pari"} simple` : raw.total_odds ? " : combiné annoncé par le tipster" : ""}. Réglés automatiquement après les matchs ; les ✅ du message ne sont pas des résultats.</Notice>}
       {test && raw.kind !== "pronos" && <Notice kind="info">Coupon ou pronos chargés comme test : suivis et réglés automatiquement, sans toucher à ta bankroll. Choisis bien l’origine (toi ou le tipster) : c’est elle qui sera notée.</Notice>}
-      <section className="rounded-xl border border-slate-200 bg-white p-4">
+      <section className="rounded-xl border border-slate-200 bg-surface p-4">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-sm font-semibold">{raw.bookmaker ?? "Bookmaker inconnu"} · {raw.ticket_type === "combo" ? `Combiné (${raw.nb_selections_declared ?? lines.length})${raw.insurance ? " · assuré" : ""}` : "Simple"}</p>
@@ -316,7 +317,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
           <button className="text-xs text-slate-600 underline" onClick={() => { setResult(null); setLines([]); setQueue([]); setDone(null); setDetected(null); }}>Recommencer</button>
         </div>
         {result.truncated && <Notice>Capture trop longue : seules les premières lignes ont été lues. Vérifie et complète.</Notice>}
-        {raw.notes && <p className="mt-2 text-xs text-amber-800">{raw.notes}</p>}
+        {raw.notes && <p className="mt-2 text-xs text-draw-ink">{raw.notes}</p>}
         <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
           <Check ok={result.checks.odds_product_ok} label="Produit des cotes = cote totale" />
           <Check ok={result.checks.count_ok} label="Nombre de lignes cohérent" />
@@ -324,8 +325,8 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
       </section>
 
       {collapsed ? (
-        <section className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm text-amber-900">Ticket replié : le détail des sélections n’est pas visible. On enregistre le résumé (mise, cote totale, résultat) pour que ta bankroll soit juste. Tu pourras ajouter le détail plus tard.</p>
+        <section className="space-y-3 rounded-xl border border-draw/40 bg-draw-soft p-4">
+          <p className="text-sm text-draw-ink">Ticket replié : le détail des sélections n’est pas visible. On enregistre le résumé (mise, cote totale, résultat) pour que ta bankroll soit juste. Tu pourras ajouter le détail plus tard.</p>
           <p className="text-sm">Cote totale <strong>{raw.total_odds ?? "—"}</strong> · {raw.nb_selections_declared ?? "?"} sélections</p>
           <Field label="Origine de ce ticket (pour l’ensemble)">
             <SourceChooser sources={srcList} value={summaryOrigin} onChange={setSummaryOrigin} onCreated={(s) => setSrcList((x) => [...x, s])} />
@@ -336,26 +337,26 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
           const hasParam = markets.find((m) => m.code === l.market_code)?.a_parametre;
           const homeN = l.match?.home ?? l.home_team ?? "Domicile", awayN = l.match?.away ?? l.away_team ?? "Extérieur";
           return (
-          <section key={l.key} className={`space-y-2 rounded-xl border bg-white p-4 ${l.include ? "border-slate-200" : "border-dashed border-slate-300 opacity-60"}`}>
+          <section key={l.key} className={`space-y-2 rounded-xl border bg-surface p-4 ${l.include ? "border-slate-200" : "border-dashed border-slate-300 opacity-60"}`}>
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{raw.kind === "pronos" ? "Prono" : "Sélection"} {i + 1}</p>
                 <p className="truncate text-sm font-medium">{l.match ? `${l.match.home} – ${l.match.away}` : `${l.home_team ?? "?"} – ${l.away_team ?? "?"}`}</p>
                 <p className="text-xs text-slate-600">{l.ok ? pickLabel(l.market_code, l.market_param, l.selection, homeN, awayN) : l.label_pick}</p>
                 {l.match
-                  ? <p className="text-[11px] text-emerald-700">Match reconnu · {l.match.competition} · {new Date(l.match.kickoff_at).toLocaleString("fr-FR", { weekday: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}{l.match.score ? ` · score en base ${l.match.score}` : ""}{l.score_consistent === false ? " · ⚠ diffère du ticket" : ""}</p>
-                  : <p className="text-[11px] text-amber-700">Match non reconnu : choisis-le ci-dessous, sinon il sera gardé en texte et réglé à la main.</p>}
-                {!l.ok && <p className="text-[11px] text-red-700">{l.reason ?? "Sélection non comprise : choisis le marché ci-dessous."}</p>}
+                  ? <p className="text-[11px] text-gain-ink">Match reconnu · {l.match.competition} · {new Date(l.match.kickoff_at).toLocaleString("fr-FR", { weekday: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}{l.match.score ? ` · score en base ${l.match.score}` : ""}{l.score_consistent === false ? " · ⚠ diffère du ticket" : ""}</p>
+                  : <p className="text-[11px] text-draw-ink">Match non reconnu : choisis-le ci-dessous, sinon il sera gardé en texte et réglé à la main.</p>}
+                {!l.ok && <p className="text-[11px] text-loss-ink">{l.reason ?? "Sélection non comprise : choisis le marché ci-dessous."}</p>}
                 {l.include && alerteDe(l) && (
-                  <div className="mt-1 rounded-lg border border-amber-300 bg-amber-50 p-2">
-                    <p className="text-[12px] leading-snug text-amber-950">{alerteDe(l)!.message}</p>
+                  <div className="mt-1 rounded-lg border border-draw/40 bg-draw-soft p-2">
+                    <p className="text-[12px] leading-snug text-draw-ink">{alerteDe(l)!.message}</p>
                     <div className="mt-1.5 flex flex-wrap gap-3">
-                      <button type="button" onClick={() => update(l.key, { verifie: true })} className="rounded-md bg-ink px-2.5 py-1.5 text-[12px] font-medium text-white">J’ai vérifié : c’est bien ça</button>
-                      <button type="button" onClick={() => update(l.key, { editing: true })} className="text-[12px] text-amber-950 underline">Corriger la ligne</button>
+                      <button type="button" onClick={() => update(l.key, { verifie: true })} className="rounded-md bg-inverse px-2.5 py-1.5 text-[12px] font-medium text-on-inverse">J’ai vérifié : c’est bien ça</button>
+                      <button type="button" onClick={() => update(l.key, { editing: true })} className="text-[12px] text-draw-ink underline">Corriger la ligne</button>
                     </div>
                   </div>
                 )}
-                {l.include && manque(l) && <p className="mt-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-900">Sera écartée ({manque(l)}) · le reste s’enregistre quand même</p>}
+                {l.include && manque(l) && <p className="mt-1 inline-block rounded-full bg-draw-soft px-2 py-0.5 text-[11px] font-medium text-draw-ink">Sera écartée ({manque(l)}) · le reste s’enregistre quand même</p>}
               </div>
               {raw.kind === "pronos"
                 ? <button type="button" onClick={() => update(l.key, { editing: !l.editing })} className="shrink-0 text-xs text-brand underline">{l.editing ? "Fermer" : "Modifier"}</button>
@@ -367,7 +368,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
                 {!l.match && <MatchPicker line={{ query: l.query, match: null }} onChange={(p) => { if (p.match) update(l.key, { match: { ...p.match, score: null }, query: "" }); else if (p.query !== undefined) update(l.key, { query: p.query }); }} hint="Tape une équipe pour retrouver le match." />}
                 <div className="grid grid-cols-2 gap-2">
                   <Field label="Marché">
-                    <select value={l.market_code} onChange={(e) => update(l.key, { market_code: e.target.value, selection: "", ok: false, paramStr: defaultParam(e.target.value), market_param: defaultParam(e.target.value) ? Number(defaultParam(e.target.value)) : null })} className="w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm">
+                    <select value={l.market_code} onChange={(e) => update(l.key, { market_code: e.target.value, selection: "", ok: false, paramStr: defaultParam(e.target.value), market_param: defaultParam(e.target.value) ? Number(defaultParam(e.target.value)) : null })} className="w-full rounded-lg border border-slate-300 bg-surface px-2 py-2 text-sm">
                       <MarketOptions markets={markets} />
                     </select>
                   </Field>
@@ -382,7 +383,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
               {toNum(l.coteStr) > 1 && <span className={`mt-5 rounded-full border px-2 py-1 text-[11px] ${RISK_CLASS[riskFromOdds(toNum(l.coteStr))]}`}>{RISK_LABEL[riskFromOdds(toNum(l.coteStr))]}</span>}
               <label className="ml-auto mt-5 flex items-center gap-1 text-xs text-slate-600"><input type="checkbox" checked={l.include} onChange={(e) => update(l.key, { include: e.target.checked })} /> inclure</label>
             </div>
-            {l.odds_source && l.odds_source !== "ticket" && <p className="-mt-1 text-[11px] text-ink-muted">Le tipster ne donne pas de cote : {l.odds_source === "reference" ? "cote de référence des bookmakers" : "cote estimée d’après les probabilités BETWISE"}. Mets la tienne si tu l’as.</p>}
+            {l.odds_source && l.odds_source !== "ticket" && <p className="-mt-1 text-[11px] text-ink-muted">Le tipster ne donne pas de cote : {l.odds_source === "reference" ? "cote de référence des bookmakers" : `cote estimée d’après les probabilités ${APP_NAME}`}. Mets la tienne si tu l’as.</p>}
             <Field label="Origine du choix">
               <SourceChooser size="sm" sources={srcList} value={l.origin} onChange={(id) => update(l.key, { origin: id })} onCreated={(s) => setSrcList((x) => [...x, s])} />
             </Field>
@@ -391,11 +392,11 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
         })
       )}
 
-      <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+      <section className="space-y-3 rounded-xl border border-slate-200 bg-surface p-4">
         <div className="grid grid-cols-2 gap-3">
           <Field label={`${test ? "Mise fictive" : "Mise"}${separes ? " par prono" : ""} (F CFA)`}><Input inputMode="numeric" value={mise} onChange={(e) => setMise(e.target.value)} /></Field>
           {raw.kind !== "pronos" && <Field label="Résultat du ticket">
-            <select value={status} onChange={(e) => setStatus(e.target.value as typeof status)} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base">
+            <select value={status} onChange={(e) => setStatus(e.target.value as typeof status)} className="w-full rounded-lg border border-slate-300 bg-surface px-3 py-3 text-base">
               <option value="en_cours">En cours</option>
               <option value="gagne">Gagné</option>
               <option value="perdu">Perdu</option>
@@ -426,6 +427,6 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
 }
 
 function Check({ ok, label }: { ok: boolean | null; label: string }) {
-  const cls = ok === null ? "bg-slate-100 text-slate-500" : ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800";
+  const cls = ok === null ? "bg-slate-100 text-slate-500" : ok ? "bg-gain-soft text-gain-ink" : "bg-loss-soft text-loss-ink";
   return <span className={`rounded-full px-2 py-0.5 ${cls}`}>{ok === null ? "–" : ok ? "✓" : "✗"} {label}</span>;
 }

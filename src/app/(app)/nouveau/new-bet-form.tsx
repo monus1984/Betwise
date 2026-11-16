@@ -103,8 +103,8 @@ export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest 
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-2 rounded-xl border border-line bg-surface-2 p-1 text-sm font-medium" role="radiogroup" aria-label="Type d’enregistrement">
-        <button type="button" role="radio" aria-checked={!test} onClick={() => setTest(false)} className={`rounded-lg py-2 ${!test ? "bg-white shadow-card" : "text-ink-muted"}`}>Parier</button>
-        <button type="button" role="radio" aria-checked={test} onClick={() => { setTest(true); if (!mise) setMise("1000"); }} className={`rounded-lg py-2 ${test ? "bg-white shadow-card" : "text-ink-muted"}`}>Tester sans miser</button>
+        <button type="button" role="radio" aria-checked={!test} onClick={() => setTest(false)} className={`rounded-lg py-2 ${!test ? "bg-surface shadow-card" : "text-ink-muted"}`}>Parier</button>
+        <button type="button" role="radio" aria-checked={test} onClick={() => { setTest(true); if (!mise) setMise("1000"); }} className={`rounded-lg py-2 ${test ? "bg-surface shadow-card" : "text-ink-muted"}`}>Tester sans miser</button>
       </div>
       {!legs.length && coupon.length > 0 && (
         <Link href={slipHref(coupon, test)} className="flex items-center justify-between rounded-xl border border-brand/30 bg-brand/5 px-3 py-2.5 text-sm">
@@ -116,11 +116,11 @@ export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest 
       {test && <Notice kind="info">Mode test : le choix est suivi et réglé comme un pari, mais ta bankroll ne bouge pas. Il compte dans « Mes tests » et dans la fiche de chaque source d’origine, pour mesurer la justesse des choix.</Notice>}
       <div id="bet-lines" className="scroll-mt-4" />
       {lines.map((l, i) => (
-        <section key={l.key} className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+        <section key={l.key} className="space-y-3 rounded-xl border border-slate-200 bg-surface p-4">
           {lines.length > 1 && (
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Sélection {i + 1}</p>
-              <button type="button" className="text-xs text-red-600" onClick={() => setLines((ls) => ls.filter((x) => x.key !== l.key))}>Retirer</button>
+              <button type="button" className="text-xs text-loss-ink" onClick={() => setLines((ls) => ls.filter((x) => x.key !== l.key))}>Retirer</button>
             </div>
           )}
 
@@ -131,7 +131,7 @@ export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest 
               <select
                 value={l.market}
                 onChange={(e) => update(l.key, { market: e.target.value, selection: "", param: defaultParam(e.target.value) })}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base"
+                className="w-full rounded-lg border border-slate-300 bg-surface px-3 py-3 text-base"
               >
                 <MarketOptions markets={markets} />
               </select>
@@ -174,13 +174,13 @@ export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest 
 
       {upcoming.length > 0 && legs.length > 0 && list}
 
-      <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+      <section className="space-y-3 rounded-xl border border-slate-200 bg-surface p-4">
         <Field label={test ? "Mise fictive (F CFA)" : "Mise (F CFA)"} hint={test ? "Sert seulement à calculer le rendement du test." : undefined}>
           <Input inputMode="numeric" value={mise} onChange={(e) => setMise(e.target.value)} placeholder="2 000" />
         </Field>
         <div className="flex gap-1.5">
           {[500, 1000, 2000, 5000, 10000].map((v) => (
-            <button key={v} type="button" onClick={() => setMise(String(v))} className={`flex-1 rounded-lg border py-1.5 text-xs tabular-nums ${miseNum === v ? "border-ink bg-ink text-white" : "border-line bg-white text-ink-soft"}`}>{v.toLocaleString("fr-FR")}</button>
+            <button key={v} type="button" onClick={() => setMise(String(v))} className={`flex-1 rounded-lg border py-1.5 text-xs tabular-nums ${miseNum === v ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft"}`}>{v.toLocaleString("fr-FR")}</button>
           ))}
         </div>
         <div className="flex justify-between text-sm text-slate-700">
@@ -215,7 +215,7 @@ function UpcomingList({ matches, chosen, onSingle, onAdd, defaultOpen }: { match
   const today = dayKey(new Date().toISOString());
   const list = matches.filter((m) => dayKey(m.kickoff_at) === day && (!q.trim() || `${m.home} ${m.away}`.toLowerCase().includes(q.trim().toLowerCase())));
   return (
-    <details open={defaultOpen} className="group rounded-xl border border-line bg-white shadow-card">
+    <details open={defaultOpen} className="group rounded-xl border border-line bg-surface shadow-card">
       <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-semibold">
         <span>📅 Matchs des 2 prochains jours <span className="font-normal text-ink-muted">({matches.length})</span></span>
         <span className="text-ink-muted group-open:rotate-180">▾</span>
@@ -223,7 +223,7 @@ function UpcomingList({ matches, chosen, onSingle, onAdd, defaultOpen }: { match
       <div className="border-t border-line px-3 pb-3 pt-2">
         <div className="mb-2 flex items-center gap-1.5">
           {days.map((d) => (
-            <button key={d} type="button" onClick={() => setDay(d)} className={`rounded-full border px-3 py-1 text-xs ${day === d ? "border-ink bg-ink text-white" : "border-line text-ink-soft"}`}>
+            <button key={d} type="button" onClick={() => setDay(d)} className={`rounded-full border px-3 py-1 text-xs ${day === d ? "border-inverse bg-inverse text-on-inverse" : "border-line text-ink-soft"}`}>
               {d === today ? "Aujourd’hui" : new Date(`${d}T12:00:00Z`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", timeZone: "UTC" })}
             </button>
           ))}
@@ -240,7 +240,7 @@ function UpcomingList({ matches, chosen, onSingle, onAdd, defaultOpen }: { match
                   <span className="w-10 shrink-0 text-xs tabular-nums text-ink-muted">{new Date(m.kickoff_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: TZ })}</span>
                   <span className="min-w-0 flex-1 truncate text-sm">{COMP_FLAG[m.competition] ?? "⚽"} {m.home} – {m.away}</span>
                 </button>
-                <button type="button" aria-label={on ? "Déjà dans le pari" : "Ajouter au combiné"} onClick={() => onAdd(m)} className={`mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-sm font-semibold ${on ? "border-brand bg-brand text-white" : "border-brand/40 text-brand"}`}>{on ? "✓" : "+"}</button>
+                <button type="button" aria-label={on ? "Déjà dans le pari" : "Ajouter au combiné"} onClick={() => onAdd(m)} className={`mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-sm font-semibold ${on ? "border-brand bg-brand text-on-fill" : "border-brand/40 text-brand"}`}>{on ? "✓" : "+"}</button>
               </li>
             );
           })}

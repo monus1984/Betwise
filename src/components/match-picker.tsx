@@ -91,7 +91,7 @@ export function MatchPicker({ line, onChange, hint }: { line: PickerLine; onChan
     const m = line.match;
     return (
       <Field label="Match">
-        <div className="flex items-center justify-between rounded-lg border border-slate-900 bg-slate-50 px-3 py-2.5">
+        <div className="flex items-center justify-between rounded-lg border border-inverse bg-slate-50 px-3 py-2.5">
           <div className="text-sm">
             <p className="font-medium">{m.home} – {m.away}</p>
             <p className="text-xs text-slate-500">{m.competition} · {fmtDate(m.kickoff_at)}</p>
@@ -107,7 +107,7 @@ export function MatchPicker({ line, onChange, hint }: { line: PickerLine; onChan
       <div className="relative">
         <Input value={line.query} onChange={(e) => onChange({ query: e.target.value })} onFocus={() => setOpen(true)} placeholder="ex. PSG, Real, Arsenal…" autoComplete="off" />
         {open && hits.length > 0 && (
-          <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
+          <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-slate-200 bg-surface shadow-lg">
             {hits.map((h) => (
               <li key={h.id}>
                 <button

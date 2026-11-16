@@ -22,11 +22,11 @@ export function AddToSlip({ leg, size = "md", label }: { leg: Leg; size?: "sm" |
         aria-label={inSlip ? "Retirer du coupon" : "Ajouter au coupon"}
         aria-pressed={inSlip}
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); const r = slip.toggle(leg); setFlash(r === "remplace" ? "Remplacé" : r === "ajoute" ? "Ajouté" : null); }}
-        className={`flex ${dim} items-center justify-center rounded-full border px-2 font-semibold transition active:scale-95 ${inSlip ? "border-brand bg-brand text-white" : "border-brand/40 bg-white text-brand"}`}
+        className={`flex ${dim} items-center justify-center rounded-full border px-2 font-semibold transition active:scale-95 ${inSlip ? "border-brand bg-brand text-on-fill" : "border-brand/40 bg-surface text-brand"}`}
       >
         {inSlip ? "✓" : "+"}{label && <span className="ml-1 text-xs font-medium">{label}</span>}
       </button>
-      {flash && <span className="pointer-events-none absolute -top-6 right-0 whitespace-nowrap rounded-md bg-ink px-1.5 py-0.5 text-[10px] text-white">{flash}</span>}
+      {flash && <span className="pointer-events-none absolute -top-6 right-0 whitespace-nowrap rounded-md bg-inverse px-1.5 py-0.5 text-[10px] text-on-inverse">{flash}</span>}
     </span>
   );
 }
@@ -41,7 +41,7 @@ export function OddButton({ leg, name, disabled, wide }: { leg: Leg; name: strin
       type="button"
       disabled={disabled}
       onClick={() => slip.toggle(leg)}
-      className={`min-w-0 rounded-lg border transition active:scale-[0.98] disabled:opacity-50 ${on ? "border-brand bg-brand text-white" : "border-line bg-white"} ${wide ? "flex w-full items-center gap-2 px-3 py-2 text-left" : "flex flex-col items-center px-1.5 py-1.5 text-center"}`}
+      className={`min-w-0 rounded-lg border transition active:scale-[0.98] disabled:opacity-50 ${on ? "border-brand bg-brand text-on-fill" : "border-line bg-surface"} ${wide ? "flex w-full items-center gap-2 px-3 py-2 text-left" : "flex flex-col items-center px-1.5 py-1.5 text-center"}`}
     >
       <span className={wide ? "min-w-0 flex-1 text-[13px] leading-snug" : `w-full truncate text-[11px] leading-tight ${tone}`}>{name}</span>
       {wide && leg.p !== null && <span className={`shrink-0 text-[11px] tabular-nums ${tone}`}>{Math.round(leg.p * 100)} %</span>}
@@ -67,7 +67,7 @@ export function SlipBar() {
       {open && <div className="fixed inset-0 z-30 bg-black/30" onClick={() => setOpen(false)} aria-hidden />}
       <div className="fixed inset-x-0 z-30 mx-auto max-w-xl px-3" style={{ bottom: "calc(64px + env(safe-area-inset-bottom))" }}>
         {open && (
-          <section className="mb-2 max-h-[65dvh] overflow-y-auto rounded-2xl border border-line bg-white p-3 shadow-xl" aria-label="Coupon">
+          <section className="mb-2 max-h-[65dvh] overflow-y-auto rounded-2xl border border-line bg-surface p-3 shadow-xl" aria-label="Coupon">
             <div className="mb-2 flex items-center justify-between">
               <h2 className="text-sm font-semibold">Mon coupon · {legs.length} sélection{legs.length > 1 ? "s" : ""}</h2>
               <button type="button" onClick={() => slip.clear()} className="text-xs text-ink-muted underline">Vider</button>
@@ -102,11 +102,11 @@ export function SlipBar() {
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
               <Link href={slipHref(legs, true)} className="rounded-xl border border-line py-2.5 text-center text-sm font-semibold">Tester sans miser</Link>
-              <Link href={slipHref(legs, false)} className="rounded-xl bg-brand py-2.5 text-center text-sm font-semibold text-white">Parier</Link>
+              <Link href={slipHref(legs, false)} className="rounded-xl bg-brand py-2.5 text-center text-sm font-semibold text-on-fill">Parier</Link>
             </div>
           </section>
         )}
-        <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full items-center gap-3 rounded-2xl bg-ink px-4 py-2.5 text-left text-white shadow-lg">
+        <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full items-center gap-3 rounded-2xl bg-inverse px-4 py-2.5 text-left text-on-inverse shadow-lg">
           <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-brand px-1.5 text-sm font-bold tabular-nums">{legs.length}</span>
           <span className="flex-1 text-sm font-medium">{legs.length > 1 ? "Combiné" : "Simple"} · cote <b className="tabular-nums">{C(cote)}</b>{p !== null && <span className="text-white/70"> · passe {p >= 0.1 ? Math.round(p * 100) : (p * 100).toFixed(1).replace(".", ",")} %</span>}</span>
           <span className="text-xs text-white/70">{open ? "Fermer ▾" : "Voir ▴"}</span>

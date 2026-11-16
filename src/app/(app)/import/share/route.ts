@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/app-name";
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
   }
   // Les fichiers ne survivent pas à une redirection : on renvoie une page qui les remet dans l'import
   const parts = await Promise.all(files.slice(0, 6).map(async (f) => ({ name: f.name, type: f.type || "image/jpeg", b64: Buffer.from(await f.arrayBuffer()).toString("base64") })));
-  const html = `<!doctype html><meta charset="utf-8"><title>BETWISE</title><body style="font-family:system-ui;padding:24px">Ouverture de l’import…
+  const html = `<!doctype html><meta charset="utf-8"><title>${APP_NAME}</title><body style="font-family:system-ui;padding:24px">Ouverture de l’import…
 <script>try{sessionStorage.setItem("betwise.shared",JSON.stringify(${JSON.stringify(parts)}))}catch(e){}location.replace("/import?shared=1")</script>`;
   return new NextResponse(html, { headers: { "content-type": "text/html; charset=utf-8" } });
 }

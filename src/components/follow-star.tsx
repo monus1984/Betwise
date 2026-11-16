@@ -12,7 +12,7 @@ export function FollowStar({ matchId, teamId, initial, light, label, small }: { 
     const next = !on; setOn(next);
     start(async () => { const r = teamId ? await toggleFollowTeam(teamId, next) : await toggleFollowMatch(matchId!, next); if (!r.ok) setOn(!next); });
   };
-  const color = on ? "text-amber-400" : light ? "text-white/70" : "text-slate-300";
+  const color = on ? "text-band-draw" : light ? "text-white/70" : "text-slate-300";
   return (
     <button type="button" onClick={toggle} aria-pressed={on} aria-label={teamId ? (on ? "Ne plus suivre cette équipe" : "Suivre cette équipe") : on ? "Ne plus suivre ce match" : "Suivre ce match"}
       className={`flex shrink-0 items-center gap-1.5 ${label ? "rounded-full border border-white/30 bg-white/10 px-2.5 py-1 text-xs text-white" : small ? "h-6 w-6 justify-center" : "h-9 w-8 justify-center"}`}>

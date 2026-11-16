@@ -1,4 +1,5 @@
 "use client";
+import { APP_NAME } from "@/lib/app-name";
 
 import { useEffect, useState } from "react";
 import { IconPhone, IconTile } from "@/components/icons";
@@ -48,26 +49,26 @@ export function InstallButton({ compact = false }: { compact?: boolean }) {
   function later() { setDismissed(true); try { localStorage.setItem("betwise.install.non", "1"); } catch { /* ignore */ } }
 
   const steps = mode === "ios"
-    ? ["Ouvre BETWISE dans Safari (pas dans une autre appli).", "Touche le bouton Partager, le carré avec une flèche vers le haut.", "Choisis « Sur l’écran d’accueil », puis « Ajouter »."]
+    ? [`Ouvre ${APP_NAME} dans Safari (pas dans une autre appli).`, "Touche le bouton Partager, le carré avec une flèche vers le haut.", "Choisis « Sur l’écran d’accueil », puis « Ajouter »."]
     : ["Ouvre le menu du navigateur, les trois points en haut à droite.", "Choisis « Installer l’application » ou « Ajouter à l’écran d’accueil »."];
 
   if (compact) {
     return (
       <div className="text-center">
-        <button type="button" onClick={install} className="text-sm font-medium text-brand underline">📲 Installer BETWISE sur ce téléphone</button>
+        <button type="button" onClick={install} className="text-sm font-medium text-brand underline">📲 Installer {APP_NAME} sur ce téléphone</button>
         {help && <ol className="mx-auto mt-2 max-w-xs list-decimal space-y-1 pl-5 text-left text-xs text-slate-600">{steps.map((s) => <li key={s}>{s}</li>)}</ol>}
       </div>
     );
   }
   return (
-    <section className="mb-3 rounded-2xl border border-line bg-white p-3 shadow-card">
+    <section className="mb-3 rounded-2xl border border-line bg-surface p-3 shadow-card">
       <div className="flex items-center gap-3">
         <IconTile tone="terrain"><IconPhone /></IconTile>
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-semibold">Installer BETWISE</span>
+          <span className="block text-sm font-semibold">Installer {APP_NAME}</span>
           <span className="block text-[11px] text-ink-muted">Une icône sur l’écran d’accueil, le plein écran et les notifications.</span>
         </span>
-        <button type="button" onClick={install} className="shrink-0 rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white">{mode === "android" ? "Installer" : "Comment faire"}</button>
+        <button type="button" onClick={install} className="shrink-0 rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-on-fill">{mode === "android" ? "Installer" : "Comment faire"}</button>
       </div>
       {help && <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs text-ink-soft">{steps.map((s) => <li key={s}>{s}</li>)}</ol>}
       <button type="button" onClick={later} className="mt-1.5 text-[11px] text-ink-muted underline">Plus tard</button>

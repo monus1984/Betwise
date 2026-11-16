@@ -81,7 +81,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
             const label = d === today ? "Auj." : d === dayKey(new Date(Date.now() + 86400000).toISOString()) ? "Demain" : d === dayKey(new Date(Date.now() - 86400000).toISOString()) ? "Hier" : dt.toLocaleDateString("fr-FR", { weekday: "short", timeZone: "UTC" }).replace(".", "");
             const active = d === day;
             return (
-              <Link key={d} href={q(d, null)} scroll={false} className={`flex w-[54px] flex-col items-center rounded-xl border py-1.5 ${active ? "border-ink bg-ink text-white" : d < today ? "border-line bg-surface-2 text-ink-muted" : "border-line bg-white text-ink-soft"}`}>
+              <Link key={d} href={q(d, null)} scroll={false} className={`flex w-[54px] flex-col items-center rounded-xl border py-1.5 ${active ? "border-inverse bg-inverse text-on-inverse" : d < today ? "border-line bg-surface-2 text-ink-muted" : "border-line bg-surface text-ink-soft"}`}>
                 <span className="text-[10px] capitalize">{label}</span>
                 <span className="text-base font-semibold leading-tight tabular-nums">{dt.getUTCDate()}</span>
                 <span className={`text-[10px] tabular-nums ${active ? "text-white/70" : "text-ink-muted"}`}>{counts.get(d)}</span>
@@ -95,33 +95,33 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
 
       {/* Tous / En direct / Suivis */}
       <div className="mb-3 flex gap-1.5">
-        <Link href={q(day, null)} scroll={false} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${!filtre ? "border-brand bg-brand text-white" : "border-line bg-white text-ink-soft"}`}>Tous</Link>
-        <Link href="/matchs?f=direct" scroll={false} className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium ${filtre === "direct" ? "border-loss bg-loss text-white" : "border-line bg-white text-ink-soft"}`}>
-          <span className={`h-1.5 w-1.5 rounded-full ${filtre === "direct" ? "bg-white" : nbDirect ? "animate-pulse bg-loss" : "bg-slate-300"}`} />En direct{nbDirect ? ` (${nbDirect})` : ""}
+        <Link href={q(day, null)} scroll={false} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${!filtre ? "border-brand bg-brand text-on-fill" : "border-line bg-surface text-ink-soft"}`}>Tous</Link>
+        <Link href="/matchs?f=direct" scroll={false} className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium ${filtre === "direct" ? "border-loss bg-loss text-on-fill" : "border-line bg-surface text-ink-soft"}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${filtre === "direct" ? "bg-surface" : nbDirect ? "animate-pulse bg-loss" : "bg-slate-300"}`} />En direct{nbDirect ? ` (${nbDirect})` : ""}
         </Link>
-        <Link href="/matchs?f=suivis" scroll={false} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${filtre === "suivis" ? "border-ink bg-ink text-white" : "border-line bg-white text-ink-soft"}`}>★ Suivis{followed.size ? ` (${followed.size})` : ""}</Link>
+        <Link href="/matchs?f=suivis" scroll={false} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${filtre === "suivis" ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft"}`}>★ Suivis{followed.size ? ` (${followed.size})` : ""}</Link>
       </div>
 
       {/* Filtre compétition */}
       {!filtre && compsOfDay.length > 1 && (
         <nav className="-mx-4 mb-4 overflow-x-auto px-4" aria-label="Compétitions">
           <div className="flex w-max gap-1.5">
-            <Link href={q(day, null)} scroll={false} className={`rounded-full border px-3 py-1 text-xs ${!comp ? "border-ink bg-ink text-white" : "border-line bg-white text-ink-soft"}`}>Tout</Link>
+            <Link href={q(day, null)} scroll={false} className={`rounded-full border px-3 py-1 text-xs ${!comp ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft"}`}>Tout</Link>
             {compsOfDay.map((c) => (
-              <Link key={c} href={q(day, c)} scroll={false} className={`rounded-full border px-3 py-1 text-xs ${comp === c ? "border-ink bg-ink text-white" : "border-line bg-white text-ink-soft"}`}>{COMP_FLAG[c] ?? "⚽"} {COMP_SHORT[c] ?? c}</Link>
+              <Link key={c} href={q(day, c)} scroll={false} className={`rounded-full border px-3 py-1 text-xs ${comp === c ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft"}`}>{COMP_FLAG[c] ?? "⚽"} {COMP_SHORT[c] ?? c}</Link>
             ))}
           </div>
         </nav>
       )}
 
       {rows.length === 0 && (
-        <div className="rounded-xl border border-dashed border-line bg-white p-6 text-center text-sm text-ink-muted">
+        <div className="rounded-xl border border-dashed border-line bg-surface p-6 text-center text-sm text-ink-muted">
           {filtre === "direct" ? "Aucun match en direct pour l’instant." : filtre === "suivis" ? "Aucun match suivi. Touche l’étoile d’un match pour le suivre et recevoir ses buts en notification." : "Aucun match ce jour-là. Le calendrier couvre les 14 prochains jours et se met à jour chaque matin."}
         </div>
       )}
 
       {ordered.map(([code, list]) => (
-        <section key={code} className="mb-4 overflow-hidden rounded-xl border border-line bg-white shadow-card">
+        <section key={code} className="mb-4 overflow-hidden rounded-xl border border-line bg-surface shadow-card">
           <h2 className="flex items-center justify-between border-b border-line bg-surface-2 px-3 py-2 text-xs font-semibold text-ink-soft">
             <span>{COMP_FLAG[code] ?? "⚽"} {COMP_SHORT[code] ?? one(list[0].competition)?.nom}</span>
             {STANDING_COMPS.includes(code) ? <Link href={`/matchs/classement?c=${code}`} className="font-medium text-brand">Classement ›</Link> : <span className="font-normal text-ink-muted">{list.length} match{list.length > 1 ? "s" : ""}</span>}

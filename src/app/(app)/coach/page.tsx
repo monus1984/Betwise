@@ -61,12 +61,12 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
       <CoupsDuJour picks={today.picks} theirs={today.theirs} mises={mises} />
 
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <Link href="/options" className="rounded-2xl border border-line bg-white p-3 shadow-card active:bg-surface-2">
+        <Link href="/options" className="rounded-2xl border border-line bg-surface p-3 shadow-card active:bg-surface-2">
           <IconTile size="sm" tone="conseil"><IconTarget width={18} height={18} /></IconTile>
           <p className="mt-2 text-sm font-semibold">Options du jour</p>
           <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">Ton % de réussite, en simple ou en combiné à la cote voulue.</p>
         </Link>
-        <Link href="/paris?vue=tests" className="rounded-2xl border border-line bg-white p-3 shadow-card active:bg-surface-2">
+        <Link href="/paris?vue=tests" className="rounded-2xl border border-line bg-surface p-3 shadow-card active:bg-surface-2">
           <IconTile size="sm" tone="test"><IconFlask width={18} height={18} /></IconTile>
           <p className="mt-2 text-sm font-semibold">Mes tests</p>
           <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
@@ -77,12 +77,12 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
         </Link>
       </div>
 
-      <section className="mt-3 rounded-xl border border-line bg-white p-4 shadow-card">
+      <section className="mt-3 rounded-xl border border-line bg-surface p-4 shadow-card">
         <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold"><IconTile size="sm" tone="conseil"><IconChat width={18} height={18} /></IconTile>Poser une question au Coach</h2>
         <ul className="space-y-1.5">
           {COACH_SUGGESTIONS.slice(0, 4).map((s) => <li key={s}><Link href="/coach?v=discussion" className="block rounded-lg border border-line px-3 py-2 text-[13px] text-ink-soft active:bg-surface-2">{s}</Link></li>)}
         </ul>
-        <Link href="/coach?v=discussion" className="mt-3 block rounded-xl bg-brand py-2.5 text-center text-sm font-semibold text-white">Ouvrir la discussion</Link>
+        <Link href="/coach?v=discussion" className="mt-3 block rounded-xl bg-brand py-2.5 text-center text-sm font-semibold text-on-fill">Ouvrir la discussion</Link>
       </section>
     </>
   );

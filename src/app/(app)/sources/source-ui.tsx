@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/app-name";
 export function labelType(t: string) {
   return ({
     perso: "Mes propres choix",
@@ -6,7 +7,7 @@ export function labelType(t: string) {
     compte_instagram: "Compte Instagram",
     canal_telegram: "Canal Telegram",
     site: "Site de prédictions",
-    modele_betwise: "Modèle statistique BETWISE",
+    modele_betwise: `Modèle statistique ${APP_NAME}`,
   } as Record<string, string>)[t] ?? t;
 }
 

@@ -67,7 +67,7 @@ export default async function BetPage({ params }: { params: Promise<{ id: string
         ) : (
           <ul className="space-y-1 text-xs text-slate-600">
             {(versions ?? []).map((v, i) => (
-              <li key={i} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <li key={i} className="rounded-lg border border-slate-200 bg-surface px-3 py-2">
                 <span className="text-slate-400">{new Date(v.changed_at).toLocaleString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}</span>
                 {" · "}
                 {Object.entries(v.changes as Record<string, { avant: unknown; apres: unknown }>).map(([k, c]) => `${label(k)} : ${fmt(c.avant, k, sources)} → ${fmt(c.apres, k, sources)}`).join(" ; ")}

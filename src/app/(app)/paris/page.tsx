@@ -28,7 +28,7 @@ export default async function ParisPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <PageHeader title="Mes paris" subtitle={tests ? "Choix testés sans miser : ta bankroll n’a pas bougé." : filter === "en_cours" ? "En attente de résultat ou de ta confirmation." : "Réglés."} action={<Link href="/bilan">Bilan</Link>} />
-      {sp.ajout && <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{tests ? "Test enregistré." : "Pari enregistré."}</p>}
+      {sp.ajout && <p className="mb-4 rounded-lg border border-gain/30 bg-gain-soft p-3 text-sm text-gain-ink">{tests ? "Test enregistré." : "Pari enregistré."}</p>}
 
       <div className="mb-4 flex gap-2">
         <Tab href="/paris" active={!tests && filter === "en_cours"}>En cours</Tab>
@@ -38,9 +38,9 @@ export default async function ParisPage({ searchParams }: { searchParams: Promis
 
       {tests && <TestsSummary bets={bets} />}
 
-      {error && <p className="text-sm text-red-700">{error.message}</p>}
+      {error && <p className="text-sm text-loss-ink">{error.message}</p>}
       {bets.length === 0 && !error && (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-600">
+        <div className="rounded-lg border border-dashed border-slate-300 bg-surface p-6 text-center text-sm text-slate-600">
           {tests ? <>Aucun test pour l’instant. Depuis <Link href="/options" className="text-brand underline">Options du jour</Link>, une fiche match ou un import de coupon, choisis « Tester sans miser ».</> : filter === "en_cours" ? "Aucun pari en cours. Le bouton + en bas permet d’en ajouter un." : "Aucun pari réglé pour l’instant."}
         </div>
       )}
@@ -53,7 +53,7 @@ export default async function ParisPage({ searchParams }: { searchParams: Promis
 
 function Tab({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
-    <Link href={href} className={`rounded-full px-3.5 py-1.5 text-sm ${active ? "bg-slate-900 text-white" : "bg-white text-slate-700 border border-slate-300"}`}>
+    <Link href={href} className={`rounded-full px-3.5 py-1.5 text-sm ${active ? "bg-inverse text-on-inverse" : "bg-surface text-slate-700 border border-slate-300"}`}>
       {children}
     </Link>
   );
@@ -72,7 +72,7 @@ function TestsSummary({ bets }: { bets: BetRow[] }) {
     const e = byOrigin.get(k) ?? { n: 0, ok: 0 }; e.n++; if (s.resultat === "gagne") e.ok++; byOrigin.set(k, e);
   }
   return (
-    <section className="mb-4 rounded-xl border border-line bg-white p-4 shadow-card">
+    <section className="mb-4 rounded-xl border border-line bg-surface p-4 shadow-card">
       <div className="grid grid-cols-3 gap-2 text-center">
         <div><p className="text-lg font-bold tabular-nums">{done.length}</p><p className="text-[11px] text-ink-muted">réglés</p></div>
         <div><p className="text-lg font-bold tabular-nums">{Math.round((100 * gagnes) / done.length)} %</p><p className="text-[11px] text-ink-muted">tickets gagnés</p></div>

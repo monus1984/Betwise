@@ -35,7 +35,7 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
       <PageHeader
         title="Sources"
         subtitle="Qui t’oriente, et avec quels résultats."
-        action={<Link href="/sources/nouvelle" className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white">+ Source</Link>}
+        action={<Link href="/sources/nouvelle" className="rounded-lg bg-inverse px-3 py-2 text-sm font-medium text-on-inverse">+ Source</Link>}
       />
       <div className="mb-4 flex gap-2">
         <Tab href="/sources" active={filter === "suivies"}>Mes sources</Tab>
@@ -43,12 +43,12 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
       </div>
 
       {list.length === 0 && (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-600">
+        <div className="rounded-lg border border-dashed border-slate-300 bg-surface p-6 text-center text-sm text-slate-600">
           {filter === "suivies" ? "Ajoute un pronostiqueur, une page ou un canal que tu suis." : "Aucune source partagée à découvrir pour l’instant."}
         </div>
       )}
 
-      <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
+      <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200 bg-surface">
         {list.map((s) => {
           const t = trend.get(s.id);
           return (
@@ -75,7 +75,7 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
 
 function Tab({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
-    <Link href={href} className={`rounded-full px-3.5 py-1.5 text-sm ${active ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700"}`}>
+    <Link href={href} className={`rounded-full px-3.5 py-1.5 text-sm ${active ? "bg-inverse text-on-inverse" : "border border-slate-300 bg-surface text-slate-700"}`}>
       {children}
     </Link>
   );

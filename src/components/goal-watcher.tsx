@@ -27,8 +27,8 @@ export function GoalWatcher({ scores }: { scores: LiveScore[] }) {
   if (!scores.length) return null;
   return (
     <>
-      <button type="button" onClick={toggle} aria-pressed={sound} className="mb-3 rounded-full border border-line bg-white px-3 py-1 text-[11px] text-ink-soft">{sound ? "🔊 Son des buts activé" : "🔈 Son des buts coupé"}</button>
-      {toast && <div role="status" className="fixed inset-x-0 top-[max(0.75rem,env(safe-area-inset-top))] z-40 mx-auto w-fit max-w-[92vw] rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white shadow-xl">{toast}</div>}
+      <button type="button" onClick={toggle} aria-pressed={sound} className="mb-3 rounded-full border border-line bg-surface px-3 py-1 text-[11px] text-ink-soft">{sound ? "🔊 Son des buts activé" : "🔈 Son des buts coupé"}</button>
+      {toast && <div role="status" className="fixed inset-x-0 top-[max(0.75rem,env(safe-area-inset-top))] z-40 mx-auto w-fit max-w-[92vw] rounded-full bg-inverse px-4 py-2 text-sm font-semibold text-on-inverse shadow-xl">{toast}</div>}
     </>
   );
 }

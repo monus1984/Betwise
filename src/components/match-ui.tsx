@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/app-name";
 /** Briques visuelles des matchs : écusson à initiales, cases 1/N/2, drapeaux de compétition. */
 
 const PALETTE = ["#1e3a8a", "#7c2d12", "#14532d", "#581c87", "#7f1d1d", "#134e4a", "#713f12", "#312e81", "#831843", "#0c4a6e"];
@@ -34,11 +35,11 @@ export function ProbCells({ probs, compact = true }: { probs: Probs | null; comp
   const vals = [probs.p1, probs.pN, probs.p2];
   const max = Math.max(...vals);
   return (
-    <span className="flex shrink-0 gap-1" title={probs.source === "modele" ? "Probabilités du modèle BETWISE" : "Probabilités tirées des cotes de référence"}>
+    <span className="flex shrink-0 gap-1" title={probs.source === "modele" ? `Probabilités du modèle ${APP_NAME}` : "Probabilités tirées des cotes de référence"}>
       {(["1", "N", "2"] as const).map((k, i) => {
         const top = vals[i] === max;
         return (
-          <span key={k} className={`flex ${compact ? "h-9 w-[38px]" : "h-12 w-16"} flex-col items-center justify-center rounded-md border text-center leading-none ${top ? (probs.source === "modele" ? "border-brand bg-brand text-white" : "border-ink bg-ink text-white") : "border-line bg-white text-ink-soft"}`}>
+          <span key={k} className={`flex ${compact ? "h-9 w-[38px]" : "h-12 w-16"} flex-col items-center justify-center rounded-md border text-center leading-none ${top ? (probs.source === "modele" ? "border-brand bg-brand text-on-fill" : "border-inverse bg-inverse text-on-inverse") : "border-line bg-surface text-ink-soft"}`}>
             <span className={`text-[9px] ${top ? "text-white/75" : "text-ink-muted"}`}>{k}</span>
             <span className={`${compact ? "text-[12px]" : "text-sm"} mt-0.5 font-semibold tabular-nums`}>{Math.round(vals[i] * 100)}</span>
           </span>
@@ -64,8 +65,8 @@ export function PickBadge({ label, p, cote, source, pModele }: { label: string; 
   const strong = p >= 0.75;
   const gap = pModele !== null && pModele !== undefined ? Math.round((pModele - p) * 100) : null;
   return (
-    <span className={`flex w-[120px] shrink-0 flex-col rounded-lg px-2 py-1.5 leading-tight ${source === "modele" ? (strong ? "bg-brand text-white" : "bg-brand-soft text-brand") : strong ? "bg-ink text-white" : "bg-surface-2 text-ink-soft"}`}
-      title={source === "modele" ? "Modèle BETWISE (pas de cote disponible)" : "Déduit des cotes de référence"}>
+    <span className={`flex w-[120px] shrink-0 flex-col rounded-lg px-2 py-1.5 leading-tight ${source === "modele" ? (strong ? "bg-brand text-on-fill" : "bg-brand-soft text-brand") : strong ? "bg-inverse text-on-inverse" : "bg-surface-2 text-ink-soft"}`}
+      title={source === "modele" ? `Modèle ${APP_NAME} (pas de cote disponible)` : "Déduit des cotes de référence"}>
       <span className="line-clamp-2 text-[11px] font-semibold">{label}</span>
       <span className="mt-0.5 flex items-baseline justify-between text-[11px] tabular-nums">
         <span className="text-[13px] font-bold">{Math.round(p * 100)} %</span>

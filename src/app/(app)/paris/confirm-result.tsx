@@ -1,4 +1,5 @@
 "use client";
+import { APP_NAME } from "@/lib/app-name";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -22,33 +23,33 @@ export function ConfirmResult({ betId, propose, gainPropose, mise }: { betId: st
   const bouton = (r: Res, cls: string) => (
     <button key={r} type="button" disabled={pending} onClick={() => regler(r)} className={`rounded-lg py-2 text-sm font-medium disabled:opacity-50 ${cls}`}>{MOT[r][0].toUpperCase() + MOT[r].slice(1)}</button>
   );
-  const TROIS = [bouton("gagne", "bg-emerald-600 text-white"), bouton("perdu", "bg-red-600 text-white"), bouton("rembourse", "bg-slate-200 text-slate-800")];
+  const TROIS = [bouton("gagne", "bg-gain text-on-fill"), bouton("perdu", "bg-loss text-on-fill"), bouton("rembourse", "bg-slate-200 text-slate-800")];
 
   if (!propose) {
     return (
       <div className="mt-4">
         <p className="mb-1.5 text-[11px] text-ink-muted">Pas encore de résultat proposé. Tu peux régler ce pari toi-même, d’après ton bookmaker :</p>
         <div className="grid grid-cols-3 gap-2">{TROIS}</div>
-        {err && <p className="mt-2 text-xs text-red-700">{err}</p>}
+        {err && <p className="mt-2 text-xs text-loss-ink">{err}</p>}
       </div>
     );
   }
   const effet = propose === "gagne" && gainPropose !== null ? `+${fcfa(mise + gainPropose)} crédités` : propose === "rembourse" ? `${fcfa(mise)} rendus` : "la mise reste perdue";
   return (
-    <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-3">
-      <p className="text-sm font-semibold text-amber-950">BETWISE propose : {MOT[propose]}</p>
-      <p className="mt-0.5 text-xs text-amber-900">Vérifie sur ton bookmaker avant de confirmer. Rien n’est encore écrit dans ta bankroll ({effet} si tu confirmes).</p>
+    <div className="mt-4 rounded-xl border border-draw/40 bg-draw-soft p-3">
+      <p className="text-sm font-semibold text-draw-ink">{APP_NAME} propose : {MOT[propose]}</p>
+      <p className="mt-0.5 text-xs text-draw-ink">Vérifie sur ton bookmaker avant de confirmer. Rien n’est encore écrit dans ta bankroll ({effet} si tu confirmes).</p>
       <div className="mt-2 flex flex-wrap items-center gap-3">
-        <button type="button" disabled={pending} onClick={() => regler(propose)} className="rounded-lg bg-ink px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">{pending ? "Enregistrement…" : `Oui, c’est ${MOT[propose]}`}</button>
-        {!autre && <button type="button" onClick={() => setAutre(true)} className="text-sm text-amber-950 underline">Non, ce n’est pas ça</button>}
+        <button type="button" disabled={pending} onClick={() => regler(propose)} className="rounded-lg bg-inverse px-3 py-2 text-sm font-semibold text-on-inverse disabled:opacity-50">{pending ? "Enregistrement…" : `Oui, c’est ${MOT[propose]}`}</button>
+        {!autre && <button type="button" onClick={() => setAutre(true)} className="text-sm text-draw-ink underline">Non, ce n’est pas ça</button>}
       </div>
       {autre && (
         <div className="mt-2">
-          <p className="mb-1.5 text-[11px] text-amber-900">Quel est le vrai résultat ?</p>
-          <div className="grid grid-cols-2 gap-2">{(["gagne", "perdu", "rembourse"] as Res[]).filter((r) => r !== propose).map((r) => bouton(r, r === "gagne" ? "bg-emerald-600 text-white" : r === "perdu" ? "bg-red-600 text-white" : "bg-slate-200 text-slate-800"))}</div>
+          <p className="mb-1.5 text-[11px] text-draw-ink">Quel est le vrai résultat ?</p>
+          <div className="grid grid-cols-2 gap-2">{(["gagne", "perdu", "rembourse"] as Res[]).filter((r) => r !== propose).map((r) => bouton(r, r === "gagne" ? "bg-gain text-on-fill" : r === "perdu" ? "bg-loss text-on-fill" : "bg-slate-200 text-slate-800"))}</div>
         </div>
       )}
-      {err && <p className="mt-2 text-xs text-red-700">{err}</p>}
+      {err && <p className="mt-2 text-xs text-loss-ink">{err}</p>}
     </div>
   );
 }

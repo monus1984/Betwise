@@ -8,8 +8,8 @@
 export type Categorie = "sur" | "audacieux" | "risque";
 export const CAT_LABEL: Record<Categorie | "hors", string> = { sur: "Sûr", audacieux: "Audacieux", risque: "Risqué", hors: "Très risqué" };
 export const CAT_STYLE: Record<Categorie | "hors", string> = {
-  sur: "bg-emerald-50 text-gain border-emerald-200", audacieux: "bg-amber-50 text-draw border-amber-200",
-  risque: "bg-red-50 text-loss border-red-200", hors: "bg-ink text-white border-ink",
+  sur: "bg-gain-soft text-gain border-gain/30", audacieux: "bg-draw-soft text-draw border-draw/40",
+  risque: "bg-loss-soft text-loss border-loss/30", hors: "bg-inverse text-on-inverse border-inverse",
 };
 export const CAT_CONSTATE: Record<Categorie, number> = { sur: 0.879, audacieux: 0.764, risque: 0.591 };
 /** Probabilité moyenne annoncée par les cotes dans chaque catégorie (même étude). */

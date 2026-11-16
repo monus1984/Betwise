@@ -1,7 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/connexion", "/inscription", "/auth", "/api/health", "/api/cron", "/manifest.webmanifest", "/sw.js", "/icon-192.png", "/icon-512.png"];
+// « /apercu » : planche des composants, données fictives, inexistante en production
+const PUBLIC_PATHS = [...(process.env.NODE_ENV === "production" ? [] : ["/apercu"]), "/connexion", "/inscription", "/auth", "/api/health", "/api/cron", "/manifest.webmanifest", "/sw.js", "/icon-192.png", "/icon-512.png"];
 
 /** Rafraîchit la session Supabase et protège les pages privées. */
 export async function middleware(request: NextRequest) {
