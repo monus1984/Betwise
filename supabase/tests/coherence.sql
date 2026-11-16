@@ -17,8 +17,8 @@ bt as (
 select * from (values
   ('A  sélection dont le résultat contredit le score',            (select count(*) from sel where calc is not null and calc <> 'en_attente' and calc <> res)),
   ('B  sélection réglée alors que le match n''est pas joué',       (select count(*) from sel where ms in ('programme', 'en_cours') and res <> 'en_attente')),
-  ('C1 pari gagné avec une sélection perdue',                     (select count(*) from bt where statut = 'gagne' and nl > 0)),
-  ('C2 pari perdu sans aucune sélection perdue',                  (select count(*) from bt where statut = 'perdu' and ns > 0 and nl = 0)),
+  ('C1 pari gagné avec une sélection perdue',                     (select count(*) from bt where statut = 'gagne' and nl > 0 and cashout is null)),
+  ('C2 pari perdu sans aucune sélection perdue',                  (select count(*) from bt where statut = 'perdu' and ns > 0 and nl = 0 and cashout is null)),
   ('C3 pari en cours dont tout est réglé, sans proposition',      (select count(*) from bt where statut = 'en_cours' and ns > 0 and np = 0 and resultat_propose is null)),
   ('D  gain du pari différent de la somme de ses mouvements',     (select count(*) from bt where not virtuel and statut in ('gagne', 'perdu', 'rembourse') and round(coalesce(gain_net, 0), 2) <> round(tx, 2))),
   ('D2 pari test avec un mouvement de bankroll',                  (select count(*) from bt where virtuel and tx <> 0)),
