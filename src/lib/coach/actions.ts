@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 /** Fixe (ou remplace) l'objectif actif. La bankroll de départ est le solde du moment. */
@@ -39,4 +40,19 @@ export async function previewObjectif(input: { cible: number; jours: number }) {
   if (solde <= 0 || input.cible <= solde || input.jours < 1) return null;
   const { evaluatePlan } = await import("./plan");
   return { solde, ...evaluatePlan({ bankroll: solde, depart: solde, cible: input.cible, jours: Math.min(180, input.jours), parisParJour: 2 }) };
+}
+
+/** Budget de la semaine : ce que l'utilisateur s'autorise à miser et à perdre. Remplace l'objectif de gain. */
+export async function setBudget(formData: FormData) {
+  const lire = (k: string) => Math.round(Number(String(formData.get(k) ?? "").replace(/\s/g, "").replace(",", ".")));
+  const mise = lire("mise"), perte = lire("perte");
+  if (!(mise > 0) || !(perte > 0) || perte > mise || mise > 1000000000) redirect("/coach?v=outils&err=budget");
+  const db = await createClient();
+  const { data: { user } } = await db.auth.getUser();
+  if (!user) redirect("/connexion");
+  const { error } = await db.from("budgets").upsert({ user_id: user.id, mise_semaine: mise, perte_max_semaine: perte, updated_at: new Date().toISOString() });
+  // L'ancien objectif de gain n'est plus suivi
+  await db.from("objectifs").update({ actif: false }).eq("user_id", user.id).eq("actif", true);
+  revalidatePath("/"); revalidatePath("/coach");
+  redirect(error ? "/coach?v=outils&err=serveur" : "/coach?v=outils&ok=budget");
 }

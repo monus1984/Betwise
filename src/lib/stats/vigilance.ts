@@ -3,7 +3,7 @@
  * chaque alerte cite la règle qui l'a déclenchée et les chiffres qui la justifient.
  */
 export type PariV = { mise: number; statut: string; placed_at: string; settled_at: string | null; nb_selections: number | null };
-export type Alerte = { cle: "mise" | "exposition" | "serie" | "apres_perte" | "combines"; poids: number; titre: string; regle: string };
+export type Alerte = { cle: "budget" | "mise" | "exposition" | "serie" | "apres_perte" | "combines"; poids: number; titre: string; regle: string };
 
 export const SEUILS = { mise: 0.10, exposition: 0.25, serie: 3, hausse: 1.5, fenetreH: 24, combine: 6, combinesSur10: 5 };
 const pc = (x: number) => `${Math.round(x * 100)} %`;

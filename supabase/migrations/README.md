@@ -50,3 +50,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0040_source_proof.sql | 2026-11-16 | Vues `source_proof` et `source_proof_by_market` : note et détail par marché sur les seuls pronos enregistrés avant le coup d'envoi |
 | 0041_metrics_sur_pronos_prouves.sql | 2026-11-16 | `compute_source_metrics()` et `source_cumulative()` limitées aux pronos prouvés |
 | 0042_cashout.sql | 2026-11-16 | `bets.cashout`, `cashout_bet()` : pari réglé sur le montant encaissé chez le bookmaker |
+| 0043_budgets.sql | 2026-11-16 | Table `budgets` (une ligne par utilisateur, RLS) : budget de mise et perte maximale par semaine |

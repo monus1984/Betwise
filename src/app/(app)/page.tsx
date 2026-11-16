@@ -3,7 +3,8 @@ import Link from "next/link";
 import { Sparkline } from "@/components/sparkline";
 import { fcfa } from "@/components/ui";
 import { loadDashboard } from "@/lib/stats/dashboard";
-import { vigilance } from "@/lib/stats/vigilance";
+import { vigilance, type Alerte } from "@/lib/stats/vigilance";
+import { etatBudget } from "@/lib/coach/budget";
 import { lire as lireProof, resume } from "@/lib/sources/proof";
 import { comptes as calculer, type Mouvement } from "@/lib/bankroll/comptes";
 import { createClient } from "@/lib/supabase/server";
@@ -29,7 +30,7 @@ export default async function Home() {
   // Profil (créé au besoin : couvre un compte Kehiwa qui ouvre BETWISE pour la première fois)
   const { data: profile } = await supabase.rpc("ensure_profile");
 
-  const [{ data: summary }, d, { data: follows }, { data: k }, { data: enCours }, { data: pend }, { data: journal }, { data: recents }, { count: nonLues }] = await Promise.all([
+  const [{ data: summary }, d, { data: follows }, { data: k }, { data: enCours }, { data: pend }, { data: journal }, { data: recents }, { count: nonLues }, { data: bud }] = await Promise.all([
     supabase.from("my_bankroll_summary").select("*").maybeSingle(),
     loadDashboard(supabase, null),
     supabase.from("source_follows").select("source_id, source:sources(id, nom, type)").eq("user_id", user!.id),
@@ -38,8 +39,9 @@ export default async function Home() {
     // Sélections encore en attente sur un pari en cours : sert à repérer ceux que BETWISE ne réglera pas seul
     supabase.from("bet_selections").select("bet_id, match_id, bets!inner(statut, placed_at, virtuel), match:matches(statut, result_at)").eq("resultat", "en_attente").eq("bets.statut", "en_cours").limit(500),
     supabase.from("my_bankroll_journal").select("type, montant, bet_id, bookmaker").limit(3000),
-    supabase.from("bets").select("mise, statut, placed_at, settled_at, nb_selections").eq("virtuel", false).neq("statut", "annule").order("placed_at", { ascending: false }).limit(40),
+    supabase.from("bets").select("mise, statut, gain_net, placed_at, settled_at, nb_selections").eq("virtuel", false).neq("statut", "annule").order("placed_at", { ascending: false }).limit(40),
     supabase.from("notifications").select("id", { count: "exact", head: true }).is("lu_at", null),
+    supabase.from("budgets").select("mise_semaine, perte_max_semaine").maybeSingle(),
   ]);
 
   const proposes = new Set((enCours ?? []).filter((b) => b.resultat_propose && b.resultat_propose !== "en_attente").map((b) => b.id));
@@ -58,7 +60,9 @@ export default async function Home() {
   const aComparer = nbReels > 0 && (joursSansComparaison === null || joursSansComparaison >= 7);
   const rienAFaire = !aConfirmer && !aRegler && !aComparer;
   const parCompte = calculer((journal ?? []).filter((t) => t.type && t.montant !== null) as unknown as Mouvement[], (enCours ?? []).map((b) => ({ mise: Number(b.mise), bookmaker: b.bookmaker }))).comptes;
-  const alertes = vigilance((recents ?? []).map((b) => ({ mise: Number(b.mise), statut: b.statut, placed_at: b.placed_at, settled_at: b.settled_at, nb_selections: b.nb_selections })), solde).slice(0, 2);
+  const budget = bud ? etatBudget({ miseSemaine: Number(bud.mise_semaine), perteMaxSemaine: Number(bud.perte_max_semaine) }, (recents ?? []).map((b) => ({ mise: Number(b.mise), statut: b.statut, gain_net: b.gain_net === null ? null : Number(b.gain_net), placed_at: b.placed_at, settled_at: b.settled_at }))) : null;
+  const alerteBudget: Alerte[] = budget?.motif ? [{ cle: "budget", poids: 9, titre: budget.statut === "atteint" ? "Ton budget de la semaine est atteint" : "Tu approches de ton budget de la semaine", regle: `${budget.motif} Règle : celle que tu as fixée toi-même.` }] : [];
+  const alertes = [...alerteBudget, ...vigilance((recents ?? []).map((b) => ({ mise: Number(b.mise), statut: b.statut, placed_at: b.placed_at, settled_at: b.settled_at, nb_selections: b.nb_selections })), solde)].slice(0, 2);
   const sept = d.courbe.filter((x) => Date.now() - Date.parse(x.at) <= 7 * JOUR).reduce((t, x) => t + x.net, 0);
   const cloche = Math.min(nonLues ?? 0, 99);
 
@@ -130,7 +134,7 @@ export default async function Home() {
       {alertes.length > 0 && (
         <section className="mt-3 space-y-2" aria-label="Points de vigilance">
           {alertes.map((a) => (
-            <Link key={a.cle} href={a.cle === "serie" || a.cle === "combines" ? "/bilan" : "/paris"} className="flex items-center gap-3 rounded-2xl border border-draw/50 bg-draw-soft p-3 active:opacity-90">
+            <Link key={a.cle} href={a.cle === "budget" ? "/coach?v=outils" : a.cle === "serie" || a.cle === "combines" ? "/bilan" : "/paris"} className="flex items-center gap-3 rounded-2xl border border-draw/50 bg-draw-soft p-3 active:opacity-90">
               <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0 text-draw"><path d="M12 3 2.5 20h19L12 3Z" /><path d="M12 10v4.5" /><path d="M12 17.3v.2" /></svg>
               <span className="min-w-0 flex-1">
                 <span className="block text-[11px] font-semibold uppercase tracking-wide text-draw">Point de vigilance</span>
@@ -161,7 +165,7 @@ export default async function Home() {
         <Action href="/import" icon={<><path d="M4 8V6a2 2 0 0 1 2-2h2" /><path d="M16 4h2a2 2 0 0 1 2 2v2" /><path d="M20 16v2a2 2 0 0 1-2 2h-2" /><path d="M8 20H6a2 2 0 0 1-2-2v-2" /><path d="M8 9.5h8M8 12h8M8 14.5h5" /></>}>Scanner un ticket</Action>
         <Action href="/matchs" icon={<><circle cx="12" cy="12" r="9" /><path d="m12 7.5 4 2.9-1.5 4.7h-5L8 10.4l4-2.9Z" /><path d="M12 3v4.5M3.6 9.3 8 10.4M5.9 18.3l3.6-3.2M18.1 18.3l-3.6-3.2M20.4 9.3 16 10.4" /></>}>Analyser un match</Action>
         <Action href="/sources" icon={<><circle cx="9" cy="8" r="3.2" /><path d="M3 19a6 6 0 0 1 12 0" /><circle cx="17" cy="9" r="2.4" /><path d="M16 14.2a4.6 4.6 0 0 1 5 4.6" /></>}>Comparer mes sources</Action>
-        <Action href="/coach?v=discussion" icon={<><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" /><path d="M9 11.5h.01M12 11.5h.01M15 11.5h.01" /></>}>Parler au coach</Action>
+        <Action href="/coach" icon={<><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" /><path d="M9 11.5h.01M12 11.5h.01M15 11.5h.01" /></>}>Parler au coach</Action>
       </section>
 
       <section className="mt-5 rounded-2xl border border-line bg-surface p-4">

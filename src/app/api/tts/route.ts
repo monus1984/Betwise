@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { spoken } from "@/lib/coach/voice";
 import { synthesize } from "@/lib/tts/gemini";
+import { wavToMp3 } from "@/lib/tts/mp3";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -10,7 +11,7 @@ const MAX_CHARS = 1200;      // une étape d'analyse ou une réponse du Coach ; 
 const LECTURES_PAR_JOUR = 80; // par compte, pendant le test
 
 /**
- * Lit un texte avec la voix du Coach. Renvoie un WAV.
+ * Lit un texte avec la voix du Coach. Renvoie un MP3 (douze fois plus léger que le WAV d'origine), ou le WAV si la compression échoue.
  * Sans clé, en cas de quota ou de panne : 503 avec { fallback: true } — le téléphone lit alors avec sa propre voix.
  */
 export async function POST(req: Request) {
@@ -33,5 +34,8 @@ export async function POST(req: Request) {
     console.warn("[tts]", r.status, r.error.slice(0, 200));
     return NextResponse.json({ fallback: true, error: "voix indisponible" }, { status: 503 });
   }
-  return new NextResponse(new Uint8Array(r.wav), { status: 200, headers: { "Content-Type": "audio/wav", "Cache-Control": "private, no-store", "Content-Length": String(r.wav.length) } });
+  let mp3: Buffer | null = null;
+  try { mp3 = wavToMp3(r.wav); } catch (e) { console.warn("[tts] compression", e instanceof Error ? e.message : e); }
+  const son = mp3 ?? r.wav;
+  return new NextResponse(new Uint8Array(son), { status: 200, headers: { "Content-Type": mp3 ? "audio/mpeg" : "audio/wav", "Cache-Control": "private, no-store", "Content-Length": String(son.length) } });
 }

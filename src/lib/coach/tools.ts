@@ -5,6 +5,7 @@ import { APP_NAME } from "@/lib/app-name";
  * Confidentialité : aucun nom, e-mail ni montant en devise. Mises en « unités »
  * (1 unité = mise médiane de l'utilisateur), bankroll en pourcentages.
  */
+import { etatBudget } from "./budget";
 import { loadRecit } from "../matches/recit";
 import type { createClient } from "../supabase/server";
 import type { ChatTool } from "../llm/provider";
@@ -32,9 +33,7 @@ function since(p: unknown) {
 }
 
 export const COACH_TOOLS: ChatTool[] = [
-  { name: "mon_objectif", description: "Objectif actif de l'utilisateur (bankroll de départ, cible, échéance), sa progression, sa chance d'atteindre la cible à temps, le risque de chute, l'objectif raisonnable et les mises conseillées du jour par catégorie (Très probable, Audacieux, Risqué) avec le budget risque.", input_schema: { type: "object", properties: {} } },
-  { name: "simuler_objectif", description: "Simule un objectif sans l'enregistrer, à partir du solde actuel : chance d'atteindre la cible dans le délai, risque de chute, mise nécessaire, et objectif raisonnable.", input_schema: { type: "object", properties: { cible: { type: "number", description: "Montant visé en F CFA" }, jours: { type: "number", description: "Délai en jours" } }, required: ["cible", "jours"] } },
-  { name: "fixer_objectif", description: "Enregistre l'objectif (remplace l'actuel). À n'appeler que si l'utilisateur a clairement validé le montant et le délai.", input_schema: { type: "object", properties: { cible: { type: "number" }, jours: { type: "number" } }, required: ["cible", "jours"] } },
+  { name: "mon_budget", description: "Budget de la semaine de l'utilisateur : part déjà misée, part de la perte autorisée déjà atteinte, statut (libre, proche, atteint). En pourcentages. À appeler avant de parler de mise ou quand il demande où il en est.", input_schema: { type: "object", properties: {} } },
   { name: "coups_du_jour", description: `Les coups du jour ${APP_NAME} classés Très probable / Audacieux / Risqué (probabilité, cote, mise conseillée, gain possible), et les choix de l'utilisateur et de ses sources sur les matchs du jour, confrontés aux probabilités ${APP_NAME} et classés dans les mêmes catégories. À utiliser pour « quoi jouer aujourd'hui », « mes paris du jour », « que penses-tu du prono de X ».`, input_schema: { type: "object", properties: {} } },
   { name: "options_du_jour", description: "Paris simples dont la probabilité est dans une fourchette choisie, sur tous les marchés (victoire, double chance, remboursé si nul, handicap ±1,5, plus/moins de buts du match ou d'une équipe, les deux marquent, et combos d'un même match comme « Sénégal ou nul et plus de 1,5 but »). Donne probabilité, catégorie, cote de référence ou cote juste. À utiliser pour « quoi jouer à 80 % », « des paris Audacieux », « les options de PSG–Lyon ».", input_schema: { type: "object", properties: { min_pct: { type: "number", description: "Probabilité minimale en %, par défaut 67" }, max_pct: { type: "number", description: "Probabilité maximale en %, par défaut 91" }, periode: { type: "string", enum: ["auj", "demain", "48h"], description: "Par défaut auj" }, famille: { type: "string", enum: ["tout", "resultat", "buts", "mitemps", "combo"], description: "combo = combos d'un même match ; mitemps = marchés de mi-temps (probabilités indicatives)" }, equipe: { type: "string", description: "Limiter aux matchs d'une équipe (nom partiel)" }, max: { type: "number", description: "Nombre maximal, par défaut 8" } } } },
   { name: "combine_cible", description: "Compose des combinés qui visent une cote donnée avec des sélections dans une fourchette de probabilité (une par match, le moins de matchs possible). Donne pour chacun les sélections, la cote estimée, la chance réelle de passer et la cote juste. À utiliser pour « fais-moi un combiné à 3 », « un combiné Très probable à 2 ».", input_schema: { type: "object", properties: { cote_cible: { type: "number", description: "Cote recherchée, ex. 2, 3, 5" }, min_pct: { type: "number", description: "Par défaut 67" }, max_pct: { type: "number", description: "Par défaut 91" }, periode: { type: "string", enum: ["auj", "demain", "48h"], description: "Par défaut 48h" } }, required: ["cote_cible"] } },
@@ -92,6 +91,15 @@ function summarize(bets: BetRow[], u: number) {
 
 export async function runCoachTool(db: Db, name: string, input: Record<string, unknown>): Promise<unknown> {
   switch (name) {
+    case "mon_budget": {
+      const [{ data: b }, { data: paris }] = await Promise.all([
+        db.from("budgets").select("mise_semaine, perte_max_semaine").maybeSingle(),
+        db.from("bets").select("mise, statut, gain_net, placed_at, settled_at").eq("virtuel", false).gte("placed_at", new Date(Date.now() - 9 * 86400000).toISOString()).limit(300),
+      ]);
+      if (!b) return { defini: false, note: "aucun budget fixé : il se règle dans Coach, onglet Outils. Ne propose pas de montant à sa place." };
+      const e = etatBudget({ miseSemaine: Number(b.mise_semaine), perteMaxSemaine: Number(b.perte_max_semaine) }, (paris ?? []).map((x) => ({ ...x, mise: Number(x.mise), gain_net: x.gain_net === null ? null : Number(x.gain_net) })));
+      return { defini: true, semaine_depuis: e.debut.slice(0, 10), budget_de_mise_utilise_pct: pct(e.partMises), limite_de_perte_atteinte_pct: pct(e.partPerte), statut: e.statut, note: e.statut === "atteint" ? "budget atteint : ne propose aucun pari cette semaine" : e.statut === "proche" ? "proche de la limite : dis-le en une ligne" : "dans le budget" };
+    }
     case "mon_objectif":
     case "simuler_objectif":
     case "fixer_objectif":
@@ -330,7 +338,7 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
         db.from("source_metrics_by_axis").select("axe, valeur, nb_declares, nb_gagnes, rendement").eq("source_id", s.id).eq("periode", "total"),
       ]);
       return {
-        nom: originName(s), autres_correspondances: srcs.slice(1).map((x) => x.nom),
+        source_id: s.id, nom: originName(s), autres_correspondances: srcs.slice(1).map((x) => x.nom),
         periodes: Object.fromEntries((met ?? []).map((m) => [m.periode, { declares: m.nb_declares, verifies: m.nb_verifies, regles: m.nb_regles, reussite_pct: m.taux_reussite !== null ? pct(Number(m.taux_reussite)) : null, rendement_pct: m.rendement !== null ? pct(Number(m.rendement)) : null, ic90_pct: m.ic_bas !== null ? [pct(Number(m.ic_bas)), pct(Number(m.ic_haut))] : null, pire_serie_unites: m.pire_serie, statut: m.statut_eval }])),
         detail_total: (axes ?? []).map((a) => ({ axe: a.axe, valeur: a.valeur, pronos: a.nb_declares, gagnes: a.nb_gagnes, rendement_pct: a.rendement !== null ? pct(Number(a.rendement)) : null })),
         note: "indicateurs recalculés chaque nuit ; IC absent sous 5 pronos réglés avec cote",
@@ -362,7 +370,7 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
         const j = (e[0]?.justification ?? null) as { lambda_dom?: number; lambda_ext?: number; score_probable?: string } | null;
         const ref = (code: string, sel: string) => (odds ?? []).find((o) => o.match_id === m.id && o.market_code === code && o.selection === sel)?.cote ?? null;
         return {
-          match: `${one(m.home as One<{ nom: string }>)?.nom} – ${one(m.away as One<{ nom: string }>)?.nom}`, competition: one(m.competition as One<{ nom: string }>)?.nom, coup_envoi: m.kickoff_at,
+          match_id: m.id, match: `${one(m.home as One<{ nom: string }>)?.nom} – ${one(m.away as One<{ nom: string }>)?.nom}`, competition: one(m.competition as One<{ nom: string }>)?.nom, coup_envoi: m.kickoff_at,
           recit: rc ? {
             etapes: rc.etapes.map((x) => ({ etape: x.titre, faits: x.lignes })),
             verdict: rc.verdict ? { choix: rc.verdict.label, chance_pct: pct(rc.verdict.p), categorie: rc.verdict.categorie, cote_reference: rc.verdict.cote, cote_juste: Math.round(100 / rc.verdict.p) / 100 } : "pas de cote : pas d'avis",

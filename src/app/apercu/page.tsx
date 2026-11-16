@@ -7,6 +7,8 @@ import { Sparkline } from "@/components/sparkline";
 import { Mark } from "@/components/icons";
 import { MatchSources } from "@/app/(app)/matchs/[id]/sources-tab";
 import { VIDE } from "@/lib/sources/proof";
+import { BudgetCard } from "@/app/(app)/coach/budget-card";
+import { etatBudget } from "@/lib/coach/budget";
 
 /**
  * Planche des composants communs, pour contrôler les deux thèmes sans compte.
@@ -40,6 +42,13 @@ export default function Apercu() {
       <h2 className="mt-5 text-base font-bold">Que veux-tu faire ?</h2>
       <div className="mb-6 mt-2 grid grid-cols-2 gap-2">
         {["Scanner un ticket", "Analyser un match"].map((t) => <div key={t} className="tile tile-action flex flex-col items-center gap-2 px-3 py-4 text-center text-sm font-medium"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden className="text-brand"><circle cx="12" cy="12" r="9" /><path d="M8 12h8M12 8v8" /></svg>{t}</div>)}
+      </div>
+      <h2 className="mb-2 text-base font-bold">Coach (fictif)</h2>
+      <BudgetCard soldeTotal={30000} budget={{ miseSemaine: 8000, perteMaxSemaine: 4000 }} etat={etatBudget({ miseSemaine: 8000, perteMaxSemaine: 4000 }, [{ mise: 3500, statut: "perdu", gain_net: -3500, placed_at: new Date().toISOString(), settled_at: new Date().toISOString() }, { mise: 2000, statut: "en_cours", gain_net: null, placed_at: new Date().toISOString(), settled_at: null }])} />
+      <div className="mb-6 mt-3 rounded-2xl rounded-bl-sm border border-line bg-surface px-3.5 py-3 text-sm">
+        <p>Je ne propose pas de pari maintenant : tu demandes un pari pour rattraper une perte, c’est la situation où l’on mise le plus mal. Regarde plutôt ton bilan de la semaine.</p>
+        <p className="mt-2 rounded-lg bg-draw-soft px-2.5 py-1.5 text-[12px] font-medium text-draw-ink">Garde-fou actif : le Coach ne propose pas de pari dans cette réponse.</p>
+        <div className="tile tile-action mt-2 flex items-center gap-3 px-3 py-2.5"><span className="min-w-0 flex-1"><span className="block truncate text-[13px] font-semibold">Bilan détaillé</span><span className="block truncate text-[11px] text-ink-muted">Réussite et rendement par type, marché, bookmaker</span></span><span aria-hidden className="text-brand">›</span></div>
       </div>
       <h2 className="mb-2 text-base font-bold">Fiche match, onglet Sources (fictif)</h2>
       <div className="mb-6"><MatchSources home="Équipe A" away="Équipe B" joue={false}

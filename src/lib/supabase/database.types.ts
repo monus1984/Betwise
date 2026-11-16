@@ -745,6 +745,27 @@ export type Database = {
           },
         ]
       }
+      budgets: {
+        Row: {
+          user_id: string
+          mise_semaine: number
+          perte_max_semaine: number
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          mise_semaine: number
+          perte_max_semaine: number
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          mise_semaine?: number
+          perte_max_semaine?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bankroll_transactions: {
         Row: {
           id: string

@@ -6,10 +6,10 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Notice } from "@/components/ui";
 
-export type ChatMsg = { id?: string; role: "user" | "assistant"; text: string; fonctions?: string[] };
+export type ChatMsg = { id?: string; role: "user" | "assistant"; text: string; fonctions?: string[]; cartes?: { titre: string; sous: string; href: string }[]; garde?: boolean };
 
 const FN_LABEL: Record<string, string> = {
-  options_du_jour: "options du jour", combine_cible: "combiné à cote visée", mes_tests: "tes tests", mon_objectif: "ton objectif", simuler_objectif: "simulation d’objectif", fixer_objectif: "objectif enregistré", coups_du_jour: "coups du jour", bilan_paris: "bilan des paris", bilan_par_origine: "réussite par origine", etat_bankroll: "état de la bankroll",
+  options_du_jour: "options du jour", combine_cible: "combiné à cote visée", mes_tests: "tes tests", mon_budget: "ton budget de la semaine", mon_objectif: "ton objectif", simuler_objectif: "simulation d’objectif", fixer_objectif: "objectif enregistré", coups_du_jour: "coups du jour", bilan_paris: "bilan des paris", bilan_par_origine: "réussite par origine", etat_bankroll: "état de la bankroll",
   paris_en_cours: "paris en cours", sources_suivies: "sources suivies", detail_source: "détail d’une source", analyse_match: "analyse de match",
 };
 
@@ -71,7 +71,7 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
       const j = await r.json();
       if (j.conversationId) setId(j.conversationId);
       if (!r.ok) { setErr(j.error ?? "Erreur."); return; }
-      setMsgs((m) => [...m, { id: j.reply.id, role: "assistant", text: j.reply.text, fonctions: j.reply.fonctions }]);
+      setMsgs((m) => [...m, { id: j.reply.id, role: "assistant", text: j.reply.text, fonctions: j.reply.fonctions, cartes: j.reply.cartes, garde: j.reply.garde }]);
       if (voiceOutRef.current) speakText(j.reply.text);
       if (typeof j.restant === "number") setLeft(j.restant);
     } catch {
@@ -107,6 +107,17 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
           <div key={m.id ?? i} className={m.role === "user" ? "flex justify-end" : ""}>
             <div className={m.role === "user" ? "max-w-[85%] rounded-2xl rounded-br-sm bg-inverse px-3.5 py-2.5 text-sm text-on-inverse" : "rounded-2xl rounded-bl-sm border border-slate-200 bg-surface px-3.5 py-3 text-sm text-slate-800"}>
               {m.role === "assistant" ? <Rich text={m.text || "Réponse vide : repose ta question."} /> : m.text}
+              {m.role === "assistant" && m.garde && <p className="mt-2 rounded-lg bg-draw-soft px-2.5 py-1.5 text-[12px] font-medium text-draw-ink">Garde-fou actif : le Coach ne propose pas de pari dans cette réponse.</p>}
+              {m.role === "assistant" && !!m.cartes?.length && (
+                <ul className="mt-2 space-y-1.5">
+                  {m.cartes.map((c) => (
+                    <li key={c.href}><Link href={c.href} className="tile tile-action flex items-center gap-3 px-3 py-2.5">
+                      <span className="min-w-0 flex-1"><span className="block truncate text-[13px] font-semibold text-ink">{c.titre}</span><span className="block truncate text-[11px] text-ink-muted">{c.sous}</span></span>
+                      <span aria-hidden className="text-brand">›</span>
+                    </Link></li>
+                  ))}
+                </ul>
+              )}
               {m.role === "assistant" && canSpeak && !!m.text && <button type="button" onClick={() => { unlockAudio(); speakText(m.text); }} className="mt-1.5 text-[11px] font-medium text-brand">🔊 Écouter</button>}
               {m.role === "assistant" && !!m.fonctions?.length && (
                 <p className="mt-2 border-t border-slate-100 pt-1.5 text-[11px] text-slate-400">Données consultées : {[...new Set(m.fonctions)].map((f) => FN_LABEL[f] ?? f).join(", ")}</p>

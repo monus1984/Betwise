@@ -1,24 +1,26 @@
 import Link from "next/link";
 import { CoachNav } from "@/components/coach-nav";
-import { IconChat, IconFlask, IconTarget, IconTile } from "@/components/icons";
+import { IconFlask, IconTarget, IconTile } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
-import { loadGoal } from "@/lib/coach/goal";
+import { etatBudget } from "@/lib/coach/budget";
+import { cartesDe, type Carte } from "@/lib/coach/cartes";
+import { Notice } from "@/components/ui";
 import { misesDuJour } from "@/lib/coach/plan";
 import { COACH_SUGGESTIONS } from "@/lib/coach/prompt";
 import { loadToday } from "@/lib/coach/today";
 import { createClient } from "@/lib/supabase/server";
 import { CoachChat, type ChatMsg } from "./chat";
 import { CoupsDuJour } from "./coups-du-jour";
-import { ObjectifCard } from "./objectif-card";
+import { BudgetCard } from "./budget-card";
 
 export const dynamic = "force-dynamic";
 
-/** Section Coach : objectif, coups du jour, options, tests et discussion, au même endroit. */
-export default async function CoachPage({ searchParams }: { searchParams: Promise<{ nouvelle?: string; v?: string; q?: string }> }) {
+/** Coach : la discussion d'abord. Le budget, les sélections du jour et les tests sont dans « Outils ». */
+export default async function CoachPage({ searchParams }: { searchParams: Promise<{ nouvelle?: string; v?: string; q?: string; ok?: string; err?: string }> }) {
   const sp = await searchParams;
   const db = await createClient();
 
-  if (sp.v === "discussion" || sp.nouvelle) {
+  if (sp.v !== "outils") {
     let conversationId: string | null = null;
     let messages: ChatMsg[] = [];
     if (!sp.nouvelle) {
@@ -26,10 +28,10 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
       if (c) {
         conversationId = c.id;
         const { data: ms } = await db.from("messages").select("id, role, contenu, fonctions").eq("conversation_id", c.id).in("role", ["user", "assistant"]).order("created_at").limit(60);
-        messages = (ms ?? []).map((m) => ({
-          id: m.id, role: m.role as "user" | "assistant", text: m.contenu ?? "",
-          fonctions: Array.isArray(m.fonctions) ? (m.fonctions as { nom?: string }[]).map((f) => f.nom ?? "").filter(Boolean) : [],
-        }));
+        messages = (ms ?? []).map((m) => {
+          const appels = Array.isArray(m.fonctions) ? (m.fonctions as { nom?: string; sortie?: unknown }[]) : [];
+          return { id: m.id, role: m.role as "user" | "assistant", text: m.contenu ?? "", fonctions: appels.map((f) => f.nom ?? "").filter(Boolean), cartes: cartesDe(appels) as Carte[] };
+        });
       }
     }
     return (
@@ -42,48 +44,56 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
   }
 
   const { data: { user } } = await db.auth.getUser();
-  const [{ data: summary }, { data: tests }] = await Promise.all([
-    db.from("my_bankroll_summary").select("solde").maybeSingle(),
+  const [{ data: summary }, { data: tests }, { data: bud }, { data: recents }] = await Promise.all([
+    db.from("my_bankroll_summary").select("solde, exposition").maybeSingle(),
     db.from("bets").select("statut, mise, gain_net").eq("virtuel", true).neq("statut", "annule").limit(2000),
+    db.from("budgets").select("mise_semaine, perte_max_semaine").maybeSingle(),
+    db.from("bets").select("mise, statut, gain_net, placed_at, settled_at").eq("virtuel", false).gte("placed_at", new Date(Date.now() - 9 * 86400000).toISOString()).limit(300),
   ]);
-  const solde = Number(summary?.solde ?? 0);
-  const [goal, today] = await Promise.all([loadGoal(db, solde), loadToday(db, user!.id)]);
-  const mises = goal ? goal.mises : solde > 0 ? misesDuJour(solde, solde) : null;
+  const solde = Number(summary?.solde ?? 0), capital = solde + Number(summary?.exposition ?? 0);
+  const budget = bud ? { miseSemaine: Number(bud.mise_semaine), perteMaxSemaine: Number(bud.perte_max_semaine) } : null;
+  const etat = budget ? etatBudget(budget, (recents ?? []).map((b) => ({ ...b, mise: Number(b.mise), gain_net: b.gain_net === null ? null : Number(b.gain_net) }))) : null;
+  const today = await loadToday(db, user!.id);
+  const mises = solde > 0 ? misesDuJour(solde, solde) : null;
   const tRegles = (tests ?? []).filter((t) => t.statut !== "en_cours");
   const tMises = tRegles.reduce((x, t) => x + Number(t.mise), 0), tNet = tRegles.reduce((x, t) => x + Number(t.gain_net ?? 0), 0);
 
   return (
     <>
-      <PageHeader title="Coach" subtitle="Ton objectif, les coups du jour, les options à ton taux de réussite et tes tests." />
-      <CoachNav current="jour" />
+      <PageHeader title="Coach" subtitle="Ton budget de la semaine, tes tests, et les sélections du jour si tu les demandes." />
+      <CoachNav current="outils" />
+      {sp.ok === "budget" && <div className="mb-3"><Notice kind="info">Budget enregistré.</Notice></div>}
+      {sp.err && <div className="mb-3"><Notice>{sp.err === "budget" ? "Indique deux montants ; la perte maximale ne peut pas dépasser le budget de mise." : "Enregistrement impossible. Réessaie."}</Notice></div>}
 
-      <ObjectifCard goal={goal} solde={solde} />
-      <CoupsDuJour picks={today.picks} theirs={today.theirs} mises={mises} />
+      <BudgetCard budget={budget} etat={etat} soldeTotal={capital} />
 
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <Link href="/options" className="rounded-2xl border border-line bg-surface p-3 shadow-card active:bg-surface-2">
-          <IconTile size="sm" tone="conseil"><IconTarget width={18} height={18} /></IconTile>
-          <p className="mt-2 text-sm font-semibold">Options du jour</p>
-          <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">Ton % de réussite, en simple ou en combiné à la cote voulue.</p>
-        </Link>
-        <Link href="/paris?vue=tests" className="rounded-2xl border border-line bg-surface p-3 shadow-card active:bg-surface-2">
+        <Link href="/paris?vue=tests" className="rounded-2xl border border-line bg-surface p-3 active:bg-surface-2">
           <IconTile size="sm" tone="test"><IconFlask width={18} height={18} /></IconTile>
           <p className="mt-2 text-sm font-semibold">Mes tests</p>
           <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
-            {!tests?.length ? "Teste tes choix et ceux de tes tipsters, sans miser."
+            {!tests?.length ? "Teste tes choix et ceux de tes sources, sans miser."
               : !tRegles.length ? `${tests.length} en attente de résultat.`
               : <>{tRegles.length} réglé{tRegles.length > 1 ? "s" : ""} · {Math.round((100 * tRegles.filter((t) => t.statut === "gagne").length) / tRegles.length)} % gagnés · <span className={tNet >= 0 ? "text-gain" : "text-loss"}>{tNet >= 0 ? "+" : ""}{tMises ? Math.round((100 * tNet) / tMises) : 0} %</span></>}
           </p>
         </Link>
+        <Link href="/options" className="rounded-2xl border border-line bg-surface p-3 active:bg-surface-2">
+          <IconTile size="sm" tone="neutre"><IconTarget width={18} height={18} /></IconTile>
+          <p className="mt-2 text-sm font-semibold">Chercher par probabilité</p>
+          <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">Les marchés du jour dans la fourchette de chances que tu choisis.</p>
+        </Link>
       </div>
 
-      <section className="mt-3 rounded-xl border border-line bg-surface p-4 shadow-card">
-        <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold"><IconTile size="sm" tone="conseil"><IconChat width={18} height={18} /></IconTile>Poser une question au Coach</h2>
-        <ul className="space-y-1.5">
-          {COACH_SUGGESTIONS.slice(0, 4).map((s) => <li key={s}><Link href="/coach?v=discussion" className="block rounded-lg border border-line px-3 py-2 text-[13px] text-ink-soft active:bg-surface-2">{s}</Link></li>)}
-        </ul>
-        <Link href="/coach?v=discussion" className="mt-3 block rounded-xl bg-brand py-2.5 text-center text-sm font-semibold text-on-fill">Ouvrir la discussion</Link>
-      </section>
+      {/* En retrait : les sélections du jour ne s'affichent que si on les ouvre, et jamais quand le budget est atteint */}
+      {etat?.statut === "atteint" ? (
+        <p className="mt-3 rounded-xl border border-line bg-surface p-3 text-[13px] text-ink-muted">Les sélections du jour sont masquées : ton budget de la semaine est atteint.</p>
+      ) : (
+        <details className="mt-3 rounded-xl border border-line bg-surface p-3">
+          <summary className="cursor-pointer text-sm font-semibold">Sélections du jour <span className="font-normal text-ink-muted">· {today.picks.length ? `${today.picks.length} sur des marchés à cote de référence` : "rien de solide aujourd’hui"}</span></summary>
+          <p className="mt-2 text-[11px] leading-relaxed text-ink-muted">Ce sont des probabilités tirées des cotes, pas des conseils. Une sélection « Très probable » perd environ 12 fois sur 100.</p>
+          <CoupsDuJour picks={today.picks} theirs={today.theirs} mises={mises} />
+        </details>
+      )}
     </>
   );
 }
