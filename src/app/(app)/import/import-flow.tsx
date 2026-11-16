@@ -336,6 +336,17 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
         </div>
       </section>
 
+      {!collapsed && lines.length > 0 && (
+        <div className="grid grid-cols-3 gap-2 text-center" aria-label="État de la lecture">
+          <div className="tile px-2 py-2"><p className="text-lg font-bold tabular-nums text-gain">{valides.length}</p><p className="text-[11px] text-ink-muted">lue{valides.length > 1 ? "s" : ""}</p></div>
+          <div className="tile px-2 py-2"><p className={`text-lg font-bold tabular-nums ${included.filter((l) => alerteDe(l)).length ? "text-draw" : ""}`}>{included.filter((l) => alerteDe(l)).length}</p><p className="text-[11px] text-ink-muted">à vérifier</p></div>
+          <div className="tile px-2 py-2"><p className={`text-lg font-bold tabular-nums ${ecartees.length - included.filter((l) => alerteDe(l)).length ? "text-loss" : ""}`}>{ecartees.length - included.filter((l) => alerteDe(l)).length}</p><p className="text-[11px] text-ink-muted">écartée{ecartees.length - included.filter((l) => alerteDe(l)).length > 1 ? "s" : ""}</p></div>
+        </div>
+      )}
+      {!collapsed && raw.kind !== "pronos" && lines.some((l) => l.outcome !== "pending" && l.outcome !== "unknown") && (
+        <p className="px-1 text-[11px] leading-relaxed text-ink-muted">Le résultat affiché à droite de chaque ligne est celui lu sur l’image. À l’enregistrement, il est recoupé avec le score du match : en cas de désaccord, c’est le score qui compte.</p>
+      )}
+
       {collapsed ? (
         <section className="space-y-3 rounded-xl border border-draw/40 bg-draw-soft p-4">
           <p className="text-sm text-draw-ink">Ticket replié : le détail des sélections n’est pas visible. On enregistre le résumé (mise, cote totale, résultat) pour que ta bankroll soit juste. Tu pourras ajouter le détail plus tard.</p>
@@ -349,10 +360,12 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
           const hasParam = markets.find((m) => m.code === l.market_code)?.a_parametre;
           const homeN = l.match?.home ?? l.home_team ?? "Domicile", awayN = l.match?.away ?? l.away_team ?? "Extérieur";
           return (
-          <section key={l.key} className={`space-y-2 rounded-xl border bg-surface p-4 ${l.include ? "border-slate-200" : "border-dashed border-slate-300 opacity-60"}`}>
+          <section key={l.key} className={`space-y-2 rounded-xl border bg-surface p-4 ${!l.include ? "border-dashed border-slate-300 opacity-60" : alerteDe(l) ? "border-draw/60" : manque(l) ? "border-loss/40" : "border-slate-200"}`}>
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{raw.kind === "pronos" ? "Prono" : "Sélection"} {i + 1}</p>
+                <p className="flex items-center gap-2 text-xs font-medium text-slate-500">{raw.kind === "pronos" ? "Prono" : "Sélection"} {i + 1}
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${!l.include ? "bg-surface-2 text-ink-soft" : alerteDe(l) ? "bg-draw-soft text-draw-ink" : manque(l) ? "bg-loss-soft text-loss-ink" : "bg-gain-soft text-gain-ink"}`}>{!l.include ? "Retirée" : alerteDe(l) ? "À vérifier" : manque(l) ? "Écartée" : "Lue"}</span>
+                </p>
                 <p className="truncate text-sm font-medium">{l.match ? `${l.match.home} – ${l.match.away}` : `${l.home_team ?? "?"} – ${l.away_team ?? "?"}`}</p>
                 <p className="text-xs text-slate-600">{l.ok ? pickLabel(l.market_code, l.market_param, l.selection, homeN, awayN) : l.label_pick}</p>
                 {l.match
@@ -372,7 +385,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
               </div>
               {raw.kind === "pronos"
                 ? <button type="button" onClick={() => update(l.key, { editing: !l.editing })} className="shrink-0 text-xs text-brand underline">{l.editing ? "Fermer" : "Modifier"}</button>
-                : <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${OUTCOME[l.outcome].cls}`}>{OUTCOME[l.outcome].label}</span>}
+                : <span className="shrink-0 text-right"><span className="block text-[10px] text-ink-muted">sur le ticket</span><span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${OUTCOME[l.outcome].cls}`}>{OUTCOME[l.outcome].label}</span></span>}
             </div>
             {raw.kind !== "pronos" && <button type="button" onClick={() => update(l.key, { editing: !l.editing })} className="text-xs text-brand underline">{l.editing ? "Fermer la correction" : "Corriger le match ou le choix"}</button>}
             {l.editing && (

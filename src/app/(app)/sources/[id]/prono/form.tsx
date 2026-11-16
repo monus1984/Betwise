@@ -87,7 +87,7 @@ export function NewPredictionForm({ sourceId, markets }: { sourceId: string; mar
           </div>
         </Field>
 
-        <Field label="Niveau de risque annoncé par la source (facultatif)" hint="« Pari sûr », « coup de poker »… Si la source le dit, on le garde tel quel et on le compare à la cote.">
+        <Field label="Niveau de risque annoncé par la source (facultatif)" hint="« Prudent », « coup de poker »… Si la source le dit, on le garde tel quel et on le compare à la cote.">
           <div className="flex gap-2">
             {(["prudent", "moyen", "risque"] as const).map((k) => (
               <Chip key={k} active={risque === k} onClick={() => setRisque(risque === k ? null : k)}>{RISK_LABEL[k]}</Chip>

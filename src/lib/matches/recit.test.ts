@@ -35,17 +35,17 @@ describe("récit d'un match", () => {
     expect(r.etapes[3].lignes[0]).toContain("Italie 0–2 Belgique");
     expect(r.etapes[4].lignes).toEqual(["M. Retegui (Italie) : 2 buts sur les 2 derniers matchs."]);
   });
-  it("rend un verdict Audacieux, de préférence avec une vraie cote, et propose plus sûr et plus osé", () => {
+  it("rend un verdict Audacieux, de préférence avec une vraie cote, et propose plus probable et plus osé", () => {
     expect(r.verdict).toMatchObject({ market: "OU", param: 1.5, sel: "Plus", categorie: "audacieux" });
     expect(r.autres.map((c) => c.categorie)).toEqual(["sur", "risque"]);
-    expect(r.texte).toContain("Mon avis :");
+    expect(r.texte).toContain("Le choix le plus probable :");
     expect(r.texte).not.toContain("mi-temps");
   });
   it("n'invente rien quand la base est vide", () => {
     const v = buildRecit({ ...base, rangs: { home: null, away: null }, passes: [], picks: [], source: null, butsAttendus: null });
     expect(v.etapes).toEqual([]);
     expect(v.verdict).toBeNull();
-    expect(v.texte).toContain("je ne donne pas d’avis");
+    expect(v.texte).toContain("aucun choix à mettre en avant");
   });
   it("ne traduit une zone de classement que s'il la connaît", () => {
     expect(zoneFr("Relegation")).toBe("en position de relégation");

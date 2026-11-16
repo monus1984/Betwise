@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return NextResponse.json({ ok: false, cle: false, erreur: "GEMINI_API_KEY absente de ce déploiement" });
   const t0 = Date.now();
-  const r = await synthesize("Belgique contre Italie. Mon avis : la Belgique ne perd pas.", key);
+  const r = await synthesize("Belgique contre Italie. Le choix le plus probable : la Belgique ne perd pas.", key);
   const ms = Date.now() - t0;
   if (!r.ok) return NextResponse.json({ ok: false, cle: true, modele: TTS_MODEL, voix: TTS_VOICE, statut: r.status, erreur: r.error.slice(0, 300), ms });
   return NextResponse.json({ ok: true, cle: true, modele: TTS_MODEL, voix: TTS_VOICE, octets: r.wav.length, secondes: Math.round(((r.wav.length - 44) / 48000) * 10) / 10, ms });

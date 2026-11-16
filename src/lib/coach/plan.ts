@@ -20,7 +20,7 @@ const COTE: Record<Categorie, number> = { sur: (1 / CAT_ANNONCE.sur) * (1 - MARG
 type Mix = [Categorie, number][];
 const MIX_PRUDENT: Mix = [["sur", 0.5], ["audacieux", 0.4], ["risque", 0.1]];
 const MIXES: { mix: Mix; label: string }[] = [
-  { mix: [["sur", 0.6], ["audacieux", 0.4]], label: "surtout Sûr" },
+  { mix: [["sur", 0.6], ["audacieux", 0.4]], label: "surtout Très probable" },
   { mix: [["sur", 0.3], ["audacieux", 0.5], ["risque", 0.2]], label: "surtout Audacieux" },
   { mix: [["audacieux", 0.4], ["risque", 0.6]], label: "surtout Risqué" },
 ];
@@ -62,7 +62,7 @@ function bestPlan(i: PlanInput, target: number, maxChute = 0.4): PlanStats {
 
 export function evaluatePlan(i: PlanInput): PlanResult {
   const prudentSim = simulate(i, i.cible, { mix: MIX_PRUDENT, f: null });
-  const prudent: PlanStats = { ...prudentSim, mise: MISE_PART.audacieux, mix: "Sûr et Audacieux, Risqué sur les gains" };
+  const prudent: PlanStats = { ...prudentSim, mise: MISE_PART.audacieux, mix: "Très probable et Audacieux, Risqué sur les gains" };
   const objectif = bestPlan(i, i.cible);
   // Objectif raisonnable : la plus haute cible avec au moins une chance sur deux et au plus 20 % de risque de chute
   let raisonnable: PlanResult["raisonnable"] = null;

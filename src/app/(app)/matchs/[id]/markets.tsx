@@ -20,28 +20,42 @@ export function MatchMarkets({ m, sg }: { m: M; sg: Signal }) {
   };
   const row = (cols: 2 | 3, cells: (React.ReactNode | null)[]) => <div className={`grid gap-1.5 ${cols === 3 ? "grid-cols-3" : "grid-cols-2"}`}>{cells}</div>;
 
-  return (
-    <div className="space-y-3">
-      <Block title="Résultat du match">{row(3, [cell("1X2", null, "1", h), cell("1X2", null, "N", "Nul"), cell("1X2", null, "2", a)])}</Block>
-      <Block title="Double chance">{row(3, [cell("DC", null, "1N", `${h} ou nul`), cell("DC", null, "12", "Pas de nul"), cell("DC", null, "N2", `${a} ou nul`)])}</Block>
-      <Block title="Remboursé si match nul">{row(2, [cell("DNB", null, "1", h), cell("DNB", null, "2", a)])}</Block>
-      <Block title="Nombre de buts">
+  // Deux étages : les marchés pour lesquels on a une vraie cote de bookmaker, puis ceux dont la probabilité est
+  // seulement déduite (du résultat et du nombre de buts, ou du modèle). Les seconds portent toujours « estimation ».
+  const blocs: { m: string[]; n: React.ReactNode }[] = [
+      { m: ["1X2"], n: (
+      <Block key="Résultat du match" title="Résultat du match">{row(3, [cell("1X2", null, "1", h), cell("1X2", null, "N", "Nul"), cell("1X2", null, "2", a)])}</Block>
+      ) },
+      { m: ["DC"], n: (
+      <Block key="Double chance" title="Double chance">{row(3, [cell("DC", null, "1N", `${h} ou nul`), cell("DC", null, "12", "Pas de nul"), cell("DC", null, "N2", `${a} ou nul`)])}</Block>
+      ) },
+      { m: ["DNB"], n: (
+      <Block key="Remboursé si match nul" title="Remboursé si match nul">{row(2, [cell("DNB", null, "1", h), cell("DNB", null, "2", a)])}</Block>
+      ) },
+      { m: ["OU"], n: (
+      <Block key="Nombre de buts" title="Nombre de buts">
         <div className="space-y-1.5">{[0.5, 1.5, 2.5, 3.5, 4.5].map((l) => <div key={l}>{row(2, [cell("OU", l, "Plus", `Plus de ${L(l)}`), cell("OU", l, "Moins", `Moins de ${L(l)}`)])}</div>)}</div>
       </Block>
-      <Block title="Les deux équipes marquent">{row(2, [cell("BTTS", null, "Oui", "Oui"), cell("BTTS", null, "Non", "Non")])}</Block>
-      {(["TT1", "TT2"] as const).map((t) => (
+      ) },
+      { m: ["BTTS"], n: (
+      <Block key="Les deux équipes marquent" title="Les deux équipes marquent">{row(2, [cell("BTTS", null, "Oui", "Oui"), cell("BTTS", null, "Non", "Non")])}</Block>
+      ) },
+      ...(["TT1", "TT2"] as const).map((t) => ({ m: [t as string], n: (
         <Block key={t} title={`Buts de ${t === "TT1" ? h : a}`}>
           <div className="space-y-1.5">{[0.5, 1.5, 2.5].map((l) => <div key={l}>{row(2, [cell(t, l, "Plus", `Plus de ${L(l)}`), cell(t, l, "Moins", `Moins de ${L(l)}`)])}</div>)}</div>
         </Block>
-      ))}
-      <Block title="Handicap">
+      ) })),
+      { m: ["AH"], n: (
+      <Block key="Handicap" title="Handicap">
         <div className="space-y-1.5">
           {row(2, [cell("AH", -1.5, "1", `${h} −1,5`), cell("AH", 1.5, "2", `${a} +1,5`)])}
           {row(2, [cell("AH", 1.5, "1", `${h} +1,5`), cell("AH", -1.5, "2", `${a} −1,5`)])}
         </div>
         <p className="mt-1.5 text-[11px] text-ink-muted">−1,5 : gagner par 2 buts ou plus. +1,5 : ne pas perdre par 2 buts ou plus.</p>
       </Block>
-      <Block title="Mi-temps" note="probabilités indicatives">
+      ) },
+      { m: ["HT_1X2", "HT_DC", "HT_OU", "HT_BTTS", "H2_1X2", "H2_OU", "HTFT", "HMG"], n: (
+      <Block key="Mi-temps" title="Mi-temps" note="probabilités indicatives">
         <Sub>Résultat à la mi-temps</Sub>
         {row(3, [cell("HT_1X2", null, "1", h), cell("HT_1X2", null, "N", "Nul"), cell("HT_1X2", null, "2", a)])}
         <Sub>Double chance à la mi-temps</Sub>
@@ -57,22 +71,39 @@ export function MatchMarkets({ m, sg }: { m: M; sg: Signal }) {
         <Group title="Mi-temps / fin de match">{["1", "N", "2"].flatMap((x) => ["1", "N", "2"].map((y) => cell("HTFT", null, `${x}/${y}`, pickLabel("HTFT", null, `${x}/${y}`, h, a), true)))}</Group>
         <Group title="Mi-temps avec le plus de buts">{row(3, [cell("HMG", null, "1", "1re"), cell("HMG", null, "N", "Autant"), cell("HMG", null, "2", "2e")])}</Group>
       </Block>
-      <Block title="Autres paris sur les buts">
+      ) },
+      { m: ["OE", "MG"], n: (
+      <Block key="Autres paris sur les buts" title="Autres paris sur les buts">
         <Sub>Pair ou impair</Sub>
         {row(2, [cell("OE", null, "Pair", "Pair"), cell("OE", null, "Impair", "Impair")])}
         <Group title="Tranche de buts">{MG_RANGES.map((x) => cell("MG", null, x, pickLabel("MG", null, x, h, a), true))}</Group>
       </Block>
-      <Block title="Autres paris sur le résultat">
+      ) },
+      { m: ["WTN", "EH"], n: (
+      <Block key="Autres paris sur le résultat" title="Autres paris sur le résultat">
         <Sub>Gagne sans encaisser</Sub>
         {row(2, [cell("WTN", null, "1", h), cell("WTN", null, "2", a)])}
         <Group title="Handicap européen (3 issues)">{[-2, -1, 1, 2].flatMap((l) => ["1", "N", "2"].map((x) => cell("EH", l, x, pickLabel("EH", l, x, h, a), true)))}</Group>
       </Block>
-      <Block title="Combinés du match" note="deux conditions, une seule sélection">
+      ) },
+      { m: ["DC_OU", "1X2_OU", "DC_BTTS", "1X2_BTTS", "OU_BTTS"], n: (
+      <Block key="Combinés du match" title="Combinés du match" note="deux conditions, une seule sélection">
         <Group title="Double chance et buts">{["1N", "N2", "12"].flatMap((x) => [1.5, 2.5, 3.5].flatMap((l) => ["Plus", "Moins"].map((b) => cell("DC_OU", l, `${x}|${b}`, pickLabel("DC_OU", l, `${x}|${b}`, h, a), true))))}</Group>
         <Group title="Résultat et buts">{["1", "2"].flatMap((x) => [1.5, 2.5, 3.5].flatMap((l) => ["Plus", "Moins"].map((b) => cell("1X2_OU", l, `${x}|${b}`, pickLabel("1X2_OU", l, `${x}|${b}`, h, a), true))))}</Group>
         <Group title="Résultat et les deux marquent">{[...["1N", "N2", "12"].flatMap((x) => ["Oui", "Non"].map((b) => cell("DC_BTTS", null, `${x}|${b}`, pickLabel("DC_BTTS", null, `${x}|${b}`, h, a), true))), ...["1", "N", "2"].flatMap((x) => ["Oui", "Non"].map((b) => cell("1X2_BTTS", null, `${x}|${b}`, pickLabel("1X2_BTTS", null, `${x}|${b}`, h, a), true)))]}</Group>
         <Group title="Buts et les deux marquent">{[1.5, 2.5, 3.5].flatMap((l) => ["Plus", "Moins"].flatMap((x) => ["Oui", "Non"].map((b) => cell("OU_BTTS", l, `${x}|${b}`, pickLabel("OU_BTTS", l, `${x}|${b}`, h, a), true))))}</Group>
       </Block>
+      ) },
+  ];
+  const reel = (mk: string[]) => picks.some((p) => mk.includes(p.market) && p.cote !== null);
+  const suivis = blocs.filter((b) => reel(b.m)), estimes = blocs.filter((b) => !reel(b.m));
+
+  return (
+    <div className="space-y-3">
+      {suivis.length > 0 && <Etage titre="Cotes de référence" texte="Marchés pour lesquels on a la cote médiane des bookmakers européens. La probabilité affichée en découle, marge retirée." />}
+      {suivis.map((b) => b.n)}
+      {estimes.length > 0 && <Etage estime titre="Estimations" texte={suivis.length ? "Aucune cote de bookmaker sur ces marchés : la probabilité est déduite du résultat et du nombre de buts attendus. À comparer à la cote de ton bookmaker avant de t’y fier." : "Aucune cote de bookmaker sur ce match : toutes les probabilités viennent du modèle statistique. Elles sont moins fiables que des cotes de marché."} />}
+      {estimes.map((b) => b.n)}
       {m.ouvert && (
         <Block title="Corners, cartons, tirs, buteurs" note="sans pourcentage">
           <div className="flex flex-wrap gap-1.5">
@@ -96,6 +127,14 @@ function Block({ title, note, children }: { title: string; note?: string; childr
       <h3 className="mb-2 flex items-baseline justify-between text-xs font-semibold text-ink-soft">{title}{note && <span className="font-normal text-ink-muted">{note}</span>}</h3>
       {children}
     </section>
+  );
+}
+function Etage({ titre, texte, estime }: { titre: string; texte: string; estime?: boolean }) {
+  return (
+    <div className={`rounded-xl border p-3 ${estime ? "border-draw/40 bg-draw-soft" : "border-brand/30 bg-brand-soft"}`}>
+      <p className={`text-sm font-semibold ${estime ? "text-draw-ink" : "text-ink"}`}>{titre}</p>
+      <p className={`mt-0.5 text-[12px] leading-snug ${estime ? "text-draw-ink" : "text-ink-soft"}`}>{texte}</p>
+    </div>
   );
 }
 function Sub({ children }: { children: React.ReactNode }) {

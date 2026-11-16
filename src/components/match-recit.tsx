@@ -22,7 +22,7 @@ export function MatchRecit({ match, etapes, verdict, autres, source }: Props) {
 
   const blocs = [
     ...etapes.map((e) => `${e.titre}. ${e.lignes.join(" ")}`),
-    verdict ? `Mon avis : ${verdict.label}. ${pct(verdict.p)} chances sur 100, catégorie ${CAT_LABEL[verdict.categorie]}.` : "Pas encore de cote sur ce match : je ne donne pas d’avis.",
+    verdict ? `Le choix le plus probable : ${verdict.label}. ${pct(verdict.p)} chances sur 100${verdict.cote ? "" : ", c’est une estimation"}.` : "Pas encore de cote sur ce match : aucun choix à mettre en avant.",
   ];
   const stop = () => { stopSpeaking(); setLu(null); };
   const lire = () => { unlockAudio(); setLu(0); speakBlocks([`${match.home} contre ${match.away}. ${blocs[0]}`, ...blocs.slice(1)], setLu); };
@@ -52,19 +52,19 @@ export function MatchRecit({ match, etapes, verdict, autres, source }: Props) {
       </ol>
 
       <div className={`rounded-xl border-2 p-3 transition-colors ${lu === etapes.length ? "border-brand bg-brand/5" : "border-pitch/30 bg-surface"}`}>
-        <p className="text-[11px] font-semibold text-brand">Le verdict</p>
+        <p className="text-[11px] font-semibold text-brand">Ce que disent les chiffres</p>
         {verdict ? (
           <>
             <div className="mt-1 flex items-center gap-2">
               <p className="min-w-0 flex-1 font-display text-xl font-bold leading-tight">{verdict.label}</p>
               {match.ouvert && <AddToSlip leg={leg(verdict)} />}
             </div>
-            <p className="mt-1 text-sm tabular-nums"><b>{pct(verdict.p)} chances sur 100</b> · cote {cote(verdict)} <span className={`ml-1 rounded-full border px-1.5 py-0.5 text-[10px] ${CAT_STYLE[verdict.categorie]}`}>{CAT_LABEL[verdict.categorie]}</span></p>
+            <p className="mt-1 text-sm tabular-nums"><b>{pct(verdict.p)} chances sur 100</b> · cote {cote(verdict)} <span className={`ml-1 rounded-full border px-1.5 py-0.5 text-[10px] ${CAT_STYLE[verdict.categorie]}`}>{CAT_LABEL[verdict.categorie]}</span>{(!verdict.cote || source === "modele") && <span className="ml-1 rounded-full bg-draw-soft px-1.5 py-0.5 text-[10px] font-semibold text-draw-ink">estimation</span>}</p>
             {autres.length > 0 && (
               <ul className="mt-2 divide-y divide-line border-t border-line">
                 {autres.map((c) => (
                   <li key={`${c.market}${c.param}${c.sel}`} className="flex items-center gap-2 py-1.5 text-[13px]">
-                    <span className="w-16 shrink-0 text-[11px] text-ink-muted">{c.categorie === "sur" ? "Plus sûr" : "Plus osé"}</span>
+                    <span className="w-16 shrink-0 text-[11px] text-ink-muted">{c.categorie === "sur" ? "Plus probable" : "Plus osé"}</span>
                     <span className="min-w-0 flex-1 truncate">{c.label}</span>
                     <span className="shrink-0 tabular-nums text-ink-muted">{pct(c.p)} % · {cote(c)}</span>
                     {match.ouvert && <AddToSlip size="sm" leg={leg(c)} />}
@@ -72,9 +72,9 @@ export function MatchRecit({ match, etapes, verdict, autres, source }: Props) {
                 ))}
               </ul>
             )}
-            <p className="mt-2 text-[11px] leading-relaxed text-ink-muted">Le verdict est calculé d’après {source === "modele" ? `le modèle ${APP_NAME}` : "les cotes de référence"}, pas d’après les étapes ci-dessus : elles donnent le contexte, elles ne prouvent rien. « ≈ » : cote estimée, à comparer à celle de ton bookmaker.</p>
+            <p className="mt-2 text-[11px] leading-relaxed text-ink-muted">Ce choix est calculé d’après {source === "modele" ? `le modèle ${APP_NAME}` : "les cotes de référence"}, pas d’après les étapes ci-dessus : elles donnent le contexte, elles ne prouvent rien. « ≈ » : cote estimée, à comparer à celle de ton bookmaker.</p>
           </>
-        ) : <p className="mt-1 text-sm text-ink-muted">Pas encore de cote sur ce match : pas d’avis pour l’instant.</p>}
+        ) : <p className="mt-1 text-sm text-ink-muted">Pas encore de cote sur ce match : aucun choix à mettre en avant pour l’instant.</p>}
       </div>
     </section>
   );

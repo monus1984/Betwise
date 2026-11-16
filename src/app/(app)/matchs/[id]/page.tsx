@@ -1,4 +1,6 @@
 import { APP_NAME } from "@/lib/app-name";
+import { MatchSources } from "./sources-tab";
+import { lire as lireProof } from "@/lib/sources/proof";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RISK_CLASS, RISK_LABEL, riskFromOdds } from "@/components/ui";
@@ -28,14 +30,16 @@ type Just = { lambda_dom?: number; lambda_ext?: number; score_probable?: string;
 type Evt = { t: "but" | "pen" | "csc" | "pen_rate" | "jaune" | "rouge"; n: string | null; e: "1" | "2"; m: number; x?: number };
 const EVT: Record<Evt["t"], { icon: string; txt: string }> = { but: { icon: "⚽", txt: "" }, pen: { icon: "⚽", txt: " (penalty)" }, csc: { icon: "⚽", txt: " (contre son camp)" }, pen_rate: { icon: "✖️", txt: " (penalty manqué)" }, jaune: { icon: "🟨", txt: "" }, rouge: { icon: "🟥", txt: "" } };
 const TABS = [
-  { k: "paris", t: "Paris" }, { k: "analyse", t: "Analyse" }, { k: "forme", t: "Forme" }, { k: "equipes", t: "Équipes" }, { k: "pronos", t: "Pronos" },
+  { k: "analyse", t: "Analyse" }, { k: "stats", t: "Stats" }, { k: "marches", t: "Marchés" }, { k: "sources", t: "Sources" },
 ] as const;
 const TZ = "Africa/Abidjan";
 
 export default async function MatchPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ t?: string }> }) {
   const { id } = await params;
   const sp = await searchParams;
-  const tab = sp.t === "h2h" ? "forme" : sp.t === "cotes" ? "paris" : TABS.some((x) => x.k === sp.t) ? sp.t! : null;
+  // Anciens liens (notifications, favoris) : on les range dans les quatre onglets actuels
+  const ANCIEN: Record<string, string> = { paris: "marches", cotes: "marches", forme: "stats", equipes: "stats", h2h: "stats", pronos: "sources" };
+  const tab = TABS.some((x) => x.k === sp.t) ? sp.t! : ANCIEN[sp.t ?? ""] ?? null;
   const supabase = await createClient();
 
   const { data } = await supabase
@@ -63,7 +67,6 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const just = (est?.[0]?.justification ?? null) as Just | null;
   const model = e("1X2", "1") ? { p1: Number(e("1X2", "1")!.probabilite), pN: Number(e("1X2", "N")!.probabilite), p2: Number(e("1X2", "2")!.probabilite) } : null;
   const market = marketProbs(ref("1X2", "1")?.cote, ref("1X2", "N")?.cote, ref("1X2", "2")?.cote);
-  const extras: Extras | null = tab === "equipes" ? await getExtras({ id: m.id, af_fixture_id: m.af_fixture_id, kickoff_at: m.kickoff_at, statut: m.statut }) : null;
   const sg = (await loadSignals(supabase, [id])).get(id) ?? null;
   const suivi = !!(await supabase.from("match_follows").select("match_id").eq("match_id", id).maybeSingle()).data;
   const [{ data: tf }, { data: st }] = await Promise.all([
@@ -74,7 +77,10 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const standing = latestStandings((st ?? []) as StandingRow[]);
   const evts = [...(m.details?.evts ?? [])].sort((x, y) => x.m - y.m || (x.x ?? 0) - (y.x ?? 0));
   const mk = sg?.market ?? null;
-  const onglet = tab ?? (m.statut === "programme" && sg ? "paris" : "analyse");
+  const onglet = tab ?? "analyse";
+  const extras: Extras | null = onglet === "stats" ? await getExtras({ id: m.id, af_fixture_id: m.af_fixture_id, kickoff_at: m.kickoff_at, statut: m.statut }) : null;
+  const srcIds = [...new Set((preds ?? []).map((p) => one(p.source as { id: string } | { id: string }[] | null)?.id).filter((x): x is string => !!x))];
+  const { data: proofs } = onglet === "sources" && srcIds.length ? await supabase.from("source_proof").select("*").in("source_id", srcIds) : { data: [] };
   const recit = onglet === "analyse" && m.statut !== "termine" ? await loadRecit(supabase as never, m.id) : null;
   const picks = sg ? picksOf(sg).filter((p) => p.p >= 0.6 && p.p <= 0.95).slice(0, 4) : [];
   const parier = (market: string, sel: string, cote?: number, param?: number) => `/nouveau?match=${m.id}&market=${market}${param !== undefined ? `&param=${param}` : ""}&sel=${encodeURIComponent(sel)}${cote ? `&cote=${cote}` : ""}`;
@@ -103,7 +109,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         {(model || market) && (
           <div className="mt-4">
             <ProbBar p={market ?? model!} light />
-            <p className="mt-1.5 text-center text-[11px] text-white/60">{market ? "Cotes de référence (marge retirée)" : `Modèle ${APP_NAME}`}</p>
+            <p className="mt-1.5 text-center text-[11px] text-white/60">{market ? "D’après les cotes de référence, marge retirée" : `Estimation du modèle ${APP_NAME}, sans cote de bookmaker`}</p>
           </div>
         )}
       </header>
@@ -125,10 +131,10 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
       {/* Onglets */}
       <nav className="sticky top-0 z-10 -mx-4 mb-3 bg-canvas/95 px-4 py-1.5 backdrop-blur">
-        <div className="grid grid-cols-6 gap-0.5 rounded-xl bg-surface-2 p-1">
+        <div className="grid grid-cols-4 gap-0.5 rounded-xl bg-surface-2 p-1">
           {TABS.map((t) => (
             <Link key={t.k} href={`/matchs/${m.id}?t=${t.k}`} scroll={false} replace className={`truncate rounded-lg px-1 py-1.5 text-center text-[12.5px] ${onglet === t.k ? "bg-surface font-semibold text-ink shadow-card" : "text-ink-muted"}`}>
-              {t.t}{t.k === "pronos" && preds?.length ? ` (${preds.length})` : ""}
+              {t.t}{t.k === "sources" && preds?.length ? ` (${preds.length})` : ""}
             </Link>
           ))}
         </div>
@@ -138,12 +144,12 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         <div className="space-y-3">
           {recit && <MatchRecit match={{ id: m.id, home, away, kickoff: m.kickoff_at, comp: comp?.code_externe ?? "", ouvert: m.statut === "programme" }} etapes={recit.etapes} verdict={recit.verdict} autres={recit.autres} source={recit.source} />}
           {picks.length > 0 && (
-            <Card title="Les issues les plus probables" note={sg!.source === "modele" ? `modèle ${APP_NAME}` : "d’après les cotes"}>
+            <Card title="Les issues les plus probables" note={sg!.source === "modele" ? "estimation du modèle" : "d’après les cotes"}>
               <ul className="divide-y divide-line">
                 {picks.map((p) => (
                   <li key={`${p.market}${p.param}${p.sel}`} className="flex items-center gap-2">
                     <Link href={upcoming ? parier(p.market, p.sel, p.cote ?? undefined, p.param ?? undefined) : "#"} className="flex min-w-0 flex-1 items-center justify-between gap-3 py-2 text-sm active:bg-surface-2">
-                      <span className="truncate">{pickLabel(p.market, p.param, p.sel, shortName(home), shortName(away))}</span>
+                      <span className="min-w-0 truncate">{pickLabel(p.market, p.param, p.sel, shortName(home), shortName(away))}{(p.cote === null || sg!.source === "modele") && <span className="ml-1.5 rounded-full bg-draw-soft px-1.5 py-0.5 text-[10px] font-semibold text-draw-ink">estimation</span>}</span>
                       <span className="shrink-0 tabular-nums"><b>{Math.round(p.p * 100)} %</b> <span className="text-xs text-ink-muted">{p.cote ? `cote ${p.cote.toFixed(2)}` : `cote juste ${(1 / p.p).toFixed(2)}`}</span>{p.pModele !== null && <span className="ml-1 text-xs text-brand">· modèle {Math.round(p.pModele * 100)} %</span>}</span>
                     </Link>
                     {m.statut === "programme" && <AddToSlip size="sm" leg={legFrom({ matchId: m.id, home, away, kickoff: m.kickoff_at, comp: comp?.code_externe ?? "", market: p.market, param: p.param, sel: p.sel, p: p.p, cote: p.cote })} />}
@@ -189,7 +195,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         </div>
       )}
 
-      {onglet === "paris" && (
+      {onglet === "marches" && (
         <div className="space-y-3">
           {sg ? <MatchMarkets m={{ id: m.id, kickoff_at: m.kickoff_at, home, away, comp: comp?.code_externe ?? "", ouvert: m.statut === "programme" }} sg={sg} /> : <Card><p className="text-sm text-ink-muted">Pas encore de cote ni d’estimation pour ce match. Elles arrivent chaque matin à partir de J-14.</p></Card>}
           {m.statut !== "programme" && sg && <p className="px-1 text-[11px] text-ink-muted">Match commencé ou terminé : les cotes sont affichées pour mémoire, le coupon est fermé.</p>}
@@ -211,13 +217,13 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         </div>
       )}
 
-      {onglet === "forme" && standing.length > 0 && (
+      {onglet === "stats" && standing.length > 0 && (
         <section className="mb-3 rounded-xl border border-line bg-surface p-3 shadow-card">
           <div className="mb-1 flex items-baseline justify-between"><h2 className="text-sm font-semibold">Classement{standing[0].groupe ? ` · ${standing[0].groupe}` : ""}</h2><Link href={`/matchs/classement?c=${comp?.code_externe}&e=${m.home_team_id},${m.away_team_id}`} className="text-[11px] font-medium text-brand">tout le classement ›</Link></div>
           <StandingsTable rows={standing} highlight={[]} />
         </section>
       )}
-      {onglet === "forme" && (
+      {onglet === "stats" && (
         just?.forme_dom ? (
           <div className="grid grid-cols-1 gap-3">
             <FormCard team={shortName(home)} form={just.forme_dom} />
@@ -226,7 +232,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         ) : <Card><p className="text-sm text-ink-muted">Forme disponible pour les 5 grands championnats, avec l’estimation du modèle (J-14).</p></Card>
       )}
 
-      {onglet === "forme" && (
+      {onglet === "stats" && (
         <div className="mt-3"><Card title="Dernières confrontations">
           {!just?.h2h ? <p className="text-sm text-ink-muted">Disponible pour les 5 grands championnats, avec l’estimation du modèle.</p>
             : just.h2h.length === 0 ? <p className="text-sm text-ink-muted">Pas de confrontation en championnat sur les trois dernières saisons.</p> : (
@@ -249,7 +255,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
       )}
 
 
-      {onglet === "equipes" && extras && (
+      {onglet === "stats" && extras && (
         <div className="space-y-3">
           {!extras.disponible && <Card><p className="text-sm text-ink-muted">Compositions et absents indisponibles pour ce match pour l’instant.</p></Card>}
           {extras.stats && extras.stats.length === 2 && (
@@ -309,27 +315,10 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         </div>
       )}
 
-      {onglet === "pronos" && (
-        <Card title="Pronos enregistrés sur ce match" note="toutes sources visibles">
-          {!preds?.length ? <p className="text-sm text-ink-muted">Aucun prono pour l’instant.</p> : (
-            <ul className="divide-y divide-line">
-              {preds.map((p) => {
-                const src = one(p.source as { id: string; nom: string; type: string } | { id: string; nom: string; type: string }[] | null);
-                return (
-                  <li key={p.id} className="flex items-center justify-between gap-3 py-2 text-sm">
-                    <span className="min-w-0">
-                      <Link href={`/sources/${src?.id}`} className="block truncate font-medium">{src?.type === "modele_betwise" ? "📊 " : ""}{src?.nom}</Link>
-                      <span className="text-xs text-ink-muted">{p.market_code}{p.market_param ? ` ${p.market_param}` : ""} · {p.selection}{p.cote_annoncee ? ` · cote ${Number(p.cote_annoncee).toFixed(2)}` : ""}</span>
-                    </span>
-                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] ${p.resultat === "gagne" ? "bg-gain-soft text-gain" : p.resultat === "perdu" ? "bg-loss-soft text-loss" : p.statut === "verifie" ? "bg-brand-soft text-brand" : "bg-surface-2 text-ink-muted"}`}>
-                      {p.resultat === "gagne" ? "gagné" : p.resultat === "perdu" ? "perdu" : p.statut === "verifie" ? "vérifié avant match" : "déclaré"}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </Card>
+      {onglet === "sources" && (
+        <MatchSources home={shortName(home)} away={shortName(away)} joue={m.statut === "termine"}
+          pronos={(preds ?? []).map((p) => { const src = one(p.source as { id: string; nom: string; type: string } | { id: string; nom: string; type: string }[] | null); return { id: p.id, sourceId: src?.id ?? "", source: src?.nom ?? "?", market: p.market_code, param: p.market_param === null ? null : Number(p.market_param), sel: p.selection, cote: p.cote_annoncee === null ? null : Number(p.cote_annoncee), prouve: p.statut === "verifie", resultat: p.resultat }; })}
+          proofs={Object.fromEntries((proofs ?? []).map((x) => [x.source_id as string, lireProof(x)]))} />
       )}
 
       {upcoming && (

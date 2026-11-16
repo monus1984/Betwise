@@ -43,7 +43,7 @@ function Progress({ goal: g, onEdit }: { goal: GoalState; onEdit: () => void }) 
         </p>
       )}
       <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-        <Mise label="Sûr" v={g.mises.sur} cls="text-gain" />
+        <Mise label="Très probable" v={g.mises.sur} cls="text-gain" />
         <Mise label="Audacieux" v={g.mises.audacieux} cls="text-draw" />
         <Mise label="Risqué" v={g.mises.risque} cls="text-loss" sub={g.mises.risque ? `budget ${F(g.mises.budgetRisque)}` : "pas encore de gains"} />
       </div>

@@ -5,6 +5,8 @@ import { TabBar } from "@/components/tab-bar";
 import { ThemeChoice } from "@/components/theme-choice";
 import { Sparkline } from "@/components/sparkline";
 import { Mark } from "@/components/icons";
+import { MatchSources } from "@/app/(app)/matchs/[id]/sources-tab";
+import { VIDE } from "@/lib/sources/proof";
 
 /**
  * Planche des composants communs, pour contrôler les deux thèmes sans compte.
@@ -39,6 +41,10 @@ export default function Apercu() {
       <div className="mb-6 mt-2 grid grid-cols-2 gap-2">
         {["Scanner un ticket", "Analyser un match"].map((t) => <div key={t} className="tile tile-action flex flex-col items-center gap-2 px-3 py-4 text-center text-sm font-medium"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden className="text-brand"><circle cx="12" cy="12" r="9" /><path d="M8 12h8M12 8v8" /></svg>{t}</div>)}
       </div>
+      <h2 className="mb-2 text-base font-bold">Fiche match, onglet Sources (fictif)</h2>
+      <div className="mb-6"><MatchSources home="Équipe A" away="Équipe B" joue={false}
+        pronos={[{ id: "1", sourceId: "a", source: "Source A", market: "1X2", param: null, sel: "1", cote: 1.8, prouve: true, resultat: "en_attente" }, { id: "2", sourceId: "b", source: "Source B", market: "DC", param: null, sel: "N2", cote: 1.5, prouve: false, resultat: "en_attente" }, { id: "3", sourceId: "a", source: "Source A", market: "OU", param: 2.5, sel: "Plus", cote: null, prouve: true, resultat: "en_attente" }]}
+        proofs={{ a: { ...VIDE, prouves: 24, prouvesRegles: 24, prouvesGagnes: 19 }, b: { ...VIDE, apresCoup: 27 } }} /></div>
       <h2 className="mb-2 text-base font-bold">Sources (fictif)</h2>
       <section className="rounded-2xl bg-pitch p-5 text-white">
         <div className="flex items-baseline justify-between gap-3"><p className="text-xs font-medium text-white/70">Pronos prouvés</p><span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px]">Tendance</span></div>

@@ -12,10 +12,10 @@ import { legFrom } from "@/lib/slip/leg";
 
 export type SP = { per?: string; min?: string; max?: string; fam?: string; vue?: string; cible?: string; m?: string; n?: string };
 const PRESETS = [
-  { k: "sur", label: "Sûr", min: 83, max: 91 },
+  { k: "sur", label: "Très probable", min: 83, max: 91 },
   { k: "aud", label: "Audacieux", min: 67, max: 83 },
   { k: "ris", label: "Risqué", min: 53, max: 67 },
-  { k: "mix", label: "Sûr + Audacieux", min: 67, max: 91 },
+  { k: "mix", label: "Très probable + Audacieux", min: 67, max: 91 },
 ];
 const FAMS = [{ k: "", label: "Tout" }, { k: "resultat", label: "Résultat" }, { k: "buts", label: "Buts" }, { k: "mitemps", label: "Mi-temps" }, { k: "combo", label: "Combos même match" }];
 const CIBLES = [1.5, 2, 3, 5, 10];

@@ -135,8 +135,8 @@ export function buildRecit(input: RecitInput): Recit {
   const { verdict, autres } = verdictDe(input);
   const affiche = `${input.home} – ${input.away}`;
   const avis = verdict
-    ? `Mon avis : ${verdict.label}. ${Math.round(verdict.p * 100)} chances sur 100.${autres.length ? ` ${autres.map((c) => `Plus ${c.categorie === "sur" ? "sûr" : "osé"} : ${c.label}, ${Math.round(c.p * 100)} sur 100.`).join(" ")}` : ""}`
-    : "Pas encore de cote sur ce match : je ne donne pas d’avis.";
+    ? `Le choix le plus probable : ${verdict.label}. ${Math.round(verdict.p * 100)} chances sur 100${verdict.cote ? "" : " (estimation)"}.${autres.length ? ` ${autres.map((c) => `Plus ${c.categorie === "sur" ? "probable" : "osé"} : ${c.label}, ${Math.round(c.p * 100)} sur 100.`).join(" ")}` : ""}`
+    : "Pas encore de cote sur ce match : aucun choix à mettre en avant.";
   const texte = [`${input.home} contre ${input.away}.`, ...etapes.map((e) => `${e.titre}. ${e.lignes.join(" ")}`), avis].join("\n");
   return { affiche, etapes, verdict, autres, source: input.source, texte };
 }
