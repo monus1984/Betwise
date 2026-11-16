@@ -154,6 +154,13 @@ export function normalizePick(marketText: string, pickText: string, home: string
   const p = pickText.toLowerCase().replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ").replace(/\s+/g, " ").trim().replace(/^[–—-](?!\s*(?:de\b|\d))\s*|\s*[–—-]$/g, "").trim();
   if (!p && oui && team) { const sd = (home && Math.max(teamSimilarity(team, home), ...(alias?.home ?? []).map((x) => teamSimilarity(team, x))) >= (away ? Math.max(teamSimilarity(team, away), ...(alias?.away ?? []).map((x) => teamSimilarity(team, x))) : 0)) ? "1" : "2"; if (home || away) return { market_code: "1X2", market_param: null, selection: sd, label_pick: `${team} gagne`, ok: true }; }
   if (!p) return { market_code: "1X2", market_param: null, selection: "", label_pick: "Choix non visible", ok: false, reason: "Le choix n'est pas écrit (prono dit à l'oral ?) : choisis-le." };
+  // 1xBet : « Handicap 2 (-1) » = handicap asiatique sur l'équipe 2. Sur une ligne entière, un écart exactement égal
+  // au handicap rembourse la sélection (vérifié sur ticket : Bénin -1, victoire 0-1, cote retirée du combiné).
+  {
+    const h = `${m} ${p}`.match(/handicap\s*([12])\s*\(?\s*([+\-−]?\s*\d+(?:[.,]\d+)?)\s*\)?/);
+    if (h && !/europ|3 issues|3 way/.test(`${m} ${p}`))
+      return { market_code: "AH", market_param: Number(h[2].replace(/\s/g, "").replace("−", "-").replace(",", ".")), selection: h[1], label_pick: pickText, ok: true };
+  }
   const side = (name: string): "1" | "2" | null => {
     if (!name) return null;
     const names = [name, ABBR[name.toLowerCase().replace(/[.’']/g, "").trim()]].filter(Boolean) as string[];
