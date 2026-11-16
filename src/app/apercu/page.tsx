@@ -39,6 +39,26 @@ export default function Apercu() {
       <div className="mb-6 mt-2 grid grid-cols-2 gap-2">
         {["Scanner un ticket", "Analyser un match"].map((t) => <div key={t} className="tile tile-action flex flex-col items-center gap-2 px-3 py-4 text-center text-sm font-medium"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden className="text-brand"><circle cx="12" cy="12" r="9" /><path d="M8 12h8M12 8v8" /></svg>{t}</div>)}
       </div>
+      <h2 className="mb-2 text-base font-bold">Sources (fictif)</h2>
+      <section className="rounded-2xl bg-pitch p-5 text-white">
+        <div className="flex items-baseline justify-between gap-3"><p className="text-xs font-medium text-white/70">Pronos prouvés</p><span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px]">Tendance</span></div>
+        <p className="mt-1 text-3xl font-bold tabular-nums">19 justes sur 24</p>
+        <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
+          <div><p className="text-[11px] text-white/60">Réussite</p><p className="font-semibold">79 %</p></div>
+          <div><p className="text-[11px] text-white/60">Attendu à ces cotes</p><p className="font-semibold">76 %</p></div>
+          <div><p className="text-[11px] text-white/60">Rendement</p><p className="font-semibold text-band-gain">+4 %</p></div>
+        </div>
+      </section>
+      <p className="mt-2 rounded-xl border border-draw/40 bg-draw-soft p-3 text-[13px] leading-snug text-draw-ink"><b>27 pronos saisis après le coup d’envoi</b> (24 justes sur 27). Ils restent dans l’historique mais ne comptent pas dans la note.</p>
+      <ol className="mb-6 mt-3 space-y-2">
+        {[["1", "Source A", "+6 %", "35"], ["2", "Source B", "+4 %", "24"]].map(([r, n, x, v]) => (
+          <li key={r} className="tile flex items-center gap-3 p-3">
+            <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${r === "1" ? "bg-draw text-on-fill" : "bg-surface-2 text-ink-soft"}`}>{r}</span>
+            <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{n}</span><span className="block text-[11px] text-ink-muted">Canal Telegram · {v} pronos prouvés · Tendance</span><span className="mt-0.5 block text-[12px] text-ink-soft">Réussite 79 % · attendu à ces cotes 76 %</span></span>
+            <span className="shrink-0 text-right"><span className="block text-base font-bold tabular-nums text-gain">{x}</span><span className="block text-[10px] text-ink-muted">rendement · {v} cotes</span></span>
+          </li>
+        ))}
+      </ol>
       <div className="space-y-4">
         <Card><ThemeChoice /></Card>
         <Card>

@@ -64,6 +64,8 @@ TABLES = {
 }
 
 VIEWS = {
+    "source_proof": "source_id:uuid? prouves:int8? prouves_regles:int8? prouves_gagnes:int8? prouves_avec_cote:int8? prouves_unites:numeric? attendu:numeric? apres_coup:int8? apres_coup_regles:int8? apres_coup_gagnes:int8? dernier_prono:timestamptz?",
+    "source_proof_by_market": "source_id:uuid? market_code:text? regles:int8? gagnes:int8? avec_cote:int8? unites:numeric?",
     "source_trend": "source_id:uuid? nb_declares:int8? nb_verifies:int8? nb_regles:int8? nb_gagnes:int8? nb_perdus:int8? unites_nettes:numeric? nb_avec_cote:int8? prudent_regles:int8? prudent_gagnes:int8? moyen_regles:int8? moyen_gagnes:int8? risque_regles:int8? risque_gagnes:int8? dernier_prono:timestamptz?",
     "my_bankroll_journal": "id:uuid? bankroll_id:uuid? type:enum:tx_type? montant:numeric? bet_id:uuid? note:text? at:timestamptz? bookmaker:text?",
     "my_bankroll_summary": "bankroll_id:uuid? user_id:uuid? devise:text? solde:numeric? exposition:numeric? resultat_net:numeric? nb_regles:int8? nb_gagnes:int8?",

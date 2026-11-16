@@ -4,6 +4,7 @@ import { Sparkline } from "@/components/sparkline";
 import { fcfa } from "@/components/ui";
 import { loadDashboard } from "@/lib/stats/dashboard";
 import { vigilance } from "@/lib/stats/vigilance";
+import { lire as lireProof, resume } from "@/lib/sources/proof";
 import { comptes as calculer, type Mouvement } from "@/lib/bankroll/comptes";
 import { createClient } from "@/lib/supabase/server";
 import { Mark } from "@/components/icons";
@@ -62,11 +63,11 @@ export default async function Home() {
   const cloche = Math.min(nonLues ?? 0, 99);
 
   const ids = (follows ?? []).map((f) => f.source_id);
-  const { data: trends } = ids.length ? await supabase.from("source_trend").select("source_id, nb_gagnes, nb_regles").in("source_id", ids) : { data: [] };
+  const { data: trends } = ids.length ? await supabase.from("source_proof").select("*").in("source_id", ids) : { data: [] };
   const sources = (follows ?? []).map((f) => {
     const s = Array.isArray(f.source) ? f.source[0] : f.source, t = trends?.find((x) => x.source_id === f.source_id);
-    const regles = Number(t?.nb_regles ?? 0), gagnes = Number(t?.nb_gagnes ?? 0);
-    return { id: f.source_id, nom: s?.nom ?? "?", type: s?.type ?? "", regles, gagnes };
+    const proof = lireProof(t);
+    return { id: f.source_id, nom: s?.nom ?? "?", type: s?.type ?? "", regles: proof.prouvesRegles, note: resume(proof) };
   }).filter((s) => s.type !== "perso").sort((a, b) => b.regles - a.regles);
   const maj = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" });
 
@@ -164,11 +165,11 @@ export default async function Home() {
       </section>
 
       <section className="mt-5 rounded-2xl border border-line bg-surface p-4">
-        <div className="flex items-baseline justify-between gap-2"><h2 className="text-sm font-semibold">Mes sources suivies</h2><Link href="/sources" className="text-xs font-medium text-brand">Toutes ›</Link></div>
+        <div className="flex items-baseline justify-between gap-2"><h2 className="text-sm font-semibold">Mes sources suivies <span className="font-normal text-ink-muted">· pronos prouvés</span></h2><Link href="/sources" className="text-xs font-medium text-brand">Toutes ›</Link></div>
         {sources.length === 0 ? <p className="mt-2 text-sm text-ink-muted">Aucune pour l’instant. <Link href="/sources" className="text-brand underline">Ajoute un tipster, une page ou un canal</Link> pour le noter sur ses vrais résultats.</p> : (
           <ul className="mt-2 divide-y divide-line">
             {sources.slice(0, 4).map((s) => (
-              <li key={s.id}><Link href={`/sources/${s.id}`} className="flex items-center justify-between gap-3 py-2 text-sm"><span className="min-w-0 truncate font-medium">{s.nom}</span><span className="shrink-0 tabular-nums text-ink-muted">{s.regles ? `${s.gagnes} juste${s.gagnes > 1 ? "s" : ""} sur ${s.regles}` : "pas encore de prono réglé"}</span></Link></li>
+              <li key={s.id}><Link href={`/sources/${s.id}`} className="flex items-center justify-between gap-3 py-2 text-sm"><span className="min-w-0 truncate font-medium">{s.nom}</span><span className="shrink-0 tabular-nums text-ink-muted">{s.note}</span></Link></li>
             ))}
           </ul>
         )}

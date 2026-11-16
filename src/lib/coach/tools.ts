@@ -305,16 +305,17 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
       if (!ids.length) return { sources: [], note: "aucune source suivie" };
       const [{ data: met }, { data: tr }] = await Promise.all([
         db.from("source_metrics").select("source_id, nb_declares, nb_verifies, nb_regles, taux_reussite, rendement, ic_bas, ic_haut, pire_serie, statut_eval").eq("periode", "total").in("source_id", ids),
-        db.from("source_trend").select("source_id, nb_declares, nb_gagnes, nb_regles, dernier_prono").in("source_id", ids),
+        db.from("source_proof").select("source_id, prouves, prouves_regles, prouves_gagnes, apres_coup, dernier_prono").in("source_id", ids),
       ]);
       return (f ?? []).map((x) => {
         const s = one(x.source as One<{ nom: string; type: string }>); const m = met?.find((y) => y.source_id === x.source_id); const t = tr?.find((y) => y.source_id === x.source_id);
         return {
-          nom: originName(s), type: s?.type, pronos_declares: t?.nb_declares ?? 0, pronos_regles: t?.nb_regles ?? 0, gagnes: t?.nb_gagnes ?? 0,
+          nom: originName(s), type: s?.type, pronos_prouves_avant_match: Number(t?.prouves ?? 0), prouves_regles: Number(t?.prouves_regles ?? 0), prouves_gagnes: Number(t?.prouves_gagnes ?? 0),
+          saisis_apres_le_match_non_comptes: Number(t?.apres_coup ?? 0), note: Number(t?.prouves_regles ?? 0) >= 10 ? "notée" : "non établie (moins de 10 pronos prouvés réglés) : ne pas en tirer de conclusion",
           verifies_avant_match: m?.nb_verifies ?? null, taux_reussite_pct: m?.taux_reussite !== null && m?.taux_reussite !== undefined ? pct(Number(m.taux_reussite)) : null,
           rendement_pct: m?.rendement !== null && m?.rendement !== undefined ? pct(Number(m.rendement)) : null,
           intervalle_confiance_90_pct: m?.ic_bas !== null && m?.ic_bas !== undefined ? [pct(Number(m.ic_bas)), pct(Number(m.ic_haut))] : null,
-          pire_serie_unites: m?.pire_serie ?? null, statut_evaluation: m?.statut_eval ?? "tendance", dernier_prono: t?.dernier_prono ?? null,
+          pire_serie_unites: m?.pire_serie ?? null, dernier_prono: t?.dernier_prono ?? null,
         };
       });
     }

@@ -1555,6 +1555,33 @@ export type Database = {
       }
     }
     Views: {
+      source_proof: {
+        Row: {
+          source_id: string | null
+          prouves: number | null
+          prouves_regles: number | null
+          prouves_gagnes: number | null
+          prouves_avec_cote: number | null
+          prouves_unites: number | null
+          attendu: number | null
+          apres_coup: number | null
+          apres_coup_regles: number | null
+          apres_coup_gagnes: number | null
+          dernier_prono: string | null
+        }
+        Relationships: []
+      }
+      source_proof_by_market: {
+        Row: {
+          source_id: string | null
+          market_code: string | null
+          regles: number | null
+          gagnes: number | null
+          avec_cote: number | null
+          unites: number | null
+        }
+        Relationships: []
+      }
       source_trend: {
         Row: {
           source_id: string | null

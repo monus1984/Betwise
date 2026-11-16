@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
-import { RISK_CLASS, RISK_LABEL } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
-import { evalStatus, labelType } from "../source-ui";
+import { labelType, MARCHE_FR } from "../source-ui";
+import { NIVEAU, SEUIL, lire, niveau, raison, rendement, reussite } from "@/lib/sources/proof";
 import { FollowButton, PredictionRow, SourceLink } from "./client";
 import { linkOf } from "@/lib/sources/link";
 import { CumulChart, type CumulPoint } from "./cumul-chart";
@@ -21,7 +21,11 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
 
   const { data: s } = await supabase.from("sources").select("*").eq("id", id).maybeSingle();
   if (!s) notFound();
-  const { data: t } = await supabase.from("source_trend").select("*").eq("source_id", id).maybeSingle();
+  const [{ data: pf }, { data: parMarche }] = await Promise.all([
+    supabase.from("source_proof").select("*").eq("source_id", id).maybeSingle(),
+    supabase.from("source_proof_by_market").select("*").eq("source_id", id),
+  ]);
+  const proof = lire(pf), nv = niveau(proof), reu = reussite(proof), rdt = rendement(proof);
   const { data: f } = await supabase.from("source_follows").select("source_id").eq("source_id", id).eq("user_id", user!.id).maybeSingle();
   const periode = (["30j", "90j", "180j", "total"] as const).includes(sp.p as never) ? (sp.p as "30j" | "90j" | "180j" | "total") : "total";
   const since = periode === "total" ? null : new Date(Date.now() - Number(periode.replace("j", "")) * 86400000).toISOString();
@@ -37,9 +41,6 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
     .order("logged_at", { ascending: false })
     .limit(60);
 
-  const n = (v: unknown) => Number(v ?? 0);
-  const declares = n(t?.nb_declares), regles = n(t?.nb_regles), gagnes = n(t?.nb_gagnes);
-  const avecCote = n(t?.nb_avec_cote), unites = Number(t?.unites_nettes ?? 0);
   const isSystem = s.type === "modele_betwise" || s.type === "perso";
 
   return (
@@ -56,20 +57,28 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
       {sp.doublon && <p className="mb-4 rounded-lg border border-draw/40 bg-draw-soft p-3 text-sm text-draw-ink">Ce prono existait déjà pour cette source (même match, marché et sélection le même jour) : rien n’a été ajouté.</p>}
 
       <section className="rounded-2xl bg-pitch p-5 text-white">
-        <div className="flex items-baseline justify-between">
-          <p className="text-xs uppercase tracking-wide text-slate-300">Tendance</p>
-          <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px]">{evalStatus(declares)} · {declares} prono{declares > 1 ? "s" : ""}</span>
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="text-xs font-medium text-white/70">Pronos prouvés</p>
+          <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px]">{NIVEAU[nv]}</span>
         </div>
-        <p className="mt-1 text-3xl font-semibold tabular-nums">
-          {regles ? `${gagnes} gagné${gagnes > 1 ? "s" : ""} sur ${regles}` : "—"}
-        </p>
-        <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
-          <div><p className="text-[11px] uppercase tracking-wide text-white/60">Réussite</p><p className="font-semibold">{regles ? `${Math.round((100 * gagnes) / regles)} %` : "—"}</p></div>
-          <div><p className="text-[11px] uppercase tracking-wide text-white/60">Rendement</p><p className={`font-semibold ${unites >= 0 ? "text-band-gain" : "text-band-loss"}`}>{avecCote ? `${unites >= 0 ? "+" : ""}${unites.toFixed(1)} u / ${avecCote}` : "—"}</p></div>
-          <div><p className="text-[11px] uppercase tracking-wide text-white/60">Vérifiés</p><p className="font-semibold">{n(t?.nb_verifies)}/{declares}</p></div>
-        </div>
-        {declares > 0 && declares < 30 && <p className="mt-3 text-[11px] text-white/60">Moins de 30 pronos : une tendance, pas un jugement. Le compte est affiché pour que tu juges toi-même.</p>}
+        <p className="mt-1 text-3xl font-bold tabular-nums">{nv === "non_etabli" ? "Non établi" : `${proof.prouvesGagnes} juste${proof.prouvesGagnes > 1 ? "s" : ""} sur ${proof.prouvesRegles}`}</p>
+        {nv === "non_etabli" ? (
+          <p className="mt-1 text-[13px] leading-snug text-white/75">{raison(proof)} Il en faut {SEUIL.classement}, enregistrés avant le coup d’envoi et réglés, pour donner une note.</p>
+        ) : (
+          <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
+            <div><p className="text-[11px] text-white/60">Réussite</p><p className="font-semibold tabular-nums">{reu === null ? "—" : `${Math.round(reu * 100)} %`}</p></div>
+            <div><p className="text-[11px] text-white/60">Attendu</p><p className="font-semibold tabular-nums">{proof.attendu === null ? "—" : `${Math.round(proof.attendu * 100)} %`}</p></div>
+            <div><p className="text-[11px] text-white/60">Rendement</p><p className={`font-semibold tabular-nums ${rdt === null ? "" : rdt >= 0 ? "text-band-gain" : "text-band-loss"}`}>{rdt === null ? "—" : `${rdt >= 0 ? "+" : "−"}${Math.abs(rdt * 100).toFixed(0)} %`}</p></div>
+          </div>
+        )}
+        {nv !== "non_etabli" && proof.attendu !== null && <p className="mt-3 text-[11px] text-white/60">« Attendu » : la réussite que ces cotes laissent prévoir. Au-dessus, la source fait mieux que le marché.</p>}
+        {nv !== "non_etabli" && proof.prouvesRegles < SEUIL.provisoire && <p className="mt-3 text-[11px] text-white/60">Moins de {SEUIL.provisoire} pronos prouvés : une tendance, pas un jugement.</p>}
       </section>
+      {proof.apresCoup > 0 && (
+        <p className="mt-2 rounded-xl border border-draw/40 bg-draw-soft p-3 text-[13px] leading-snug text-draw-ink">
+          <b>{proof.apresCoup} prono{proof.apresCoup > 1 ? "s" : ""} saisi{proof.apresCoup > 1 ? "s" : ""} après le coup d’envoi</b>{proof.apresCoupRegles > 0 ? ` (${proof.apresCoupGagnes} juste${proof.apresCoupGagnes > 1 ? "s" : ""} sur ${proof.apresCoupRegles})` : ""}. Ils restent dans l’historique mais ne comptent pas dans la note : rien ne prouve qu’ils ont été donnés avant le match.
+        </p>
+      )}
 
       <div className="mt-4 flex gap-2">
         {(["30j", "90j", "180j", "total"] as const).map((k) => (
@@ -104,7 +113,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
             <p className="text-[11px] text-slate-500">réussite à atteindre à cette cote moyenne</p>
           </div>
         </div>
-        <p className="mt-3 text-[11px] text-slate-400">Calculé chaque nuit sur les pronos réglés avec cote, période choisie ci-dessus. « Non établi » : l’intervalle de confiance contient zéro, l’échantillon ne permet pas de conclure.</p>
+        <p className="mt-3 text-[11px] text-slate-400">Calculé chaque nuit sur les pronos prouvés, réglés et avec cote, période choisie ci-dessus. « Non établi » : l’intervalle de confiance contient zéro, l’échantillon ne permet pas de conclure.</p>
       </section>
 
       {(axes ?? []).some((a) => a.axe === "competition") && (
@@ -126,18 +135,27 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
         </section>
       )}
 
-      <section className="mt-4 grid grid-cols-3 gap-2">
-        {(["prudent", "moyen", "risque"] as const).map((k) => {
-          const r = n(t?.[`${k}_regles` as keyof typeof t]), g = n(t?.[`${k}_gagnes` as keyof typeof t]);
-          return (
-            <div key={k} className={`rounded-xl border p-3 text-center ${RISK_CLASS[k]}`}>
-              <p className="text-[11px] font-medium uppercase tracking-wide">{RISK_LABEL[k]}</p>
-              <p className="text-lg font-semibold tabular-nums">{r ? `${g}/${r}` : "—"}</p>
-              <p className="text-[11px] opacity-80">{r ? `${Math.round((100 * g) / r)} %` : "aucun réglé"}</p>
-            </div>
-          );
-        })}
-      </section>
+      {(parMarche ?? []).some((m) => Number(m.regles) > 0) && (
+        <section className="mt-3 rounded-xl border border-line bg-surface p-4">
+          <div className="mb-2 flex items-baseline justify-between"><h2 className="text-sm font-semibold">Par marché</h2><span className="text-[11px] text-ink-muted">pronos prouvés seulement</span></div>
+          <table className="w-full text-[13px]">
+            <thead><tr className="text-left text-[11px] text-ink-muted"><th className="py-1 font-medium">Marché</th><th className="py-1 text-right font-medium">Justes</th><th className="py-1 text-right font-medium">Rendement</th></tr></thead>
+            <tbody className="divide-y divide-line">
+              {(parMarche ?? []).filter((m) => Number(m.regles) > 0).sort((a, b) => Number(b.regles) - Number(a.regles)).map((m) => {
+                const r = Number(m.avec_cote) ? Number(m.unites) / Number(m.avec_cote) : null;
+                return (
+                  <tr key={m.market_code}>
+                    <td className="py-1.5">{MARCHE_FR[m.market_code ?? ""] ?? m.market_code}</td>
+                    <td className="py-1.5 text-right tabular-nums">{Number(m.gagnes)} sur {Number(m.regles)}</td>
+                    <td className={`py-1.5 text-right tabular-nums ${r === null || Number(m.regles) < 5 ? "text-ink-muted" : r >= 0 ? "text-gain" : "text-loss"}`}>{r === null ? "—" : Number(m.regles) < 5 ? "trop peu" : `${r >= 0 ? "+" : "−"}${Math.abs(r * 100).toFixed(0)} %`}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <p className="mt-2 text-[11px] text-ink-muted">Sous 5 pronos sur un marché, le rendement n’est pas affiché : il ne voudrait rien dire.</p>
+        </section>
+      )}
 
       {s.type !== "modele_betwise" && (
         <Link href={`/sources/${id}/prono`} className="mt-4 block rounded-lg bg-inverse py-3 text-center text-base font-medium text-on-inverse">+ Enregistrer un prono de cette source</Link>

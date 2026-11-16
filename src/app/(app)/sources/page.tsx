@@ -1,82 +1,126 @@
 import Link from "next/link";
 import { linkOf } from "@/lib/sources/link";
 import { PageHeader } from "@/components/page-header";
+import { Card, Empty } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
-import { labelType, TrendBadge } from "./source-ui";
+import { NIVEAU, SEUIL, classer, lire, niveau, raison, rendement, reussite, type Proof } from "@/lib/sources/proof";
+import { labelType, ProofBadge } from "./source-ui";
 
 export const dynamic = "force-dynamic";
 
+const VUES = [["suivies", "Mes sources"], ["classement", "Classement"], ["decouvrir", "Découvrir"]] as const;
+const pc = (x: number | null) => (x === null ? "—" : `${Math.round(x * 100)} %`);
+const unit = (x: number | null) => (x === null ? "—" : `${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x * 100).toFixed(0)} %`);
+
+/** Sources : celles que je suis, le classement sur pronos prouvés, et celles que d'autres ont partagées. */
 export default async function SourcesPage({ searchParams }: { searchParams: Promise<{ f?: string }> }) {
   const sp = await searchParams;
-  const filter = sp.f === "decouvrir" ? "decouvrir" : "suivies";
+  const vue = VUES.some(([k]) => k === sp.f) ? sp.f! : "suivies";
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { data: follows } = await supabase.from("source_follows").select("source_id").eq("user_id", user!.id);
+  const [{ data: follows }, { data: sources }, { data: proofs }] = await Promise.all([
+    supabase.from("source_follows").select("source_id").eq("user_id", user!.id),
+    supabase.from("sources").select("id, nom, type, visibilite, created_by, created_at, lien, identifiant_externe").order("created_at"),
+    supabase.from("source_proof").select("*"),
+  ]);
   const followed = new Set((follows ?? []).map((f) => f.source_id));
-
-  const { data: sources } = await supabase
-    .from("sources")
-    .select("id, nom, type, visibilite, created_by, created_at, lien, identifiant_externe")
-    .order("created_at");
-  const { data: trends } = await supabase.from("source_trend").select("*");
-  const trend = new Map((trends ?? []).map((t) => [t.source_id, t]));
-
-  const all = sources ?? [];
+  const proofOf = new Map((proofs ?? []).map((t) => [t.source_id, lire(t)]));
+  const all = (sources ?? []).map((s) => ({ ...s, proof: proofOf.get(s.id) ?? lire(null) }));
   const mine = all.filter((s) => s.type === "perso" && s.created_by === user!.id);
   const model = all.filter((s) => s.type === "modele_betwise");
   const others = all.filter((s) => s.type !== "perso" && s.type !== "modele_betwise");
-  const list = filter === "suivies"
-    ? [...mine, ...others.filter((s) => followed.has(s.id) || s.created_by === user!.id), ...model]
-    : others.filter((s) => s.visibilite === "partagee" && !followed.has(s.id) && s.created_by !== user!.id);
+  const suivies = [...mine, ...others.filter((s) => followed.has(s.id) || s.created_by === user!.id), ...model];
+  const aDecouvrir = others.filter((s) => s.visibilite === "partagee" && !followed.has(s.id) && s.created_by !== user!.id);
+  const { classees, nonEtablies } = classer(all.filter((s) => s.type !== "perso" || s.created_by === user!.id));
 
   return (
     <>
-      <PageHeader
-        title="Sources"
-        subtitle="Qui t’oriente, et avec quels résultats."
-        action={<Link href="/sources/nouvelle" className="rounded-lg bg-inverse px-3 py-2 text-sm font-medium text-on-inverse">+ Source</Link>}
-      />
-      <div className="mb-4 flex gap-2">
-        <Tab href="/sources" active={filter === "suivies"}>Mes sources</Tab>
-        <Tab href="/sources?f=decouvrir" active={filter === "decouvrir"}>Partagées par d’autres</Tab>
-      </div>
+      <PageHeader title="Sources" subtitle="Qui t’oriente, et ce que ses pronos valent une fois vérifiés."
+        action={<Link href="/sources/nouvelle">+ Source</Link>} />
+      <nav className="mb-4 flex gap-2 overflow-x-auto" aria-label="Vues des sources">
+        {VUES.map(([k, mot]) => (
+          <Link key={k} href={k === "suivies" ? "/sources" : `/sources?f=${k}`} scroll={false} aria-current={vue === k ? "page" : undefined}
+            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm ${vue === k ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft"}`}>{mot}</Link>
+        ))}
+      </nav>
 
-      {list.length === 0 && (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-surface p-6 text-center text-sm text-slate-600">
-          {filter === "suivies" ? "Ajoute un pronostiqueur, une page ou un canal que tu suis." : "Aucune source partagée à découvrir pour l’instant."}
+      {vue !== "classement" && (() => {
+        const list = vue === "suivies" ? suivies : aDecouvrir;
+        if (list.length === 0) return <Empty titre={vue === "suivies" ? "Aucune source suivie" : "Rien à découvrir pour l’instant"} action={vue === "suivies" ? <Link href="/sources/nouvelle" className="rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-on-fill">Ajouter une source</Link> : undefined}>{vue === "suivies" ? "Ajoute un pronostiqueur, une page ou un canal que tu suis : ses pronos seront notés sur leurs vrais résultats." : "Les sources partagées par d’autres testeurs apparaîtront ici."}</Empty>;
+        return (
+          <Card className="!p-0">
+            <ul className="divide-y divide-line">
+              {list.map((s) => (
+                <li key={s.id} className="flex items-stretch">
+                  <Link href={`/sources/${s.id}`} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-4 py-3 active:bg-surface-2">
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium">{s.nom}</span>
+                      <span className="block text-xs text-ink-muted">{labelType(s.type)}{s.visibilite === "partagee" && s.type !== "modele_betwise" ? " · partagée" : ""}</span>
+                      {s.proof.apresCoup > 0 && <span className="mt-0.5 block text-[11px] text-draw-ink">{s.proof.apresCoup} saisi{s.proof.apresCoup > 1 ? "s" : ""} après le match, non compté{s.proof.apresCoup > 1 ? "s" : ""}</span>}
+                    </span>
+                    <ProofBadge proof={s.proof} />
+                  </Link>
+                  {linkOf(s) && (
+                    <a href={linkOf(s)!} target="_blank" rel="noopener noreferrer" aria-label={`Ouvrir la page de ${s.nom}`} className="flex w-11 shrink-0 items-center justify-center border-l border-line text-brand active:bg-surface-2">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        );
+      })()}
+
+      {vue === "classement" && (
+        <div className="space-y-3">
+          <p className="px-1 text-[12px] leading-relaxed text-ink-muted">Classement sur les seuls pronos <b className="text-ink-soft">prouvés</b> : enregistrés avant le coup d’envoi, puis réglés par le score. Il faut {SEUIL.classement} pronos prouvés réglés pour y entrer.</p>
+          {classees.length === 0 ? <Empty titre="Aucune source classée pour l’instant">Aucune n’a encore {SEUIL.classement} pronos enregistrés avant leur match et réglés.</Empty> : (
+            <ol className="space-y-2">
+              {classees.map((s, i) => <Rang key={s.id} rang={i + 1} id={s.id} nom={s.nom} type={labelType(s.type)} proof={s.proof} />)}
+            </ol>
+          )}
+          {classees.length >= 2 && (
+            <Link href={`/sources/comparer?a=${classees[0].id}&b=${classees[1].id}`} className="block rounded-xl border border-brand/40 py-2.5 text-center text-sm font-medium text-brand active:bg-brand-soft">Comparer deux sources</Link>
+          )}
+          {nonEtablies.length > 0 && (
+            <Card className="!p-0">
+              <h2 className="px-4 pt-3 text-sm font-semibold">Non établi</h2>
+              <p className="px-4 text-[11px] text-ink-muted">Pas assez de pronos prouvés pour une note. Ce n’est pas un jugement.</p>
+              <ul className="mt-2 divide-y divide-line">
+                {nonEtablies.map((s) => (
+                  <li key={s.id}><Link href={`/sources/${s.id}`} className="block px-4 py-2.5 active:bg-surface-2">
+                    <span className="block text-sm font-medium">{s.nom}</span>
+                    <span className="block text-[12px] text-ink-muted">{raison(s.proof)}</span>
+                  </Link></li>
+                ))}
+              </ul>
+            </Card>
+          )}
+          <p className="px-1 text-[11px] leading-relaxed text-ink-muted">Rendement : gain moyen par prono à mise égale, sur les pronos dont la cote est connue. Sous {SEUIL.provisoire} pronos, l’ordre peut s’inverser d’une semaine à l’autre.</p>
         </div>
       )}
-
-      <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200 bg-surface">
-        {list.map((s) => {
-          const t = trend.get(s.id);
-          return (
-            <li key={s.id} className="flex items-stretch">
-              <Link href={`/sources/${s.id}`} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-3 py-3 active:bg-slate-50">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{s.nom}</p>
-                  <p className="text-xs text-slate-500">{labelType(s.type)}{s.visibilite === "partagee" && s.type !== "modele_betwise" ? " · partagée" : ""}</p>
-                </div>
-                <TrendBadge regles={Number(t?.nb_regles ?? 0)} gagnes={Number(t?.nb_gagnes ?? 0)} declares={Number(t?.nb_declares ?? 0)} />
-              </Link>
-              {linkOf(s) && (
-                <a href={linkOf(s)!} target="_blank" rel="noopener noreferrer" aria-label={`Ouvrir la page de ${s.nom}`} className="flex w-11 shrink-0 items-center justify-center border-l border-slate-200 text-brand active:bg-slate-50">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>
-                </a>
-              )}
-            </li>
-          );
-        })}
-      </ul>
     </>
   );
 }
 
-function Tab({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
+function Rang({ rang, id, nom, type, proof }: { rang: number; id: string; nom: string; type: string; proof: Proof }) {
+  const r = rendement(proof);
   return (
-    <Link href={href} className={`rounded-full px-3.5 py-1.5 text-sm ${active ? "bg-inverse text-on-inverse" : "border border-slate-300 bg-surface text-slate-700"}`}>
-      {children}
-    </Link>
+    <li>
+      <Link href={`/sources/${id}`} className="tile flex items-center gap-3 p-3 active:bg-surface-2">
+        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold tabular-nums ${rang === 1 ? "bg-draw text-on-fill" : "bg-surface-2 text-ink-soft"}`}>{rang}</span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-semibold">{nom}</span>
+          <span className="block text-[11px] text-ink-muted">{type} · {proof.prouvesRegles} pronos prouvés · {NIVEAU[niveau(proof)]}</span>
+          <span className="mt-0.5 block text-[12px] text-ink-soft">Réussite {pc(reussite(proof))}{proof.attendu !== null ? ` · attendu ${pc(proof.attendu)}` : ""}</span>
+        </span>
+        <span className="shrink-0 text-right">
+          <span className={`block text-base font-bold tabular-nums ${r === null ? "" : r > 0 ? "text-gain" : r < 0 ? "text-loss" : ""}`}>{unit(r)}</span>
+          <span className="block text-[10px] text-ink-muted">{r === null ? "sans cote" : `rendement · ${proof.avecCote} cotes`}</span>
+        </span>
+      </Link>
+    </li>
   );
 }

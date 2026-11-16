@@ -1,0 +1,8 @@
+-- 0040 — Appliquée le 2026-11-16. Niveau de preuve d'une source.
+-- Un prono « prouvé » a été enregistré avant le coup d'envoi (statut verifie, posé à l'insertion). Un prono saisi après
+-- le match (statut declare) est gardé et affiché, mais ne compte ni dans la note ni dans le classement.
+-- Vues créées (security_invoker, lecture pour « authenticated ») :
+--   source_proof(source_id, prouves, prouves_regles, prouves_gagnes, prouves_avec_cote, prouves_unites, attendu,
+--                apres_coup, apres_coup_regles, apres_coup_gagnes, dernier_prono)
+--   source_proof_by_market(source_id, market_code, regles, gagnes, avec_cote, unites)  -- pronos prouvés seulement
+-- Définitions complètes en base : pg_get_viewdef('betwise.source_proof'::regclass).
