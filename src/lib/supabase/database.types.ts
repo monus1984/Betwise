@@ -751,6 +751,7 @@ export type Database = {
           bet_id: string | null
           note: string | null
           at: string
+          bookmaker: string | null
         }
         Insert: {
           id?: string
@@ -760,6 +761,7 @@ export type Database = {
           bet_id?: string | null
           note?: string | null
           at?: string
+          bookmaker?: string | null
         }
         Update: {
           id?: string
@@ -769,6 +771,7 @@ export type Database = {
           bet_id?: string | null
           note?: string | null
           at?: string
+          bookmaker?: string | null
         }
         Relationships: [
           {
@@ -1572,6 +1575,19 @@ export type Database = {
         }
         Relationships: []
       }
+      my_bankroll_journal: {
+        Row: {
+          id: string | null
+          bankroll_id: string | null
+          type: Database["betwise"]["Enums"]["tx_type"] | null
+          montant: number | null
+          bet_id: string | null
+          note: string | null
+          at: string | null
+          bookmaker: string | null
+        }
+        Relationships: []
+      }
       my_bankroll_summary: {
         Row: {
           bankroll_id: string | null
@@ -1655,6 +1671,26 @@ export type Database = {
           p_bet_id: string
         }
         Returns: string
+      }
+      bankroll_move_bk: {
+        Args: {
+          p_type: Database["betwise"]["Enums"]["tx_type"]
+          p_montant: number
+          p_bookmaker: string
+          p_note?: string | null
+        }
+        Returns: Database["betwise"]["Tables"]["bankroll_transactions"]["Row"]
+      }
+      bankroll_align_bk: {
+        Args: {
+          p_bookmaker: string
+          p_solde: number
+        }
+        Returns: number
+      }
+      notifications_read: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       settle_bet: {
         Args: {

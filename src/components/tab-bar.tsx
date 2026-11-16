@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const TABS = [
-  { href: "/", label: "Accueil", icon: HomeIcon, aussi: ["/reglages"] },
+  { href: "/", label: "Accueil", icon: HomeIcon, aussi: ["/reglages", "/bankroll", "/notifications"] },
   { href: "/matchs", label: "Matchs", icon: BallIcon, aussi: [] },
   { href: "/sources", label: "Sources", icon: UsersIcon, aussi: [] },
   { href: "/paris", label: "Mes paris", icon: TicketIcon, aussi: ["/bilan", "/nouveau", "/import"] },

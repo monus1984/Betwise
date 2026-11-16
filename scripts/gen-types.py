@@ -40,7 +40,7 @@ TABLES = {
     "odds_observations": "id:uuid= match_id:uuid? market_code:text market_param:numeric? selection:text cote:numeric bookmaker:text? origine:text observed_at:timestamptz= observed_by:uuid?",
     "bets": "id:uuid= user_id:uuid bankroll_id:uuid type:enum:bet_type= mise:numeric cote_totale:numeric? statut:enum:bet_status= gain_net:numeric? placed_at:timestamptz= source_import:enum:import_channel= raw_text:text? upload_id:uuid? settled_at:timestamptz? created_at:timestamptz= nb_selections:int2? detail_complet:bool= coupon_externe:text? bookmaker:text? ticket_fingerprint:text? resultat_propose:enum:settle_result? gain_propose:numeric? propose_at:timestamptz? assurance:bool= virtuel:bool=",
     "bet_selections": "id:uuid= bet_id:uuid match_id:uuid? match_libre:text? market_code:text market_param:numeric? selection:text cote:numeric cote_observed_at:timestamptz= origin_source_id:uuid prediction_id:uuid? risque_calcule:enum:risk_category? resultat:enum:settle_result= settled_at:timestamptz?",
-    "bankroll_transactions": "id:uuid= bankroll_id:uuid type:enum:tx_type montant:numeric bet_id:uuid? note:text? at:timestamptz=",
+    "bankroll_transactions": "id:uuid= bankroll_id:uuid type:enum:tx_type montant:numeric bet_id:uuid? note:text? at:timestamptz= bookmaker:text?",
     "source_metrics": "source_id:uuid periode:text nb_declares:int4= nb_verifies:int4= nb_gagnes:int4= nb_regles:int4= taux_reussite:numeric? rendement:numeric? ic_bas:numeric? ic_haut:numeric? pire_serie:numeric? statut_eval:enum:eval_status= computed_at:timestamptz=",
     "source_metrics_by_axis": "source_id:uuid periode:text axe:enum:metric_axis valeur:text nb_declares:int4= nb_gagnes:int4= rendement:numeric? computed_at:timestamptz=",
     "model_estimates": "id:uuid= match_id:uuid market_code:text market_param:numeric? selection:text probabilite:numeric cote_reference:numeric? niveau_risque:int2? justification:jsonb? model_version:text prediction_id:uuid? created_at:timestamptz= updated_at:timestamptz=",
@@ -65,6 +65,7 @@ TABLES = {
 
 VIEWS = {
     "source_trend": "source_id:uuid? nb_declares:int8? nb_verifies:int8? nb_regles:int8? nb_gagnes:int8? nb_perdus:int8? unites_nettes:numeric? nb_avec_cote:int8? prudent_regles:int8? prudent_gagnes:int8? moyen_regles:int8? moyen_gagnes:int8? risque_regles:int8? risque_gagnes:int8? dernier_prono:timestamptz?",
+    "my_bankroll_journal": "id:uuid? bankroll_id:uuid? type:enum:tx_type? montant:numeric? bet_id:uuid? note:text? at:timestamptz? bookmaker:text?",
     "my_bankroll_summary": "bankroll_id:uuid? user_id:uuid? devise:text? solde:numeric? exposition:numeric? resultat_net:numeric? nb_regles:int8? nb_gagnes:int8?",
 }
 
@@ -113,6 +114,9 @@ FUNCTIONS = {
     "tts_take": ([("p_max", "int4", False)], "bool"),
     "bankroll_align": ([("p_solde", "numeric", False)], "numeric"),
     "bet_recheck": ([("p_bet_id", "uuid", False)], "text"),
+    "bankroll_move_bk": ([("p_type", "enum:tx_type", False), ("p_montant", "numeric", False), ("p_bookmaker", "text", False), ("p_note", "text", True)], "row:bankroll_transactions"),
+    "bankroll_align_bk": ([("p_bookmaker", "text", False), ("p_solde", "numeric", False)], "numeric"),
+    "notifications_read": ([], "int4"),
     "settle_bet": ([("p_bet_id", "uuid", False), ("p_result", "enum:settle_result", False)], "row:bets"),
     "settle_selection": ([("p_market", "text", False), ("p_param", "numeric", False), ("p_selection", "text", False), ("p_home", "int4", False), ("p_away", "int4", False), ("p_ht_home", "int4", True), ("p_ht_away", "int4", True)], "enum:settle_result"),
     "settle_pending": ([], "setof:matchs:int4,selections_reglees:int4,pronos_regles:int4,paris_finalises:int4"),

@@ -144,3 +144,26 @@ export async function updateBet(input: { betId: string; mise?: number; bookmaker
   revalidatePath("/paris", "layout"); revalidatePath("/");
   return { ok: true as const };
 }
+
+const montantDe = (v: FormDataEntryValue | null) => Number(String(v ?? "").replace(/\s/g, "").replace(",", "."));
+
+/** Dépôt ou retrait sur un compte de bookmaker précis. */
+export async function bankrollMoveBk(formData: FormData) {
+  const type = String(formData.get("type")) === "retrait" ? "retrait" : "depot";
+  const montant = montantDe(formData.get("montant")), bookmaker = String(formData.get("bookmaker") ?? "").trim();
+  if (!Number.isFinite(montant) || montant <= 0 || !bookmaker) redirect("/bankroll?v=comptes&err=saisie");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("bankroll_move_bk", { p_type: type, p_montant: montant, p_bookmaker: bookmaker });
+  revalidatePath("/"); revalidatePath("/bankroll");
+  redirect(error ? "/bankroll?v=comptes&err=serveur" : "/bankroll?v=comptes&ok=mouvement");
+}
+
+/** Recale un compte sur le solde réel du bookmaker : l'écart est inscrit au journal. */
+export async function bankrollAlignBk(formData: FormData) {
+  const solde = montantDe(formData.get("solde")), bookmaker = String(formData.get("bookmaker") ?? "").trim();
+  if (!Number.isFinite(solde) || solde < 0 || !bookmaker) redirect("/bankroll?v=comptes&err=saisie");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("bankroll_align_bk", { p_bookmaker: bookmaker, p_solde: solde });
+  revalidatePath("/"); revalidatePath("/bankroll");
+  redirect(error ? "/bankroll?v=comptes&err=serveur" : "/bankroll?v=comptes&ok=recalage");
+}
