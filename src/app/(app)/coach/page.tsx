@@ -14,7 +14,7 @@ import { ObjectifCard } from "./objectif-card";
 export const dynamic = "force-dynamic";
 
 /** Section Coach : objectif, coups du jour, options, tests et discussion, au même endroit. */
-export default async function CoachPage({ searchParams }: { searchParams: Promise<{ nouvelle?: string; v?: string }> }) {
+export default async function CoachPage({ searchParams }: { searchParams: Promise<{ nouvelle?: string; v?: string; q?: string }> }) {
   const sp = await searchParams;
   const db = await createClient();
 
@@ -36,7 +36,7 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
       <>
         <PageHeader title="Coach" subtitle="Il lit tes paris, tes sources et ta bankroll, puis explique les chiffres. Il n’en invente aucun." />
         <CoachNav current="discussion" />
-        <CoachChat key={conversationId ?? "nouvelle"} initialId={conversationId} initial={messages} suggestions={COACH_SUGGESTIONS} />
+        <CoachChat key={conversationId ?? "nouvelle"} initialId={conversationId} initial={messages} suggestions={COACH_SUGGESTIONS} initialText={(sp.q ?? "").slice(0, 300)} />
       </>
     );
   }

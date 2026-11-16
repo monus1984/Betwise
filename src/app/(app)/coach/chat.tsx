@@ -12,10 +12,10 @@ const FN_LABEL: Record<string, string> = {
   paris_en_cours: "paris en cours", sources_suivies: "sources suivies", detail_source: "détail d’une source", analyse_match: "analyse de match",
 };
 
-export function CoachChat({ initialId, initial, suggestions }: { initialId: string | null; initial: ChatMsg[]; suggestions: string[] }) {
+export function CoachChat({ initialId, initial, suggestions, initialText = "" }: { initialId: string | null; initial: ChatMsg[]; suggestions: string[]; initialText?: string }) {
   const [id, setId] = useState(initialId);
   const [msgs, setMsgs] = useState<ChatMsg[]>(initial);
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initialText); // question préparée par une action rapide : l'utilisateur l'envoie lui-même
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [left, setLeft] = useState<number | null>(null);

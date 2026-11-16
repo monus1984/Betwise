@@ -43,3 +43,5 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0033_tts_usage.sql | 2026-11-15 | `tts_usage` et `tts_take()` : compteur quotidien par compte pour la voix (synthèse vocale Gemini) |
 | 0034_bankroll_align.sql | 2026-11-15 | `bankroll_align()` : recale la bankroll sur le solde réel du bookmaker par un mouvement d'ajustement noté |
 | 0035_cote_payee.sql | 2026-11-15 | `cote_payee()` : Betclic paie sur la cote totale arrondie à 2 décimales ; `place_bet`, `finalize_bet`, `settle_bet`, `correct_bet_result` l'utilisent |
+| 0036_confirmation_and_grants.sql | 2026-11-16 | Paris réels : résultat proposé (`bets.resultat_propose`), bankroll écrite seulement à la confirmation ; écritures directes retirées aux comptes connectés sur 23 tables ; ancien `place_bet` à 6 arguments fermé |
+| 0037_bankroll_verifie_at.sql | 2026-11-16 | `bankrolls.verifie_at` : date du dernier rapprochement avec le solde du bookmaker |

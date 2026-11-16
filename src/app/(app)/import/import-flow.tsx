@@ -1,5 +1,6 @@
 "use client";
 
+import { vraisemblance } from "@/lib/extract/plausibility";
 import { MarketOptions } from "@/components/market-options";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
@@ -18,7 +19,10 @@ type Source = { id: string; nom: string; type: string };
 type Extracted = ExtractedTicket & { upload_id: string | null; truncated: boolean };
 type CouponOnly = { coupon_only: true; coupon: { bookmaker: string; code: string; url: string }; message: string };
 
-type Line = MatchedSelection & { key: number; origin: string | null; coteStr: string; include: boolean; editing: boolean; paramStr: string; query: string };
+type Line = MatchedSelection & { key: number; origin: string | null; coteStr: string; include: boolean; editing: boolean; paramStr: string; query: string;
+  /** Choix tel que lu à l'extraction : l'alerte de vraisemblance ne vaut que tant que l'utilisateur ne l'a pas changé. */
+  lu: string; verifie: boolean };
+const cleDe = (l: { match: { id: string } | null; market_code: string; market_param: number | null; selection: string }) => `${l.match?.id ?? ""}|${l.market_code}|${l.market_param ?? ""}|${l.selection}`;
 
 const OUTCOME: Record<MatchedSelection["outcome"], { label: string; cls: string }> = {
   won: { label: "Gagnée", cls: "bg-emerald-100 text-emerald-800" },
@@ -96,7 +100,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
     setDetected(hint ? { hint, sourceId: found?.id ?? null } : null);
     const origin = found?.id ?? lines[0]?.origin ?? defaultOrigin;
     if (found) setSummaryOrigin(found.id);
-    setLines(t.selections.map((s, i) => ({ ...s, key: i, origin, coteStr: s.odds ? String(s.odds) : "", include: true, editing: !s.ok || !s.match, paramStr: s.market_param !== null ? String(s.market_param) : "", query: s.match ? "" : [s.home_team, s.away_team].filter(Boolean).join(" ") })));
+    setLines(t.selections.map((s, i) => ({ ...s, key: i, origin, lu: cleDe(s), verifie: false, coteStr: s.odds ? String(s.odds) : "", include: true, editing: !s.ok || !s.match, paramStr: s.market_param !== null ? String(s.market_param) : "", query: s.match ? "" : [s.home_team, s.away_team].filter(Boolean).join(" ") })));
     // Pronos de tipster : ce ne sont pas des paris de l'utilisateur, on les enregistre comme tests par défaut
     const pronos = t.raw.kind === "pronos";
     if (pronos) setTest(true);
@@ -182,7 +186,9 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
   const included = lines.filter((l) => l.include);
   const collapsed = result?.raw.is_collapsed || (result && lines.length === 0);
   // Une ligne incomplète n'empêche pas d'enregistrer : elle est écartée, le reste part.
-  const manque = (l: Line): string | null => !l.ok ? "choix non compris" : !(l.match || (l.home_team && l.away_team)) ? "match inconnu" : !(toNum(l.coteStr) > 1) ? "cote manquante" : !l.origin ? "origine manquante" : null;
+  // Cote lue sur le ticket qui contredit la chance estimée : la ligne attend une vérification (ou une correction)
+  const alerteDe = (l: Line) => (l.ok && l.odds_source === "ticket" && !l.verifie && cleDe(l) === l.lu ? vraisemblance(l.p_estimee, toNum(l.coteStr)) : null);
+  const manque = (l: Line): string | null => alerteDe(l) ? "à vérifier sur le ticket" : !l.ok ? "choix non compris" : !(l.match || (l.home_team && l.away_team)) ? "match inconnu" : !(toNum(l.coteStr) > 1) ? "cote manquante" : !l.origin ? "origine manquante" : null;
   const valides = included.filter((l) => !manque(l));
   const ecartees = included.filter((l) => manque(l));
   const separes = result?.raw.kind === "pronos" && !result.raw.total_odds && valides.length > 1;
@@ -340,6 +346,15 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
                   ? <p className="text-[11px] text-emerald-700">Match reconnu · {l.match.competition} · {new Date(l.match.kickoff_at).toLocaleString("fr-FR", { weekday: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}{l.match.score ? ` · score en base ${l.match.score}` : ""}{l.score_consistent === false ? " · ⚠ diffère du ticket" : ""}</p>
                   : <p className="text-[11px] text-amber-700">Match non reconnu : choisis-le ci-dessous, sinon il sera gardé en texte et réglé à la main.</p>}
                 {!l.ok && <p className="text-[11px] text-red-700">{l.reason ?? "Sélection non comprise : choisis le marché ci-dessous."}</p>}
+                {l.include && alerteDe(l) && (
+                  <div className="mt-1 rounded-lg border border-amber-300 bg-amber-50 p-2">
+                    <p className="text-[12px] leading-snug text-amber-950">{alerteDe(l)!.message}</p>
+                    <div className="mt-1.5 flex flex-wrap gap-3">
+                      <button type="button" onClick={() => update(l.key, { verifie: true })} className="rounded-md bg-ink px-2.5 py-1.5 text-[12px] font-medium text-white">J’ai vérifié : c’est bien ça</button>
+                      <button type="button" onClick={() => update(l.key, { editing: true })} className="text-[12px] text-amber-950 underline">Corriger la ligne</button>
+                    </div>
+                  </div>
+                )}
                 {l.include && manque(l) && <p className="mt-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-900">Sera écartée ({manque(l)}) · le reste s’enregistre quand même</p>}
               </div>
               {raw.kind === "pronos"

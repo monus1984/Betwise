@@ -4,14 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const TABS = [
-  { href: "/", label: "Accueil", icon: HomeIcon },
-  { href: "/matchs", label: "Matchs", icon: BallIcon },
-  { href: "/paris", label: "Paris", icon: TicketIcon },
-  { href: "/nouveau", label: "", icon: PlusIcon, central: true },
-  { href: "/sources", label: "Sources", icon: UsersIcon },
-  { href: "/coach", label: "Coach", icon: CoachIcon },
+  { href: "/", label: "Accueil", icon: HomeIcon, aussi: ["/reglages"] },
+  { href: "/matchs", label: "Matchs", icon: BallIcon, aussi: [] },
+  { href: "/sources", label: "Sources", icon: UsersIcon, aussi: [] },
+  { href: "/paris", label: "Mes paris", icon: TicketIcon, aussi: ["/bilan", "/nouveau", "/import"] },
+  { href: "/coach", label: "Coach", icon: CoachIcon, aussi: ["/options"] },
 ] as const;
 
+/** Navigation principale : cinq destinations. Ajouter un pari ou importer se fait par le bouton flottant (AddFab). */
 export function TabBar() {
   const path = usePathname();
   return (
@@ -20,23 +20,10 @@ export function TabBar() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="Navigation principale"
     >
-      <ul className="mx-auto grid max-w-xl grid-cols-6">
+      <ul className="mx-auto grid max-w-xl grid-cols-5">
         {TABS.map((t) => {
-          const active = t.href === "/" ? path === "/" : path.startsWith(t.href) || (t.href === "/coach" && path.startsWith("/options"));
+          const active = t.href === "/" ? path === "/" || t.aussi.some((a) => path.startsWith(a)) : path.startsWith(t.href) || t.aussi.some((a) => path.startsWith(a));
           const Icon = t.icon;
-          if ("central" in t && t.central) {
-            return (
-              <li key={t.href} className="flex items-center justify-center">
-                <Link
-                  href={t.href}
-                  aria-label="Ajouter un pari ou un prono"
-                  className="-mt-5 flex h-12 w-12 items-center justify-center rounded-full bg-brand text-white shadow-lg shadow-brand/40 ring-4 ring-white transition active:scale-95"
-                >
-                  <Icon />
-                </Link>
-              </li>
-            );
-          }
           return (
             <li key={t.href}>
               <Link
@@ -62,4 +49,3 @@ function TicketIcon() { return <svg {...P}><path d="M3 8a2 2 0 012-2h14a2 2 0 01
 function UsersIcon() { return <svg {...P}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0113 0" /><circle cx="17" cy="9" r="2.5" /><path d="M16 14.5a5 5 0 015.5 5.5" /></svg>; }
 function BallIcon() { return <svg {...P}><circle cx="12" cy="12" r="9" /><path d="M12 7l3.5 2.5-1.3 4h-4.4l-1.3-4z" /><path d="M12 3v4M5.3 8.5l3.5 1M18.7 8.5l-3.5 1M7.8 17.5l2-4M16.2 17.5l-2-4" /></svg>; }
 function CoachIcon() { return <svg {...P}><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></svg>; }
-function PlusIcon() { return <svg {...P} strokeWidth={2.2}><path d="M12 5v14M5 12h14" /></svg>; }

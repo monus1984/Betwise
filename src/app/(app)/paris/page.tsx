@@ -14,7 +14,7 @@ export default async function ParisPage({ searchParams }: { searchParams: Promis
 
   let q = supabase
     .from("bets")
-    .select("id, type, mise, cote_totale, statut, gain_net, placed_at, settled_at, created_at, bookmaker, detail_complet, bet_selections(id, match_libre, market_code, market_param, selection, cote, resultat, risque_calcule, origin_source_id, origin:sources!bet_selections_origin_source_id_fkey(nom), match:matches(kickoff_at, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom)))")
+    .select("id, type, mise, cote_totale, statut, gain_net, placed_at, settled_at, created_at, bookmaker, detail_complet, resultat_propose, gain_propose, bet_selections(id, match_libre, market_code, market_param, selection, cote, resultat, risque_calcule, origin_source_id, origin:sources!bet_selections_origin_source_id_fkey(nom), match:matches(kickoff_at, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom)))")
     .order("placed_at", { ascending: false })
     .eq("virtuel", tests)
     .limit(tests ? 200 : 50);
@@ -27,7 +27,7 @@ export default async function ParisPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <PageHeader title="Mes paris" subtitle={tests ? "Choix testés sans miser : ta bankroll n’a pas bougé." : filter === "en_cours" ? "En attente de résultat." : "Réglés."} />
+      <PageHeader title="Mes paris" subtitle={tests ? "Choix testés sans miser : ta bankroll n’a pas bougé." : filter === "en_cours" ? "En attente de résultat ou de ta confirmation." : "Réglés."} action={<Link href="/bilan">Bilan</Link>} />
       {sp.ajout && <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{tests ? "Test enregistré." : "Pari enregistré."}</p>}
 
       <div className="mb-4 flex gap-2">

@@ -228,6 +228,7 @@ export type Database = {
           devise: string
           active: boolean
           created_at: string
+          verifie_at: string | null
         }
         Insert: {
           id?: string
@@ -236,6 +237,7 @@ export type Database = {
           devise?: string
           active?: boolean
           created_at?: string
+          verifie_at?: string | null
         }
         Update: {
           id?: string
@@ -244,6 +246,7 @@ export type Database = {
           devise?: string
           active?: boolean
           created_at?: string
+          verifie_at?: string | null
         }
         Relationships: []
       }
@@ -577,6 +580,9 @@ export type Database = {
           coupon_externe: string | null
           bookmaker: string | null
           ticket_fingerprint: string | null
+          resultat_propose: Database["betwise"]["Enums"]["settle_result"] | null
+          gain_propose: number | null
+          propose_at: string | null
           assurance: boolean
           virtuel: boolean
         }
@@ -600,6 +606,9 @@ export type Database = {
           coupon_externe?: string | null
           bookmaker?: string | null
           ticket_fingerprint?: string | null
+          resultat_propose?: Database["betwise"]["Enums"]["settle_result"] | null
+          gain_propose?: number | null
+          propose_at?: string | null
           assurance?: boolean
           virtuel?: boolean
         }
@@ -623,6 +632,9 @@ export type Database = {
           coupon_externe?: string | null
           bookmaker?: string | null
           ticket_fingerprint?: string | null
+          resultat_propose?: Database["betwise"]["Enums"]["settle_result"] | null
+          gain_propose?: number | null
+          propose_at?: string | null
           assurance?: boolean
           virtuel?: boolean
         }

@@ -369,6 +369,8 @@ export type MatchedSelection = NormalizedSelection & {
   confidence: number;
   match: { id: string; home: string; away: string; kickoff_at: string; competition: string; score: string | null } | null;
   score_consistent: boolean | null;   // null si pas de score en base
+  /** Chance estimée par BETWISE pour ce choix sur ce match, quand elle existe : sert au contrôle de vraisemblance. */
+  p_estimee?: number | null;
 };
 
 export type ExtractedTicket = {
@@ -427,15 +429,18 @@ export async function extractTickets(db: Db, input: { images?: LlmImage[]; text?
     return { raw, selections, checks, placed_at_iso: parseFrDate(raw.placed_at) ?? parsePublished(raw.source?.published_at ?? null), usage: { tokensIn: k ? 0 : res.tokensIn, tokensOut: k ? 0 : res.tokensOut, model: res.model } };
   });
 
-  // Pronos sans cote : cote de référence quand elle existe, sinon cote estimée à partir des probabilités (marquée comme telle)
-  const ids = [...new Set(out.flatMap((t) => t.selections.filter((x) => x.match && !x.odds && x.ok).map((x) => x.match!.id)))];
+  // Chance estimée de chaque ligne reconnue (contrôle de vraisemblance à l'écran), et pour les pronos sans cote :
+  // cote de référence quand elle existe, sinon cote estimée à partir des probabilités (marquée comme telle)
+  const ids = [...new Set(out.flatMap((t) => t.selections.filter((x) => x.match && x.ok).map((x) => x.match!.id)))];
   if (ids.length) {
     const signals = await loadSignals(db as never, ids);
     for (const t of out) for (const x of t.selections) {
-      if (!x.match || x.odds || !x.ok) continue;
+      if (!x.match || !x.ok) continue;
       const sg = signals.get(x.match.id); if (!sg) continue;
-      const refOdd = sg.refOdd(x.market_code, x.market_param, x.selection);
       const p = probOfSignal(sg, x.market_code, x.market_param, x.selection);
+      x.p_estimee = p ?? null;
+      if (x.odds) continue;
+      const refOdd = sg.refOdd(x.market_code, x.market_param, x.selection);
       if (refOdd) { x.odds = refOdd; x.odds_source = "reference"; }
       else if (p) { x.odds = Math.round(coteEstimee({ p, cote: null }) * 100) / 100; x.odds_source = "estimee"; }
     }

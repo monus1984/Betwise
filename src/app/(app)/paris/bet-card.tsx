@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { deleteDuplicateBet, settleBet } from "@/lib/bets/actions";
+import { deleteDuplicateBet } from "@/lib/bets/actions";
+import { ConfirmResult } from "./confirm-result";
 import Link from "next/link";
 import { RISK_CLASS, RISK_LABEL, fcfa } from "@/components/ui";
 import { OriginPicker, type SourceOpt } from "./origin-picker";
@@ -21,6 +22,8 @@ export type BetRow = {
   created_at: string;
   bookmaker: string | null;
   detail_complet: boolean;
+  resultat_propose?: "gagne" | "perdu" | "rembourse" | "en_attente" | null;
+  gain_propose?: number | null;
   bet_selections: {
     id: string;
     match_libre: string | null;
@@ -49,15 +52,9 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
   const [err, setErr] = useState<string | null>(null);
   const [confirmDel, setConfirmDel] = useState(false);
   const st = STATUT[bet.statut];
+  const propose = bet.resultat_propose && bet.resultat_propose !== "en_attente" ? bet.resultat_propose : null;
+  const aConfirmer = bet.statut === "en_cours" && !!propose;
   const recent = Date.now() - Date.parse(bet.created_at) < 24 * 3600000;
-
-  function settle(r: "gagne" | "perdu" | "rembourse") {
-    setErr(null);
-    start(async () => {
-      const res = await settleBet(bet.id, r);
-      if (!res.ok) setErr(res.error);
-    });
-  }
 
   return (
     <li className="rounded-xl border border-slate-200 bg-white p-4">
@@ -76,7 +73,7 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
-          <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${st.cls}`}>{st.label}</span>
+          <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${aConfirmer ? "bg-amber-100 text-amber-900" : st.cls}`}>{aConfirmer ? "À confirmer" : st.label}</span>
           <Link href={`/paris/${bet.id}`} className="text-[11px] font-medium text-brand">Analyser · modifier ›</Link>
         </div>
       </div>
@@ -88,7 +85,7 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
           return (
             <li key={s.id} className="flex items-start justify-between gap-3 text-sm">
               <div className="min-w-0">
-                <p className="truncate font-medium">{label}</p>
+                <p className="truncate font-medium">{s.resultat === "gagne" ? <span className="text-emerald-700">✓ </span> : s.resultat === "perdu" ? <span className="text-red-700">✗ </span> : s.resultat === "rembourse" ? <span className="text-amber-700">↩ </span> : null}{label}</p>
                 <div className="text-xs text-slate-500">
                   {marketLabel(s.market_code, s.market_param, s.selection)} · cote {Number(s.cote).toFixed(2)} · <OriginPicker selectionId={s.id} current={s.origin_source_id} currentName={one(s.origin)?.nom ?? "—"} sources={sources} />
                 </div>
@@ -101,13 +98,7 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
         })}
       </ul>
 
-      {bet.statut === "en_cours" && (
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          <button disabled={pending} onClick={() => settle("gagne")} className="rounded-lg bg-emerald-600 py-2 text-sm font-medium text-white disabled:opacity-50">Gagné</button>
-          <button disabled={pending} onClick={() => settle("perdu")} className="rounded-lg bg-red-600 py-2 text-sm font-medium text-white disabled:opacity-50">Perdu</button>
-          <button disabled={pending} onClick={() => settle("rembourse")} className="rounded-lg bg-slate-200 py-2 text-sm font-medium text-slate-800 disabled:opacity-50">Remboursé</button>
-        </div>
-      )}
+      {bet.statut === "en_cours" && <ConfirmResult betId={bet.id} propose={propose} gainPropose={bet.gain_propose ?? null} mise={Number(bet.mise)} />}
       {!bet.detail_complet && <p className="mt-2 text-[11px] text-amber-700">Détail des sélections non lu (ticket replié) : compte dans la bankroll, pas dans la notation des sources.</p>}
       {recent && (
         <div className="mt-2 text-right">
