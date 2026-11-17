@@ -169,7 +169,7 @@ export default async function Home() {
       </section>
 
       <section className="mt-5 rounded-2xl border border-line bg-surface p-4">
-        <div className="flex items-baseline justify-between gap-2"><h2 className="text-sm font-semibold">Mes sources suivies <span className="font-normal text-ink-muted">· pronos prouvés</span></h2><Link href="/sources" className="text-xs font-medium text-brand">Toutes ›</Link></div>
+        <div className="flex items-baseline justify-between gap-2"><h2 className="text-sm font-semibold">Mes sources suivies</h2><Link href="/sources" className="text-xs font-medium text-brand">Toutes ›</Link></div>
         {sources.length === 0 ? <p className="mt-2 text-sm text-ink-muted">Aucune pour l’instant. <Link href="/sources" className="text-brand underline">Ajoute un tipster, une page ou un canal</Link> pour le noter sur ses vrais résultats.</p> : (
           <ul className="mt-2 divide-y divide-line">
             {sources.slice(0, 4).map((s) => (

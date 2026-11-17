@@ -7,7 +7,7 @@ const FIXES: Record<string, Carte> = {
   bilan_paris: { titre: "Bilan détaillé", sous: "Réussite et rendement par type, marché, bookmaker", href: "/bilan" },
   bilan_par_origine: { titre: "Bilan détaillé", sous: "Réussite de tes choix selon leur origine", href: "/bilan" },
   paris_en_cours: { titre: "Mes paris en cours", sous: "Le détail de chaque ticket", href: "/paris" },
-  sources_suivies: { titre: "Classement des sources", sous: "Notées sur leurs pronos prouvés", href: "/sources?f=classement" },
+  sources_suivies: { titre: "Classement des sources", sous: "Qui réussit le mieux, et sur quoi", href: "/sources?f=classement" },
   mes_tests: { titre: "Mes tests", sous: "Les choix suivis sans miser", href: "/paris?vue=tests" },
   mon_budget: { titre: "Mon budget de la semaine", sous: "Mises et perte autorisées", href: "/coach?v=outils" },
 };
@@ -21,7 +21,7 @@ export function cartesDe(appels: Appel[]): Carte[] {
         if (m.match_id && m.match) ajoute({ titre: m.match, sous: `${m.competition ?? "Match"} · analyse, stats, marchés, sources`, href: `/matchs/${m.match_id}` });
     } else if (a.nom === "detail_source") {
       const s = a.sortie as { source_id?: string; nom?: string } | null;
-      if (s?.source_id) ajoute({ titre: s.nom ?? "Source", sous: "Sa note prouvée et son historique", href: `/sources/${s.source_id}` });
+      if (s?.source_id) ajoute({ titre: s.nom ?? "Source", sous: "Sa réussite et son historique", href: `/sources/${s.source_id}` });
     } else if (a.nom && FIXES[a.nom]) ajoute(FIXES[a.nom]);
   }
   return out;

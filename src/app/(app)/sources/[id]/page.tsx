@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { createClient } from "@/lib/supabase/server";
 import { labelType, MARCHE_FR } from "../source-ui";
-import { NIVEAU, SEUIL, lire, niveau, raison, rendement, reussite } from "@/lib/sources/proof";
+import { NIVEAU, lire, niveau, raison, rendement, reussite } from "@/lib/sources/proof";
 import { FollowButton, PredictionRow, SourceLink } from "./client";
 import { linkOf } from "@/lib/sources/link";
 import { CumulChart, type CumulPoint } from "./cumul-chart";
@@ -58,12 +58,12 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
 
       <section className="rounded-2xl bg-pitch p-5 text-white">
         <div className="flex items-baseline justify-between gap-3">
-          <p className="text-xs font-medium text-white/70">Pronos prouvés</p>
+          <p className="text-xs font-medium text-white/70">Ses pronos</p>
           <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px]">{NIVEAU[nv]}</span>
         </div>
-        <p className="mt-1 text-3xl font-bold tabular-nums">{nv === "non_etabli" ? "Non établi" : `${proof.prouvesGagnes} juste${proof.prouvesGagnes > 1 ? "s" : ""} sur ${proof.prouvesRegles}`}</p>
+        <p className="mt-1 text-3xl font-bold tabular-nums">{nv === "non_etabli" ? (proof.prouves ? "En attente" : "À suivre") : `${proof.prouvesGagnes} juste${proof.prouvesGagnes > 1 ? "s" : ""} sur ${proof.prouvesRegles}`}</p>
         {nv === "non_etabli" ? (
-          <p className="mt-1 text-[13px] leading-snug text-white/75">{raison(proof)} Il en faut {SEUIL.classement}, enregistrés avant le coup d’envoi et réglés, pour donner une note.</p>
+          <p className="mt-1 text-[13px] leading-snug text-white/75">{raison(proof)}</p>
         ) : (
           <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
             <div><p className="text-[11px] text-white/60">Réussite</p><p className="font-semibold tabular-nums">{reu === null ? "—" : `${Math.round(reu * 100)} %`}</p></div>
@@ -72,13 +72,8 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
           </div>
         )}
         {nv !== "non_etabli" && proof.attendu !== null && <p className="mt-3 text-[11px] text-white/60">« Attendu » : la réussite que ces cotes laissent prévoir. Au-dessus, la source fait mieux que le marché.</p>}
-        {nv !== "non_etabli" && proof.prouvesRegles < SEUIL.provisoire && <p className="mt-3 text-[11px] text-white/60">Moins de {SEUIL.provisoire} pronos prouvés : une tendance, pas un jugement.</p>}
+        {proof.prouves > 0 && <p className="mt-1 text-[11px] text-white/60">{proof.prouves - proof.apresCoup} prono{proof.prouves - proof.apresCoup > 1 ? "s" : ""} sur {proof.prouves} chargé{proof.prouves > 1 ? "s" : ""} avant le coup d’envoi. Tous comptent.</p>}
       </section>
-      {proof.apresCoup > 0 && (
-        <p className="mt-2 rounded-xl border border-draw/40 bg-draw-soft p-3 text-[13px] leading-snug text-draw-ink">
-          <b>{proof.apresCoup} prono{proof.apresCoup > 1 ? "s" : ""} saisi{proof.apresCoup > 1 ? "s" : ""} après le coup d’envoi</b>{proof.apresCoupRegles > 0 ? ` (${proof.apresCoupGagnes} juste${proof.apresCoupGagnes > 1 ? "s" : ""} sur ${proof.apresCoupRegles})` : ""}. Ils restent dans l’historique mais ne comptent pas dans la note : rien ne prouve qu’ils ont été donnés avant le match.
-        </p>
-      )}
 
       <div className="mt-4 flex gap-2">
         {(["30j", "90j", "180j", "total"] as const).map((k) => (
@@ -113,7 +108,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
             <p className="text-[11px] text-slate-500">réussite à atteindre à cette cote moyenne</p>
           </div>
         </div>
-        <p className="mt-3 text-[11px] text-slate-400">Calculé chaque nuit sur les pronos prouvés, réglés et avec cote, période choisie ci-dessus. « Non établi » : l’intervalle de confiance contient zéro, l’échantillon ne permet pas de conclure.</p>
+        <p className="mt-3 text-[11px] text-slate-400">Calculé chaque nuit sur les pronos réglés avec cote, période choisie ci-dessus. « Non établi » : l’intervalle de confiance contient zéro, l’échantillon ne permet pas de conclure.</p>
       </section>
 
       {(axes ?? []).some((a) => a.axe === "competition") && (
@@ -137,7 +132,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
 
       {(parMarche ?? []).some((m) => Number(m.regles) > 0) && (
         <section className="mt-3 rounded-xl border border-line bg-surface p-4">
-          <div className="mb-2 flex items-baseline justify-between"><h2 className="text-sm font-semibold">Par marché</h2><span className="text-[11px] text-ink-muted">pronos prouvés seulement</span></div>
+          <div className="mb-2 flex items-baseline justify-between"><h2 className="text-sm font-semibold">Par marché</h2><span className="text-[11px] text-ink-muted">tous ses pronos réglés</span></div>
           <table className="w-full text-[13px]">
             <thead><tr className="text-left text-[11px] text-ink-muted"><th className="py-1 font-medium">Marché</th><th className="py-1 text-right font-medium">Justes</th><th className="py-1 text-right font-medium">Rendement</th></tr></thead>
             <tbody className="divide-y divide-line">

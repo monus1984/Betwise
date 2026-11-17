@@ -15,10 +15,10 @@ export function BudgetCard({ budget, etat, soldeTotal }: { budget: { miseSemaine
         <div className="mt-3 space-y-3">
           <Jauge mot="Misé depuis lundi" v={etat.mises} max={budget.miseSemaine} part={etat.partMises} />
           <Jauge mot="Perdu depuis lundi" v={etat.perte} max={budget.perteMaxSemaine} part={etat.partPerte} perte />
-          {etat.motif && <p className={`rounded-lg p-2 text-[12px] leading-snug ${etat.statut === "atteint" ? "bg-loss-soft text-loss-ink" : "bg-draw-soft text-draw-ink"}`}>{etat.motif}{etat.statut === "atteint" ? " Le Coach ne proposera plus de pari d’ici lundi." : ""}</p>}
+          {etat.motif && <p className={`rounded-lg p-2 text-[12px] leading-snug ${etat.statut === "atteint" ? "bg-loss-soft text-loss-ink" : "bg-draw-soft text-draw-ink"}`}>{etat.motif}</p>}
         </div>
       ) : (
-        <p className="mt-1 text-[13px] leading-snug text-ink-muted">Fixe ce que tu t’autorises à miser et à perdre par semaine. On ne vise pas un gain : on borne ce qu’on engage.</p>
+        <p className="mt-1 text-[13px] leading-snug text-ink-muted">Fixe ce que tu t’autorises à miser et à perdre par semaine. Le Coach te prévient quand tu t’en approches ; la décision reste la tienne.</p>
       )}
       <details className="mt-3" open={!budget}>
         <summary className="cursor-pointer text-xs font-medium text-brand">{budget ? "Modifier mon budget" : "Fixer mon budget"}</summary>

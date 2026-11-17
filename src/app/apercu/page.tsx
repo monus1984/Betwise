@@ -46,8 +46,7 @@ export default function Apercu() {
       <h2 className="mb-2 text-base font-bold">Coach (fictif)</h2>
       <BudgetCard soldeTotal={30000} budget={{ miseSemaine: 8000, perteMaxSemaine: 4000 }} etat={etatBudget({ miseSemaine: 8000, perteMaxSemaine: 4000 }, [{ mise: 3500, statut: "perdu", gain_net: -3500, placed_at: new Date().toISOString(), settled_at: new Date().toISOString() }, { mise: 2000, statut: "en_cours", gain_net: null, placed_at: new Date().toISOString(), settled_at: null }])} />
       <div className="mb-6 mt-3 rounded-2xl rounded-bl-sm border border-line bg-surface px-3.5 py-3 text-sm">
-        <p>Je ne propose pas de pari maintenant : tu demandes un pari pour rattraper une perte, c’est la situation où l’on mise le plus mal. Regarde plutôt ton bilan de la semaine.</p>
-        <p className="mt-2 rounded-lg bg-draw-soft px-2.5 py-1.5 text-[12px] font-medium text-draw-ink">Garde-fou actif : le Coach ne propose pas de pari dans cette réponse.</p>
+        <p>À savoir : pour rattraper d’un coup, il faut une cote haute. Ce combiné à 8,40 passe 9 fois sur 100, tu perds ta mise 91 fois. Plus tranquille : plus de 1,5 but, là où tu réussis 9 fois sur 10.</p>
         <div className="tile tile-action mt-2 flex items-center gap-3 px-3 py-2.5"><span className="min-w-0 flex-1"><span className="block truncate text-[13px] font-semibold">Bilan détaillé</span><span className="block truncate text-[11px] text-ink-muted">Réussite et rendement par type, marché, bookmaker</span></span><span aria-hidden className="text-brand">›</span></div>
       </div>
       <h2 className="mb-2 text-base font-bold">Fiche match, onglet Sources (fictif)</h2>
@@ -56,7 +55,7 @@ export default function Apercu() {
         proofs={{ a: { ...VIDE, prouves: 24, prouvesRegles: 24, prouvesGagnes: 19 }, b: { ...VIDE, apresCoup: 27 } }} /></div>
       <h2 className="mb-2 text-base font-bold">Sources (fictif)</h2>
       <section className="rounded-2xl bg-pitch p-5 text-white">
-        <div className="flex items-baseline justify-between gap-3"><p className="text-xs font-medium text-white/70">Pronos prouvés</p><span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px]">Tendance</span></div>
+        <div className="flex items-baseline justify-between gap-3"><p className="text-xs font-medium text-white/70">Ses pronos</p><span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px]">Tendance</span></div>
         <p className="mt-1 text-3xl font-bold tabular-nums">19 justes sur 24</p>
         <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
           <div><p className="text-[11px] text-white/60">Réussite</p><p className="font-semibold">79 %</p></div>
@@ -64,12 +63,11 @@ export default function Apercu() {
           <div><p className="text-[11px] text-white/60">Rendement</p><p className="font-semibold text-band-gain">+4 %</p></div>
         </div>
       </section>
-      <p className="mt-2 rounded-xl border border-draw/40 bg-draw-soft p-3 text-[13px] leading-snug text-draw-ink"><b>27 pronos saisis après le coup d’envoi</b> (24 justes sur 27). Ils restent dans l’historique mais ne comptent pas dans la note.</p>
       <ol className="mb-6 mt-3 space-y-2">
         {[["1", "Source A", "+6 %", "35"], ["2", "Source B", "+4 %", "24"]].map(([r, n, x, v]) => (
           <li key={r} className="tile flex items-center gap-3 p-3">
             <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${r === "1" ? "bg-draw text-on-fill" : "bg-surface-2 text-ink-soft"}`}>{r}</span>
-            <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{n}</span><span className="block text-[11px] text-ink-muted">Canal Telegram · {v} pronos prouvés · Tendance</span><span className="mt-0.5 block text-[12px] text-ink-soft">Réussite 79 % · attendu à ces cotes 76 %</span></span>
+            <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{n}</span><span className="block text-[11px] text-ink-muted">Canal Telegram · {v} · 19 sur 24 · Tendance</span><span className="mt-0.5 block text-[12px] text-ink-soft">Réussite 79 % · attendu à ces cotes 76 %</span></span>
             <span className="shrink-0 text-right"><span className="block text-base font-bold tabular-nums text-gain">{x}</span><span className="block text-[10px] text-ink-muted">rendement · {v} cotes</span></span>
           </li>
         ))}

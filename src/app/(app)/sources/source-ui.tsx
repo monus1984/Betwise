@@ -1,5 +1,5 @@
 import { APP_NAME } from "@/lib/app-name";
-import { NIVEAU, SEUIL, niveau, reussite, type Proof } from "@/lib/sources/proof";
+import { NIVEAU, niveau, reussite, type Proof } from "@/lib/sources/proof";
 export function labelType(t: string) {
   return ({
     perso: "Mes propres choix",
@@ -12,13 +12,13 @@ export function labelType(t: string) {
   } as Record<string, string>)[t] ?? t;
 }
 
-/** Note d'une source, à droite d'une ligne : le volume prouvé, ou « Non établi » avec sa raison en dessous. */
+/** Note d'une source, à droite d'une ligne : justes sur réglés dès le premier résultat, sinon une invitation. */
 export function ProofBadge({ proof }: { proof: Proof }) {
   const nv = niveau(proof), r = reussite(proof);
   if (nv === "non_etabli") return (
     <span className="shrink-0 text-right">
-      <span className="block text-sm font-semibold text-ink-soft">Non établi</span>
-      <span className="block text-[11px] text-ink-muted">{proof.prouves + proof.apresCoup === 0 ? "aucun prono" : `${proof.prouvesRegles} prouvé${proof.prouvesRegles > 1 ? "s" : ""} sur ${SEUIL.classement}`}</span>
+      <span className="block text-sm font-semibold text-brand">{proof.prouves ? "En attente" : "À suivre"}</span>
+      <span className="block text-[11px] text-ink-muted">{proof.prouves ? `${proof.prouves} prono${proof.prouves > 1 ? "s" : ""} en cours` : "ajoute ses pronos"}</span>
     </span>
   );
   return (
@@ -29,8 +29,4 @@ export function ProofBadge({ proof }: { proof: Proof }) {
   );
 }
 
-export const MARCHE_FR: Record<string, string> = {
-  "1X2": "Victoire / nul", DC: "Double chance", DNB: "Remboursé si nul", OU: "Plus / moins de buts", BTTS: "Les deux marquent", AH: "Handicap", EH: "Handicap européen",
-  CS: "Score exact", DC_OU: "Double chance + buts", "1X2_OU": "Résultat + buts", DC_BTTS: "Double chance + les deux marquent", "1X2_BTTS": "Résultat + les deux marquent", OU_BTTS: "Buts + les deux marquent",
-  TT1: "Buts équipe 1", TT2: "Buts équipe 2", CORN: "Corners", CARD: "Cartons", SOT: "Tirs cadrés", SHOT: "Tirs", OE: "Pair / impair", MG: "Tranche de buts", WTN: "Gagne sans encaisser",
-};
+export { MARCHE_FR } from "@/lib/markets-fr";

@@ -3,33 +3,35 @@ import { VIDE, classer, lire, niveau, raison, rendement, resume, reussite, type 
 
 const P = (x: Partial<Proof>): Proof => ({ ...VIDE, ...x });
 
-describe("niveau de preuve d'une source", () => {
-  // Cas réel du 16 novembre : 27 pronos, tous saisis après les matchs, 24 justes.
-  const koudouss = P({ apresCoup: 27, apresCoupRegles: 27, apresCoupGagnes: 24 });
-  const telegram = P({ prouves: 24, prouvesRegles: 24, prouvesGagnes: 19, avecCote: 24, unites: 1.4 });
+describe("note d'une source", () => {
+  // La vue compte tous les pronos non annulés. Cas réel : 27 pronos saisis après les matchs, 24 justes sur 26 réglés.
+  const koudouss = P({ prouves: 27, prouvesRegles: 26, prouvesGagnes: 24, avecCote: 26, unites: 5.31, apresCoup: 27, apresCoupRegles: 26, apresCoupGagnes: 24 });
+  const telegram = P({ prouves: 24, prouvesRegles: 24, prouvesGagnes: 19, avecCote: 24, unites: 0.96 });
 
-  it("un prono saisi après le coup d'envoi n'entre pas dans la note, quel que soit son résultat", () => {
-    expect(niveau(koudouss)).toBe("non_etabli");
-    expect(reussite(koudouss)).toBeNull();
-    expect(resume(koudouss)).toBe("Non établi");
-    expect(raison(koudouss)).toBe("Ses 27 pronos ont tous été saisis après le coup d’envoi.");
+  it("un prono saisi après le match compte comme les autres", () => {
+    expect(niveau(koudouss)).toBe("tendance");
+    expect(reussite(koudouss)).toBeCloseTo(24 / 26, 6);
+    expect(resume(koudouss)).toBe("24 justes sur 26");
   });
-  it("sous le seuil de 10 pronos prouvés réglés : non établi, avec le compte", () => {
-    const s = P({ prouves: 6, prouvesRegles: 4, prouvesGagnes: 4 });
-    expect(niveau(s)).toBe("non_etabli");
-    expect(raison(s)).toBe("4 pronos prouvés réglés sur 10 requis.");
+  it("les chiffres s'affichent dès le premier prono réglé, sans attendre un seuil", () => {
+    const s = P({ prouves: 6, prouvesRegles: 4, prouvesGagnes: 3 });
+    expect(niveau(s)).toBe("debut");
+    expect(resume(s)).toBe("3 justes sur 4");
+    expect(raison(s)).toBe("");
   });
-  it("paliers : tendance dès 10, provisoire dès 30, établi dès 100", () => {
-    expect([10, 29, 30, 99, 100].map((n) => niveau(P({ prouves: n, prouvesRegles: n })))).toEqual(["tendance", "tendance", "provisoire", "provisoire", "etabli"]);
+  it("sans prono réglé : une invitation à en charger, pas un refus", () => {
+    expect(resume(VIDE)).toBe("à suivre");
+    expect(raison(VIDE)).toContain("ajoute ceux qu’elle publie");
+    expect(resume(P({ prouves: 2 }))).toBe("en attente");
   });
-  it("le résumé donne toujours le volume", () => {
-    expect(resume(telegram)).toBe("19 justes sur 24 prouvés");
-    expect(rendement(telegram)).toBeCloseTo(1.4 / 24, 6);
+  it("paliers : tendance dès 10, confirmé dès 30, établi dès 100", () => {
+    expect([1, 9, 10, 29, 30, 99, 100].map((n) => niveau(P({ prouves: n, prouvesRegles: n })))).toEqual(["debut", "debut", "tendance", "tendance", "provisoire", "provisoire", "etabli"]);
   });
-  it("le classement écarte les sources non établies, même avec 24 justes sur 27 après coup", () => {
-    const { classees, nonEtablies } = classer([{ nom: "K", proof: koudouss }, { nom: "T", proof: telegram }, { nom: "C", proof: P({ prouves: 45, prouvesRegles: 35, prouvesGagnes: 30, avecCote: 35, unites: -0.5 }) }]);
-    expect(classees.map((s) => s.nom)).toEqual(["T", "C"]);   // rendement +0,06 devant −0,01
-    expect(nonEtablies.map((s) => s.nom)).toEqual(["K"]);
+  it("classement : dès 3 pronos réglés, par rendement", () => {
+    const { classees, nonEtablies } = classer([{ nom: "K", proof: koudouss }, { nom: "T", proof: telegram }, { nom: "D", proof: P({ prouves: 1, prouvesRegles: 1, prouvesGagnes: 1 }) }]);
+    expect(classees.map((s) => s.nom)).toEqual(["K", "T"]);   // +0,20 par prono devant +0,04
+    expect(nonEtablies.map((s) => s.nom)).toEqual(["D"]);
+    expect(rendement(telegram)).toBeCloseTo(0.04, 6);
   });
   it("lit une ligne de la vue, chiffres en texte compris", () => {
     expect(lire({ prouves: "24", prouves_regles: 24, prouves_gagnes: 19, prouves_avec_cote: 24, prouves_unites: "1.40", attendu: "0.7100", apres_coup: 0 })).toMatchObject({ prouves: 24, unites: 1.4, attendu: 0.71 });

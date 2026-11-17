@@ -1,7 +1,7 @@
 import { APP_NAME } from "@/lib/app-name";
 import Link from "next/link";
 import { CAT_CONSTATE, CAT_LABEL, CAT_STYLE, type Categorie } from "@/lib/coach/categories";
-import type { TheirPick, TodayPick } from "@/lib/coach/today";
+import type { Repli, TheirPick, TodayPick } from "@/lib/coach/today";
 import { COMP_FLAG } from "@/components/match-ui";
 import { IconBolt, IconFlame, IconShield, IconTile } from "@/components/icons";
 import { AddToSlip } from "@/components/slip";
@@ -13,12 +13,35 @@ const time = (iso: string) => new Date(iso).toLocaleTimeString("fr-FR", { hour: 
 const CATS: Categorie[] = ["sur", "audacieux", "risque"];
 const CAT_NOTE: Record<Categorie, string> = { sur: "cotes 1,10–1,20", audacieux: "cotes 1,20–1,50", risque: "cotes 1,50–1,90" };
 
-export function CoupsDuJour({ picks, theirs, mises }: { picks: TodayPick[]; theirs: TheirPick[]; mises: Record<Categorie, number> | null }) {
+export function CoupsDuJour({ picks, theirs, mises, repli = [] }: { picks: TodayPick[]; theirs: TheirPick[]; mises: Record<Categorie, number> | null; repli?: Repli[] }) {
   return (
     <section className="mt-3 rounded-xl border border-line bg-surface p-4 shadow-card">
       <div className="mb-3 flex items-baseline justify-between gap-2"><h2 className="flex items-center gap-2 text-sm font-semibold"><IconTile size="sm" tone="conseil"><IconBolt width={18} height={18} /></IconTile>Les coups du jour</h2><Link href="/options" className="text-[11px] text-brand">toutes les options ›</Link></div>
       {picks.length === 0 ? (
-        <p className="text-sm text-ink-muted">Rien de solide aujourd’hui : aucune sélection ne s’appuie sur une vraie cote de référence. Le Coach préfère se taire que proposer au hasard.</p>
+        repli.length === 0 ? (
+          <p className="text-sm text-ink-muted">Aucun match couvert dans les 48 heures qui viennent. En attendant : charge un coupon de tes sources, ou <Link href="/options" className="text-brand underline">cherche par probabilité</Link> sur les prochains jours.</p>
+        ) : (
+          <div>
+            <p className="mb-2 text-[12px] leading-snug text-ink-soft">Les sélections les plus probables du moment. Pour chacune : sa chance de passer, et le risque que tu prends.</p>
+            <ul className="divide-y divide-line rounded-lg border border-line">
+              {repli.map((r) => (
+                <li key={`${r.matchId}${r.selection}`}>
+                  <Link href={`/matchs/${r.matchId}`} className="flex items-center gap-3 px-3 py-2 active:bg-surface-2">
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium">{r.selection}</span>
+                      <span className="block truncate text-[11px] text-ink-muted">{r.match} · {time(r.kickoff)}{r.estimation ? " · estimation" : r.cote ? ` · cote ${C(r.cote)}` : ""}</span>
+                    </span>
+                    <span className="shrink-0 text-right tabular-nums">
+                      <span className="block text-sm font-bold">{Math.round(r.p * 100)} %</span>
+                      <span className="block text-[11px] text-loss">perd {100 - Math.round(r.p * 100)} fois sur 100</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            {repli.some((r) => r.estimation) && <p className="mt-2 text-[11px] leading-relaxed text-ink-muted">« Estimation » : pas de cote de bookmaker sur ce marché, le chiffre vient du modèle. Il est moins fiable ; compare-le à la cote de ton bookmaker.</p>}
+          </div>
+        )
       ) : (
         <div className="space-y-4">
           {CATS.map((cat) => {

@@ -15,7 +15,8 @@ import { loadOptions } from "../options/load";
 import { analyzeTicket } from "../probs/ticket";
 import { loadGoal } from "./goal";
 import { evaluatePlan, misesDuJour } from "./plan";
-import { loadToday } from "./today";
+import { loadForces, loadRepli, loadToday } from "./today";
+import { direForce } from "./forces";
 import { setObjectif } from "./actions";
 import { CAT_LABEL, categorieOf } from "./categories";
 
@@ -33,7 +34,7 @@ function since(p: unknown) {
 }
 
 export const COACH_TOOLS: ChatTool[] = [
-  { name: "mon_budget", description: "Budget de la semaine de l'utilisateur : part déjà misée, part de la perte autorisée déjà atteinte, statut (libre, proche, atteint). En pourcentages. À appeler avant de parler de mise ou quand il demande où il en est.", input_schema: { type: "object", properties: {} } },
+  { name: "mon_budget", description: "Budget de la semaine que l'utilisateur s'est fixé : part déjà misée, part de la perte autorisée déjà atteinte, statut. En pourcentages. Une information à lui donner, jamais une raison de refuser.", input_schema: { type: "object", properties: {} } },
   { name: "coups_du_jour", description: `Les coups du jour ${APP_NAME} classés Très probable / Audacieux / Risqué (probabilité, cote, mise conseillée, gain possible), et les choix de l'utilisateur et de ses sources sur les matchs du jour, confrontés aux probabilités ${APP_NAME} et classés dans les mêmes catégories. À utiliser pour « quoi jouer aujourd'hui », « mes paris du jour », « que penses-tu du prono de X ».`, input_schema: { type: "object", properties: {} } },
   { name: "options_du_jour", description: "Paris simples dont la probabilité est dans une fourchette choisie, sur tous les marchés (victoire, double chance, remboursé si nul, handicap ±1,5, plus/moins de buts du match ou d'une équipe, les deux marquent, et combos d'un même match comme « Sénégal ou nul et plus de 1,5 but »). Donne probabilité, catégorie, cote de référence ou cote juste. À utiliser pour « quoi jouer à 80 % », « des paris Audacieux », « les options de PSG–Lyon ».", input_schema: { type: "object", properties: { min_pct: { type: "number", description: "Probabilité minimale en %, par défaut 67" }, max_pct: { type: "number", description: "Probabilité maximale en %, par défaut 91" }, periode: { type: "string", enum: ["auj", "demain", "48h"], description: "Par défaut auj" }, famille: { type: "string", enum: ["tout", "resultat", "buts", "mitemps", "combo"], description: "combo = combos d'un même match ; mitemps = marchés de mi-temps (probabilités indicatives)" }, equipe: { type: "string", description: "Limiter aux matchs d'une équipe (nom partiel)" }, max: { type: "number", description: "Nombre maximal, par défaut 8" } } } },
   { name: "combine_cible", description: "Compose des combinés qui visent une cote donnée avec des sélections dans une fourchette de probabilité (une par match, le moins de matchs possible). Donne pour chacun les sélections, la cote estimée, la chance réelle de passer et la cote juste. À utiliser pour « fais-moi un combiné à 3 », « un combiné Très probable à 2 ».", input_schema: { type: "object", properties: { cote_cible: { type: "number", description: "Cote recherchée, ex. 2, 3, 5" }, min_pct: { type: "number", description: "Par défaut 67" }, max_pct: { type: "number", description: "Par défaut 91" }, periode: { type: "string", enum: ["auj", "demain", "48h"], description: "Par défaut 48h" } }, required: ["cote_cible"] } },
@@ -98,7 +99,7 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
       ]);
       if (!b) return { defini: false, note: "aucun budget fixé : il se règle dans Coach, onglet Outils. Ne propose pas de montant à sa place." };
       const e = etatBudget({ miseSemaine: Number(b.mise_semaine), perteMaxSemaine: Number(b.perte_max_semaine) }, (paris ?? []).map((x) => ({ ...x, mise: Number(x.mise), gain_net: x.gain_net === null ? null : Number(x.gain_net) })));
-      return { defini: true, semaine_depuis: e.debut.slice(0, 10), budget_de_mise_utilise_pct: pct(e.partMises), limite_de_perte_atteinte_pct: pct(e.partPerte), statut: e.statut, note: e.statut === "atteint" ? "budget atteint : ne propose aucun pari cette semaine" : e.statut === "proche" ? "proche de la limite : dis-le en une ligne" : "dans le budget" };
+      return { defini: true, semaine_depuis: e.debut.slice(0, 10), budget_de_mise_utilise_pct: pct(e.partMises), limite_de_perte_atteinte_pct: pct(e.partPerte), statut: e.statut, note: e.statut === "atteint" ? "budget atteint : dis-le en une ligne, puis propose quand même, la décision lui appartient" : e.statut === "proche" ? "proche de la limite : dis-le en une ligne" : "dans le budget" };
     }
     case "mon_objectif":
     case "simuler_objectif":
@@ -137,8 +138,12 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
           regle_budget_risque: "Risqué uniquement avec 30 % des gains réalisés depuis le début de l'objectif",
         };
       }
-      const t = await loadToday(db, user!.id);
+      const [t, repli, fortes] = await Promise.all([loadToday(db, user!.id), loadRepli(db), loadForces(db, user!.id)]);
       return {
+        toujours_proposer: "ne réponds jamais « rien à proposer » : s'il n'y a pas de coup du jour, donne les sélections « a_defaut » avec leur risque de perte, puis les points forts",
+        a_defaut_les_plus_probables: t.picks.length ? undefined : repli.map((r) => ({ selection: r.selection, match: r.match, heure: r.kickoff, chance_pct: pct(r.p), risque_de_perte_pct: 100 - pct(r.p), cote_reference: r.cote, fiabilite: r.estimation ? "estimation du modèle, moins fiable qu'une cote de bookmaker" : "d'après les cotes des bookmakers" })),
+        points_forts_de_l_utilisateur: fortes.moi.map(direForce),
+        points_forts_de_ses_sources: fortes.sources.slice(0, 4).map((x) => ({ source: x.nom, forts: x.forces.map(direForce) })),
         mises_conseillees_F: mises ? { sur: mises.sur, audacieux: mises.audacieux, risque: mises.risque } : "pas de bankroll enregistrée",
         coups_du_jour: t.picks.map((p) => ({ categorie: CAT_LABEL[p.categorie], selection: p.selection, match: p.match, heure: p.kickoff, probabilite_pct: pct(p.p), cote_reference: p.cote, cote_juste: r2(p.coteJuste), avis_modele_pct: p.pModele === null ? null : pct(p.pModele), soutenu_par: p.soutiens })),
         choix_utilisateur_et_sources: t.theirs.map((x) => ({ qui: x.qui, selection: x.selection, match: x.match, cote: x.cote, probabilite_betwise_pct: x.p === null ? null : pct(x.p), categorie: x.categorie ? CAT_LABEL[x.categorie] : null, verdict: x.verdict, aussi_coup_du_jour: x.aussiBetwise })),
@@ -318,8 +323,7 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
       return (f ?? []).map((x) => {
         const s = one(x.source as One<{ nom: string; type: string }>); const m = met?.find((y) => y.source_id === x.source_id); const t = tr?.find((y) => y.source_id === x.source_id);
         return {
-          nom: originName(s), type: s?.type, pronos_prouves_avant_match: Number(t?.prouves ?? 0), prouves_regles: Number(t?.prouves_regles ?? 0), prouves_gagnes: Number(t?.prouves_gagnes ?? 0),
-          saisis_apres_le_match_non_comptes: Number(t?.apres_coup ?? 0), note: Number(t?.prouves_regles ?? 0) >= 10 ? "notée" : "non établie (moins de 10 pronos prouvés réglés) : ne pas en tirer de conclusion",
+          nom: originName(s), type: s?.type, pronos: Number(t?.prouves ?? 0), regles: Number(t?.prouves_regles ?? 0), gagnes: Number(t?.prouves_gagnes ?? 0), volume: Number(t?.prouves_regles ?? 0) >= 30 ? "solide" : Number(t?.prouves_regles ?? 0) >= 10 ? "tendance" : "peu de pronos : donne le chiffre avec son volume",
           verifies_avant_match: m?.nb_verifies ?? null, taux_reussite_pct: m?.taux_reussite !== null && m?.taux_reussite !== undefined ? pct(Number(m.taux_reussite)) : null,
           rendement_pct: m?.rendement !== null && m?.rendement !== undefined ? pct(Number(m.rendement)) : null,
           intervalle_confiance_90_pct: m?.ic_bas !== null && m?.ic_bas !== undefined ? [pct(Number(m.ic_bas)), pct(Number(m.ic_haut))] : null,

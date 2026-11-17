@@ -1,0 +1,7 @@
+-- 0044 — Appliquée le 2026-11-17. Orientation produit : un prono saisi après le match compte comme les autres.
+-- L'abonné charge ce que publient ses sources ; l'appli ne fait pas la police à sa place et se nourrit de ces données.
+--   * vues source_proof et source_proof_by_market : tous les pronos non annulés (les colonnes gardent le préfixe
+--     « prouves_ » pour ne rien casser) ; apres_coup reste une simple information.
+--   * compute_source_metrics() et source_cumulative() : retour à « pr.statut <> 'annule' » (annule 0041) ;
+--     nb_verifies continue de compter les pronos chargés avant le coup d'envoi.
+-- Définitions complètes en base (pg_get_viewdef / pg_get_functiondef).

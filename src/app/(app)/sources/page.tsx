@@ -3,7 +3,7 @@ import { linkOf } from "@/lib/sources/link";
 import { PageHeader } from "@/components/page-header";
 import { Card, Empty } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
-import { NIVEAU, SEUIL, classer, lire, niveau, raison, rendement, reussite, type Proof } from "@/lib/sources/proof";
+import { NIVEAU, SEUIL, classer, lire, niveau, raison, rendement, resume, reussite, type Proof } from "@/lib/sources/proof";
 import { labelType, ProofBadge } from "./source-ui";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +12,7 @@ const VUES = [["suivies", "Mes sources"], ["classement", "Classement"], ["decouv
 const pc = (x: number | null) => (x === null ? "—" : `${Math.round(x * 100)} %`);
 const unit = (x: number | null) => (x === null ? "—" : `${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x * 100).toFixed(0)} %`);
 
-/** Sources : celles que je suis, le classement sur pronos prouvés, et celles que d'autres ont partagées. */
+/** Sources : celles que je suis, leur classement, et celles que d'autres ont partagées. */
 export default async function SourcesPage({ searchParams }: { searchParams: Promise<{ f?: string }> }) {
   const sp = await searchParams;
   const vue = VUES.some(([k]) => k === sp.f) ? sp.f! : "suivies";
@@ -36,7 +36,7 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHeader title="Sources" subtitle="Qui t’oriente, et ce que ses pronos valent une fois vérifiés."
+      <PageHeader title="Sources" subtitle="Qui t’oriente, et ce que valent ses pronos."
         action={<Link href="/sources/nouvelle">+ Source</Link>} />
       <nav className="mb-4 flex gap-2 overflow-x-auto" aria-label="Vues des sources">
         {VUES.map(([k, mot]) => (
@@ -57,7 +57,6 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-medium">{s.nom}</span>
                       <span className="block text-xs text-ink-muted">{labelType(s.type)}{s.visibilite === "partagee" && s.type !== "modele_betwise" ? " · partagée" : ""}</span>
-                      {s.proof.apresCoup > 0 && <span className="mt-0.5 block text-[11px] text-draw-ink">{s.proof.apresCoup} saisi{s.proof.apresCoup > 1 ? "s" : ""} après le match, non compté{s.proof.apresCoup > 1 ? "s" : ""}</span>}
                     </span>
                     <ProofBadge proof={s.proof} />
                   </Link>
@@ -75,8 +74,8 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
 
       {vue === "classement" && (
         <div className="space-y-3">
-          <p className="px-1 text-[12px] leading-relaxed text-ink-muted">Classement sur les seuls pronos <b className="text-ink-soft">prouvés</b> : enregistrés avant le coup d’envoi, puis réglés par le score. Il faut {SEUIL.classement} pronos prouvés réglés pour y entrer.</p>
-          {classees.length === 0 ? <Empty titre="Aucune source classée pour l’instant">Aucune n’a encore {SEUIL.classement} pronos enregistrés avant leur match et réglés.</Empty> : (
+          <p className="px-1 text-[12px] leading-relaxed text-ink-muted">Tes sources classées sur tous leurs pronos réglés, dès {SEUIL.classement} résultats. Plus tu charges de coupons, plus le classement devient juste.</p>
+          {classees.length === 0 ? <Empty titre="Le classement se remplit avec tes coupons" action={<Link href="/import" className="rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-on-fill">Charger un coupon</Link>}>Dès qu’une source a {SEUIL.classement} pronos réglés, elle apparaît ici.</Empty> : (
             <ol className="space-y-2">
               {classees.map((s, i) => <Rang key={s.id} rang={i + 1} id={s.id} nom={s.nom} type={labelType(s.type)} proof={s.proof} />)}
             </ol>
@@ -86,19 +85,19 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
           )}
           {nonEtablies.length > 0 && (
             <Card className="!p-0">
-              <h2 className="px-4 pt-3 text-sm font-semibold">Non établi</h2>
-              <p className="px-4 text-[11px] text-ink-muted">Pas assez de pronos prouvés pour une note. Ce n’est pas un jugement.</p>
+              <h2 className="px-4 pt-3 text-sm font-semibold">À suivre</h2>
+              <p className="px-4 text-[11px] text-ink-muted">Encore peu de résultats. Charge leurs coupons pour les voir entrer au classement.</p>
               <ul className="mt-2 divide-y divide-line">
                 {nonEtablies.map((s) => (
                   <li key={s.id}><Link href={`/sources/${s.id}`} className="block px-4 py-2.5 active:bg-surface-2">
                     <span className="block text-sm font-medium">{s.nom}</span>
-                    <span className="block text-[12px] text-ink-muted">{raison(s.proof)}</span>
+                    <span className="block text-[12px] text-ink-muted">{raison(s.proof) || `${resume(s.proof)}, encore ${SEUIL.classement - s.proof.prouvesRegles} résultat${SEUIL.classement - s.proof.prouvesRegles > 1 ? "s" : ""} pour être classée`}</span>
                   </Link></li>
                 ))}
               </ul>
             </Card>
           )}
-          <p className="px-1 text-[11px] leading-relaxed text-ink-muted">Rendement : gain moyen par prono à mise égale, sur les pronos dont la cote est connue. Sous {SEUIL.provisoire} pronos, l’ordre peut s’inverser d’une semaine à l’autre.</p>
+          <p className="px-1 text-[11px] leading-relaxed text-ink-muted">Rendement : gain moyen par prono à mise égale, sur les pronos dont la cote est connue. Avec peu de pronos, l’ordre peut encore bouger d’une semaine à l’autre.</p>
         </div>
       )}
     </>
@@ -113,7 +112,7 @@ function Rang({ rang, id, nom, type, proof }: { rang: number; id: string; nom: s
         <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold tabular-nums ${rang === 1 ? "bg-draw text-on-fill" : "bg-surface-2 text-ink-soft"}`}>{rang}</span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-semibold">{nom}</span>
-          <span className="block text-[11px] text-ink-muted">{type} · {proof.prouvesRegles} pronos prouvés · {NIVEAU[niveau(proof)]}</span>
+          <span className="block text-[11px] text-ink-muted">{type} · {proof.prouvesGagnes} sur {proof.prouvesRegles} · {NIVEAU[niveau(proof)]}</span>
           <span className="mt-0.5 block text-[12px] text-ink-soft">Réussite {pc(reussite(proof))}{proof.attendu !== null ? ` · attendu ${pc(proof.attendu)}` : ""}</span>
         </span>
         <span className="shrink-0 text-right">

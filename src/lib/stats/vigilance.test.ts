@@ -30,7 +30,7 @@ describe("points de vigilance", () => {
     const longs = [0, 1, 2, 3, 4].map((i) => p(100, "gagne", -10 - i, -9 - i, 7)), courts = [5, 6].map((i) => p(100, "gagne", -10 - i, -9 - i, 2));
     expect(cles(vigilance([...longs, ...courts], 100000))).toEqual(["combines"]);
   });
-  it("chaque alerte cite sa règle", () => {
-    for (const a of vigilance([p(9000, "en_cours", 0), p(1000, "perdu", -6, -4)], 10000)) expect(a.regle).toMatch(/Règle :/);
+  it("chaque alerte cite son repère", () => {
+    for (const a of vigilance([p(9000, "en_cours", 0), p(1000, "perdu", -6, -4)], 10000)) expect(a.regle).toMatch(/Repère/);
   });
 });

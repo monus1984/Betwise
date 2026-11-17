@@ -51,3 +51,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0041_metrics_sur_pronos_prouves.sql | 2026-11-16 | `compute_source_metrics()` et `source_cumulative()` limitées aux pronos prouvés |
 | 0042_cashout.sql | 2026-11-16 | `bets.cashout`, `cashout_bet()` : pari réglé sur le montant encaissé chez le bookmaker |
 | 0043_budgets.sql | 2026-11-16 | Table `budgets` (une ligne par utilisateur, RLS) : budget de mise et perte maximale par semaine |
+| 0044_tous_les_pronos_comptent.sql | 2026-11-17 | Note des sources sur tous leurs pronos non annulés, saisis avant ou après le match (annule l'effet de 0041) |

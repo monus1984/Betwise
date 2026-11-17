@@ -60,7 +60,7 @@ export function PredictionRow({ p, sourceId }: { p: PredictionView; sourceId: st
             {p.risque && <span className={`ml-2 rounded border px-1.5 py-0.5 text-[10px] ${RISK_CLASS[p.risque]}`}>{RISK_LABEL[p.risque]}</span>}
           </p>
           <p className="mt-0.5 text-[11px] text-slate-400">
-            {p.statut === "verifie" ? <span className="font-medium text-gain-ink">Prouvé</span> : p.statut === "declare" ? <span className="font-medium text-draw-ink">Saisi après le match, non compté</span> : "Annulé"} · {new Date(p.loggedAt).toLocaleString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}
+            {p.statut === "verifie" ? "Chargé avant le match" : p.statut === "declare" ? "Chargé après le match" : "Annulé"} · {new Date(p.loggedAt).toLocaleString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}
           </p>
         </div>
         <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${res.cls}`}>{res.label}</span>

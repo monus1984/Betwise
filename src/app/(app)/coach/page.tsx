@@ -7,7 +7,8 @@ import { cartesDe, type Carte } from "@/lib/coach/cartes";
 import { Notice } from "@/components/ui";
 import { misesDuJour } from "@/lib/coach/plan";
 import { COACH_SUGGESTIONS } from "@/lib/coach/prompt";
-import { loadToday } from "@/lib/coach/today";
+import { loadForces, loadRepli, loadToday } from "@/lib/coach/today";
+import { Card } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 import { CoachChat, type ChatMsg } from "./chat";
 import { CoupsDuJour } from "./coups-du-jour";
@@ -53,19 +54,41 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
   const solde = Number(summary?.solde ?? 0), capital = solde + Number(summary?.exposition ?? 0);
   const budget = bud ? { miseSemaine: Number(bud.mise_semaine), perteMaxSemaine: Number(bud.perte_max_semaine) } : null;
   const etat = budget ? etatBudget(budget, (recents ?? []).map((b) => ({ ...b, mise: Number(b.mise), gain_net: b.gain_net === null ? null : Number(b.gain_net) }))) : null;
-  const today = await loadToday(db, user!.id);
+  const [today, repli, fortes] = await Promise.all([loadToday(db, user!.id), loadRepli(db), loadForces(db, user!.id)]);
   const mises = solde > 0 ? misesDuJour(solde, solde) : null;
   const tRegles = (tests ?? []).filter((t) => t.statut !== "en_cours");
   const tMises = tRegles.reduce((x, t) => x + Number(t.mise), 0), tNet = tRegles.reduce((x, t) => x + Number(t.gain_net ?? 0), 0);
 
   return (
     <>
-      <PageHeader title="Coach" subtitle="Ton budget de la semaine, tes tests, et les sélections du jour si tu les demandes." />
+      <PageHeader title="Coach" subtitle="Les sélections du jour avec leur risque, tes points forts et ceux de tes sources." />
       <CoachNav current="outils" />
       {sp.ok === "budget" && <div className="mb-3"><Notice kind="info">Budget enregistré.</Notice></div>}
       {sp.err && <div className="mb-3"><Notice>{sp.err === "budget" ? "Indique deux montants ; la perte maximale ne peut pas dépasser le budget de mise." : "Enregistrement impossible. Réessaie."}</Notice></div>}
 
-      <BudgetCard budget={budget} etat={etat} soldeTotal={capital} />
+      {/* Toujours quelque chose à proposer : les sélections du jour avec leur risque, puis les points forts */}
+      <CoupsDuJour picks={today.picks} theirs={today.theirs} mises={mises} repli={repli} />
+
+      {(fortes.moi.length > 0 || fortes.sources.length > 0) && (
+        <Card className="mt-3">
+          <h2 className="text-sm font-semibold">Là où ça passe le mieux</h2>
+          {fortes.moi.length > 0 && (
+            <div className="mt-2">
+              <p className="text-[11px] font-medium text-ink-muted">Tes propres choix</p>
+              <ul className="mt-1 space-y-1">{fortes.moi.map((f) => <Force key={f.cle} libelle={f.libelle} g={f.gagnes} n={f.regles} taux={f.taux} />)}</ul>
+            </div>
+          )}
+          {fortes.sources.slice(0, 4).map((x) => (
+            <div key={x.id} className="mt-3">
+              <Link href={`/sources/${x.id}`} className="text-[11px] font-medium text-brand">{x.nom} ›</Link>
+              <ul className="mt-1 space-y-1">{x.forces.map((f) => <Force key={f.cle} libelle={f.libelle} g={f.gagnes} n={f.regles} taux={f.taux} />)}</ul>
+            </div>
+          ))}
+          <p className="mt-3 text-[11px] leading-relaxed text-ink-muted">Calculé sur les paris et pronos réglés, à partir de 3 résultats. Plus tu charges de coupons de tes sources, plus ces chiffres deviennent parlants.</p>
+        </Card>
+      )}
+
+      <div className="mt-3"><BudgetCard budget={budget} etat={etat} soldeTotal={capital} /></div>
 
       <div className="mt-3 grid grid-cols-2 gap-3">
         <Link href="/paris?vue=tests" className="rounded-2xl border border-line bg-surface p-3 active:bg-surface-2">
@@ -83,17 +106,16 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
           <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">Les marchés du jour dans la fourchette de chances que tu choisis.</p>
         </Link>
       </div>
-
-      {/* En retrait : les sélections du jour ne s'affichent que si on les ouvre, et jamais quand le budget est atteint */}
-      {etat?.statut === "atteint" ? (
-        <p className="mt-3 rounded-xl border border-line bg-surface p-3 text-[13px] text-ink-muted">Les sélections du jour sont masquées : ton budget de la semaine est atteint.</p>
-      ) : (
-        <details className="mt-3 rounded-xl border border-line bg-surface p-3">
-          <summary className="cursor-pointer text-sm font-semibold">Sélections du jour <span className="font-normal text-ink-muted">· {today.picks.length ? `${today.picks.length} sur des marchés à cote de référence` : "rien de solide aujourd’hui"}</span></summary>
-          <p className="mt-2 text-[11px] leading-relaxed text-ink-muted">Ce sont des probabilités tirées des cotes, pas des conseils. Une sélection « Très probable » perd environ 12 fois sur 100.</p>
-          <CoupsDuJour picks={today.picks} theirs={today.theirs} mises={mises} />
-        </details>
-      )}
     </>
+  );
+}
+
+function Force({ libelle, g, n, taux }: { libelle: string; g: number; n: number; taux: number }) {
+  return (
+    <li className="flex items-center gap-3 text-[13px]">
+      <span className="min-w-0 flex-1 truncate">{libelle}</span>
+      <span className="h-1.5 w-16 shrink-0 overflow-hidden rounded-full bg-surface-2"><span className="block h-1.5 rounded-full bg-gain" style={{ width: `${Math.round(taux * 100)}%` }} /></span>
+      <span className="w-16 shrink-0 text-right font-semibold tabular-nums">{g} sur {n}</span>
+    </li>
   );
 }

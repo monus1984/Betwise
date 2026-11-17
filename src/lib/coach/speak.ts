@@ -81,10 +81,10 @@ export function speakBlocks(blocks: string[], onBlock?: (i: number | null) => vo
   void lire(0);
 }
 
-/** Lit un texte libre (réponse du Coach) : découpé en blocs de quelques phrases pour que la voix démarre vite. */
+/** Lit un texte libre (réponse du Coach) : une seule demande de voix par réponse, sauf texte très long. */
 export function speakText(text: string, onDone?: () => void) {
   const phrases = spoken(text).split(/(?<=[.!?])\s+/).filter(Boolean);
   const blocks: string[] = [];
-  for (const ph of phrases) { const last = blocks[blocks.length - 1]; if (last !== undefined && (last + " " + ph).length <= 380) blocks[blocks.length - 1] = last + " " + ph; else blocks.push(ph); }
+  for (const ph of phrases) { const last = blocks[blocks.length - 1]; if (last !== undefined && (last + " " + ph).length <= 1150) blocks[blocks.length - 1] = last + " " + ph; else blocks.push(ph); }
   speakBlocks(blocks.length ? blocks : [text], (i) => { if (i === null) onDone?.(); });
 }

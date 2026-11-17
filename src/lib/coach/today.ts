@@ -78,3 +78,39 @@ export async function loadToday(db: Db, userId: string) {
 
   return { jour, picks: todayPicks, theirs };
 }
+
+// ----- Toujours quelque chose à proposer -----
+import { loadOptions } from "../options/load";
+import { singlesOf, type Option } from "../options/build";
+import { forces, type Force } from "./forces";
+
+export type Repli = { matchId: string; match: string; kickoff: string; selection: string; p: number; cote: number | null; estimation: boolean };
+
+/**
+ * Quand aucun « coup du jour » ne s'appuie sur une cote de référence, on donne quand même les sélections les plus
+ * probables du moment, en disant d'où vient le chiffre (cote de bookmaker ou estimation du modèle) et le risque de perte.
+ */
+export async function loadRepli(db: Db, n = 6): Promise<Repli[]> {
+  let options: Option[] = [];
+  for (const per of ["auj", "demain", "48h"] as const) { options = (await loadOptions(db, per)).options; if (options.length) break; }
+  return singlesOf(options.filter((o) => o.p >= 0.55 && o.p <= 0.93), 1).slice(0, n).map((o) => ({
+    matchId: o.matchId, match: `${o.home} – ${o.away}`, kickoff: o.kickoff, selection: o.label, p: o.p, cote: o.cote, estimation: o.cote === null || o.source === "modele",
+  }));
+}
+
+/** Points forts de l'abonné (ses propres choix, paris et tests) et de chacune de ses sources suivies. */
+export async function loadForces(db: Db, userId: string): Promise<{ moi: Force[]; sources: { id: string; nom: string; forces: Force[] }[] }> {
+  const [{ data: sels }, { data: follows }] = await Promise.all([
+    db.from("bet_selections").select("market_code, market_param, selection, resultat, origin:sources!bet_selections_origin_source_id_fkey(type), bets!inner(user_id, statut)").eq("bets.user_id", userId).neq("bets.statut", "annule").limit(3000),
+    db.from("source_follows").select("source_id, source:sources(nom, type)").eq("user_id", userId),
+  ]);
+  const moi = forces(((sels ?? []) as unknown as { market_code: string; market_param: number | null; selection: string; resultat: string; origin: One<{ type: string }> }[])
+    .filter((s) => (one(s.origin)?.type ?? "perso") === "perso").map((s) => ({ market: s.market_code, param: s.market_param === null ? null : Number(s.market_param), sel: s.selection, resultat: s.resultat })));
+  const suivies = ((follows ?? []) as unknown as { source_id: string; source: One<{ nom: string; type: string }> }[]).filter((f) => one(f.source) && one(f.source)!.type !== "perso");
+  const ids = suivies.map((f) => f.source_id);
+  const { data: preds } = ids.length ? await db.from("predictions").select("source_id, market_code, market_param, selection, resultat").in("source_id", ids).neq("statut", "annule").limit(5000) : { data: [] };
+  const sources = suivies.map((f) => ({ id: f.source_id, nom: one(f.source)!.nom,
+    forces: forces((preds ?? []).filter((p) => p.source_id === f.source_id).map((p) => ({ market: p.market_code, param: p.market_param === null ? null : Number(p.market_param), sel: p.selection, resultat: p.resultat })), 2) }))
+    .filter((s) => s.forces.length).sort((a, b) => b.forces[0].taux - a.forces[0].taux || b.forces[0].regles - a.forces[0].regles);
+  return { moi, sources };
+}

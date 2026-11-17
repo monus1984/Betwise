@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { Card, Empty } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
-import { NIVEAU, lire, niveau, raison, rendement, reussite, type Proof } from "@/lib/sources/proof";
+import { NIVEAU, lire, niveau, rendement, reussite } from "@/lib/sources/proof";
 import { MARCHE_FR } from "../source-ui";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 const pc = (x: number | null) => (x === null ? "—" : `${Math.round(x * 100)} %`);
 const unit = (x: number | null) => (x === null ? "—" : `${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x * 100).toFixed(0)} %`);
 
-/** Deux sources côte à côte, sur leurs pronos prouvés seulement. Chaque chiffre est donné avec son volume. */
+/** Deux sources côte à côte, sur tous leurs pronos réglés. Chaque chiffre est donné avec son volume. */
 export default async function ComparerPage({ searchParams }: { searchParams: Promise<{ a?: string; b?: string }> }) {
   const sp = await searchParams;
   const supabase = await createClient();
@@ -29,7 +29,7 @@ export default async function ComparerPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader title="Comparer" subtitle="Deux sources, sur leurs pronos prouvés." action={<Link href="/sources?f=classement">Classement</Link>} />
+      <PageHeader title="Comparer" subtitle="Deux sources, côte à côte." action={<Link href="/sources?f=classement">Classement</Link>} />
       <form className="mb-4 grid grid-cols-2 gap-2">
         {(["a", "b"] as const).map((k) => (
           <label key={k} className="block"><span className="mb-1 block text-xs font-medium text-ink-soft">Source {k.toUpperCase()}</span>
@@ -42,25 +42,22 @@ export default async function ComparerPage({ searchParams }: { searchParams: Pro
         <button className="col-span-2 rounded-xl bg-brand py-2.5 text-sm font-semibold text-on-fill">Comparer</button>
       </form>
 
-      {!a || !b ? <Empty titre="Choisis deux sources différentes">La comparaison porte sur les pronos enregistrés avant le coup d’envoi.</Empty> : (
+      {!a || !b ? <Empty titre="Choisis deux sources différentes">La comparaison porte sur tous leurs pronos réglés.</Empty> : (
         <div className="space-y-3">
           <Card className="!p-0">
             <table className="w-full text-sm">
               <thead><tr className="text-left text-[12px] text-ink-muted"><th className="px-4 py-2.5 font-medium"><span className="sr-only">Mesure</span></th><th className="px-2 py-2.5 text-right font-semibold text-ink">{a.nom}</th><th className="px-4 py-2.5 text-right font-semibold text-ink">{b.nom}</th></tr></thead>
               <tbody className="divide-y divide-line border-t border-line">
                 <Row mot="Niveau" x={NIVEAU[niveau(pa)]} y={NIVEAU[niveau(pb)]} />
-                <Row mot="Pronos prouvés réglés" x={String(pa.prouvesRegles)} y={String(pb.prouvesRegles)} />
+                <Row mot="Pronos réglés" x={String(pa.prouvesRegles)} y={String(pb.prouvesRegles)} />
                 <Row mot="Justes" x={pa.prouvesRegles ? `${pa.prouvesGagnes} sur ${pa.prouvesRegles}` : "—"} y={pb.prouvesRegles ? `${pb.prouvesGagnes} sur ${pb.prouvesRegles}` : "—"} />
                 <Row mot="Réussite" x={pc(reussite(pa))} y={pc(reussite(pb))} />
                 <Row mot="Attendu à ces cotes" x={pc(pa.attendu)} y={pc(pb.attendu)} />
                 <Row mot="Rendement par prono" x={unit(rendement(pa))} y={unit(rendement(pb))} tons={[rendement(pa), rendement(pb)]} />
-                <Row mot="Saisis après le match" note="non comptés" x={String(pa.apresCoup)} y={String(pb.apresCoup)} />
+                <Row mot="Chargés avant le match" x={String(pa.prouves - pa.apresCoup)} y={String(pb.prouves - pb.apresCoup)} />
               </tbody>
             </table>
           </Card>
-          {[[a, pa] as const, [b, pb] as const].filter(([, p]) => niveau(p) === "non_etabli").map(([s, p]) => (
-            <p key={s.id} className="rounded-xl border border-draw/40 bg-draw-soft p-3 text-[13px] text-draw-ink"><b>{s.nom} : non établi.</b> {raison(p)} Ses chiffres ne permettent pas de conclure.</p>
-          ))}
           {codes.length > 0 && (
             <Card className="!p-0">
               <h2 className="px-4 pt-3 text-sm font-semibold">Par marché</h2>
@@ -71,7 +68,7 @@ export default async function ComparerPage({ searchParams }: { searchParams: Pro
               </table>
             </Card>
           )}
-          <p className="px-1 text-[11px] leading-relaxed text-ink-muted">« 4 sur 5 » sur un marché ne prouve rien : regarde d’abord le nombre de pronos. Le rendement est le gain moyen par prono à mise égale, sur les pronos dont la cote est connue.</p>
+          <p className="px-1 text-[11px] leading-relaxed text-ink-muted">Regarde le nombre de pronos à côté de chaque chiffre : « 4 sur 5 » pèse moins que « 20 sur 25 ». Le rendement est le gain moyen par prono à mise égale, sur les pronos dont la cote est connue.</p>
         </div>
       )}
     </>
