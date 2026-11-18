@@ -11,7 +11,7 @@ export default async function NewPredictionPage({ params }: { params: Promise<{ 
   const supabase = await createClient();
   const { data: s } = await supabase.from("sources").select("id, nom, type").eq("id", id).maybeSingle();
   if (!s || s.type === "modele_betwise") notFound();
-  const { data: markets } = await supabase.from("markets").select("code, libelle_fr, a_parametre").order("code");
+  const { data: markets } = await supabase.from("markets").select("code, libelle_fr, a_parametre").neq("code", "LIBRE").order("code");
 
   return (
     <>

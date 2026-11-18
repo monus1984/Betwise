@@ -133,6 +133,8 @@ FUNCTIONS = {
     "set_selection_origin": ([("p_selection_id", "uuid", False), ("p_source_id", "uuid", False)], "void"),
     "update_selection": ([("p_selection_id", "uuid", False), ("p_cote", "numeric", True), ("p_match_id", "uuid", True), ("p_match_libre", "text", True), ("p_market_code", "text", True), ("p_market_param", "numeric", True), ("p_selection", "text", True), ("p_clear_match", "bool", True)], "void"),
     "convert_bet_to_test": ([("p_bet_id", "uuid", False)], "void"),
+    "set_selection_result": ([("p_selection_id", "uuid", False), ("p_result", "enum:settle_result", False)], "void"),
+    "log_libelle_inconnu": ([("p_bookmaker", "text", False), ("p_genre", "text", False), ("p_marche", "text", False), ("p_choix", "text", False), ("p_raison", "text", False)], "void"),
     "update_bet": ([("p_bet_id", "uuid", False), ("p_mise", "numeric", True), ("p_bookmaker", "text", True), ("p_placed_at", "timestamptz", True)], "void"),
 }
 

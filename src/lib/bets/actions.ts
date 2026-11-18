@@ -12,7 +12,7 @@ const selectionSchema = z.object({
   match_libre: z.string().trim().min(2).max(120).nullable(),
   market_code: z.enum(MARKETS_ALL),
   market_param: z.number().nullable(),
-  selection: z.string().trim().min(1).max(60),
+  selection: z.string().trim().min(1).max(120),
   cote: z.number().gt(1).lte(1000),
   origin_source_id: z.string().uuid(),
   prediction_id: z.string().uuid().nullable().optional(),
@@ -80,6 +80,8 @@ function humanize(msg: string) {
   if (msg.includes("mise")) return "La mise doit être positive.";
   if (msg.includes("déjà réglé")) return "Ce pari est déjà réglé.";
   if (msg.includes("pari réglé")) return msg.replace(/^.*pari réglé/, "Pari réglé");
+  if (msg.includes("pas encore terminé")) return "Le match n’est pas terminé : tu pourras régler cette ligne après le coup de sifflet final.";
+  if (msg.includes("réglée sur le score")) return "Cette ligne est réglée sur le score du match. Si le résultat est faux, corrige le pari entier.";
   if (msg.includes("source inconnue")) return "Source inconnue.";
   return "Enregistrement impossible : " + msg;
 }
@@ -108,6 +110,15 @@ export async function deleteDuplicateBet(betId: string) {
   const { error } = await supabase.rpc("delete_duplicate_bet", { p_bet_id: betId });
   if (error) return { ok: false as const, error: error.message.includes("24 h") ? "Suppression possible seulement dans les 24 h après la saisie." : error.message };
   revalidatePath("/"); revalidatePath("/paris", "layout");
+  return { ok: true as const };
+}
+
+/** Règle à la main une ligne que BETWISE ne sait pas régler seul (pari libre, match non suivi, statistique absente). */
+export async function setSelectionResult(selectionId: string, result: "gagne" | "perdu" | "rembourse" | "en_attente") {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_selection_result", { p_selection_id: selectionId, p_result: result });
+  if (error) return { ok: false as const, error: humanize(error.message) };
+  revalidatePath("/"); revalidatePath("/paris", "layout"); revalidatePath("/sources", "layout");
   return { ok: true as const };
 }
 

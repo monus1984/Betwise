@@ -29,12 +29,16 @@ export const SELECTIONS: Record<string, string[]> = {
   SHOT: ["Plus", "Moins"], SOT: ["Plus", "Moins"], SOT1: ["Plus", "Moins"], SOT2: ["Plus", "Moins"],
   BUT: [], BUT1: [],
   ET: ["Oui", "Non"], PEN: ["Oui", "Non"], QUALIF: ["1", "2"],
+  H2_BTTS: ["Oui", "Non"], H2_DC: ["1N", "12", "N2"],
+  HT_TT1: ["Plus", "Moins"], HT_TT2: ["Plus", "Moins"], H2_TT1: ["Plus", "Moins"], H2_TT2: ["Plus", "Moins"],
+  WEH: ["1", "2"], BH: ["Oui", "Non"], PK: ["Oui", "Non"], PKB: ["Oui", "Non"], DBL: ["Oui", "Non"],
+  LIBRE: [],
 };
 /** Marchés « plus / moins » d'une ligne : la sélection s'affiche avec la ligne. */
-export const LINE_MARKETS = ["OU", "TT1", "TT2", "HT_OU", "H2_OU", "CORN", "CORN1", "CORN2", "CARD", "CARD1", "CARD2", "SHOT", "SOT", "SOT1", "SOT2"];
-const DEFAULT_LINE: Record<string, string> = { TT1: "0.5", TT2: "0.5", HT_OU: "0.5", H2_OU: "0.5", AH: "-1.5", EH: "-1", CORN: "9.5", CORN1: "4.5", CORN2: "4.5", CARD: "3.5", CARD1: "1.5", CARD2: "1.5", SHOT: "24.5", SOT: "8.5", SOT1: "4.5", SOT2: "3.5" };
+export const LINE_MARKETS = ["OU", "TT1", "TT2", "HT_OU", "H2_OU", "HT_TT1", "HT_TT2", "H2_TT1", "H2_TT2", "CORN", "CORN1", "CORN2", "CARD", "CARD1", "CARD2", "SHOT", "SOT", "SOT1", "SOT2"];
+const DEFAULT_LINE: Record<string, string> = { TT1: "0.5", TT2: "0.5", HT_OU: "0.5", H2_OU: "0.5", HT_TT1: "0.5", HT_TT2: "0.5", H2_TT1: "0.5", H2_TT2: "0.5", AH: "-1.5", EH: "-1", CORN: "9.5", CORN1: "4.5", CORN2: "4.5", CARD: "3.5", CARD1: "1.5", CARD2: "1.5", SHOT: "24.5", SOT: "8.5", SOT1: "4.5", SOT2: "3.5" };
 /** Texte d'aide pour les marchés à saisie libre. */
-export const freePlaceholder = (market: string) => (market === "BUT" || market === "BUT1" ? "Nom du joueur, ex. Mbappé" : market === "HT_CS" ? "ex. 1-0" : "ex. 2-1");
+export const freePlaceholder = (market: string) => (market === "LIBRE" ? "Le pari comme sur le ticket, ex. Mbappé buteur ou passeur" : market === "BUT" || market === "BUT1" ? "Nom du joueur, ex. Mbappé" : market === "HT_CS" ? "ex. 1-0" : "ex. 2-1");
 
 /** Marchés combinés d'un même match : sélection « A|B ». */
 export const COMBO_PARTS: Record<string, [string[], string[]]> = {
@@ -46,7 +50,7 @@ export const COMBO_PARTS: Record<string, [string[], string[]]> = {
 };
 /** Ligne par défaut à la sélection d'un marché. */
 export const defaultParam = (market: string) => DEFAULT_LINE[market] ?? (market.includes("OU") ? "2.5" : "");
-export const paramLabel = (market: string) => (market === "AH" ? "Handicap" : market === "EH" ? "Handicap (équipe à domicile)" : /^(CORN|CARD|SHOT|SOT)/.test(market) ? "Ligne" : market === "TT1" || market === "TT2" ? "Ligne (buts de l’équipe)" : market === "HT_OU" || market === "H2_OU" ? "Ligne (buts de la mi-temps)" : "Ligne (buts)");
+export const paramLabel = (market: string) => (market === "AH" ? "Handicap" : market === "EH" ? "Handicap (équipe à domicile)" : /^(CORN|CARD|SHOT|SOT)/.test(market) ? "Ligne" : /TT[12]$/.test(market) ? "Ligne (buts de l’équipe)" : market === "HT_OU" || market === "H2_OU" ? "Ligne (buts de la mi-temps)" : "Ligne (buts)");
 
 export const toNum = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
 
@@ -55,14 +59,15 @@ export function labelSel(market: string, s: string, m: MatchHit | null) {
   if (market === "HTFT") { const [a, b] = s.split("/"); return `${team(a)} / ${team(b)}`; }
   if (market === "HMG") return s === "1" ? "1re mi-temps" : s === "2" ? "2e mi-temps" : "Autant";
   if (market === "MG") { const [a, b] = s.split("-"); return a === "0" ? `${b} au plus` : `${a} à ${b} buts`; }
-  if (["1X2", "DNB", "AH", "HT_1X2", "H2_1X2", "EH", "WTN", "QUALIF", "CORN_1X2"].includes(market)) {
+  if (["1X2", "DNB", "AH", "HT_1X2", "H2_1X2", "EH", "WTN", "QUALIF", "CORN_1X2", "WEH"].includes(market)) {
     if (s === "1") return m ? short(m.home) : "Domicile";
     if (s === "2") return m ? short(m.away) : "Extérieur";
     return "Nul";
   }
-  if (market === "DC" || market === "HT_DC") return { "1N": "Dom. ou nul", "12": "Dom. ou ext.", N2: "Nul ou ext." }[s] ?? s;
+  if (market === "DC" || market === "HT_DC" || market === "H2_DC") return { "1N": "Dom. ou nul", "12": "Dom. ou ext.", N2: "Nul ou ext." }[s] ?? s;
   if (s === "Plus" || s === "Moins") return s === "Plus" ? "Plus de" : "Moins de";
-  if (s === "Oui" || s === "Non") return s === "Oui" ? "Les deux marquent" : "Pas les deux";
+  // « Oui / Non » ne veut dire « les deux marquent » que sur ces marchés : ailleurs (penalty, tirs au but, carton rouge…) on écrit Oui ou Non
+  if (s === "Oui" || s === "Non") return /BTTS$/.test(market) ? (s === "Oui" ? "Les deux marquent" : "Pas les deux") : s;
   return s;
 }
 export const short = (n: string) => n.replace(/\s?(FC|CF|SC|AC|AS|US|SV|RB|SSC|Calcio|Club de Fútbol|Football Club)\b\.?/g, "").trim().slice(0, 16);

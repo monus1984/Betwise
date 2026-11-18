@@ -1845,6 +1845,23 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_selection_result: {
+        Args: {
+          p_selection_id: string
+          p_result: Database["betwise"]["Enums"]["settle_result"]
+        }
+        Returns: undefined
+      }
+      log_libelle_inconnu: {
+        Args: {
+          p_bookmaker: string
+          p_genre: string
+          p_marche: string
+          p_choix: string
+          p_raison: string
+        }
+        Returns: undefined
+      }
       update_bet: {
         Args: {
           p_bet_id: string

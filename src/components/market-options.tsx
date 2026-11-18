@@ -3,12 +3,14 @@ const GROUPS: [string, string[]][] = [
   ["Résultat", ["1X2", "DC", "DNB", "AH", "EH", "WTN", "QUALIF"]],
   ["Buts", ["OU", "BTTS", "TT1", "TT2", "OE", "MG", "CS"]],
   ["Combinés du match", ["DC_OU", "1X2_OU", "DC_BTTS", "1X2_BTTS", "OU_BTTS"]],
-  ["Mi-temps", ["HT_1X2", "HT_DC", "HT_OU", "HT_BTTS", "HT_CS", "H2_1X2", "H2_OU", "HTFT", "HMG"]],
-  ["Buteurs", ["BUT", "BUT1"]],
+  ["Mi-temps", ["HT_1X2", "HT_DC", "HT_OU", "HT_BTTS", "HT_TT1", "HT_TT2", "HT_CS", "H2_1X2", "H2_DC", "H2_OU", "H2_BTTS", "H2_TT1", "H2_TT2", "HTFT", "HMG", "WEH", "BH"]],
+  ["Buteurs", ["BUT", "BUT1", "DBL"]],
+  ["Penalty", ["PK", "PKB"]],
   ["Corners", ["CORN", "CORN1", "CORN2", "CORN_1X2"]],
   ["Cartons", ["CARD", "CARD1", "CARD2", "RED"]],
   ["Tirs", ["SHOT", "SOT", "SOT1", "SOT2"]],
   ["Prolongation", ["ET", "PEN"]],
+  ["Autre", ["LIBRE"]],
 ];
 export function MarketOptions({ markets }: { markets: { code: string; libelle_fr: string }[] }) {
   const by = new Map(markets.map((m) => [m.code, m]));

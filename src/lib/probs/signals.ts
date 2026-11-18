@@ -139,9 +139,15 @@ export function pickLabel(market: string, param: number | null, sel: string, hom
     case "BUT1": return /^aucun/i.test(sel) ? "Aucun buteur" : `${sel} marque le premier but`;
     case "ET": return sel === "Oui" ? "Il y a prolongation" : "Pas de prolongation";
     case "PEN": return sel === "Oui" ? "Il y a tirs au but" : "Pas de tirs au but";
+    case "PK": return sel === "Oui" ? "Un penalty est sifflé" : "Aucun penalty sifflé";
+    case "PKB": return sel === "Oui" ? "Un but sur penalty" : "Aucun but sur penalty";
+    case "DBL": return sel === "Oui" ? "Un joueur marque un doublé" : "Aucun joueur ne marque un doublé";
+    case "WEH": return `${sel === "1" ? home : away} gagne au moins une mi-temps`;
+    case "BH": return sel === "Oui" ? "But dans les deux mi-temps" : "Une mi-temps sans but";
+    case "LIBRE": return sel;
     case "QUALIF": return `${sel === "1" ? home : away} se qualifie`;
-    case "HT_1X2": case "HT_DC": case "HT_OU": case "HT_BTTS": case "HT_CS": return `Mi-temps : ${pickLabel(market.slice(3), param, sel, home, away)}`;
-    case "H2_1X2": case "H2_OU": return `2e mi-temps : ${pickLabel(market.slice(3), param, sel, home, away)}`;
+    case "HT_1X2": case "HT_DC": case "HT_OU": case "HT_BTTS": case "HT_CS": case "HT_TT1": case "HT_TT2": return `Mi-temps : ${pickLabel(market.slice(3), param, sel, home, away)}`;
+    case "H2_1X2": case "H2_OU": case "H2_BTTS": case "H2_DC": case "H2_TT1": case "H2_TT2": return `2e mi-temps : ${pickLabel(market.slice(3), param, sel, home, away)}`;
     case "HTFT": { const [a, b] = sel.split("/"); const n = (x: string) => (x === "1" ? home : x === "2" ? away : "nul"); return `Mi-temps ${n(a)} / fin ${n(b)}`; }
     case "HMG": return sel === "1" ? "Plus de buts en 1re mi-temps" : sel === "2" ? "Plus de buts en 2e mi-temps" : "Autant de buts dans les deux mi-temps";
     case "OE": return `Nombre de buts ${sel === "Pair" ? "pair" : "impair"}`;
@@ -161,7 +167,7 @@ export function pickLabel(market: string, param: number | null, sel: string, hom
 
 /** Famille d'un marché, pour filtrer les options. */
 export function familleOf(market: string): "resultat" | "buts" | "combo" | "mitemps" {
-  if (market.startsWith("HT_") || market.startsWith("H2_") || market === "HTFT" || market === "HMG") return "mitemps";
+  if (market.startsWith("HT_") || market.startsWith("H2_") || market === "HTFT" || market === "HMG" || market === "WEH" || market === "BH") return "mitemps";
   if (["DC_OU", "1X2_OU", "DC_BTTS", "1X2_BTTS", "OU_BTTS"].includes(market)) return "combo";
   if (["OU", "BTTS", "TT1", "TT2", "OE", "MG"].includes(market)) return "buts";
   return "resultat";

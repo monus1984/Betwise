@@ -1,5 +1,6 @@
 -- Contrôle de cohérence des paris et des pronos. À rejouer après tout changement qui touche l'import ou le règlement.
 -- Chaque ligne doit valoir 0. Première exécution le 2026-11-16 : 202 sélections, 114 pronos, 78 paris, tout à 0.
+-- Contrôles I et J ajoutés le 2026-11-18 (import fiable).
 with sel as (
   select s.resultat res, s.selection, m.statut ms,
     case when m.id is not null and m.statut = 'termine' then betwise.settle_sel(s.market_code, s.market_param, s.selection, m) end calc
@@ -26,6 +27,10 @@ select * from (values
   ('E2 prono réglé alors que le match n''est pas joué',            (select count(*) from pr where ms in ('programme', 'en_cours') and res <> 'en_attente')),
   ('F  sélection ou prono sans choix',                            (select count(*) from sel where coalesce(trim(selection), '') = '') + (select count(*) from pr where coalesce(trim(selection), '') = '')),
   ('G  tir ou tir cadré compté comme total du match',             (select count(*) from betwise.bet_selections s join betwise.bets b on b.id = s.bet_id where b.statut <> 'annule' and s.market_code in ('SOT', 'SHOT') and s.market_param <= 3.5 and s.cote >= 1.5)),
+  ('I  « tirs au but : non » à une cote de penalty (pari sur un penalty rangé sous le mauvais marché)', (select count(*) from betwise.bet_selections s join betwise.bets b on b.id = s.bet_id where b.statut <> 'annule' and s.market_code = 'PEN' and upper(s.selection) = 'NON' and s.cote >= 1.5)),
+  ('J  pari gardé tel quel (LIBRE) réglé sans geste de l''utilisateur', (select count(*) from betwise.bet_selections s join betwise.bets b on b.id = s.bet_id
+                                                                     where b.statut <> 'annule' and s.market_code = 'LIBRE' and s.resultat <> 'en_attente' and s.settled_at > b.created_at + interval '1 minute'
+                                                                       and not exists (select 1 from betwise.bet_versions v where v.bet_id = b.id and (v.selection_id = s.id or v.selection_id is null)))),
   ('H  solde différent de la somme des comptes',                  (select count(*) from betwise.bankrolls k where k.active and round(k.capital_initial + coalesce((select sum(montant) from betwise.bankroll_transactions t where t.bankroll_id = k.id), 0), 2)
                                                                      <> round(k.capital_initial + coalesce((select sum(j.montant) from betwise.my_bankroll_journal j where j.bankroll_id = k.id), 0), 2)))
 ) as t(controle, anomalies);

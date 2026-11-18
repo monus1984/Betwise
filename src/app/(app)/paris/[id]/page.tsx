@@ -72,7 +72,8 @@ export default async function BetPage({ params }: { params: Promise<{ id: string
               <li key={i} className="rounded-lg border border-slate-200 bg-surface px-3 py-2">
                 <span className="text-slate-400">{new Date(v.changed_at).toLocaleString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}</span>
                 {" · "}
-                {Object.entries(v.changes as Record<string, { avant: unknown; apres: unknown }>).map(([k, c]) => `${label(k)} : ${fmt(c.avant, k, sources)} → ${fmt(c.apres, k, sources)}`).join(" ; ")}
+                {Object.entries(v.changes as Record<string, unknown>).filter(([, c]) => c !== null && typeof c === "object" && "apres" in (c as object)).map(([k, c]) => `${label(k)} : ${fmt((c as { avant: unknown }).avant, k, sources)} → ${fmt((c as { apres: unknown }).apres, k, sources)}`).join(" ; ")}
+                {typeof (v.changes as Record<string, unknown>).motif === "string" ? ` (${(v.changes as Record<string, string>).motif})` : ""}
               </li>
             ))}
           </ul>
@@ -83,12 +84,13 @@ export default async function BetPage({ params }: { params: Promise<{ id: string
 }
 
 function label(k: string) {
-  return ({ origin_source_id: "origine", cote: "cote", match_id: "match", match_libre: "match", marche: "marché", mise: "mise", bookmaker: "bookmaker", placed_at: "date du ticket" } as Record<string, string>)[k] ?? k;
+  return ({ origin_source_id: "origine", cote: "cote", match_id: "match", match_libre: "match", marche: "marché", mise: "mise", bookmaker: "bookmaker", placed_at: "date du ticket", resultat: "résultat de la ligne", statut: "résultat du pari" } as Record<string, string>)[k] ?? k;
 }
 function fmt(v: unknown, k: string, sources: { id: string; nom: string }[]) {
   if (v === null || v === undefined) return "—";
   if (k === "origin_source_id") return sources.find((s) => s.id === v)?.nom ?? "autre source";
   if (k === "match_id") return typeof v === "string" ? "match identifié" : "—";
+  if (k === "resultat" || k === "statut") return ({ en_attente: "en attente", en_cours: "en cours", gagne: "gagné", perdu: "perdu", rembourse: "remboursé", annule: "annulé" } as Record<string, string>)[String(v)] ?? String(v);
   if (k === "placed_at") return new Date(String(v)).toLocaleString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" });
   return String(v);
 }

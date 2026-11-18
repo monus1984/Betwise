@@ -52,3 +52,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0042_cashout.sql | 2026-11-16 | `bets.cashout`, `cashout_bet()` : pari réglé sur le montant encaissé chez le bookmaker |
 | 0043_budgets.sql | 2026-11-16 | Table `budgets` (une ligne par utilisateur, RLS) : budget de mise et perte maximale par semaine |
 | 0044_tous_les_pronos_comptent.sql | 2026-11-17 | Note des sources sur tous leurs pronos non annulés, saisis avant ou après le match (annule l'effet de 0041) |
+| 0045_import_fiable.sql | 2026-11-18 | Import sans ligne écartée : marché `LIBRE` (pari gardé tel quel), `set_selection_result()` pour régler une ligne à la main ; 11 marchés ajoutés (mi-temps, penalty, doublé) avec leur règlement ; registre `libelles_inconnus` et `log_libelle_inconnu()` |

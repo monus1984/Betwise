@@ -73,8 +73,12 @@ export function probOf(g: Grid, market: string, param: number | null, sel: strin
       return sum(g, (i, j) => res(i + param, j) === sel);
     }
     case "WTN": return sel === "1" ? sum(g, (i, j) => i > j && j === 0) : sel === "2" ? sum(g, (i, j) => j > i && i === 0) : null;
-    case "HT_1X2": case "HT_DC": case "HT_OU": case "HT_BTTS": case "HT_CS": { const h = halves(g); return h ? probOf(h.ht, market.slice(3), param, sel) : null; }
-    case "H2_1X2": case "H2_OU": { const h = halves(g); return h ? probOf(h.h2, market.slice(3), param, sel) : null; }
+    case "HT_1X2": case "HT_DC": case "HT_OU": case "HT_BTTS": case "HT_CS": case "HT_TT1": case "HT_TT2": { const h = halves(g); return h ? probOf(h.ht, market.slice(3), param, sel) : null; }
+    case "H2_1X2": case "H2_OU": case "H2_BTTS": case "H2_DC": case "H2_TT1": case "H2_TT2": { const h = halves(g); return h ? probOf(h.h2, market.slice(3), param, sel) : null; }
+    // Gagne au moins une mi-temps : 1 − (ne gagne pas la 1re) × (ne gagne pas la 2e), les deux mi-temps étant tirées séparément
+    case "WEH": { const h = halves(g); if (!h || (sel !== "1" && sel !== "2")) return null; return 1 - (1 - sum(h.ht, R1X2[sel])) * (1 - sum(h.h2, R1X2[sel])); }
+    // But dans les deux mi-temps : aucune des deux ne finit 0-0
+    case "BH": { const h = halves(g); if (!h || !BTTS[sel]) return null; const oui = (1 - h.ht[0][0]) * (1 - h.h2[0][0]); return sel === "Oui" ? oui : 1 - oui; }
     case "HTFT": {
       const [a, b] = sel.split("/"); const h = halves(g);
       if (!h || !R1X2[a] || !R1X2[b]) return null;
