@@ -172,7 +172,7 @@ export function normalizePick(marketText: string, pickText: string, home: string
   };
   const isDraw = (s: string) => /^(nul|draw|x|match nul)$/.test(s.trim());
   const ouLine = (s: string) => {
-    const r = s.match(/([+\-]|plus|moins|over|under)\s*(?:de\s*)?(\d+[.,]?\d*)/i);
+    const r = s.match(/([+\-]|plus|moins|over|under)\s*(?:de\s*)?\(?\s*(\d+[.,]?\d*)/i);
     if (!r) return null;
     const dir = /^(\+|plus|over)$/i.test(r[1]) ? "Plus" : "Moins";
     const line = Number(r[2].replace(",", "."));
@@ -236,13 +236,18 @@ export function normalizePick(marketText: string, pickText: string, home: string
     const pre = h2 ? "H2_" : "HT_";
     const q = p.replace(/(1(ère|ere|re)|première|premiere|2(e|ème|eme|nde)|seconde|deuxième)?\s*mi[- ]?temps|\b(mt|ht)\b|\b(à la|a la|en|de la|résultat)\b/g, " ").replace(/[:–—-]/g, " ").replace(/\s+/g, " ").trim();
     const o = ouLine(p);
-    if (o && (/\b(buts?|over|under)\b/.test(p) || /^(\+|plus|moins)/.test(q))) return { market_code: `${pre}OU`, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
-    if (!h2 && /(2|deux) (équipes )?marquent|btts/.test(q)) return { market_code: "HT_BTTS", market_param: null, selection: non || /\bnon\b/.test(q) ? "Non" : "Oui", label_pick: pickText, ok: true };
+    if (o && (/\b(buts?|over|under|total)\b/.test(p) || /^(\+|plus|moins)/.test(q))) return { market_code: `${pre}OU`, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
+    if (!h2 && /(2|deux) (équipes )?(?:vont marquer|marquent)|btts/.test(q)) return { market_code: "HT_BTTS", market_param: null, selection: non || /\bnon\b/.test(q) ? "Non" : "Oui", label_pick: pickText, ok: true };
     if (!h2 && /\sou\s|\//.test(q)) { const dc = parseDoubleChance(q, side, isDraw); if (dc) return { market_code: "HT_DC", market_param: null, selection: dc, label_pick: pickText, ok: true }; }
     const r = who(q) ?? (!q.replace(/victoire|gagne|vainqueur/g, "").trim() ? teamSide : null);
     if (r) return { market_code: `${pre}1X2`, market_param: null, selection: r, label_pick: pickText, ok: true };
     return { market_code: `${pre}1X2`, market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari de mi-temps : choisis le marché et le choix." };
   }
+  // 1xBet : « Total Individuel 2 Plus de (0.5) » = buts de l'équipe 2 ; « Total Plus de (1.5) » = buts du match.
+  { const ti = all.match(/total individuel\s*([12])\s*(.*)$/); const o = ti ? ouLine(ti[2]) : null;
+    if (ti && o) return { market_code: `TT${ti[1]}`, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
+    const tm = !ti ? all.trim().match(/^total\s+((?:plus|moins|over|under)\b.*)$/) : null; const o2 = tm ? ouLine(tm[1]) : null;
+    if (o2) return { market_code: "OU", market_param: o2.line, selection: o2.dir, label_pick: pickText, ok: true }; }
   // Total de buts d'une seule équipe : « Total de buts (t. rég) - Sierra Leone » / « - de 1,5 »
   { const mt = m.match(/(?:total|nombre)[^–—-]*buts?[^–—-]*\s[–—-]\s*(.+)$/); const ts = mt ? side(mt[1].trim()) : null; const o = ts ? ouLine(p) : null;
     if (ts && o) return { market_code: `TT${ts}`, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true }; }
@@ -256,7 +261,7 @@ export function normalizePick(marketText: string, pickText: string, home: string
   }
   // Combinés écrits dans le choix : « Angleterre ou Nul & +1.5 buts », « Ghana gagne & +1.5 buts », « double + 1,5 buts »
   {
-    const btts = (x: string) => (/(2|deux) (équipes )?marquent|btts|\bgg\b/.test(x) ? (/pas|\bnon\b/.test(x) ? "Non" : "Oui") : null);
+    const btts = (x: string) => (/(2|deux) (équipes )?(?:vont marquer|marquent)|btts|\bgg\b/.test(x) ? (/pas|\bnon\b/.test(x) ? "Non" : "Oui") : null);
     const res = (x: string): { dc: string | null; r: "1" | "N" | "2" | null } => {
       const y = x.replace(/\bdouble chance\b|:/g, " ").trim();
       const dc = parseDoubleChance(y, side, isDraw) ?? (teamSide && /^(double|ou nul|ou match nul)?$/.test(y) && /double|ou nul/.test(x) ? (teamSide === "1" ? "1N" : "N2") : null);
@@ -283,7 +288,7 @@ export function normalizePick(marketText: string, pickText: string, home: string
     const r = p.match(/^(.*?)\s*\(?([+\-]\d+)\)?$/); const w = r ? who(r[1]) : null;
     if (r && w) return { market_code: "EH", market_param: w === "2" ? -Number(r[2]) : Number(r[2]), selection: w, label_pick: pickText, ok: true };
   }
-  if (/(les )?(2|deux) (équipes )?marquent|btts/.test(all)) return { market_code: "BTTS", market_param: null, selection: non || /(ne )?marquent pas|\bnon\b|\bno\b/.test(p) ? "Non" : "Oui", label_pick: pickText, ok: true };
+  if (/(les )?(2|deux) (équipes )?(?:vont marquer|marquent)|btts/.test(all)) return { market_code: "BTTS", market_param: null, selection: non || /(ne )?marquent pas|pas marquer|\bnon\b|\bno\b/.test(p) ? "Non" : "Oui", label_pick: pickText, ok: true };
   if (!m.includes("handicap") && !all.includes("&") && (/\b(buts?|goals?|over|under)\b/.test(p) || /^(\+|-|plus|moins)/.test(p))) { const o = ouLine(p); if (o) return { market_code: "OU", market_param: o.line, selection: o.dir, label_pick: pickText, ok: true }; }
   if (teamSide && /^(victoire|gagne|vainqueur|wins?|to win|1|2)$/.test(p.replace(/[^a-zà-ü0-9 ]/g, "").trim())) return { market_code: "1X2", market_param: null, selection: teamSide, label_pick: `${team} gagne`, ok: true };
   if (teamSide && /ou nul|ou match nul|double chance/.test(p) && !p.includes("&")) return { market_code: "DC", market_param: null, selection: teamSide === "1" ? "1N" : "N2", label_pick: `${team} ou nul`, ok: true };

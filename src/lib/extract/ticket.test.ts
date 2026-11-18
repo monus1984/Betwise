@@ -139,3 +139,22 @@ describe("handicap 1xBet", () => {
     expect(n("Handicap européen", "Bénin (-1)").market_code).toBe("EH");
   });
 });
+
+describe("libellés 1xBet du ticket du 17/11", () => {
+  const cas: [string, string, object][] = [
+    ["", "Les deux équipes vont marquer - Oui", { market_code: "BTTS", selection: "Oui" }],
+    ["Les deux équipes vont marquer", "Non", { market_code: "BTTS", selection: "Non" }],
+    ["", "Total Plus de (1.5)", { market_code: "OU", market_param: 1.5, selection: "Plus" }],
+    ["Total", "Moins de (2.5)", { market_code: "OU", market_param: 2.5, selection: "Moins" }],
+    ["", "Total Individuel 2 Plus de (0.5)", { market_code: "TT2", market_param: 0.5, selection: "Plus" }],
+    ["Total Individuel 1", "Moins de (1.5)", { market_code: "TT1", market_param: 1.5, selection: "Moins" }],
+    ["", "1ère mi-temps Total Plus de (0.5)", { market_code: "HT_OU", market_param: 0.5, selection: "Plus" }],
+    ["", "Handicap 2 (-1.5)", { market_code: "AH", market_param: -1.5, selection: "2" }],
+    ["", "Handicap 2 (0)", { market_code: "AH", market_param: 0, selection: "2" }],
+    ["", "V2", { market_code: "1X2", selection: "2" }],
+    ["", "12", { market_code: "DC", selection: "12" }],
+  ];
+  it.each(cas)("%s | %s", (m, p, attendu) => {
+    expect(normalizePick(m, p, "Rwanda", "Mali")).toMatchObject({ ...attendu, ok: true });
+  });
+});
