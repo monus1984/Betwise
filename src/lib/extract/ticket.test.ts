@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizePick, parseFrDate } from "./ticket";
+import { libelleBrut, normalizePick, parseFrDate } from "./ticket";
 import { matchSource } from "./source-match";
 
 const CP = ["Crystal Palace", "Liverpool"] as const;
@@ -137,5 +137,114 @@ describe("handicap 1xBet", () => {
   });
   it("le handicap européen reste à part", () => {
     expect(n("Handicap européen", "Bénin (-1)").market_code).toBe("EH");
+  });
+});
+
+describe("libellés 1xBet du ticket du 17/11", () => {
+  const cas: [string, string, object][] = [
+    ["", "Les deux équipes vont marquer - Oui", { market_code: "BTTS", selection: "Oui" }],
+    ["Les deux équipes vont marquer", "Non", { market_code: "BTTS", selection: "Non" }],
+    ["", "Total Plus de (1.5)", { market_code: "OU", market_param: 1.5, selection: "Plus" }],
+    ["Total", "Moins de (2.5)", { market_code: "OU", market_param: 2.5, selection: "Moins" }],
+    ["", "Total Individuel 2 Plus de (0.5)", { market_code: "TT2", market_param: 0.5, selection: "Plus" }],
+    ["Total Individuel 1", "Moins de (1.5)", { market_code: "TT1", market_param: 1.5, selection: "Moins" }],
+    ["", "1ère mi-temps Total Plus de (0.5)", { market_code: "HT_OU", market_param: 0.5, selection: "Plus" }],
+    ["", "Handicap 2 (-1.5)", { market_code: "AH", market_param: -1.5, selection: "2" }],
+    ["", "Handicap 2 (0)", { market_code: "AH", market_param: 0, selection: "2" }],
+    ["", "V2", { market_code: "1X2", selection: "2" }],
+    ["", "12", { market_code: "DC", selection: "12" }],
+  ];
+  it.each(cas)("%s | %s", (m, p, attendu) => {
+    expect(normalizePick(m, p, "Rwanda", "Mali")).toMatchObject({ ...attendu, ok: true });
+  });
+});
+
+describe("marchés ajoutés le 18/11 : penalty, mi-temps, paris composés", () => {
+  const n = (m: string, p: string, t?: string) => normalizePick(m, p, "Galles", "Portugal", t);
+  it("penalty dans le match", () => {
+    expect(n("Y aura-t-il un penalty ?", "Oui")).toMatchObject({ market_code: "PK", selection: "Oui", ok: true });
+    expect(n("", "Penalty accordé - Non")).toMatchObject({ market_code: "PK", selection: "Non", ok: true });
+    expect(n("Penalty marqué dans le match", "Non")).toMatchObject({ market_code: "PKB", selection: "Non", ok: true });
+    expect(n("Portugal marque un penalty", "Oui")).toMatchObject({ ok: false });
+    expect(n("Penalty manqué", "Oui")).toMatchObject({ ok: false });
+    // La séance de tirs au but reste un autre marché
+    expect(n("Tirs au but", "Oui")).toMatchObject({ market_code: "PEN", selection: "Oui", ok: true });
+  });
+  it("les deux équipes marquent ne se confond pas avec un penalty", () => {
+    expect(n("Les 2 équipes marquent (t. rég)", "Oui")).toMatchObject({ market_code: "BTTS", selection: "Oui", ok: true });
+    expect(n("Les 2 équipes marquent un pénalty", "Oui").market_code).not.toBe("BTTS");
+  });
+  it("buts par mi-temps", () => {
+    expect(n("", "1ère mi-temps Total Plus de (0.5)")).toMatchObject({ market_code: "HT_OU", market_param: 0.5, selection: "Plus", ok: true });
+    expect(n("", "2ème mi-temps Total Moins de (1.5)")).toMatchObject({ market_code: "H2_OU", market_param: 1.5, selection: "Moins", ok: true });
+    expect(n("", "1ère mi-temps Total Individuel 2 Plus de (0.5)")).toMatchObject({ market_code: "HT_TT2", market_param: 0.5, selection: "Plus", ok: true });
+    expect(n("", "Les deux équipes vont marquer en 2ème mi-temps - Oui")).toMatchObject({ market_code: "H2_BTTS", selection: "Oui", ok: true });
+    expect(n("Les 2 équipes marquent - 1ère mi-temps", "Non")).toMatchObject({ market_code: "HT_BTTS", selection: "Non", ok: true });
+    expect(n("Double chance - 2e mi-temps", "Portugal ou Nul")).toMatchObject({ market_code: "H2_DC", selection: "N2", ok: true });
+    expect(n("But dans les deux mi-temps", "Oui")).toMatchObject({ market_code: "BH", selection: "Oui", ok: true });
+    expect(n("But dans les deux mi-temps", "Non")).toMatchObject({ market_code: "BH", selection: "Non", ok: true });
+    expect(n("Mi-temps avec le plus de buts", "2e mi-temps")).toMatchObject({ market_code: "HMG", selection: "2", ok: true });
+    expect(n("Mi-temps la plus prolifique", "Égalité")).toMatchObject({ market_code: "HMG", selection: "N", ok: true });
+  });
+  it("gagne au moins une mi-temps", () => {
+    expect(n("Portugal gagne au moins 1 mi-temps", "Oui")).toMatchObject({ market_code: "WEH", selection: "2", ok: true });
+    expect(n("", "Gagne au moins une mi-temps ✅", "Galles")).toMatchObject({ market_code: "WEH", selection: "1", ok: true });
+    expect(n("Portugal gagne au moins 1 mi-temps", "Non")).toMatchObject({ ok: false });
+    // « Gagne la 1re mi-temps » reste un autre pari
+    expect(n("", "Victoire 1ère mi-temps ✅", "Portugal")).toMatchObject({ market_code: "HT_1X2", selection: "2", ok: true });
+  });
+  it("mi-temps / fin de match avec les codes de 1xBet", () => {
+    expect(n("", "Mi-temps/Fin de match V1/V2")).toMatchObject({ market_code: "HTFT", selection: "1/2", ok: true });
+    expect(n("Mi-temps / Fin de match", "X/V2")).toMatchObject({ market_code: "HTFT", selection: "N/2", ok: true });
+    expect(n("Mi-temps / Fin de match", "Galles / Nul")).toMatchObject({ market_code: "HTFT", selection: "1/N", ok: true });
+  });
+  it("paris composés de 1xBet", () => {
+    expect(n("", "V2 et Total < (3.5) - Oui")).toMatchObject({ market_code: "1X2_OU", market_param: 3.5, selection: "2|Moins", ok: true });
+    expect(n("", "Equipe 2 ne va pas perdre et Total > (1.5) - Oui")).toMatchObject({ market_code: "DC_OU", market_param: 1.5, selection: "N2|Plus", ok: true });
+    expect(n("", "Les deux équipes vont marquer et Total > (2.5) - Oui")).toMatchObject({ market_code: "OU_BTTS", market_param: 2.5, selection: "Plus|Oui", ok: true });
+    // La négation d'un pari composé ne se ramène à aucun marché suivi
+    expect(n("", "Equipe 1 ne va pas perdre et Total > (1.5) - Non")).toMatchObject({ ok: false });
+  });
+  it("deux paris du même match sur une ligne", () => {
+    expect(n("Résultat du match (t. rég) / Nombre total de buts (t. rég)", "Portugal / + de 1,5")).toMatchObject({ market_code: "1X2_OU", market_param: 1.5, selection: "2|Plus", ok: true });
+    expect(n("Double chance (t. rég) / Les 2 équipes marquent (t. rég)", "Galles ou Nul / Non")).toMatchObject({ market_code: "DC_BTTS", selection: "1N|Non", ok: true });
+    expect(n("Résultat du match (t. rég) / Les 2 équipes marquent (t. rég) / Nombre total de buts (t. rég)", "Portugal / Oui / + de 2,5")).toMatchObject({ ok: false });
+    // Une double chance écrite avec une barre n'est pas deux paris
+    expect(n("Double chance (t. rég)", "Galles / Nul")).toMatchObject({ market_code: "DC", selection: "1N", ok: true });
+    expect(n("Double chance & nombre de buts", "Portugal / Nul & + de 1,5")).toMatchObject({ market_code: "DC_OU", selection: "N2|Plus", ok: true });
+  });
+  it("remboursé si nul", () => {
+    expect(n("Résultat du match (remboursé si match nul)", "Portugal")).toMatchObject({ market_code: "DNB", selection: "2", ok: true });
+    expect(n("", "Remboursé si nul", "Galles")).toMatchObject({ market_code: "DNB", selection: "1", ok: true });
+  });
+  it("paris sur un joueur avec une condition : gardés tels quels", () => {
+    expect(n("Joueur ou son remplaçant décisif (tps rég.)", "Bruno Fernandes")).toMatchObject({ ok: false });
+    expect(n("Double chance buteur (remplaçants inclus - t. rég)", "E. Haaland / R. Højlund")).toMatchObject({ ok: false });
+    expect(n("Buteur (tps rég.)", "Bruno Fernandes")).toMatchObject({ market_code: "BUT", selection: "Bruno Fernandes", ok: true });
+  });
+  it("un nom d'équipe ne vaut victoire que si rien d'autre n'est écrit", () => {
+    expect(n("", "Portugal")).toMatchObject({ market_code: "1X2", selection: "2", ok: true });
+    expect(n("", "Portugal – Victoire")).toMatchObject({ market_code: "1X2", selection: "2", ok: true });
+    expect(n("", "Victoire de Portugal par 2 buts")).toMatchObject({ ok: false });
+    expect(n("Premier corner", "Portugal")).toMatchObject({ ok: false });
+    expect(n("", "Portugal va marquer")).toMatchObject({ market_code: "TT2", market_param: 0.5, selection: "Plus", ok: true });
+  });
+  it("libellé gardé quand le pari n'est pas reconnu", () => {
+    expect(libelleBrut("Joueur ou son remplaçant décisif (tps rég.)", "Bruno Fernandes")).toBe("Joueur ou son remplaçant décisif (tps rég.) : Bruno Fernandes");
+    expect(libelleBrut("Total Plus de (1.5)", "Total Plus de (1.5)")).toBe("Total Plus de (1.5)");
+    expect(libelleBrut("", "")).toBe("Pari non lu");
+    expect(libelleBrut("x".repeat(100), "y".repeat(100)).length).toBe(120);
+  });
+});
+
+describe("date du ticket selon le bookmaker", () => {
+  it("1xBet : points et parenthèses", () => {
+    expect(parseFrDate("17.11.2026 (13:12)")).toBe("2026-11-17T13:12:00.000Z");
+    expect(parseFrDate("Combiné à partir de 17.11.2026 (15:55)")).toBe("2026-11-17T15:55:00.000Z");
+  });
+  it("autres écritures", () => {
+    expect(parseFrDate("08/11/2026 à 13h38")).toBe("2026-11-08T13:38:00.000Z");
+    expect(parseFrDate("08-11-2026 13:38")).toBe("2026-11-08T13:38:00.000Z");
+    expect(parseFrDate("hier")).toBeNull();
   });
 });

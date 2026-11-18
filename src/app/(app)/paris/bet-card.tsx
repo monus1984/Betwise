@@ -5,6 +5,7 @@ import { deleteDuplicateBet } from "@/lib/bets/actions";
 import { ConfirmResult } from "./confirm-result";
 import Link from "next/link";
 import { RISK_CLASS, RISK_LABEL, fcfa } from "@/components/ui";
+import { pickLabel } from "@/lib/probs/signals";
 import { OriginPicker, type SourceOpt } from "./origin-picker";
 
 type Named = { nom: string } | { nom: string }[] | null;
@@ -87,7 +88,7 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
               <div className="min-w-0">
                 <p className="truncate font-medium">{s.resultat === "gagne" ? <span className="text-gain-ink">✓ </span> : s.resultat === "perdu" ? <span className="text-loss-ink">✗ </span> : s.resultat === "rembourse" ? <span className="text-draw-ink">↩ </span> : null}{label}</p>
                 <div className="text-xs text-slate-500">
-                  {marketLabel(s.market_code, s.market_param, s.selection)} · cote {Number(s.cote).toFixed(2)} · <OriginPicker selectionId={s.id} current={s.origin_source_id} currentName={one(s.origin)?.nom ?? "—"} sources={sources} />
+                  {pickLabel(s.market_code, s.market_param === null ? null : Number(s.market_param), s.selection, m ? one(m.home)?.nom ?? "Équipe 1" : "Équipe 1", m ? one(m.away)?.nom ?? "Équipe 2" : "Équipe 2")} · cote {Number(s.cote).toFixed(2)}{bet.statut === "en_cours" && s.resultat === "en_attente" && (s.market_code === "LIBRE" || !m) ? <> · <Link href={`/paris/${bet.id}`} className="font-medium text-draw-ink underline">à régler à la main</Link></> : null} · <OriginPicker selectionId={s.id} current={s.origin_source_id} currentName={one(s.origin)?.nom ?? "—"} sources={sources} />
                 </div>
               </div>
               {s.risque_calcule && (
@@ -117,21 +118,6 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
       {err && <p className="mt-2 text-xs text-loss-ink">{err}</p>}
     </li>
   );
-}
-
-function marketLabel(code: string, param: number | null, sel: string) {
-  switch (code) {
-    case "1X2": return { "1": "Victoire dom.", N: "Nul", "2": "Victoire ext." }[sel] ?? sel;
-    case "DC": return `Double chance ${sel}`;
-    case "DNB": return `Remb. si nul · ${sel === "1" ? "dom." : "ext."}`;
-    case "OU": return `${sel} de ${param ?? ""} buts`;
-    case "BTTS": return `Les deux marquent : ${sel}`;
-    case "AH": return `Handicap ${param ?? ""} · ${sel === "1" ? "dom." : "ext."}`;
-    case "CS": return `Score exact ${sel}`;
-    case "DC_OU": { const [dc, ou] = sel.split("|"); return `Double chance ${dc} & ${ou} de ${param ?? ""} buts`; }
-    case "1X2_OU": { const [r, ou] = sel.split("|"); return `${({ "1": "Dom.", N: "Nul", "2": "Ext." } as Record<string,string>)[r] ?? r} & ${ou} de ${param ?? ""} buts`; }
-    default: return `${code} ${sel}`;
-  }
 }
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", timeZone: "Africa/Abidjan" });

@@ -3,7 +3,8 @@
 import { MarketOptions } from "@/components/market-options";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { updateBet, updateSelection } from "@/lib/bets/actions";
+import { setSelectionResult, updateBet, updateSelection } from "@/lib/bets/actions";
+import { pickLabel } from "@/lib/probs/signals";
 import { Button, Chip, Field, Input, Notice, RISK_CLASS, RISK_LABEL, riskFromOdds } from "@/components/ui";
 import { MatchPicker, defaultParam, toNum, type MatchHit } from "@/components/match-picker";
 import { SelectionField } from "@/components/selection-field";
@@ -113,6 +114,14 @@ function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index
 
   const res = RESULT_LABEL[s.resultat] ?? RESULT_LABEL.en_attente;
   const marketName = markets.find((m) => m.code === s.market_code)?.libelle_fr ?? s.market_code;
+  // Lignes que l'application ne règle pas seule : pari gardé tel quel, match non suivi, ou match terminé sans donnée pour trancher
+  const libre = s.market_code === "LIBRE";
+  const joue = !s.match || s.match.statut === "termine" || s.match.statut === "annule" || s.match.statut === "reporte";
+  const aLaMain = !locked && (libre || !s.match || (s.match.statut === "termine" && s.resultat === "en_attente"));
+  function regler(r: "gagne" | "perdu" | "rembourse" | "en_attente") {
+    setErr(null);
+    start(async () => { const out = await setSelectionResult(s.id, r); if (!out.ok) setErr(out.error); else onDone(); });
+  }
 
   return (
     <section className="space-y-3 rounded-xl border border-slate-200 bg-surface p-4">
@@ -126,7 +135,7 @@ function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index
       {locked ? (
         <div className="grid grid-cols-3 gap-2 rounded-lg bg-surface-2 p-3 text-sm">
           <div><p className="text-[11px] text-ink-muted">Marché</p><p className="font-medium">{marketName}{s.market_param !== null ? ` ${s.market_param}` : ""}</p></div>
-          <div><p className="text-[11px] text-ink-muted">Choix</p><p className="font-medium">{s.selection.replace("|", " + ")}</p></div>
+          <div><p className="text-[11px] text-ink-muted">Choix</p><p className="font-medium">{pickLabel(s.market_code, s.market_param, s.selection, s.match?.home ?? "Équipe 1", s.match?.away ?? "Équipe 2")}</p></div>
           <div><p className="text-[11px] text-ink-muted">Cote</p><p className="font-medium tabular-nums">{Number(s.cote).toFixed(2)}</p></div>
         </div>
       ) : (
@@ -151,6 +160,23 @@ function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index
             {toNum(cote) > 1 && <span className={`mb-3 rounded-full border px-2 py-1 text-[11px] ${RISK_CLASS[riskFromOdds(toNum(cote))]}`}>{RISK_LABEL[riskFromOdds(toNum(cote))]}</span>}
           </div>
         </>
+      )}
+
+      {aLaMain && (
+        <div className="rounded-lg border border-draw/40 bg-draw-soft p-3">
+          <p className="text-xs leading-snug text-draw-ink">
+            {libre ? "Pari gardé tel quel : l’application ne sait pas le régler seule." : !s.match ? "Match non suivi : cette ligne ne se règle pas seule." : "Match terminé, mais la donnée manque pour trancher cette ligne."}
+            {" "}{s.resultat !== "en_attente" ? "Tu l’as réglée à la main." : joue ? "Dis ce qu’elle a donné chez ton bookmaker :" : "Tu pourras la régler ici dès la fin du match."}
+          </p>
+          {s.resultat === "en_attente" && joue && (
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              <button type="button" disabled={pending} onClick={() => regler("gagne")} className="rounded-lg bg-gain py-2 text-sm font-medium text-on-fill disabled:opacity-50">Gagnée</button>
+              <button type="button" disabled={pending} onClick={() => regler("perdu")} className="rounded-lg bg-loss py-2 text-sm font-medium text-on-fill disabled:opacity-50">Perdue</button>
+              <button type="button" disabled={pending} onClick={() => regler("rembourse")} className="rounded-lg bg-slate-200 py-2 text-sm font-medium text-slate-800 disabled:opacity-50">Remboursée</button>
+            </div>
+          )}
+          {s.resultat !== "en_attente" && <button type="button" disabled={pending} onClick={() => regler("en_attente")} className="mt-1.5 text-xs text-draw-ink underline disabled:opacity-50">Je me suis trompé : remettre en attente</button>}
+        </div>
       )}
 
       <div className="text-xs text-slate-600">Origine : <OriginPicker selectionId={s.id} current={s.origin_source_id} currentName={sources.find((x) => x.id === s.origin_source_id)?.nom ?? "—"} sources={sources} /></div>

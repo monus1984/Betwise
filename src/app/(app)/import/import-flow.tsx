@@ -102,7 +102,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
     setDetected(hint ? { hint, sourceId: found?.id ?? null } : null);
     const origin = found?.id ?? lines[0]?.origin ?? defaultOrigin;
     if (found) setSummaryOrigin(found.id);
-    setLines(t.selections.map((s, i) => ({ ...s, key: i, origin, lu: cleDe(s), verifie: false, coteStr: s.odds ? String(s.odds) : "", include: true, editing: !s.ok || !s.match, paramStr: s.market_param !== null ? String(s.market_param) : "", query: s.match ? "" : [s.home_team, s.away_team].filter(Boolean).join(" ") })));
+    setLines(t.selections.map((s, i) => ({ ...s, key: i, origin, lu: cleDe(s), verifie: false, coteStr: s.odds ? String(s.odds) : "", include: true, editing: !s.match, paramStr: s.market_param !== null ? String(s.market_param) : "", query: s.match ? "" : [s.home_team, s.away_team].filter(Boolean).join(" ") })));
     // Pronos de tipster : ce ne sont pas des paris de l'utilisateur, on les enregistre comme tests par défaut
     const pronos = t.raw.kind === "pronos";
     if (pronos) setTest(true);
@@ -187,10 +187,21 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
 
   const included = lines.filter((l) => l.include);
   const collapsed = result?.raw.is_collapsed || (result && lines.length === 0);
-  // Une ligne incomplète n'empêche pas d'enregistrer : elle est écartée, le reste part.
+  // Un pari non reconnu ou un match non retrouvé n'écarte plus la ligne : elle entre dans le ticket avec son libellé
+  // et sa cote, et se règle à la main. Seules une cote ou une origine manquante empêchent encore d'enregistrer une ligne.
   // Cote lue sur le ticket qui contredit la chance estimée : la ligne attend une vérification (ou une correction)
   const alerteDe = (l: Line) => (l.ok && l.odds_source === "ticket" && !l.verifie && cleDe(l) === l.lu ? vraisemblance(l.p_estimee, toNum(l.coteStr)) : null);
-  const manque = (l: Line): string | null => alerteDe(l) ? "à vérifier sur le ticket" : !l.ok ? "choix non compris" : !(l.match || (l.home_team && l.away_team)) ? "match inconnu" : !(toNum(l.coteStr) > 1) ? "cote manquante" : !l.origin ? "origine manquante" : null;
+  const manque = (l: Line): string | null => alerteDe(l) ? "à vérifier sur le ticket" : !(toNum(l.coteStr) > 1) ? "cote manquante" : !l.origin ? "origine manquante" : null;
+  /** Ce qui part à l'enregistrement : le marché reconnu, sinon le libellé du ticket sous « Autre pari ». */
+  const versPari = (l: Line) => ({
+    match_id: l.match?.id ?? null,
+    match_libre: l.match ? null : [l.home_team, l.away_team].filter(Boolean).join(" – ") || "Match non identifié",
+    market_code: (l.ok ? l.market_code : "LIBRE") as never,
+    market_param: l.ok ? l.market_param : null,
+    selection: l.ok ? l.selection : l.libelle,
+    cote: toNum(l.coteStr),
+    origin_source_id: l.origin!,
+  });
   const valides = included.filter((l) => !manque(l));
   const ecartees = included.filter((l) => manque(l));
   const separes = result?.raw.kind === "pronos" && !result.raw.total_odds && valides.length > 1;
@@ -209,7 +220,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
           const r = await placeImportedBet({
             virtuel: test, mise: toNum(mise), statut: "en_cours", placed_at: result.placed_at_iso, bookmaker: null, coupon_externe: null,
             upload_id: result.upload_id, raw_text: text || null, summary: null,
-            selections: [{ match_id: l.match?.id ?? null, match_libre: l.match ? null : `${l.home_team ?? "?"} – ${l.away_team ?? "?"}`, market_code: l.market_code as never, market_param: l.market_param, selection: l.selection, cote: toNum(l.coteStr), origin_source_id: l.origin!, resultat: null }],
+            selections: [{ ...versPari(l), resultat: null }],
           });
           if (!r.ok) { setError(`${ok} prono${ok > 1 ? "s" : ""} enregistré${ok > 1 ? "s" : ""}, puis : ${r.error}`); return; }
           ok++;
@@ -229,13 +240,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
         raw_text: text || null,
         summary: collapsed ? { cote_totale: result.raw.total_odds!, nb_selections: result.raw.nb_selections_declared ?? 0, origin_source_id: summaryOrigin! } : null,
         selections: collapsed ? [] : valides.map((l) => ({
-          match_id: l.match?.id ?? null,
-          match_libre: l.match ? null : `${l.home_team ?? "?"} – ${l.away_team ?? "?"}`,
-          market_code: l.market_code as never,
-          market_param: l.market_param,
-          selection: l.selection,
-          cote: toNum(l.coteStr),
-          origin_source_id: l.origin!,
+          ...versPari(l),
           resultat: l.outcome === "won" ? "gagne" : l.outcome === "lost" ? "perdu" : l.outcome === "void" ? "rembourse" : null,
         })),
       });
@@ -338,9 +343,9 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
 
       {!collapsed && lines.length > 0 && (
         <div className="grid grid-cols-3 gap-2 text-center" aria-label="État de la lecture">
-          <div className="tile px-2 py-2"><p className="text-lg font-bold tabular-nums text-gain">{valides.length}</p><p className="text-[11px] text-ink-muted">lue{valides.length > 1 ? "s" : ""}</p></div>
+          <div className="tile px-2 py-2"><p className="text-lg font-bold tabular-nums text-gain">{included.filter((l) => l.ok && !alerteDe(l)).length}</p><p className="text-[11px] text-ink-muted">reconnue{included.filter((l) => l.ok && !alerteDe(l)).length > 1 ? "s" : ""}</p></div>
           <div className="tile px-2 py-2"><p className={`text-lg font-bold tabular-nums ${included.filter((l) => alerteDe(l)).length ? "text-draw" : ""}`}>{included.filter((l) => alerteDe(l)).length}</p><p className="text-[11px] text-ink-muted">à vérifier</p></div>
-          <div className="tile px-2 py-2"><p className={`text-lg font-bold tabular-nums ${ecartees.length - included.filter((l) => alerteDe(l)).length ? "text-loss" : ""}`}>{ecartees.length - included.filter((l) => alerteDe(l)).length}</p><p className="text-[11px] text-ink-muted">écartée{ecartees.length - included.filter((l) => alerteDe(l)).length > 1 ? "s" : ""}</p></div>
+          <div className="tile px-2 py-2"><p className={`text-lg font-bold tabular-nums ${included.filter((l) => !l.ok).length ? "text-draw" : ""}`}>{included.filter((l) => !l.ok).length}</p><p className="text-[11px] text-ink-muted">à régler à la main</p></div>
         </div>
       )}
       {!collapsed && raw.kind !== "pronos" && lines.some((l) => l.outcome !== "pending" && l.outcome !== "unknown") && (
@@ -360,18 +365,18 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
           const hasParam = markets.find((m) => m.code === l.market_code)?.a_parametre;
           const homeN = l.match?.home ?? l.home_team ?? "Domicile", awayN = l.match?.away ?? l.away_team ?? "Extérieur";
           return (
-          <section key={l.key} className={`space-y-2 rounded-xl border bg-surface p-4 ${!l.include ? "border-dashed border-slate-300 opacity-60" : alerteDe(l) ? "border-draw/60" : manque(l) ? "border-loss/40" : "border-slate-200"}`}>
+          <section key={l.key} className={`space-y-2 rounded-xl border bg-surface p-4 ${!l.include ? "border-dashed border-slate-300 opacity-60" : alerteDe(l) ? "border-draw/60" : manque(l) ? "border-loss/40" : !l.ok ? "border-draw/40" : "border-slate-200"}`}>
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <p className="flex items-center gap-2 text-xs font-medium text-slate-500">{raw.kind === "pronos" ? "Prono" : "Sélection"} {i + 1}
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${!l.include ? "bg-surface-2 text-ink-soft" : alerteDe(l) ? "bg-draw-soft text-draw-ink" : manque(l) ? "bg-loss-soft text-loss-ink" : "bg-gain-soft text-gain-ink"}`}>{!l.include ? "Retirée" : alerteDe(l) ? "À vérifier" : manque(l) ? "Écartée" : "Lue"}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${!l.include ? "bg-surface-2 text-ink-soft" : alerteDe(l) ? "bg-draw-soft text-draw-ink" : manque(l) ? "bg-loss-soft text-loss-ink" : !l.ok ? "bg-draw-soft text-draw-ink" : "bg-gain-soft text-gain-ink"}`}>{!l.include ? "Retirée" : alerteDe(l) ? "À vérifier" : manque(l) ? "Incomplète" : !l.ok ? "Gardée telle quelle" : "Lue"}</span>
                 </p>
                 <p className="truncate text-sm font-medium">{l.match ? `${l.match.home} – ${l.match.away}` : `${l.home_team ?? "?"} – ${l.away_team ?? "?"}`}</p>
-                <p className="text-xs text-slate-600">{l.ok ? pickLabel(l.market_code, l.market_param, l.selection, homeN, awayN) : l.label_pick}</p>
+                <p className="text-xs text-slate-600">{l.ok ? pickLabel(l.market_code, l.market_param, l.selection, homeN, awayN) : l.libelle}</p>
                 {l.match
                   ? <p className="text-[11px] text-gain-ink">Match reconnu · {l.match.competition} · {new Date(l.match.kickoff_at).toLocaleString("fr-FR", { weekday: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}{l.match.score ? ` · score en base ${l.match.score}` : ""}{l.score_consistent === false ? " · ⚠ diffère du ticket" : ""}</p>
                   : <p className="text-[11px] text-draw-ink">Match non reconnu : choisis-le ci-dessous, sinon il sera gardé en texte et réglé à la main.</p>}
-                {!l.ok && <p className="text-[11px] text-loss-ink">{l.reason ?? "Sélection non comprise : choisis le marché ci-dessous."}</p>}
+                {!l.ok && <p className="text-[11px] leading-snug text-draw-ink">{l.reason ?? "Pari pas reconnu : gardé avec son libellé et sa cote, à régler à la main après le match."} Tu peux aussi lui donner un marché suivi avec « Corriger ».</p>}
                 {l.include && alerteDe(l) && (
                   <div className="mt-1 rounded-lg border border-draw/40 bg-draw-soft p-2">
                     <p className="text-[12px] leading-snug text-draw-ink">{alerteDe(l)!.message}</p>
@@ -381,7 +386,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
                     </div>
                   </div>
                 )}
-                {l.include && manque(l) && <p className="mt-1 inline-block rounded-full bg-draw-soft px-2 py-0.5 text-[11px] font-medium text-draw-ink">Sera écartée ({manque(l)}) · le reste s’enregistre quand même</p>}
+                {l.include && manque(l) && <p className="mt-1 inline-block rounded-full bg-draw-soft px-2 py-0.5 text-[11px] font-medium text-draw-ink">Pas enregistrée pour l’instant : {manque(l)}</p>}
               </div>
               {raw.kind === "pronos"
                 ? <button type="button" onClick={() => update(l.key, { editing: !l.editing })} className="shrink-0 text-xs text-brand underline">{l.editing ? "Fermer" : "Modifier"}</button>
@@ -440,7 +445,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
       {!collapsed && ecartees.length > 0 && (
         <Notice kind="info">
           {valides.length > 0
-            ? <>{ecartees.length} ligne{ecartees.length > 1 ? "s" : ""} sur {included.length} {ecartees.length > 1 ? "seront écartées" : "sera écartée"} : {ecartees.map((l) => `${l.match ? `${l.match.home} – ${l.match.away}` : [l.home_team, l.away_team].filter(Boolean).join(" – ") || `ligne ${l.key + 1}`} (${manque(l)})`).join(", ")}. Corrige-les au-dessus si tu veux les garder.</>
+            ? <>{ecartees.length} ligne{ecartees.length > 1 ? "s" : ""} sur {included.length} {ecartees.length > 1 ? "ne seront pas enregistrées" : "ne sera pas enregistrée"} : {ecartees.map((l) => `${l.match ? `${l.match.home} – ${l.match.away}` : [l.home_team, l.away_team].filter(Boolean).join(" – ") || `ligne ${l.key + 1}`} (${manque(l)})`).join(", ")}. Complète-les au-dessus pour les garder.</>
             : <>Aucune ligne n’est complète pour l’instant : corrige-en au moins une au-dessus (match, choix ou cote).</>}
           {valides.length > 0 && !test && raw.kind !== "pronos" && included.length > 1 && <> Attention : c’est un pari réel. Le combiné enregistré n’aura que {valides.length} sélection{valides.length > 1 ? "s" : ""} : sa cote et son gain ne seront pas ceux du ticket.</>}
         </Notice>

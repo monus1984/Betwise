@@ -10,7 +10,7 @@ const selection = z.object({
   match_libre: z.string().trim().min(2).max(120).nullable(),
   market_code: z.enum(MARKETS_ALL),
   market_param: z.number().nullable(),
-  selection: z.string().trim().min(1).max(60),
+  selection: z.string().trim().min(1).max(120),
   cote: z.number().gt(1).lte(1000),
   origin_source_id: z.string().uuid(),
   resultat: z.enum(["gagne", "perdu", "rembourse"]).nullable(),

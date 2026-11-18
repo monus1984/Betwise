@@ -48,3 +48,28 @@ describe("grille de scores", () => {
     expect(probOf(makeGrid(l.lh, l.la), "OU", 2.5, "Plus")).toBeCloseTo((1 / 1.47) / (1 / 1.47 + 1 / 2.62), 3);
   });
 });
+
+describe("marchés par mi-temps ajoutés le 18/11", () => {
+  const g = makeGrid(1.6, 1.1);
+  it("les deux marquent, double chance et buts d'une équipe se calculent aussi par mi-temps", () => {
+    expect(probOf(g, "H2_BTTS", null, "Oui")! + probOf(g, "H2_BTTS", null, "Non")!).toBeCloseTo(1, 6);
+    expect(probOf(g, "H2_DC", null, "1N")!).toBeCloseTo(probOf(g, "H2_1X2", null, "1")! + probOf(g, "H2_1X2", null, "N")!, 6);
+    expect(probOf(g, "HT_TT1", 0.5, "Plus")! + probOf(g, "HT_TT1", 0.5, "Moins")!).toBeCloseTo(1, 6);
+    expect(probOf(g, "H2_TT2", 0.5, "Plus")!).toBeLessThan(probOf(g, "TT2", 0.5, "Plus")!);
+  });
+  it("gagner au moins une mi-temps est plus probable que gagner la première, sans être acquis", () => {
+    const w = probOf(g, "WEH", null, "1")!;
+    expect(w).toBeGreaterThan(Math.max(probOf(g, "HT_1X2", null, "1")!, probOf(g, "H2_1X2", null, "1")!));
+    expect(w).toBeLessThan(1);
+    expect(probOf(g, "WEH", null, "N")).toBeNull();
+  });
+  it("un but dans chaque mi-temps demande au moins deux buts", () => {
+    const oui = probOf(g, "BH", null, "Oui")!;
+    expect(oui + probOf(g, "BH", null, "Non")!).toBeCloseTo(1, 6);
+    expect(oui).toBeLessThan(probOf(g, "OU", 1.5, "Plus")!);
+  });
+  it("un pari gardé tel quel n'a pas de probabilité", () => {
+    expect(probOf(g, "LIBRE", null, "Bruno Fernandes décisif")).toBeNull();
+    expect(probOf(g, "PKB", null, "Oui")).toBeNull();
+  });
+});

@@ -63,6 +63,12 @@ export async function POST(req: NextRequest) {
       if (!tickets[0].raw.bookmaker) tickets[0].raw.bookmaker = coupon.bookmaker;
     }
 
+    // Registre des libellés non compris (libellé seul : ni compte, ni montant, ni cote), pour les corriger par lots
+    const inconnus = tickets.flatMap((t) => t.selections.map((s, i) => ({ s, raw: t.raw.selections[i], t })).filter((x) => !x.s.ok && x.raw)).slice(0, 30);
+    await Promise.allSettled(inconnus.map((x) => supabase.rpc("log_libelle_inconnu", {
+      p_bookmaker: x.t.raw.bookmaker ?? "", p_genre: x.t.raw.kind ?? "ticket", p_marche: x.raw.market_text, p_choix: x.raw.pick_text, p_raison: x.s.reason ?? "",
+    })));
+
     // Une ligne d'upload par ticket lu (même image source), pour tracer chaque import
     const out = [];
     for (const t of tickets) {
