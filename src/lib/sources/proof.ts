@@ -52,3 +52,8 @@ export function classer<T extends { proof: Proof }>(sources: T[]): { classees: T
   const nonEtablies = sources.filter((s) => !ok(s)).sort((a, b) => b.proof.prouves - a.proof.prouves);
   return { classees, nonEtablies };
 }
+
+/** Second indicateur, à part : les seuls pronos chargés avant le coup d'envoi. Une information en plus, pas une condition. */
+export function preMatch(p: Proof): { charges: number; regles: number; gagnes: number } {
+  return { charges: p.prouves - p.apresCoup, regles: p.prouvesRegles - p.apresCoupRegles, gagnes: p.prouvesGagnes - p.apresCoupGagnes };
+}

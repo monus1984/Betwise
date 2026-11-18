@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { createClient } from "@/lib/supabase/server";
 import { labelType, MARCHE_FR } from "../source-ui";
-import { NIVEAU, lire, niveau, raison, rendement, reussite } from "@/lib/sources/proof";
+import { NIVEAU, lire, niveau, preMatch, raison, rendement, reussite } from "@/lib/sources/proof";
 import { FollowButton, PredictionRow, SourceLink } from "./client";
 import { linkOf } from "@/lib/sources/link";
 import { CumulChart, type CumulPoint } from "./cumul-chart";
@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 type Named = { nom: string } | { nom: string }[] | null;
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
 
-export default async function SourcePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ existante?: string; ajout?: string; doublon?: string; p?: string }> }) {
+export default async function SourcePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ existante?: string; ajout?: string; doublon?: string; p?: string; h?: string }> }) {
   const { id } = await params;
   const sp = await searchParams;
   const supabase = await createClient();
@@ -39,7 +39,11 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
     .select("id, match_libre, market_code, market_param, selection, cote_annoncee, risque_annonce, risque_calcule, statut, resultat, logged_at, published_at, submitted_by, match:matches(id, kickoff_at, score_home, score_away, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom))")
     .eq("source_id", id)
     .order("logged_at", { ascending: false })
-    .limit(60);
+    .limit(200);
+  // Filtre de l'historique : tout reste consultable, on choisit seulement ce qu'on regarde
+  const filtre = (["avant", "apres", "attente"] as const).find((x) => x === sp.h) ?? "tous";
+  const vus = (preds ?? []).filter((p) => filtre === "tous" ? true : filtre === "avant" ? p.statut === "verifie" : filtre === "apres" ? p.statut === "declare" : p.resultat === "en_attente" && p.statut !== "annule").slice(0, 60);
+  const pm = preMatch(proof);
 
   const isSystem = s.type === "modele_betwise" || s.type === "perso";
 
@@ -72,7 +76,12 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
           </div>
         )}
         {nv !== "non_etabli" && proof.attendu !== null && <p className="mt-3 text-[11px] text-white/60">« Attendu » : la réussite que ces cotes laissent prévoir. Au-dessus, la source fait mieux que le marché.</p>}
-        {proof.prouves > 0 && <p className="mt-1 text-[11px] text-white/60">{proof.prouves - proof.apresCoup} prono{proof.prouves - proof.apresCoup > 1 ? "s" : ""} sur {proof.prouves} chargé{proof.prouves > 1 ? "s" : ""} avant le coup d’envoi. Tous comptent.</p>}
+        {proof.prouves > 0 && (
+          <div className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2">
+            <span className="min-w-0"><span className="block text-[12px] font-medium">Chargés avant le match</span><span className="block text-[11px] text-white/60">{pm.charges} prono{pm.charges > 1 ? "s" : ""} sur {proof.prouves}</span></span>
+            <span className="shrink-0 text-right text-sm font-semibold tabular-nums">{pm.regles ? `${pm.gagnes} sur ${pm.regles}` : pm.charges ? "en attente" : "aucun pour l’instant"}</span>
+          </div>
+        )}
       </section>
 
       <div className="mt-4 flex gap-2">
@@ -153,16 +162,28 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
       )}
 
       {s.type !== "modele_betwise" && (
-        <Link href={`/sources/${id}/prono`} className="mt-4 block rounded-lg bg-inverse py-3 text-center text-base font-medium text-on-inverse">+ Enregistrer un prono de cette source</Link>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <Link href={`/import?source=${id}`} className="rounded-xl bg-brand py-3 text-center text-sm font-semibold text-on-fill">Charger un coupon</Link>
+          <Link href={`/sources/${id}/prono`} className="rounded-xl border border-line bg-surface py-3 text-center text-sm font-medium">Saisir un prono</Link>
+          <p className="col-span-2 text-[11px] leading-relaxed text-ink-muted">Capture, texte ou vidéo de ce qu’elle publie, avant ou après le match : tout compte et enrichit ses chiffres.</p>
+        </div>
       )}
 
       <section className="mt-5">
         <h2 className="mb-2 text-sm font-semibold">Historique des pronos</h2>
-        {(preds ?? []).length === 0 ? (
-          <p className="rounded-lg border border-dashed border-slate-300 bg-surface p-5 text-center text-sm text-slate-600">Aucun prono enregistré. Rien ne s’efface jamais ici : chaque prono garde son résultat.</p>
+        {(preds ?? []).length > 0 && (
+          <nav className="mb-2 flex gap-2 overflow-x-auto" aria-label="Filtrer l’historique">
+            {([["tous", "Tous"], ["avant", "Avant le match"], ["apres", "Après le match"], ["attente", "En attente"]] as const).map(([k, mot]) => (
+              <Link key={k} href={`/sources/${id}?p=${periode}${k === "tous" ? "" : `&h=${k}`}`} scroll={false}
+                className={`shrink-0 rounded-full border px-3 py-1 text-xs ${filtre === k ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft"}`}>{mot}</Link>
+            ))}
+          </nav>
+        )}
+        {vus.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-slate-300 bg-surface p-5 text-center text-sm text-slate-600">{(preds ?? []).length === 0 ? "Aucun prono pour l’instant. Charge un de ses coupons : ses chiffres apparaîtront dès le premier résultat." : "Aucun prono dans ce filtre."}</p>
         ) : (
           <ul className="space-y-2">
-            {(preds ?? []).map((p) => {
+            {vus.map((p) => {
               const m = one(p.match as unknown as { id: string; kickoff_at: string; score_home: number | null; score_away: number | null; home: Named; away: Named } | null);
               return (
                 <PredictionRow

@@ -84,7 +84,7 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
               <ul className="mt-1 space-y-1">{x.forces.map((f) => <Force key={f.cle} libelle={f.libelle} g={f.gagnes} n={f.regles} taux={f.taux} />)}</ul>
             </div>
           ))}
-          <p className="mt-3 text-[11px] leading-relaxed text-ink-muted">Calculé sur les paris et pronos réglés, à partir de 3 résultats. Plus tu charges de coupons de tes sources, plus ces chiffres deviennent parlants.</p>
+          <p className="mt-3 text-[11px] leading-relaxed text-ink-muted">Provenance : tous tes paris et tests réglés, et tous les pronos réglés de tes sources, depuis le début. Affiché à partir de 3 résultats. Plus tu charges de coupons, plus ces chiffres deviennent parlants.</p>
         </Card>
       )}
 
@@ -97,7 +97,7 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
           <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
             {!tests?.length ? "Teste tes choix et ceux de tes sources, sans miser."
               : !tRegles.length ? `${tests.length} en attente de résultat.`
-              : <>{tRegles.length} réglé{tRegles.length > 1 ? "s" : ""} · {Math.round((100 * tRegles.filter((t) => t.statut === "gagne").length) / tRegles.length)} % gagnés · <span className={tNet >= 0 ? "text-gain" : "text-loss"}>{tNet >= 0 ? "+" : ""}{tMises ? Math.round((100 * tNet) / tMises) : 0} %</span></>}
+              : <>{tRegles.length} réglé{tRegles.length > 1 ? "s" : ""} · {Math.round((100 * tRegles.filter((t) => t.statut === "gagne").length) / tRegles.length)} % gagnés · <span className={tNet >= 0 ? "text-gain" : "text-loss"}>{tNet >= 0 ? "+" : ""}{tMises ? Math.round((100 * tNet) / tMises) : 0} %</span><span className="mt-0.5 block">Le pourcentage : gain fictif net rapporté aux mises fictives. Touche pour le détail par pari.</span></>}
           </p>
         </Link>
         <Link href="/options" className="rounded-2xl border border-line bg-surface p-3 active:bg-surface-2">

@@ -29,7 +29,7 @@ export function CoupsDuJour({ picks, theirs, mises, repli = [] }: { picks: Today
                   <Link href={`/matchs/${r.matchId}`} className="flex items-center gap-3 px-3 py-2 active:bg-surface-2">
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-medium">{r.selection}</span>
-                      <span className="block truncate text-[11px] text-ink-muted">{r.match} · {time(r.kickoff)}{r.estimation ? " · estimation" : r.cote ? ` · cote ${C(r.cote)}` : ""}</span>
+                      <span className="block truncate text-[11px] text-ink-muted">{r.match} · {time(r.kickoff)}{r.estimation ? " · cote de référence indisponible, estimation" : r.cote ? ` · cote de référence ${C(r.cote)}` : ""}</span>
                     </span>
                     <span className="shrink-0 text-right tabular-nums">
                       <span className="block text-sm font-bold">{Math.round(r.p * 100)} %</span>

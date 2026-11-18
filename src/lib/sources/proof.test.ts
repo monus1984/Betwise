@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { VIDE, classer, lire, niveau, raison, rendement, resume, reussite, type Proof } from "./proof";
+import { VIDE, classer, lire, niveau, preMatch, raison, rendement, resume, reussite, type Proof } from "./proof";
 
 const P = (x: Partial<Proof>): Proof => ({ ...VIDE, ...x });
 
@@ -36,5 +36,10 @@ describe("note d'une source", () => {
   it("lit une ligne de la vue, chiffres en texte compris", () => {
     expect(lire({ prouves: "24", prouves_regles: 24, prouves_gagnes: 19, prouves_avec_cote: 24, prouves_unites: "1.40", attendu: "0.7100", apres_coup: 0 })).toMatchObject({ prouves: 24, unites: 1.4, attendu: 0.71 });
     expect(lire(null)).toEqual(VIDE);
+  });
+  it("le pré-match vérifié se lit à part, sans rien retirer à la note", () => {
+    expect(preMatch(koudouss)).toEqual({ charges: 0, regles: 0, gagnes: 0 });
+    expect(preMatch(P({ prouves: 6, prouvesRegles: 6, prouvesGagnes: 4, apresCoup: 1, apresCoupRegles: 1, apresCoupGagnes: 1 }))).toEqual({ charges: 5, regles: 5, gagnes: 3 });
+    expect(resume(koudouss)).toBe("24 justes sur 26");
   });
 });
