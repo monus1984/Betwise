@@ -6,7 +6,10 @@ Ce fichier est le point d'entrée des consignes produit et de développement du 
 
 Faire évoluer l'expérience utilisateur vers une application **prédictions-first** : l'abonné arrive sur les prédictions et les recommandations, pas sur un tableau de bord de bankroll ni sur un écran vide.
 
-Le brief de référence à lire intégralement avant de coder est :
+Les documents de référence à lire avant toute intervention sont :
+- [Audit UX et exigence d'un Betster réellement animé](docs/audit/2026-11-19-audit-ux-et-betster-reel.md) — audit des branches et nouvelle exigence obligatoire pour le personnage virtuel.
+
+Les briefs produit à lire intégralement avant de coder sont :
 - [Architecture UX, Prédictions, Coach et personnage Betster](docs/product/architecture-ux-predictions-coach-betster.md)
 - [Décisions d'identité de marque et personnage IA](docs/brand/decisions-identite-personnage-ia.md)
 
