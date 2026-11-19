@@ -5,8 +5,8 @@
 --   5fee (réel, perdu)  : deux lignes « + de 2,5 / Oui » (MyCombi) enregistrées « les deux marquent » → « plus de 2,5 et les deux marquent ».
 --   979e (réel, perdu)  : « Résultat du match (remboursé si match nul) — Angola » enregistrée en victoire sèche → remboursé si nul.
 --   55b2 (test)         : « +2 BUTS » enregistrée « plus de 2 » → « plus de 1,5 » (règle du 12/11) ; remboursé → gagné.
--- PARTIE 2 (NON appliquée, en attente de l'accord de Mounir) : lignes que l'utilisateur a rangées à la main sous un marché voisin,
---   faute de marché adapté à l'époque. Voir la liste en fin de fichier.
+-- PARTIE 2 (appliquée le 19/11 avec l'accord de Mounir, voir 2026-11-19_lignes_rangees_a_la_main.sql) : lignes que l'utilisateur
+--   avait rangées à la main sous un marché voisin, faute de marché adapté à l'époque. Liste d'origine en fin de fichier.
 do $$
 declare
   c record; s betwise.bet_selections; b betwise.bets; m betwise.matches; v_res betwise.settle_result; v_pred betwise.predictions;
@@ -64,7 +64,7 @@ begin
   end loop;
 end $$;
 
--- PARTIE 2 — NON APPLIQUÉE. Lignes rangées à la main par l'utilisateur sous un marché voisin (le bon marché n'existait pas,
+-- PARTIE 2 — APPLIQUÉE LE 19/11 par le fichier 2026-11-19_lignes_rangees_a_la_main.sql. Lignes rangées à la main par l'utilisateur sous un marché voisin (le bon marché n'existait pas,
 -- ou les boutons « Oui / Non » affichaient « Les deux marquent / Pas les deux »). À recoder seulement avec son accord,
 -- par le même bloc que ci-dessus en remplaçant la liste « values » :
 --

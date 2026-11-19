@@ -2,6 +2,7 @@
 -- Chaque ligne doit valoir 0. Première exécution le 2026-11-16 : 202 sélections, 114 pronos, 78 paris, tout à 0.
 -- Contrôles I et J ajoutés le 2026-11-18 (import fiable).
 -- Contrôles K et L ajoutés le 2026-11-19 (cotes par bookmaker).
+-- 2026-11-19, après le recodage des six lignes rangées à la main : tout à 0 (256 sélections, 139 pronos, 99 paris).
 with sel as (
   select s.resultat res, s.selection, m.statut ms,
     case when m.id is not null and m.statut = 'termine' then betwise.settle_sel(s.market_code, s.market_param, s.selection, m) end calc
