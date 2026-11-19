@@ -1,5 +1,5 @@
 /**
- * Coups du jour : chaque matin, trois sélections par catégorie (Sûr, Audacieux, Risqué) sur les matchs des
+ * Coups du jour : chaque matin, trois sélections par catégorie (Prudent, Équilibré, Audacieux) sur les matchs des
  * prochaines 24 h, uniquement là où une vraie cote de référence existe. Un match ne sert qu'une fois.
  * Les sélections sont enregistrées comme pronos de la source « Coups du jour BETWISE » : leur bilan est public.
  */

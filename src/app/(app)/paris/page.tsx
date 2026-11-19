@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
+import { CoachNav } from "@/components/coach-nav";
 import { createClient } from "@/lib/supabase/server";
 import { loadSourceOptions } from "@/lib/sources/options";
 import { BetCard, type BetRow } from "./bet-card";
@@ -27,6 +28,7 @@ export default async function ParisPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
+      <CoachNav current="paris" />
       <PageHeader title="Mes paris" subtitle={tests ? "Choix testés sans miser : ta bankroll n’a pas bougé." : filter === "en_cours" ? "En attente de résultat ou de ta confirmation." : "Réglés."} action={<Link href="/bilan">Bilan</Link>} />
       {sp.ajout && <p className="mb-4 rounded-lg border border-gain/30 bg-gain-soft p-3 text-sm text-gain-ink">{tests ? "Test enregistré." : "Pari enregistré."}</p>}
 

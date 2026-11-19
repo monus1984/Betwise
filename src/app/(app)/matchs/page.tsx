@@ -71,7 +71,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <LiveRefresh active={rows.some((r) => r.statut === "en_cours" || (r.statut === "programme" && Math.abs(Date.parse(r.kickoff_at) - Date.now()) < 15 * 60000))} />
-      <PageHeader title="Prédictions" subtitle="Sur chaque match, l’issue la plus probable d’après les cotes de référence ; en bleu, d’après le modèle quand il n’y a pas de cote." />
+      <PageHeader title="Matchs" subtitle="Sur chaque match, l’issue la plus probable d’après les cotes de référence ; en bleu, d’après le modèle quand il n’y a pas de cote." />
 
       {/* Bandeau des jours */}
       <nav className="-mx-4 mb-3 overflow-x-auto px-4 pb-1" aria-label="Jours">

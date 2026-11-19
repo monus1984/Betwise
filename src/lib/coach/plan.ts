@@ -1,6 +1,6 @@
 /**
  * Objectif de bankroll : deux plans simulés (Monte-Carlo, marge du bookmaker comprise).
- *  - « prudent »  : mises de 3 à 8 % selon la catégorie, Risqué seulement sur le budget risque (30 % des gains) ;
+ *  - « prudent »  : mises de 3 à 8 % selon la catégorie, Audacieux seulement sur le budget risque (30 % des gains) ;
  *  - « objectif » : mise unique et mélange plus offensif, réglés pour maximiser la chance d'atteindre la cible
  *                   sans dépasser 40 % de risque de chute.
  * L'objectif est atteint dès que la bankroll touche la cible (l'abonné peut s'arrêter là).
@@ -20,9 +20,9 @@ const COTE: Record<Categorie, number> = { sur: (1 / CAT_ANNONCE.sur) * (1 - MARG
 type Mix = [Categorie, number][];
 const MIX_PRUDENT: Mix = [["sur", 0.5], ["audacieux", 0.4], ["risque", 0.1]];
 const MIXES: { mix: Mix; label: string }[] = [
-  { mix: [["sur", 0.6], ["audacieux", 0.4]], label: "surtout Très probable" },
-  { mix: [["sur", 0.3], ["audacieux", 0.5], ["risque", 0.2]], label: "surtout Audacieux" },
-  { mix: [["audacieux", 0.4], ["risque", 0.6]], label: "surtout Risqué" },
+  { mix: [["sur", 0.6], ["audacieux", 0.4]], label: "surtout Prudent" },
+  { mix: [["sur", 0.3], ["audacieux", 0.5], ["risque", 0.2]], label: "surtout Équilibré" },
+  { mix: [["audacieux", 0.4], ["risque", 0.6]], label: "surtout Audacieux" },
 ];
 const FRACTIONS = [0.05, 0.08, 0.1, 0.15, 0.2];
 
@@ -62,7 +62,7 @@ function bestPlan(i: PlanInput, target: number, maxChute = 0.4): PlanStats {
 
 export function evaluatePlan(i: PlanInput): PlanResult {
   const prudentSim = simulate(i, i.cible, { mix: MIX_PRUDENT, f: null });
-  const prudent: PlanStats = { ...prudentSim, mise: MISE_PART.audacieux, mix: "Très probable et Audacieux, Risqué sur les gains" };
+  const prudent: PlanStats = { ...prudentSim, mise: MISE_PART.audacieux, mix: "Prudent et Équilibré, Audacieux sur les gains" };
   const objectif = bestPlan(i, i.cible);
   // Objectif raisonnable : la plus haute cible avec au moins une chance sur deux et au plus 20 % de risque de chute
   let raisonnable: PlanResult["raisonnable"] = null;

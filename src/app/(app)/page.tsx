@@ -9,7 +9,9 @@ import { createClient } from "@/lib/supabase/server";
 import { Mark } from "@/components/icons";
 import { InstallButton } from "@/components/install-button";
 import { loadAccueil } from "@/lib/accueil/load";
-import { AvisBetster, Bienvenue, CarteMatchUI, IconeScan, ImportCarte, JourCreux, TipstersDuJour } from "@/components/accueil";
+import { BandeauBetster, Bienvenue, CarteMatchUI, Demain, IconeScan, ImportCarte, RaccourcisCoach, TipstersDuJour } from "@/components/accueil";
+import { ProfilsDuJour } from "@/components/profils-du-jour";
+import { heure, jourCourt, pct as pctP } from "@/components/proposition";
 import { BoutonMasque, Montant } from "@/components/montant";
 import { LiveRefresh } from "@/components/live-refresh";
 
@@ -69,13 +71,35 @@ export default async function Home() {
 
 
   const nouveau = nbReels === 0 && (follows ?? []).length === 0;
-  const cartes = acc.cartes.slice(0, 6);
   const directs = acc.cartes.filter((c) => c.statut === "en_cours").length;
+  const aVenirAnalyses = acc.cartes.filter((c) => c.probs && c.statut === "programme").length;
+  const jourCharge = aVenirAnalyses > 0 || directs > 0;
+  const pl2 = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
+  // Synthèse de Betster : uniquement des comptes tirés des données, jamais un avis inventé
+  const synthese = [
+    directs ? `${pl2(directs, "match")} en direct.` : "",
+    aVenirAnalyses ? `Aujourd’hui, j’ai analysé ${pl2(aVenirAnalyses, "match")} à venir et retenu ${pl2(acc.nbPropositions, "proposition")}.`
+      : acc.profilsDeDemain && acc.nbPropositions ? `Pas de match analysé aujourd’hui. J’ai déjà regardé demain : ${pl2(acc.nbDemainAnalyses, "match")} et ${pl2(acc.nbPropositions, "proposition")}.`
+      : !directs ? "Pas de match analysé aujourd’hui." : "",
+    !acc.profilsDeDemain && acc.nbDemainAnalyses ? `Demain, ${pl2(acc.nbDemainAnalyses, "match")} déjà analysé${acc.nbDemainAnalyses > 1 ? "s" : ""}.` : "",
+    !acc.nbPropositions && !acc.nbDemainAnalyses && acc.repli.length ? "Les prochains matchs couverts sont plus bas." : "",
+  ].filter(Boolean).join(" ");
+  const maj = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" });
+  const matchsDuJour = acc.cartes.length > 0 && (
+    <section aria-label="Matchs du jour" className="mt-6 flex flex-col gap-2.5">
+      <div className="flex items-baseline justify-between gap-2">
+        <h2 className="text-[17px] font-bold">{directs ? "En ce moment" : "Matchs du jour"}</h2>
+        <span className="text-[11.5px] text-ink-muted">{acc.nbAnalyses} analysé{acc.nbAnalyses > 1 ? "s" : ""}{acc.nbSans ? ` · ${acc.nbSans} sans analyse` : ""}</span>
+      </div>
+      {acc.cartes.slice(0, 6).map((c) => <CarteMatchUI key={c.id} c={c} />)}
+      {acc.cartes.length > 6 && <Link href="/matchs" className="flex h-11 items-center justify-center rounded-xl border border-line text-[13.5px] font-semibold">Voir les {acc.cartes.length} matchs du jour</Link>}
+    </section>
+  );
+  const demain = <Demain matchs={acc.demain} titre="Demain" total={acc.nbDemain} />;
 
   return (
     <>
       <LiveRefresh active={acc.cartes.some((c) => c.statut === "en_cours" || (c.statut === "programme" && Math.abs(Date.parse(c.kickoff) - Date.now()) < 15 * 60000))} />
-      {/* En-tête : le nom, l'import, la cloche, les réglages */}
       <header className="mb-3 flex items-center justify-between gap-3">
         <span className="flex items-center gap-2"><Mark className="h-7 w-7" /><span className="min-w-0"><span className="block text-lg font-bold leading-tight tracking-tight">{APP_NAME}</span><span className="block text-[11px] capitalize text-ink-muted">{new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Abidjan" })}</span></span></span>
         <span className="flex items-center gap-0.5">
@@ -89,70 +113,43 @@ export default async function Home() {
           </Link>
         </span>
       </header>
-      <h1 className="sr-only">Bonjour {profile?.pseudo ?? ""}</h1>
+      <h1 className="sr-only">Prédictions</h1>
 
-      {/* 1. L'avis de Betster, ou ce qui vient quand rien n'est analysé aujourd'hui */}
-      {acc.avis ? <AvisBetster a={acc.avis} /> : <JourCreux repli={acc.repli} />}
+      <BandeauBetster prenom={profile?.pseudo ?? ""} synthese={synthese} maj={maj} expression={acc.avis?.expression ?? "neutre"} />
       {nouveau && <Bienvenue />}
 
-      {/* 2. Matchs du jour */}
-      {cartes.length > 0 && (
-        <section aria-label="Matchs du jour" className="mt-6 flex flex-col gap-2.5">
-          <div className="flex items-baseline justify-between gap-2">
-            <h2 className="text-[17px] font-bold">{directs ? "Ce soir" : "Matchs du jour"}</h2>
-            <span className="text-[11.5px] text-ink-muted">{directs ? `${pl(directs, "match")} en direct · ` : ""}{acc.nbAnalyses} analysé{acc.nbAnalyses > 1 ? "s" : ""}{acc.nbSans ? ` · ${acc.nbSans} sans analyse` : ""}</span>
-          </div>
-          {cartes.map((c) => <CarteMatchUI key={c.id} c={c} />)}
-          {acc.cartes.length > cartes.length && <Link href="/matchs" className="flex h-11 items-center justify-center rounded-xl border border-line text-[13.5px] font-semibold">Voir les {acc.cartes.length} matchs du jour</Link>}
+      {acc.nbPropositions > 0 && <ProfilsDuJour profils={acc.profils} titre={acc.profilsDeDemain ? "Les meilleures options de demain" : "Les meilleures options du jour"} />}
+
+      {/* Aujourd'hui d'abord quand il y a des matchs analysés ; sinon demain remonte */}
+      {jourCharge ? <>{matchsDuJour}{demain}</> : <>{demain}{matchsDuJour}</>}
+
+      {!acc.nbPropositions && !acc.demain.length && acc.repli.length > 0 && (
+        <section aria-label="Les prochains jours" className="mt-6">
+          <h2 className="text-[17px] font-bold">Les prochains jours</h2>
+          <ul className="tile mt-2.5 divide-y divide-line">
+            {acc.repli.map((r) => (
+              <li key={r.matchId + r.selection}><Link href={`/matchs/${r.matchId}`} className="flex items-center justify-between gap-3 p-3">
+                <span className="min-w-0"><span className="block text-[13px] font-semibold">{r.selection}</span><span className="block text-[11px] text-ink-muted">{r.match} · {jourCourt(r.kickoff)} {heure(r.kickoff)}</span></span>
+                <span className="shrink-0 text-right"><span className="block font-display text-lg font-bold">{pctP(r.p)}</span><span className="block text-[10px] text-ink-muted">{r.estimation ? "estimation du modèle" : "cote de référence"}</span></span>
+              </Link></li>
+            ))}
+          </ul>
         </section>
       )}
 
-      {/* 3. Mon Coach : bankroll, budget, vigilance, conversation */}
-      <section aria-label="Mon Coach" className="tile mt-6 flex flex-col gap-3 p-3.5">
-        <div className="flex items-center justify-between"><h2 className="text-[17px] font-bold">Mon Coach</h2><BoutonMasque /></div>
-        {nouveau ? (
-          <p className="text-[13px] leading-snug text-ink-soft">Ta bankroll, ton rendement et tes points de vigilance apparaîtront ici dès ton premier pari importé.</p>
-        ) : (
-          <>
-            <Link href="/bankroll" className="flex items-end justify-between gap-3">
-              <span className="min-w-0">
-                <span className="block text-[12px] text-ink-muted">Ta bankroll</span>
-                <Montant texte={fcfa(solde)} className="block text-[28px] font-extrabold leading-tight tabular-nums" />
-                {d.courbe.length > 0 && <span className={`block text-[11.5px] font-semibold ${sept > 0 ? "text-gain" : sept < 0 ? "text-loss" : "text-ink-soft"}`}><Montant texte={signedF(sept)} /> sur 7 jours</span>}
-              </span>
-              <Sparkline values={[0, ...d.courbe.map((x) => x.cumul)].slice(-30)} className="h-10 w-28" label="Tendance des gains moins pertes" />
-            </Link>
-            <dl className="grid grid-cols-3 gap-2 text-[11px]">
-              <div><dt className="text-ink-muted">En jeu</dt><dd className="font-bold"><Montant texte={fcfa(exposition)} /></dd></div>
-              <div><dt className="text-ink-muted">Rendement</dt><dd className={`font-bold ${tone(d.rendement)}`}>{pct(d.rendement, true)}</dd></div>
-              <div><dt className="text-ink-muted">Paris gagnés</dt><dd className="font-bold">{d.regles ? `${d.gagnes} sur ${d.gagnes + d.perdus}` : "—"}</dd></div>
-            </dl>
-            {budget && (
-              <div className="flex flex-col gap-1.5">
-                <p className="flex justify-between text-[12px]"><span className="text-ink-soft">Budget de la semaine</span><span className="font-semibold"><Montant texte={`${fcfa(budget.mises)} sur ${fcfa(Number(bud!.mise_semaine))}`} /></span></p>
-                <div className="h-1.5 rounded-full bg-surface-2"><div className="h-1.5 rounded-full bg-brand" style={{ width: `${Math.min(100, Math.round(budget.partMises * 100))}%` }} /></div>
-              </div>
-            )}
-            {alertes[0] && (
-              <Link href={alertes[0].cle === "budget" ? "/coach?v=outils" : alertes[0].cle === "serie" || alertes[0].cle === "combines" ? "/bilan" : "/paris"} className="flex items-start gap-2 rounded-xl bg-draw-soft p-2.5 text-draw-ink">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="mt-px shrink-0"><path d="M12 3 2.5 20h19L12 3Z" /><path d="M12 10v4.5M12 17.3v.2" /></svg>
-                <span className="text-[12px] leading-snug"><b>Point de vigilance.</b> {alertes[0].titre}</span>
-              </Link>
-            )}
-          </>
-        )}
-        <Link href="/coach" className="flex h-11 items-center justify-center gap-2 rounded-xl bg-brand text-[13.5px] font-bold text-on-fill">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" /></svg>Parler au coach
-        </Link>
-      </section>
+      <RaccourcisCoach
+        nouveau={nouveau}
+        solde={<Montant texte={fcfa(solde)} />}
+        sept={d.courbe.length > 0 ? <Montant texte={signedF(sept)} /> : null}
+        budget={budget ? <Montant texte={`${fcfa(budget.mises)} misés sur ${fcfa(Number(bud!.mise_semaine))}`} /> : null}
+        paris={d.enCours ? `${pl2(d.enCours, "pari")} en cours${aConfirmer ? ` · ${aConfirmer} à confirmer` : ""}` : aConfirmer ? `${aConfirmer} à confirmer` : "Aucun en cours"}
+        vigilance={alertes[0] ? { titre: alertes[0].titre, href: alertes[0].cle === "budget" ? "/coach?v=outils" : alertes[0].cle === "serie" || alertes[0].cle === "combines" ? "/bilan" : "/paris" } : null}
+        masque={<BoutonMasque />}
+      />
 
-      {/* 4. Import */}
       <div className="mt-3.5"><ImportCarte /></div>
-
-      {/* 5. Tipsters suivis sur les matchs du jour */}
       <TipstersDuJour t={acc.tipsters} />
 
-      {/* 6. Ce qui attend une action */}
       {!rienAFaire && (
         <>
           <h2 className="mt-6 text-[17px] font-bold">À faire</h2>
