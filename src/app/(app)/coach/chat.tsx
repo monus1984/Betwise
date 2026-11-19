@@ -5,6 +5,7 @@ import { speakText, stopSpeaking, unlockAudio } from "@/lib/coach/speak";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Notice } from "@/components/ui";
+import { BetsterAnime } from "@/components/betster-anime";
 
 export type ChatMsg = { id?: string; role: "user" | "assistant"; text: string; fonctions?: string[]; cartes?: { titre: string; sous: string; href: string }[] };
 
@@ -18,6 +19,7 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
   const [msgs, setMsgs] = useState<ChatMsg[]>(initial);
   const [text, setText] = useState(initialText); // question préparée par une action rapide : l'utilisateur l'envoie lui-même
   const [busy, setBusy] = useState(false);
+  const [parle, setParle] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [left, setLeft] = useState<number | null>(null);
   const end = useRef<HTMLDivElement>(null);
@@ -38,7 +40,7 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
   function setVoice(on: boolean) {
     setVoiceOut(on); voiceOutRef.current = on;
     try { localStorage.setItem("betwise.coach.voix", on ? "1" : "0"); } catch { /* ignore */ }
-    if (on) unlockAudio(); else stopSpeaking();
+    if (on) unlockAudio(); else { stopSpeaking(); setParle(false); }
   }
   function listen() {
     const Ctor = recCtor();
@@ -72,7 +74,7 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
       if (j.conversationId) setId(j.conversationId);
       if (!r.ok) { setErr(j.error ?? "Erreur."); return; }
       setMsgs((m) => [...m, { id: j.reply.id, role: "assistant", text: j.reply.text, fonctions: j.reply.fonctions, cartes: j.reply.cartes }]);
-      if (voiceOutRef.current) speakText(j.reply.text);
+      if (voiceOutRef.current) { setParle(true); speakText(j.reply.text, () => setParle(false)); }
       if (typeof j.restant === "number") setLeft(j.restant);
     } catch {
       setErr("Pas de connexion. Réessaie.");
@@ -83,6 +85,11 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
 
   return (
     <div className="pb-28">
+      <div className="mb-3 flex items-center gap-3">
+        <BetsterAnime etat={busy ? "pense" : parle ? "parle" : "repos"} taille={56} />
+        <p className="min-w-0 flex-1 text-[12.5px] leading-snug text-ink-soft" aria-live="polite">{busy ? "Je regarde tes données…" : parle ? "Je te lis ma réponse. Le texte reste affiché dessous." : msgs.length ? "Une autre question ?" : "Pose ta question, à l’écrit ou à la voix."}</p>
+        {parle && <button type="button" onClick={() => { stopSpeaking(); setParle(false); }} className="shrink-0 rounded-full border border-line px-3 py-1 text-xs font-medium text-ink-soft">Stop</button>}
+      </div>
       <div className="mb-3 flex items-center justify-between gap-3">
         {canSpeak ? (
           <button type="button" onClick={() => setVoice(!voiceOut)} aria-pressed={voiceOut} className={`rounded-full border px-3 py-1 text-xs font-medium ${voiceOut ? "border-brand bg-brand text-on-fill" : "border-line bg-surface text-ink-soft"}`}>
@@ -117,14 +124,14 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
                   ))}
                 </ul>
               )}
-              {m.role === "assistant" && canSpeak && !!m.text && <button type="button" onClick={() => { unlockAudio(); speakText(m.text); }} className="mt-1.5 text-[11px] font-medium text-brand">🔊 Écouter</button>}
+              {m.role === "assistant" && canSpeak && !!m.text && <button type="button" onClick={() => { unlockAudio(); setParle(true); speakText(m.text, () => setParle(false)); }} className="mt-1.5 text-[11px] font-medium text-brand">🔊 Écouter</button>}
               {m.role === "assistant" && !!m.fonctions?.length && (
                 <p className="mt-2 border-t border-slate-100 pt-1.5 text-[11px] text-slate-400">Données consultées : {[...new Set(m.fonctions)].map((f) => FN_LABEL[f] ?? f).join(", ")}</p>
               )}
             </div>
           </div>
         ))}
-        {busy && <p className="text-xs text-slate-500">Le coach consulte tes données…</p>}
+        
         {err && <Notice>{err}</Notice>}
         <div ref={end} />
       </div>

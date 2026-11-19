@@ -1,3 +1,4 @@
+import { BetsterAnime } from "@/components/betster-anime";
 /**
  * Blocs du nouvel accueil (maquettes validées le 19/11 : docs/design/accueil/maquettes/).
  * Probabilité, couverture et fraîcheur sont toujours séparées ; aucune « convergence » affichée (D12).
@@ -13,11 +14,7 @@ import type { CarteMatch, MatchAVenir, TipsterDuJour } from "@/lib/accueil/load"
 /** Betster, nom de travail du personnage IA. Une seule image pour l'instant : l'expression est calculée et exposée,
  * l'image changera quand les trois expressions seront livrées (docs/brand/betster-character-bible.md). */
 export function Betster({ expression, taille = 56 }: { expression: string; taille?: number }) {
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src="/betster/betster-112.webp" alt="Betster" width={taille} height={taille} data-expression={expression}
-      className="shrink-0 rounded-full ring-2 ring-brand/70" style={{ width: taille, height: taille }} />
-  );
+  return <span data-expression={expression} className="inline-flex shrink-0"><BetsterAnime etat="repos" taille={taille} /></span>;
 }
 
 /** Barre 1 / N / 2 : l'issue la plus probable en couleur, les autres en gris, les chiffres écrits dessous. */
