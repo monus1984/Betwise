@@ -1,0 +1,24 @@
+name: Mesure des probabilités
+
+on:
+  schedule:
+    # Chaque lundi à 08:20 UTC, après le modèle : la mesure se refait seule sur tous les matchs terminés
+    - cron: "20 8 * * 1"
+  workflow_dispatch:
+
+jobs:
+  mesure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsx scripts/mesure-probabilites.ts --enregistrer | tee mesure.md
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - run: cat mesure.md >> "$GITHUB_STEP_SUMMARY"

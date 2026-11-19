@@ -26,6 +26,30 @@ const CANDIDATES: [string, number | null, string][] = [
   ["OU", 1.5, "Plus"], ["OU", 2.5, "Plus"], ["OU", 2.5, "Moins"], ["OU", 3.5, "Moins"], ["BTTS", null, "Oui"], ["BTTS", null, "Non"],
 ];
 
+/** Les cinq cotes de référence d'un match : victoire, nul, défaite, plus et moins de 2,5 buts. */
+export type Cotes5 = { c1: number | null; cN: number | null; c2: number | null; plus25: number | null; moins25: number | null };
+
+/** Probabilité directe des marchés cotés (victoire, plus/moins 2,5) : cotes de référence, marge retirée proportionnellement. */
+export function probaDirecte(c: Cotes5, market: string, param: number | null, sel: string): number | null {
+  const group = market === "1X2" ? [c.c1, c.cN, c.c2] : market === "OU" && param === 2.5 ? [c.plus25, c.moins25] : null;
+  if (!group || group.some((x) => !x)) return null;
+  const inv = group.map((x) => 1 / x!), tot = inv.reduce((a, b) => a + b, 0);
+  const idx = market === "1X2" ? ["1", "N", "2"].indexOf(sel) : ["Plus", "Moins"].indexOf(sel);
+  return idx < 0 ? null : inv[idx] / tot;
+}
+
+/**
+ * Ce que l'application affiche pour un match dont elle a les cotes de référence : probabilité directe pour le résultat
+ * et le plus/moins 2,5 ; grille de scores (buts attendus déduits de ces cotes) pour tous les autres marchés.
+ * Fonction pure : la fiche match et la mesure des probabilités (scripts/mesure-probabilites.ts) passent par elle.
+ */
+export function probasMarche(c: Cotes5): { lh: number; la: number; approx: boolean; grid: Grid; p: (market: string, param: number | null, sel: string) => number | null } | null {
+  const ml = lambdasFromOdds(c);
+  if (!ml) return null;
+  const grid = makeGrid(ml.lh, ml.la);
+  return { ...ml, grid, p: (market, param, sel) => probaDirecte(c, market, param, sel) ?? probOf(grid, market, param, sel) };
+}
+
 /** Signaux (buts attendus + cotes) pour une liste de matchs, en deux requêtes. */
 export async function loadSignals(db: Db, ids: string[]): Promise<Map<string, Signal>> {
   const out = new Map<string, Signal>();
@@ -40,16 +64,10 @@ export async function loadSignals(db: Db, ids: string[]): Promise<Map<string, Si
       const o = mine.find((x) => x.market_code === market && x.selection === sel && (x.market_param === null ? param === null : Number(x.market_param) === param));
       return o ? Number(o.cote) : null;
     };
-    // Probabilité directe des marchés cotés (victoire, plus/moins 2,5) : cotes de référence, marge retirée proportionnellement
-    const direct = (market: string, param: number | null, sel: string): number | null => {
-      const group = market === "1X2" ? (["1", "N", "2"] as const).map((k) => refOdd("1X2", null, k)) : market === "OU" && param === 2.5 ? (["Plus", "Moins"] as const).map((k) => refOdd("OU", 2.5, k)) : null;
-      if (!group || group.some((c) => !c)) return null;
-      const inv = group.map((c) => 1 / c!), tot = inv.reduce((a, b) => a + b, 0);
-      const idx = market === "1X2" ? ["1", "N", "2"].indexOf(sel) : ["Plus", "Moins"].indexOf(sel);
-      return idx < 0 ? null : inv[idx] / tot;
-    };
-    const ml = lambdasFromOdds({ c1: refOdd("1X2", null, "1"), cN: refOdd("1X2", null, "N"), c2: refOdd("1X2", null, "2"), plus25: refOdd("OU", 2.5, "Plus"), moins25: refOdd("OU", 2.5, "Moins") });
-    const market = ml ? { lh: ml.lh, la: ml.la, grid: makeGrid(ml.lh, ml.la) } : null;
+    const cotes: Cotes5 = { c1: refOdd("1X2", null, "1"), cN: refOdd("1X2", null, "N"), c2: refOdd("1X2", null, "2"), plus25: refOdd("OU", 2.5, "Plus"), moins25: refOdd("OU", 2.5, "Moins") };
+    const direct = (market: string, param: number | null, sel: string) => probaDirecte(cotes, market, param, sel);
+    const ml = probasMarche(cotes);
+    const market = ml ? { lh: ml.lh, la: ml.la, grid: ml.grid } : null;
     const j = est?.find((e) => e.match_id === id)?.justification as { lambda_dom?: number; lambda_ext?: number } | null | undefined;
     const model = j?.lambda_dom && j?.lambda_ext ? { lh: j.lambda_dom, la: j.lambda_ext, grid: makeGrid(j.lambda_dom, j.lambda_ext, DRAW_BOOST) } : null;
     if (ml && market) out.set(id, { source: "marche", lh: ml.lh, la: ml.la, grid: market.grid, approx: ml.approx, market, model, refOdd, direct });

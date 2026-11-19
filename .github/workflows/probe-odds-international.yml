@@ -6,7 +6,7 @@ on:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -14,6 +14,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx tsx scripts/probe-bookmakers.ts
+      # Provisoire sur la branche etape-2 : lance la mesure tant que mesure-probabilites.yml n'est pas sur main
+      - run: npx tsx scripts/mesure-probabilites.ts
         env:
-          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

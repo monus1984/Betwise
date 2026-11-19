@@ -28,9 +28,22 @@ async function apiFootball(key: string) {
     console.log(`Relevé (update) du premier match : ${fx[0].update ?? "?"}`);
     for (const b of (fx[0].bookmakers ?? []).filter((x: { name: string }) => cible.test(x.name))) {
       console.log(`${b.name} — ${b.bets.length} marchés : ${b.bets.map((x: { name: string; values: unknown[] }) => `${x.name} [${x.values.length}]`).join(" | ")}`);
-      const ou = b.bets.find((x: { name: string }) => x.name === "Goals Over/Under");
-      if (ou) console.log(`  lignes plus/moins : ${ou.values.map((v: { value: string; odd: string }) => `${v.value}=${v.odd}`).join(", ")}`);
+      // Format exact des valeurs de chaque marché (12 premières), pour écrire la correspondance avec les codes BETWISE
+      if (league === 39) for (const x of b.bets as { name: string; values: { value: string | number; odd: string }[] }[]) {
+        console.log(`  · ${x.name} : ${x.values.slice(0, 12).map((v) => `${v.value}=${v.odd}`).join(" ; ")}`);
+      }
     }
+  }
+}
+
+/** Le filtre par bookmaker : combien de pages pour une journée, et l'heure de relevé match par match. */
+async function filtre1xbet(key: string) {
+  const get = async (path: string) => (await (await fetch(`${AF}${path}`, { headers: { "x-apisports-key": key } })).json()) as { response?: any[]; paging?: { total: number }; errors?: unknown };
+  for (const [nom, league] of [["Premier League", 39], ["Liga", 140], ["Amicaux", 10], ["Éliminatoires CAN", 36]] as [string, number][]) {
+    const r = await get(`/odds?league=${league}&season=${league === 36 ? 2027 : 2026}&bookmaker=11&page=1`);
+    const fx = r.response ?? [];
+    console.log(`\n### Filtre bookmaker=11 — ${nom} : ${fx.length} matchs page 1 (pages : ${r.paging?.total ?? "?"})`);
+    for (const f of fx.slice(0, 12)) console.log(`  match ${f.fixture?.id} · coup d'envoi ${f.fixture?.date} · relevé ${f.update} · bookmakers ${(f.bookmakers ?? []).map((b: { id: number; name: string; bets: unknown[] }) => `${b.name}#${b.id} (${b.bets.length} marchés)`).join(", ")}`);
   }
 }
 
@@ -57,7 +70,7 @@ async function oddsApi(key: string) {
 async function main() {
   const af = process.env.API_FOOTBALL_KEY, od = process.env.ODDS_API_KEY;
   if (!af && !od) { console.error("Aucune clé fournie"); process.exit(1); }
-  if (af) await apiFootball(af.trim());
+  if (af) { await apiFootball(af.trim()); await filtre1xbet(af.trim()); }
   if (od) await oddsApi(od.trim());
 }
 main().catch((e) => { console.error(e instanceof Error ? e.message : e); process.exit(1); });

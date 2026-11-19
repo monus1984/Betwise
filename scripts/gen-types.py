@@ -55,6 +55,7 @@ TABLES = {
     "match_follows": "user_id:uuid match_id:uuid created_at:timestamptz=",
     "notifications": "id:uuid= user_id:uuid type:text cle:text titre:text corps:text url:text= created_at:timestamptz= sent_at:timestamptz? lu_at:timestamptz?",
     "app_secrets": "name:text value:jsonb created_at:timestamptz=",
+    "mesures_probabilites": "id:int8= mesure_le:date= perimetre:text cle:text libelle:text n:int4 proba_moyenne:numeric? frequence:numeric? brier:numeric? brier_reference:numeric? log_loss:numeric? detail:jsonb? created_at:timestamptz=",
     "daily_picks": "id:uuid= jour:date match_id:uuid market_code:text market_param:numeric? selection:text categorie:text rang:int2 probabilite:numeric cote_ref:numeric? cote_juste:numeric p_modele:numeric? prediction_id:uuid? created_at:timestamptz=",
     "match_history": "id:uuid= ligue:text saison:text played_on:date home_nom:text away_nom:text home_goals:int2 away_goals:int2 cote_1:numeric? cote_n:numeric? cote_2:numeric? cote_plus25:numeric? cote_moins25:numeric? imported_at:timestamptz=",
     "conversations": "id:uuid= user_id:uuid titre:text? created_at:timestamptz=",

@@ -1329,6 +1329,54 @@ export type Database = {
         }
         Relationships: []
       }
+      mesures_probabilites: {
+        Row: {
+          id: number
+          mesure_le: string
+          perimetre: string
+          cle: string
+          libelle: string
+          n: number
+          proba_moyenne: number | null
+          frequence: number | null
+          brier: number | null
+          brier_reference: number | null
+          log_loss: number | null
+          detail: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          mesure_le?: string
+          perimetre: string
+          cle: string
+          libelle: string
+          n: number
+          proba_moyenne?: number | null
+          frequence?: number | null
+          brier?: number | null
+          brier_reference?: number | null
+          log_loss?: number | null
+          detail?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          mesure_le?: string
+          perimetre?: string
+          cle?: string
+          libelle?: string
+          n?: number
+          proba_moyenne?: number | null
+          frequence?: number | null
+          brier?: number | null
+          brier_reference?: number | null
+          log_loss?: number | null
+          detail?: Json | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       daily_picks: {
         Row: {
           id: string
