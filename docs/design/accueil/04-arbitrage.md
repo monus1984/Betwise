@@ -74,6 +74,30 @@ Cela sert aussi d'« indicateur de confiance » séparé de la probabilité, que
 | D8 | Scénarios dans le lot suivant ; couverture africaine dans un lot à part, juste après | Oui |
 | D9 | Nom du personnage | À toi |
 
-### Décisions de Mounir
+### Décisions de Mounir — 19/11/2026, 11:05
 
-_À remplir après sa réponse, datées et dans ses mots._
+| N° | Réponse de Mounir | Suite |
+| --- | --- | --- |
+| D1 | « Matchs du jour avec les indicateurs de confiance ; Coach BETWISE comprenant la partie bankroll et coaching perso et chat etc. ; Import et ensuite source… néanmoins donnez-moi vos meilleurs avis » | Ordre retenu ; proposition détaillée de Claude en section 5, à valider |
+| D2 | « Pas forcément pour, mais je suis ouvert à tes suggestions » | Bankroll en une ligne non retenue telle quelle ; proposition en section 5 |
+| D3 | OK | Expression de l'avatar et indicateur de confiance calculés par une règle |
+| D4 | « Je pense qu'il faut changer même le nom de l'onglet et le positionner (Mes pronostiqueurs, Mon réseau ou autre) » | Renommer l'onglet Sources ; proposition en section 5 |
+| D5 | OK | Trois pistes d'avatar dessinées avant de choisir |
+| D6 | OK | Écrans en HTML par Claude, images de l'avatar par ChatGPT |
+| D7 | Pas de réponse | Matchs → Prédictions : en attente |
+| D8 | OK | Scénarios au lot suivant ; couverture africaine dans un lot à part, juste après |
+| D9 | « Betster = mélange entre Betwise et tipster (ton avis ?) » | Nom proposé par Mounir ; avis de Claude en section 5 ; vérification de marque à faire |
+
+## 5. Propositions de Claude après les décisions (à valider)
+
+**Accueil, dans l'ordre de D1 :**
+1. **Matchs du jour.** En tête, l'avis de Betster : le coup du jour le plus solide, avec l'avatar, sa probabilité, sa cote et son indicateur de confiance. Dessous, les matchs du jour, chacun avec sa barre 1 / N / 2 et son indicateur de confiance. Un match sur lequel l'abonné a un pari en cours porte une pastille « ton pari » et son état en direct : les paris en cours n'ont plus besoin d'un bloc à part.
+2. **Coach BETWISE.** Une carte : solde et tendance sur 7 jours, budget de la semaine s'il est fixé, la vigilance du moment s'il y en a une, et « parler au coach ». Un bouton œil masque les montants (utile en public) ; le choix est gardé sur le téléphone.
+3. **Import.** Un bouton visible en permanence (dans l'en-tête ou le bouton flottant actuel, renommé « Importer »), plus un rappel dans la page quand un ticket attend.
+4. **Pronostiqueurs.** Ce que tes pronostiqueurs suivis disent des matchs du jour, face à l'avis de BETWISE (D4 de la section 4).
+
+**Bankroll (D2) :** pas d'une seule ligne, mais une carte Coach compacte (point 2 ci-dessus). Les points de vigilance passent dans cette carte au lieu d'un bandeau à part.
+
+**Nom de l'onglet Sources (D4) :** dans une barre de cinq onglets, il y a la place pour 9 à 10 caractères. « Mes pronostiqueurs » ne tient pas, « Mon réseau » est flou. Proposition : **« Tipsters »** sur l'onglet, mot que tes utilisateurs emploient déjà, et « Mes pronostiqueurs » en titre de page. Ordre des onglets : Accueil · Prédictions · Mes paris · Tipsters · Coach.
+
+**Betster (D9) :** bon nom. Court, se lit pareil en français et en anglais, on y entend « bet », « tipster » et « best », et il va bien à un personnage qui donne son avis. Deux réserves : une recherche rapide ne montre pas de marque connue de ce nom, mais ce n'est pas une vérification de marque (à faire auprès de l'OAPI pour l'Afrique francophone avant d'en faire un logo) ; et le personnage parle au nom de BETWISE, il ne doit pas passer pour un tipster de plus qu'on note comme les autres.
