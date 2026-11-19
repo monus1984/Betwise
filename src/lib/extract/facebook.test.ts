@@ -22,7 +22,11 @@ describe("pronos Facebook", () => {
     expect(n("Win", "Angleterre", "Croatie", "England", { home: ["England"], away: ["Croatia"] })).toBe("1X2 1 ok");
     expect(n("Victoire", "Saint-Marin", "Biélorussie", "Belarus", { home: ["San Marino"], away: ["Belarus"] })).toBe("1X2 2 ok");
     expect(n("Victoire", "RD Congo", "Sierra Leone", "DR Congo", { home: ["Congo DR"] })).toBe("1X2 1 ok");
-    expect(n("+1,5", "Sénégal", "Soudan", "Sénégal")).toBe("OU 1.5 Plus ok");
+    // « Sénégal +1,5 » = le Sénégal marque au moins 2 buts (lecture confirmée le 19/11), pas le total du match
+    expect(n("+1,5", "Sénégal", "Soudan", "Sénégal")).toBe("TT1 1.5 Plus ok");
+    expect(n("Sénégal +1,5", "Sénégal", "Soudan")).toBe("TT1 1.5 Plus ok");
+    expect(n("Soudan +1,5", "Sénégal", "Soudan")).toBe("TT2 1.5 Plus ok");
+    expect(n("Sénégal +2", "Sénégal", "Soudan")).toBe("TT1 1.5 Plus ok");
     expect(n("+1,5 BUTS DANS LE MATCHS", "Monténégro", "Lettonie", "Lettonie")).toBe("OU 1.5 Plus ok");
     expect(n("double+1,5 BUTS DANS LE MATCHS", "Tchéquie", "Espagne", "Espagne")).toBe("DC_OU 1.5 N2|Plus ok");
   });
@@ -47,9 +51,13 @@ describe("pronos Facebook", () => {
     const b = normalizePick("Total", "+2", "Italie", "France");
     expect(b.market_param).toBe(2);
   });
-  it("but + corners : signalé, pas deviné", () => {
+  it("but + corners d'une équipe : les deux conditions, sur cette équipe (lecture confirmée le 19/11)", () => {
     const r = normalizePick("", "1BUT+ 3 CORNERS", "Turquie", "Belgique", "Turquie");
-    expect(r.ok).toBe(false); expect(r.reason).toMatch(/corners/);
+    expect(r).toMatchObject({ market_code: "COMBO", selection: "TT1@0.5:Plus & CORN1@2.5:Plus", ok: true });
+    expect(normalizePick("", "Belgique 2 buts + 5 corners", "Turquie", "Belgique")).toMatchObject({ market_code: "COMBO", selection: "TT2@1.5:Plus & CORN2@4.5:Plus", ok: true });
+    // Sans équipe, on ne devine pas
+    const s = normalizePick("", "1BUT+ 3 CORNERS", "Turquie", "Belgique");
+    expect(s.ok).toBe(false); expect(s.reason).toMatch(/corners/);
   });
   it("âge d'un post lu comme une heure de publication", () => {
     const now = Date.UTC(2026, 10, 12, 20, 0);

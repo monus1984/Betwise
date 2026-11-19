@@ -256,6 +256,15 @@ export function normalizePick(marketText: string, pickText: string, home: string
     if (name.length >= 3) return { market_code: "PCARD", market_param: null, selection: name, label_pick: pickText, ok: true };
   }
   if (stat) {
+    // « Turquie 1BUT+ 3 CORNERS » : l'équipe marque au moins 1 but ET obtient au moins 3 corners (lecture confirmée le 19/11)
+    { const bc = all.match(/(\d+)\s*buts?\s*\+\s*(\d+)\s*corners?/);
+      if (bc && stat === "CORN") {
+        const nm = p.match(/^(.*?)\s*\d+\s*buts?\s*\+/); const sd = teamSide ?? (nm && nm[1].trim() ? side(nm[1].trim()) : null);
+        if (sd) { const c = comboLibre([
+          { market_code: `TT${sd}`, market_param: Number(bc[1]) - 0.5, selection: "Plus", label_pick: pickText, ok: true },
+          { market_code: `CORN${sd}`, market_param: Number(bc[2]) - 0.5, selection: "Plus", label_pick: pickText, ok: true },
+        ], pickText); if (c) return c; }
+      } }
     if (/\d\s*buts?\b|\bbuts?\s*\+|\bmarque/.test(all)) { const c = essaiCombo(); if (c) return c; }
     if (/\d\s*buts?\b|\bbuts?\s*\+|\bmarque/.test(all)) return { market_code: stat, market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari qui mêle buts et statistiques (corners, cartons) : pas encore suivi. La ligne est gardée telle quelle, à régler à la main." };
     const o = ouLine(p), t = mention();
@@ -449,6 +458,17 @@ export function normalizePick(marketText: string, pickText: string, home: string
   // « Slovaquie va marquer », « marque » après une équipe nommée seule : au moins un but de cette équipe
   { const vm = p.match(/^(.*?)\s*(?:va marquer|marquera|marque(?: au moins (?:1|un) but)?)$/); const sd = vm ? (vm[1].trim() ? side(vm[1].trim()) : teamSide) : null;
     if (vm && sd && !/(2|deux)|équipes/.test(p)) return { market_code: `TT${sd}`, market_param: 0.5, selection: "Plus", label_pick: pickText, ok: true }; }
+  // « Sénégal +1,5 » d'un tipster : buts de l'équipe nommée (au moins 2), pas du match (lecture confirmée le 19/11).
+  // « +1,5 BUTS DANS LE MATCH » reste le total du match ; un marché « handicap » nommé reste un handicap.
+  if (!/handicap|match|&|\bet\b/.test(all)) {
+    const tl = p.match(/^(.*?)\s*\+\s*(\d+(?:[.,]\d+)?)\s*(?:buts?)?$/);
+    if (tl) {
+      const nom = tl[1].trim();
+      const proche = (x: string, t: string | null, al?: string[]) => (t ? Math.max(...[t, ...(al ?? [])].map((y) => teamSimilarity(canon(x), y))) : 0);
+      const sd = nom ? (proche(nom, home, alias?.home) >= 0.8 ? "1" : proche(nom, away, alias?.away) >= 0.8 ? "2" : null) : teamSide;
+      if (sd) { const v = Number(tl[2].replace(",", ".")); return { market_code: `TT${sd}`, market_param: Number.isInteger(v) ? v - 0.5 : v, selection: "Plus", label_pick: pickText, ok: true }; }
+    }
+  }
   if (!m.includes("handicap") && !all.includes("&") && (/\b(buts?|goals?|over|under)\b/.test(p) || /^(\+|-|plus|moins)/.test(p))) { const o = ouLine(p); if (o) return { market_code: "OU", market_param: o.line, selection: o.dir, label_pick: pickText, ok: true }; }
   if (teamSide && /^(victoire|gagne|vainqueur|wins?|to win|1|2)$/.test(p.replace(/[^a-zà-ü0-9 ]/g, "").trim())) return { market_code: "1X2", market_param: null, selection: teamSide, label_pick: `${team} gagne`, ok: true };
   if (teamSide && /ou nul|ou match nul|double chance/.test(p) && !p.includes("&")) return { market_code: "DC", market_param: null, selection: teamSide === "1" ? "1N" : "N2", label_pick: `${team} ou nul`, ok: true };

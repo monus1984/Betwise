@@ -12,15 +12,15 @@ describe("corpus des libellés réellement importés (10 au 18/11/2026)", () => 
     expect(CORPUS.map(dire)).toMatchSnapshot();
   });
 
-  it("206 libellés sur 230 au moins sont compris", () => {
+  it("209 libellés sur 230 au moins sont compris", () => {
     expect(CORPUS.length).toBe(230);
-    expect(CORPUS.filter((r) => lire(r).ok).length).toBeGreaterThanOrEqual(206);
+    expect(CORPUS.filter((r) => lire(r).ok).length).toBeGreaterThanOrEqual(209);
   });
 
   it("aucun des libellés non compris ne devient un autre marché en silence", () => {
     // Les seuls libellés gardés tels quels : anciennes lectures sans équipe, choix ambigu ou absent, paris de joueurs, paris mêlant buts et corners, penalty de chaque équipe
     const gardes = CORPUS.filter((r) => !lire(r).ok).map((r) => `${r[2]} | ${r[3]}`);
-    for (const g of gardes) expect(g).toMatch(/^(Victoire \| .+ – Victoire|1ère mi-temps \| .+ – 1ère mi-temps|\+1,5 \| Sénégal \+1,5|PÉPITE DU JOUR \| |1BUT\+ 3 CORNERS \| .*|Les 2 équipes marquent un pénalty \| Oui|Nombre de tirs cadrés du joueur \(OPTA\) \| .+)$/);
+    for (const g of gardes) expect(g).toMatch(/^(Victoire \| .+ – Victoire|1ère mi-temps \| .+ – 1ère mi-temps|PÉPITE DU JOUR \| |Les 2 équipes marquent un pénalty \| Oui|Nombre de tirs cadrés du joueur \(OPTA\) \| .+)$/);
   });
 
   it("lectures fausses corrigées le 18/11 : elles passaient pour comprises", () => {
@@ -31,8 +31,9 @@ describe("corpus des libellés réellement importés (10 au 18/11/2026)", () => 
     expect(trouve("Une des 2 équipes marque un pénalty", "But marqué sur penalty")).toMatchObject({ market_code: "PKB", selection: "Oui", ok: true });
     // Remboursé si nul : était lu comme une victoire sèche
     expect(trouve("Résultat du match (remboursé si match nul)", "Angola")).toMatchObject({ market_code: "DNB", selection: "2", ok: true });
-    // « Sénégal +1,5 » : était lu comme une victoire du Sénégal
-    expect(trouve("+1,5", "Sénégal +1,5")).toMatchObject({ ok: false });
+    // « Sénégal +1,5 » : était lu comme une victoire du Sénégal, puis gardé tel quel ; le 19/11, l'utilisateur confirme « le Sénégal marque au moins 2 buts »
+    expect(trouve("+1,5", "Sénégal +1,5")).toMatchObject({ market_code: "TT1", market_param: 1.5, selection: "Plus", ok: true });
+    expect(trouve("1BUT+ 3 CORNERS", "Turquie 1BUT+ 3 CORNERS")).toMatchObject({ market_code: "COMBO", selection: "TT1@0.5:Plus & CORN1@2.5:Plus", ok: true });
     // « +2 » d'un tipster : au moins deux buts, soit plus de 1,5 (et non plus de 2)
     expect(trouve("+2", "+2")).toMatchObject({ market_code: "OU", market_param: 1.5, selection: "Plus", ok: true });
   });
