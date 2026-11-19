@@ -147,3 +147,14 @@ Proposition : **l'avis de Betster est le premier coup du jour de la catégorie A
 ### Décisions de Mounir — 19/11/2026, 11:29
 
 « ok avançons » : D10 (avis de Betster = premier coup du jour Audacieux, sinon premier Sûr) et D11 (« convergence » à la place de « confiance ») retenus. Suite : les autres états de l'accueil.
+
+## 7. Mesure de la convergence — 19/11, 14:40
+
+Détail : `05-mesure-convergence.md`. Sur 2 952 matchs, la probabilité du marché est aussi fiable quand le modèle diverge que quand il est d'accord ; en cas de désaccord, c'est le modèle qui se trompe. La convergence ne doit donc pas être présentée comme un signal de fiabilité.
+
+| N° | Question | Recommandation |
+| --- | --- | --- |
+| D12 | Retirer la convergence de l'accueil ; garder probabilité, couverture et fraîcheur ; l'avis du modèle reste dans la fiche match comme second avis | Oui |
+| D13 | Expression de Betster fondée sur la probabilité et la couverture (positive ≥ 60 % avec cote fraîche, prudente sinon, neutre sans donnée) | Oui |
+
+D11 (« convergence » à la place de « confiance ») devient sans objet si D12 est retenu.
