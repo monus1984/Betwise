@@ -158,3 +158,7 @@ Détail : `05-mesure-convergence.md`. Sur 2 952 matchs, la probabilité du march
 | D13 | Expression de Betster fondée sur la probabilité et la couverture (positive ≥ 60 % avec cote fraîche, prudente sinon, neutre sans donnée) | Oui |
 
 D11 (« convergence » à la place de « confiance ») devient sans objet si D12 est retenu.
+
+### Décisions de Mounir — 19/11/2026, 14:40
+
+« D12 et 13 validé » : la convergence est retirée de l'accueil (probabilité, couverture et fraîcheur restent) ; l'avis du modèle reste dans la fiche match comme second avis ; l'expression de Betster suit la probabilité et la couverture. D11 est sans objet. Maquettes mises à jour le même jour (filtre « 60 % et plus »).

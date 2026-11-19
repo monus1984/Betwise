@@ -62,11 +62,11 @@ body{margin:0}
 <span style="font-size: 11.5px; color: rgb(201 211 220)">Arsenal – Brentford · Premier League · 13:30</span>
 <div style="display: flex; flex-wrap: wrap; gap: 6px">
 <span style="font-size: 11px; font-weight: 600; padding: 3px 7px; border-radius: 7px; background: rgb(255 255 255 / 0.1)">Cote 1xBet 1,52 · il y a 2 h</span>
-<span style="font-size: 11px; font-weight: 600; padding: 3px 7px; border-radius: 7px; background: rgb(255 255 255 / 0.1); display: inline-flex; align-items: center; gap: 4px"><svg aria-hidden="true" width="12" height="10" viewBox="0 0 12 10"><rect x="0" y="6" width="3" height="4" rx="1" fill="rgb(123 224 196)"></rect><rect x="4.5" y="3" width="3" height="7" rx="1" fill="rgb(123 224 196)"></rect><rect x="9" y="0" width="3" height="10" rx="1" fill="rgb(123 224 196)"></rect></svg>Forte convergence</span>
+<span style="font-size: 11px; font-weight: 600; padding: 3px 7px; border-radius: 7px; background: rgb(255 255 255 / 0.1)">Marché et modèle</span>
 </div>
 </div>
 </div>
-<p style="margin: 0; font-size: 11.5px; line-height: 1.4; color: rgb(201 211 220)">Ce choix perd 32 fois sur 100. Choisi parmi les coups du jour à cote 1,20–1,50 : la plus forte probabilité, avec l'accord du modèle. Ce n'est pas un calcul de valeur de la cote.</p>
+<p style="margin: 0; font-size: 11.5px; line-height: 1.4; color: rgb(201 211 220)">Ce choix perd 32 fois sur 100. Choisi parmi les coups du jour à cote 1,20–1,50 : la plus forte probabilité. Ce n'est pas un calcul de valeur de la cote.</p>
 <div style="display: flex; gap: 8px; align-items: center">
 <a href="#analyse" style="flex-grow: 1; height: 44px; border-radius: 12px; background: rgb(123 224 196); color: rgb(7 26 38); display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 700; text-decoration: none">Voir l'analyse</a>
 <button type="button" aria-label="Ajouter au coupon" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid rgb(255 255 255 / 0.25); background: transparent; color: rgb(243 245 247); display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></button>
@@ -139,7 +139,7 @@ body{margin:0}
 <sc-if value="{{filtres}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; gap: 6px; overflow: hidden">
 <button type="button" aria-pressed="true" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 0; background: rgb(var(--ink)); color: rgb(var(--canvas)); font-size: 12px; font-weight: 600">Tous</button>
-<button type="button" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid rgb(var(--line)); background: transparent; color: rgb(var(--soft)); font-size: 12px; font-weight: 500">Forte convergence</button>
+<button type="button" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid rgb(var(--line)); background: transparent; color: rgb(var(--soft)); font-size: 12px; font-weight: 500">60 % et plus</button>
 <button type="button" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid rgb(var(--line)); background: transparent; color: rgb(var(--soft)); font-size: 12px; font-weight: 500">Mes paris</button>
 <button type="button" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid rgb(var(--line)); background: transparent; color: rgb(var(--soft)); font-size: 12px; font-weight: 500">Afrique</button>
 </div>
@@ -166,7 +166,7 @@ body{margin:0}
 <div style="display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px solid rgb(var(--line))">
 <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 8px">
 <span style="display: flex; flex-direction: column; gap: 1px; min-width: 0"><span style="font-size: 10.5px; color: rgb(var(--muted))">{{m.marche}}</span><span style="font-size: 13px; font-weight: 600">{{m.pick}} <span style="color: rgb(var(--muted)); font-weight: 500">· {{m.pp}} %</span></span></span>
-<span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: rgb(var(--soft)); flex-shrink: 0"><svg aria-hidden="true" width="12" height="10" viewBox="0 0 12 10"><rect x="0" y="6" width="3" height="4" rx="1" style="{{m.b1}}"></rect><rect x="4.5" y="3" width="3" height="7" rx="1" style="{{m.b2}}"></rect><rect x="9" y="0" width="3" height="10" rx="1" style="{{m.b3}}"></rect></svg>{{m.conv}}</span>
+
 </div>
 <span style="font-size: 10.5px; color: rgb(var(--muted))">{{m.couv}}</span>
 <sc-if value="{{m.verdict}}" hint-placeholder-val="{{false}}"><span style="{{m.verdictStyle}}">{{m.verdict}}</span></sc-if>
