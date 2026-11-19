@@ -29,6 +29,7 @@ export async function POST(req: Request) {
   const { data: ok, error } = await supabase.rpc("tts_take", { p_max: LECTURES_PAR_JOUR });
   if (error || !ok) return NextResponse.json({ fallback: true, error: "limite de lectures du jour atteinte" }, { status: 503 });
 
+  const debut = Date.now();
   const r = await synthesize(text, key);
   if (!r.ok) {
     console.warn("[tts]", r.status, r.error.slice(0, 200));
@@ -37,5 +38,6 @@ export async function POST(req: Request) {
   let mp3: Buffer | null = null;
   try { mp3 = wavToMp3(r.wav); } catch (e) { console.warn("[tts] compression", e instanceof Error ? e.message : e); }
   const son = mp3 ?? r.wav;
+  console.log("[tts] ok", `${Date.now() - debut} ms`, `${text.length} caractères`, `${son.length} octets`, mp3 ? "mp3" : "wav");
   return new NextResponse(new Uint8Array(son), { status: 200, headers: { "Content-Type": mp3 ? "audio/mpeg" : "audio/wav", "Cache-Control": "private, no-store", "Content-Length": String(son.length) } });
 }

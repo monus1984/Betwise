@@ -21,7 +21,8 @@ export function unlockAudio() {
 
 export function stopSpeaking() {
   run++;
-  try { player?.pause(); } catch { /* ignore */ }
+  // Le son muet joué pour déverrouiller le téléphone n'est pas coupé : l'interrompre peut annuler le déverrouillage (iPhone)
+  try { if (player && player.src !== SILENCE) player.pause(); } catch { /* ignore */ }
   try { window.speechSynthesis?.cancel(); } catch { /* ignore */ }
 }
 
@@ -67,9 +68,12 @@ async function fetchVoice(text: string): Promise<string | null> {
   } catch { return null; }
 }
 
-function phoneVoice(text: string, done: () => void) {
+/** Ce qui se passe côté son, pour que l'écran le dise : préparation, lecture, voix du téléphone, ou échec. */
+export type EtatSon = "charge" | "joue" | "telephone" | "echec";
+
+function phoneVoice(text: string, done: () => void, etat?: (e: EtatSon) => void) {
   try {
-    const synth = window.speechSynthesis; if (!synth) return done();
+    const synth = window.speechSynthesis; if (!synth) { etat?.("echec"); return done(); }
     const voice = pickVoice(synth.getVoices());
     const parts = spoken(text).split(/(?<=[.!?:])\s+/).map((x) => x.trim()).filter(Boolean);
     if (!parts.length) return done();
@@ -77,7 +81,9 @@ function phoneVoice(text: string, done: () => void) {
       const u = new SpeechSynthesisUtterance(part);
       u.lang = voice?.lang ?? "fr-FR"; u.rate = 0.95; u.pitch = 1.06;
       if (voice) u.voice = voice as SpeechSynthesisVoice;
-      if (k === parts.length - 1) { u.onend = done; u.onerror = done; }
+      if (k === 0) u.onstart = () => etat?.("telephone");
+      u.onerror = () => { etat?.("echec"); if (k === parts.length - 1) done(); };
+      if (k === parts.length - 1) u.onend = done;
       synth.speak(u);
     });
   } catch { done(); }
@@ -87,7 +93,7 @@ function phoneVoice(text: string, done: () => void) {
  * Lit des blocs de texte dans l'ordre. `onBlock(i)` annonce le bloc en cours, `onBlock(null)` la fin ou l'arrêt.
  * Un nouvel appel, ou stopSpeaking(), interrompt la lecture en cours.
  */
-export function speakBlocks(blocks: string[], onBlock?: (i: number | null) => void) {
+export function speakBlocks(blocks: string[], onBlock?: (i: number | null) => void, onEtat?: (e: EtatSon) => void) {
   stopSpeaking();
   const id = ++run;
   const vivant = () => id === run;
@@ -98,18 +104,21 @@ export function speakBlocks(blocks: string[], onBlock?: (i: number | null) => vo
     if (i >= blocks.length) { onBlock?.(null); return; }
     onBlock?.(i);
     const suite = () => { if (vivant()) void lire(i + 1); };
+    const etat = (e: EtatSon) => { if (vivant()) onEtat?.(e); };
+    etat("charge");
     const url = await demande(i);
     if (!vivant()) return;
     void demande(i + 1); // le bloc suivant se prépare pendant la lecture
-    if (!url) return phoneVoice(blocks[i], suite);
+    if (!url) return phoneVoice(blocks[i], suite, etat);
     try {
       if (!player) player = new Audio();
       const a = player;
       a.onended = () => { URL.revokeObjectURL(url); enveloppes.delete(url); suite(); };
-      a.onerror = () => { URL.revokeObjectURL(url); if (vivant()) phoneVoice(blocks[i], suite); };
+      a.onerror = () => { URL.revokeObjectURL(url); if (vivant()) phoneVoice(blocks[i], suite, etat); };
+      a.onplaying = () => etat("joue");
       a.src = url;
       await a.play();
-    } catch { if (vivant()) phoneVoice(blocks[i], suite); }
+    } catch { if (vivant()) phoneVoice(blocks[i], suite, etat); }
   };
   void lire(0);
 }
