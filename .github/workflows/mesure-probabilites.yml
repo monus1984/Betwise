@@ -17,7 +17,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx tsx scripts/mesure-probabilites.ts | tee mesure.md
+      - run: npx tsx scripts/mesure-probabilites.ts --enregistrer | tee mesure.md
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
