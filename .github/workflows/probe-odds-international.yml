@@ -6,7 +6,7 @@ on:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -14,8 +14,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # Provisoire sur la branche etape-2 : lance la mesure tant que mesure-probabilites.yml n'est pas sur main
-      - run: npx tsx scripts/mesure-probabilites.ts --enregistrer
+      - run: npx tsx scripts/probe-odds-international.ts
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
