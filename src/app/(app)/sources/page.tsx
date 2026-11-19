@@ -6,7 +6,7 @@ import { Card, Empty } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 import { NIVEAU, SEUIL, classer, lire, niveau, raison, rendement, resume, reussite, type Proof } from "@/lib/sources/proof";
 import { labelType, ProofBadge } from "./source-ui";
-import { AXE_FR, forcesEtFaiblesses, type Axe, type LigneAxe } from "@/lib/sources/analyse";
+import { AXE_FR, bilanDe, forcesEtFaiblesses, type Prono } from "@/lib/sources/analyse";
 import { COMP_SHORT } from "@/components/match-ui";
 
 export const dynamic = "force-dynamic";
@@ -136,29 +136,31 @@ async function Analyse({ sources }: { sources: { id: string; nom: string; type: 
   if (!sources.length) return <Empty titre="Aucune source à analyser" action={<Link href="/sources/nouvelle" className="rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-on-fill">Ajouter une source</Link>}>Suis un tipster, une page ou un canal, puis charge ses captures.</Empty>;
   const db = await createClient();
   const ids = sources.map((x) => x.id);
-  const [{ data: met }, { data: axes }] = await Promise.all([
-    db.from("source_metrics").select("source_id, nb_regles, nb_gagnes, taux_reussite, rendement, pire_serie").eq("periode", "total").in("source_id", ids),
-    db.from("source_metrics_by_axis").select("source_id, axe, valeur, nb_declares, nb_gagnes, rendement").eq("periode", "total").in("source_id", ids),
+  // Calcul sur les pronos eux-mêmes : les statistiques par critère en base comptent aussi les pronos pas encore réglés
+  const [{ data: met }, { data: pr }] = await Promise.all([
+    db.from("source_metrics").select("source_id, pire_serie").eq("periode", "total").in("source_id", ids),
+    db.from("predictions").select("source_id, market_code, resultat, cote_annoncee, risque_annonce, risque_calcule, match:matches(competition:competitions(code_externe))").in("source_id", ids).neq("statut", "annule").in("resultat", ["gagne", "perdu"]).limit(5000),
   ]);
+  const un = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
+  const pronos: Prono[] = ((pr ?? []) as unknown as { source_id: string; market_code: string; resultat: string; cote_annoncee: number | null; risque_annonce: string | null; risque_calcule: string | null; match: { competition: { code_externe: string | null } | { code_externe: string | null }[] | null } | { competition: { code_externe: string | null } | { code_externe: string | null }[] | null }[] | null }[])
+    .map((r) => ({ source_id: r.source_id, marche: r.market_code, competition: un(un(r.match)?.competition ?? null)?.code_externe ?? null, risque: r.risque_annonce ?? r.risque_calcule, resultat: r.resultat, cote: r.cote_annoncee === null ? null : Number(r.cote_annoncee) }));
   const lignes = sources.map((x) => {
-    const m = met?.find((r) => r.source_id === x.id);
-    const la: LigneAxe[] = (axes ?? []).filter((a) => a.source_id === x.id).map((a) => ({ axe: a.axe as Axe, valeur: a.valeur, nb: Number(a.nb_declares), gagnes: Number(a.nb_gagnes), rendement: a.rendement === null ? null : Number(a.rendement) }));
-    const taux = m?.taux_reussite === null || m?.taux_reussite === undefined ? null : Number(m.taux_reussite);
-    return { ...x, m, taux, ...forcesEtFaiblesses(la, taux, COMP_SHORT) };
-  }).sort((a, b) => (b.m?.nb_regles ?? 0) - (a.m?.nb_regles ?? 0));
+    const b = bilanDe(pronos.filter((p) => p.source_id === x.id));
+    return { ...x, b, pire: met?.find((r) => r.source_id === x.id)?.pire_serie ?? null, ...forcesEtFaiblesses(b.lignes, b.taux, COMP_SHORT) };
+  }).sort((a, b) => b.b.regles - a.b.regles);
   return (
     <div className="space-y-3">
       <p className="px-1 text-[12px] leading-relaxed text-ink-muted">Chaque source sur tous ses pronos réglés. Une force ou une faiblesse demande au moins 3 résultats sur le critère et un écart d’au moins 10 points avec sa réussite générale.</p>
       {lignes.map((x) => (
         <article key={x.id} className="tile p-3.5">
           <Link href={`/sources/${x.id}`} className="flex items-baseline justify-between gap-2"><span className="text-[15px] font-bold">{x.nom}</span><span className="text-[11px] text-ink-muted">{labelType(x.type)} ›</span></Link>
-          {!x.m?.nb_regles ? <p className="mt-1 text-[12.5px] text-ink-muted">Pas encore de prono réglé.</p> : (
+          {!x.b.regles ? <p className="mt-1 text-[12.5px] text-ink-muted">Pas encore de prono réglé.</p> : (
             <>
               <dl className="mt-2 grid grid-cols-3 gap-2 text-[11px]">
-                <div><dt className="text-ink-muted">Réglés</dt><dd className="text-[15px] font-bold">{x.m.nb_regles}</dd></div>
-                <div><dt className="text-ink-muted">Réussite</dt><dd className="text-[15px] font-bold">{pc(x.taux)}</dd>{x.proof.attendu !== null && <dd className="text-ink-muted">attendu {pc(x.proof.attendu)}</dd>}</div>
-                <div><dt className="text-ink-muted">Rendement</dt><dd className={`text-[15px] font-bold ${x.m.rendement === null ? "" : Number(x.m.rendement) >= 0 ? "text-gain" : "text-loss"}`}>{unit(x.m.rendement === null ? null : Number(x.m.rendement))}</dd></div>
-                <div><dt className="text-ink-muted">Pire série</dt><dd className="font-semibold">{x.m.pire_serie ?? "—"} perdus</dd></div>
+                <div><dt className="text-ink-muted">Réglés</dt><dd className="text-[15px] font-bold">{x.b.regles}</dd></div>
+                <div><dt className="text-ink-muted">Réussite</dt><dd className="text-[15px] font-bold">{pc(x.b.taux)}</dd>{x.proof.attendu !== null && <dd className="text-ink-muted">attendu {pc(x.proof.attendu)}</dd>}</div>
+                <div><dt className="text-ink-muted">Rendement</dt><dd className={`text-[15px] font-bold ${x.b.rendement === null ? "" : x.b.rendement >= 0 ? "text-gain" : "text-loss"}`}>{unit(x.b.rendement)}</dd></div>
+                <div><dt className="text-ink-muted">Pire série</dt><dd className="font-semibold">{x.pire === null ? "—" : `${x.pire} perdus`}</dd></div>
                 <div className="col-span-2"><dt className="text-ink-muted">Publiés avant le match</dt><dd className="font-semibold">{x.proof.prouvesRegles} sur {x.proof.prouvesRegles + x.proof.apresCoupRegles}{x.proof.apresCoupRegles ? ` · ${x.proof.apresCoupRegles} ajoutés après coup` : ""}</dd></div>
               </dl>
               {(x.forces.length > 0 || x.faiblesses.length > 0) ? (

@@ -1,6 +1,7 @@
 "use client";
 /**
- * Betster animé (19/11) : le portrait validé, sans aucune retouche de son apparence, animé par le mouvement.
+ * Animation du portrait de Betster (19/11) : une image fixe mise en mouvement, pas un personnage incarné (voir
+ * docs/brand/betster/etude-avatar-reel.md sur la branche design-accueil pour la cible). Le portrait validé n'est pas retouché.
  * Repos : il respire et balance légèrement la tête. Pense : il penche la tête, un anneau tourne.
  * Parle : il bouge au rythme réel de la voix du Coach (niveau sonore), ou à un rythme régulier avec la voix du téléphone.
  * Tout s'arrête si l'utilisateur a demandé moins d'animations.

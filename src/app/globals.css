@@ -199,7 +199,7 @@ input, select, textarea { color: rgb(var(--c-ink)); }
 .betster-fab { animation: betster-halo 3.2s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .betster-fab { animation: none; } }
 
-/* Betster animé : repos (respire, balance la tête), pense (tête penchée, anneau), parle (suit le niveau de la voix) */
+/* Animation du portrait de Betster : repos (respire, balance la tête), pense (tête penchée, anneau), parle (suit le niveau de la voix) */
 @keyframes betster-respire {
   0%, 100% { transform: translateY(0) rotate(0) scale(1); }
   25% { transform: translateY(-1.5px) rotate(-3deg) scale(1.03); }
