@@ -1,6 +1,7 @@
 import type { createClient } from "@/lib/supabase/server";
 import { MODEL_VERSION } from "../model/version";
 import { lambdasFromOdds, makeGrid, probOf, type Grid } from "./grid";
+import { METHODE_MARGE, sansMarge, type MethodeMarge } from "./marge";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
 /**
@@ -29,13 +30,12 @@ const CANDIDATES: [string, number | null, string][] = [
 /** Les cinq cotes de référence d'un match : victoire, nul, défaite, plus et moins de 2,5 buts. */
 export type Cotes5 = { c1: number | null; cN: number | null; c2: number | null; plus25: number | null; moins25: number | null };
 
-/** Probabilité directe des marchés cotés (victoire, plus/moins 2,5) : cotes de référence, marge retirée proportionnellement. */
-export function probaDirecte(c: Cotes5, market: string, param: number | null, sel: string): number | null {
+/** Probabilité directe des marchés cotés (victoire, plus/moins 2,5) : cotes de référence, marge retirée (voir marge.ts). */
+export function probaDirecte(c: Cotes5, market: string, param: number | null, sel: string, methode: MethodeMarge = METHODE_MARGE): number | null {
   const group = market === "1X2" ? [c.c1, c.cN, c.c2] : market === "OU" && param === 2.5 ? [c.plus25, c.moins25] : null;
   if (!group || group.some((x) => !x)) return null;
-  const inv = group.map((x) => 1 / x!), tot = inv.reduce((a, b) => a + b, 0);
   const idx = market === "1X2" ? ["1", "N", "2"].indexOf(sel) : ["Plus", "Moins"].indexOf(sel);
-  return idx < 0 ? null : inv[idx] / tot;
+  return idx < 0 ? null : sansMarge(group as number[], methode)[idx];
 }
 
 /**
@@ -43,11 +43,11 @@ export function probaDirecte(c: Cotes5, market: string, param: number | null, se
  * et le plus/moins 2,5 ; grille de scores (buts attendus déduits de ces cotes) pour tous les autres marchés.
  * Fonction pure : la fiche match et la mesure des probabilités (scripts/mesure-probabilites.ts) passent par elle.
  */
-export function probasMarche(c: Cotes5): { lh: number; la: number; approx: boolean; grid: Grid; p: (market: string, param: number | null, sel: string) => number | null } | null {
-  const ml = lambdasFromOdds(c);
+export function probasMarche(c: Cotes5, methode: MethodeMarge = METHODE_MARGE): { lh: number; la: number; approx: boolean; grid: Grid; p: (market: string, param: number | null, sel: string) => number | null } | null {
+  const ml = lambdasFromOdds(c, methode);
   if (!ml) return null;
   const grid = makeGrid(ml.lh, ml.la);
-  return { ...ml, grid, p: (market, param, sel) => probaDirecte(c, market, param, sel) ?? probOf(grid, market, param, sel) };
+  return { ...ml, grid, p: (market, param, sel) => probaDirecte(c, market, param, sel, methode) ?? probOf(grid, market, param, sel) };
 }
 
 /** Signaux (buts attendus + cotes) pour une liste de matchs, en deux requêtes. */

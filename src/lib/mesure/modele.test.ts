@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { rejouerModele, type MatchHist } from "./modele";
-import { proportionnelle, puissance } from "./marge";
+import { proportionnelle, puissance, shin } from "../probs/marge";
 
 describe("rejeu du modèle", () => {
   // Quatre équipes, A la plus forte : un tour par semaine pendant 60 semaines
@@ -27,14 +27,21 @@ describe("rejeu du modèle", () => {
 
 describe("retrait de la marge", () => {
   it("les deux méthodes donnent des probabilités qui somment à 1", () => {
-    for (const f of [proportionnelle, puissance]) expect(f([1.5, 4.2, 6.5]).reduce((a, b) => a + b, 0)).toBeCloseTo(1, 6);
+    for (const f of [proportionnelle, puissance, shin]) expect(f([1.5, 4.2, 6.5]).reduce((a, b) => a + b, 0)).toBeCloseTo(1, 6);
   });
   it("la méthode puissance rend plus de probabilité au favori et en retire à l'outsider", () => {
     const a = proportionnelle([1.3, 5.5, 9]), b = puissance([1.3, 5.5, 9]);
     expect(b[0]).toBeGreaterThan(a[0]);
     expect(b[2]).toBeLessThan(a[2]);
   });
+  it("la méthode de Shin va dans le même sens, moins fort", () => {
+    const a = proportionnelle([1.3, 5.5, 9]), b = shin([1.3, 5.5, 9]), c = puissance([1.3, 5.5, 9]);
+    expect(b[0]).toBeGreaterThan(a[0]);
+    expect(b[2]).toBeLessThan(a[2]);
+    expect(Math.abs(b[0] - a[0])).toBeLessThan(Math.abs(c[0] - a[0]) + 0.02);
+  });
   it("sans marge, rien ne change", () => {
     expect(puissance([2, 2])).toEqual([0.5, 0.5]);
+    expect(shin([2, 2])).toEqual([0.5, 0.5]);
   });
 });

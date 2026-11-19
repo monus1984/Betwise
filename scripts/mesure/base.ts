@@ -6,7 +6,7 @@ import { createAdminClient } from "../../src/lib/supabase/admin";
 import { MODEL_OPTS } from "../../src/lib/model/run";
 import { ecartCalibration, logLoss3, pct, rendement, resume, tranches, type Obs, type Resume } from "../../src/lib/mesure/calibration";
 import { mesurerMarche, type MatchMesure, type MesureMarche } from "../../src/lib/mesure/marche";
-import { proportionnelle, puissance } from "../../src/lib/mesure/marge";
+import { proportionnelle, puissance } from "../../src/lib/probs/marge";
 import { rejouerModele, type MatchHist } from "../../src/lib/mesure/modele";
 import { normalizeTeam, teamSimilarity } from "../../src/lib/odds-api/client";
 
@@ -31,12 +31,12 @@ async function tout<T>(page: (de: number, a: number) => PromiseLike<{ data: T[] 
 /** 1. Matchs suivis par l'application : dernières cotes de référence relevées avant le coup d'envoi. */
 async function matchsSuivis(db: Db): Promise<MatchMesure[]> {
   type M = { id: string; kickoff_at: string; score_home: number; score_away: number; ht_home: number | null; ht_away: number | null; competition: { code_externe: string | null } | { code_externe: string | null }[] | null };
-  const ms = await tout<M>((de, a) => db.from("matches").select("id, kickoff_at, score_home, score_away, ht_home, ht_away, competition:competitions(code_externe)").eq("statut", "termine").not("score_home", "is", null).order("kickoff_at").range(de, a) as never);
+  const ms = await tout<M>((de, a) => db.from("matches").select("id, kickoff_at, score_home, score_away, ht_home, ht_away, competition:competitions(code_externe)").eq("statut", "termine").not("score_home", "is", null).order("kickoff_at").order("id").range(de, a) as never);
   const out: MatchMesure[] = [];
   for (let i = 0; i < ms.length; i += 50) {
     const lot = ms.slice(i, i + 50);
     type O = { match_id: string; market_code: string; market_param: number | null; selection: string; cote: number; observed_at: string };
-    const odds = await tout<O>((de, a) => db.from("odds_observations").select("match_id, market_code, market_param, selection, cote, observed_at").eq("bookmaker", "ref:eu-median").in("match_id", lot.map((m) => m.id)).order("observed_at", { ascending: false }).range(de, a) as never);
+    const odds = await tout<O>((de, a) => db.from("odds_observations").select("match_id, market_code, market_param, selection, cote, observed_at").eq("bookmaker", "ref:eu-median").in("match_id", lot.map((m) => m.id)).order("observed_at", { ascending: false }).order("id").range(de, a) as never);
     for (const m of lot) {
       const avant = odds.filter((o) => o.match_id === m.id && o.observed_at < m.kickoff_at); // déjà triées de la plus récente à la plus ancienne
       const c = (market: string, sel: string) => { const o = avant.find((x) => x.market_code === market && x.selection === sel); return o ? Number(o.cote) : null; };
@@ -56,7 +56,7 @@ function ligneResume(nom: string, r: Resume | null, extra = "") {
 /** 2. Coups du jour : ce que l'application annonçait, ce qui est arrivé. */
 async function coupsDuJour(db: Db) {
   type P = { jour: string; categorie: string; probabilite: number; cote_ref: number | null; prediction_id: string | null };
-  const picks = await tout<P>((de, a) => db.from("daily_picks").select("jour, categorie, probabilite, cote_ref, prediction_id").order("jour").range(de, a) as never);
+  const picks = await tout<P>((de, a) => db.from("daily_picks").select("jour, categorie, probabilite, cote_ref, prediction_id").order("jour").order("id").range(de, a) as never);
   const ids = picks.map((p) => p.prediction_id).filter((x): x is string => !!x);
   const res = new Map<string, string>();
   for (let i = 0; i < ids.length; i += 100) {
@@ -80,32 +80,22 @@ async function coupsDuJour(db: Db) {
 }
 
 /** 3. Historique des cinq championnats (cotes moyennes de clôture) : mêmes calculs que l'application, sur des milliers de matchs. */
-async function historique(db: Db, rapportMarche: (r: MesureMarche, titre: string) => void) {
-  type H = { ligue: string; played_on: string; home_nom: string; away_nom: string; home_goals: number; away_goals: number; cote_1: number | null; cote_n: number | null; cote_2: number | null; cote_plus25: number | null; cote_moins25: number | null };
-  const hs = await tout<H>((de, a) => db.from("match_history").select("ligue, played_on, home_nom, away_nom, home_goals, away_goals, cote_1, cote_n, cote_2, cote_plus25, cote_moins25").order("played_on").range(de, a) as never);
+async function historique(db: Db, rapportMarche: (r: MesureMarche, titre: string) => void, rapportMethodes: (m: MatchMesure[]) => void) {
+  type H = { ligue: string; played_on: string; home_nom: string; away_nom: string; home_goals: number; away_goals: number; cote_1: number | null; cote_n: number | null; cote_2: number | null; cote_plus25: number | null; cote_moins25: number | null; ht_home_goals: number | null; ht_away_goals: number | null };
+  const hs = await tout<H>((de, a) => db.from("match_history").select("ligue, played_on, home_nom, away_nom, home_goals, away_goals, cote_1, cote_n, cote_2, cote_plus25, cote_moins25, ht_home_goals, ht_away_goals").order("played_on").order("id").range(de, a) as never);
   const cotes = hs.filter((h) => h.cote_1 && h.cote_n && h.cote_2);
-  const r = mesurerMarche(cotes.map((h) => ({ code: h.ligue, cotes: { c1: Number(h.cote_1), cN: Number(h.cote_n), c2: Number(h.cote_2), plus25: h.cote_plus25 ? Number(h.cote_plus25) : null, moins25: h.cote_moins25 ? Number(h.cote_moins25) : null }, score: { h: h.home_goals, a: h.away_goals, hth: null, hta: null } })));
+  const matchs: MatchMesure[] = cotes.map((h) => ({ code: h.ligue, cotes: { c1: Number(h.cote_1), cN: Number(h.cote_n), c2: Number(h.cote_2), plus25: h.cote_plus25 ? Number(h.cote_plus25) : null, moins25: h.cote_moins25 ? Number(h.cote_moins25) : null }, score: { h: h.home_goals, a: h.away_goals, hth: h.ht_home_goals, hta: h.ht_away_goals } }));
+  const r = mesurerMarche(matchs);
   rapportMarche(r, `## 3. Mêmes calculs sur l'historique des cinq championnats : ${r.matchs} matchs du ${hs[0]?.played_on ?? "?"} au ${hs[hs.length - 1]?.played_on ?? "?"}, cotes moyennes de clôture`);
+  rapportMethodes(matchs);
 
-  // Retrait de la marge : proportionnel (application) contre puissance
-  const k = (h: H): 0 | 1 | 2 => (h.home_goals > h.away_goals ? 0 : h.home_goals === h.away_goals ? 1 : 2);
-  const methodes: [string, (c: number[]) => number[]][] = [["proportionnelle (application)", proportionnelle], ["puissance", puissance]];
-  console.log("\n### Retrait de la marge sur le résultat du match\n");
-  console.log("| Méthode | Log-loss | Favoris à 60 % ou plus : sélections | annoncé | arrivé | écart (points) | Outsiders à moins de 20 % : sélections | annoncé | arrivé | écart (points) |");
-  console.log("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
-  for (const [nom, f] of methodes) {
-    const rows = cotes.map((h) => ({ p: f([Number(h.cote_1), Number(h.cote_n), Number(h.cote_2)]) as [number, number, number], k: k(h) }));
-    const obs: Obs[] = rows.flatMap((x) => x.p.map((p, i) => ({ p, y: (x.k === i ? 1 : 0) as 0 | 1 })));
-    const fav = resume(obs.filter((o) => o.p >= 0.6)), out = resume(obs.filter((o) => o.p < 0.2));
-    console.log(`| ${nom} | ${d3(logLoss3(rows)!)} | ${fav?.n ?? 0} | ${fav ? pct(fav.pMoy, 1) : "—"} | ${fav ? pct(fav.freq, 1) : "—"} | ${fav ? pts(fav.freq - fav.pMoy) : "—"} | ${out?.n ?? 0} | ${out ? pct(out.pMoy, 1) : "—"} | ${out ? pct(out.freq, 1) : "—"} | ${out ? pts(out.freq - out.pMoy) : "—"} |`);
-  }
   return { hs, r };
 }
 
 /** 4. Modèle maison rejoué semaine après semaine, comparé aux cotes de clôture sur les mêmes matchs. */
 async function modele(db: Db, hs: { ligue: string; played_on: string; home_nom: string; away_nom: string; home_goals: number; away_goals: number; cote_1: number | null; cote_n: number | null; cote_2: number | null }[]) {
   type A = { league: number; played_at: string; home_id: number; home_nom: string; away_id: number; away_nom: string; home_goals: number; away_goals: number; xg_home: number | null; xg_away: number | null };
-  const af = await tout<A>((de, a) => db.from("af_history").select("league, played_at, home_id, home_nom, away_id, away_nom, home_goals, away_goals, xg_home, xg_away").order("played_at").range(de, a) as never);
+  const af = await tout<A>((de, a) => db.from("af_history").select("league, played_at, home_id, home_nom, away_id, away_nom, home_goals, away_goals, xg_home, xg_away").order("played_at").order("fixture_id").range(de, a) as never);
   const noms = new Map<string, string>();
   const matchs: MatchHist[] = af.filter((m) => LIGUES[m.league]).map((m) => {
     noms.set(String(m.home_id), m.home_nom); noms.set(String(m.away_id), m.away_nom);
@@ -152,12 +142,14 @@ async function modele(db: Db, hs: { ligue: string; played_on: string; home_nom: 
   return lignes;
 }
 
-export async function mesurerDepuisLaBase(o: { enregistrer: boolean; rapportMarche: (r: MesureMarche, titre?: string) => void; resumeVersLigne: (r: Resume) => Record<string, number> }) {
+export async function mesurerDepuisLaBase(o: { enregistrer: boolean; rapportMarche: (r: MesureMarche, titre?: string) => void; rapportMethodes: (m: MatchMesure[]) => void; resumeVersLigne: (r: Resume) => Record<string, number> }) {
   const db = createAdminClient();
-  const suivis = mesurerMarche(await matchsSuivis(db));
+  const ms = await matchsSuivis(db);
+  const suivis = mesurerMarche(ms);
   o.rapportMarche(suivis);
+  o.rapportMethodes(ms);
   const cdj = await coupsDuJour(db);
-  const { hs, r: ligues } = await historique(db, o.rapportMarche as never);
+  const { hs, r: ligues } = await historique(db, o.rapportMarche as never, o.rapportMethodes);
   const mod = await modele(db, hs);
 
   if (!o.enregistrer) return;

@@ -54,3 +54,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0044_tous_les_pronos_comptent.sql | 2026-11-17 | Note des sources sur tous leurs pronos non annulés, saisis avant ou après le match (annule l'effet de 0041) |
 | 0045_import_fiable.sql | 2026-11-18 | Import sans ligne écartée : marché `LIBRE` (pari gardé tel quel), `set_selection_result()` pour régler une ligne à la main ; 11 marchés ajoutés (mi-temps, penalty, doublé) avec leur règlement ; registre `libelles_inconnus` et `log_libelle_inconnu()` |
 | 0046_mesures_probabilites.sql | 2026-11-19 | Table `mesures_probabilites` : résumé de chaque mesure des probabilités (par périmètre et famille de marchés), écrit par `scripts/mesure-probabilites.ts` |
+| 0047_historique_mi_temps.sql | 2026-11-19 | `match_history.ht_home_goals`, `ht_away_goals` : score à la pause, pour mesurer les marchés de mi-temps |

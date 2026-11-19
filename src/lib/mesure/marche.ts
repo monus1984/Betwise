@@ -4,6 +4,7 @@
  * probabilités exactement comme la fiche match (probasMarche), et on les confronte au score.
  */
 import { ALL_CANDIDATES, probasMarche, type Cotes5 } from "../probs/signals";
+import type { MethodeMarge } from "../probs/marge";
 import { issue, type Score } from "./issue";
 import { ecartCalibration, logLoss3, resume, tranches, type Obs, type Resume, type Tranche } from "./calibration";
 
@@ -50,19 +51,20 @@ export type MesureFamille = {
 export type MesureMarche = {
   matchs: number;
   familles: MesureFamille[];
-  groupes: Record<TypeFamille, { selections: number; tout: Resume | null; ecart: number; tranches: Tranche[] }>;
+  /** favoris : sélections annoncées à 60 % ou plus ; outsiders : à moins de 20 %. */
+  groupes: Record<TypeFamille, { selections: number; tout: Resume | null; ecart: number; tranches: Tranche[]; favoris: Resume | null; outsiders: Resume | null }>;
   resultat: { n: number; logLoss: number; hasard: number; frequences: number } | null;
   parCompetition: { code: string; matchs: number; logLoss: number }[];
   miTemps: { matchs: number; buts: number; butsAvantPause: number; part: number } | null;
 };
 
-export function mesurerMarche(matchs: MatchMesure[]): MesureMarche {
+export function mesurerMarche(matchs: MatchMesure[], methode?: MethodeMarge): MesureMarche {
   const parFamille = new Map<string, { obs: Obs[]; matchs: Set<number> }>();
   const x12: { p: [number, number, number]; k: 0 | 1 | 2; code: string }[] = [];
   let buts = 0, avant = 0, nMt = 0, n = 0;
 
   matchs.forEach((m, i) => {
-    const sg = probasMarche(m.cotes);
+    const sg = probasMarche(m.cotes, methode);
     if (!sg) return;
     n++;
     const p1 = sg.p("1X2", null, "1"), pN = sg.p("1X2", null, "N"), p2 = sg.p("1X2", null, "2");
@@ -85,7 +87,7 @@ export function mesurerMarche(matchs: MatchMesure[]): MesureMarche {
   });
   const groupe = (t: TypeFamille) => {
     const obs = FAMILLES.filter((f) => f.type === t).flatMap((f) => parFamille.get(f.cle)?.obs ?? []);
-    return { selections: obs.length, tout: resume(obs), ecart: ecartCalibration(obs), tranches: tranches(obs) };
+    return { selections: obs.length, tout: resume(obs), ecart: ecartCalibration(obs), tranches: tranches(obs), favoris: resume(obs.filter((o) => o.p >= 0.6)), outsiders: resume(obs.filter((o) => o.p < 0.2)) };
   };
   const freq = x12.length ? ([0, 1, 2] as const).map((k) => x12.filter((r) => r.k === k).length / x12.length) : [1 / 3, 1 / 3, 1 / 3];
   const codes = [...new Set(x12.map((r) => r.code))].sort();

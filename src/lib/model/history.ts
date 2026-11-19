@@ -10,6 +10,7 @@ export type HistoryRow = {
   ligue: string; saison: string; played_on: string; home_nom: string; away_nom: string;
   home_goals: number; away_goals: number;
   cote_1: number | null; cote_n: number | null; cote_2: number | null; cote_plus25: number | null; cote_moins25: number | null;
+  ht_home_goals: number | null; ht_away_goals: number | null;
 };
 
 /** Saison au format football-data.co.uk (2526 pour 2025-26). La saison bascule en juillet. */
@@ -30,6 +31,8 @@ export function parseCsv(text: string, ligue: string, saison: string): HistoryRo
   const iDate = ix("Date"), iH = ix("HomeTeam"), iA = ix("AwayTeam"), iHG = ix("FTHG"), iAG = ix("FTAG");
   const i1 = ix("AvgH", "BbAvH"), iN = ix("AvgD", "BbAvD"), i2 = ix("AvgA", "BbAvA");
   const iO = ix("Avg>2.5", "BbAv>2.5"), iU = ix("Avg<2.5", "BbAv<2.5");
+  const iHH = ix("HTHG"), iHA = ix("HTAG");
+  const but = (v: string | undefined) => { const n = Number(v); return v !== undefined && v !== "" && Number.isInteger(n) && n >= 0 ? n : null; };
   const num = (v: string | undefined) => { const n = Number(v); return v && Number.isFinite(n) && n > 1 ? n : null; };
   const out: HistoryRow[] = [];
   for (const l of lines.slice(1)) {
@@ -43,6 +46,7 @@ export function parseCsv(text: string, ligue: string, saison: string): HistoryRo
       ligue, saison, played_on: `${year}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`,
       home_nom: c[iH].trim(), away_nom: c[iA].trim(), home_goals: hg, away_goals: ag,
       cote_1: num(c[i1]), cote_n: num(c[iN]), cote_2: num(c[i2]), cote_plus25: num(c[iO]), cote_moins25: num(c[iU]),
+      ht_home_goals: iHH >= 0 ? but(c[iHH]) : null, ht_away_goals: iHA >= 0 ? but(c[iHA]) : null,
     });
   }
   return out;

@@ -1443,6 +1443,8 @@ export type Database = {
           cote_2: number | null
           cote_plus25: number | null
           cote_moins25: number | null
+          ht_home_goals: number | null
+          ht_away_goals: number | null
           imported_at: string
         }
         Insert: {
@@ -1459,6 +1461,8 @@ export type Database = {
           cote_2?: number | null
           cote_plus25?: number | null
           cote_moins25?: number | null
+          ht_home_goals?: number | null
+          ht_away_goals?: number | null
           imported_at?: string
         }
         Update: {
@@ -1475,6 +1479,8 @@ export type Database = {
           cote_2?: number | null
           cote_plus25?: number | null
           cote_moins25?: number | null
+          ht_home_goals?: number | null
+          ht_away_goals?: number | null
           imported_at?: string
         }
         Relationships: []

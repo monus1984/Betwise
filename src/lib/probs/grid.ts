@@ -4,6 +4,8 @@
  *  - « modele » : forces attaque/défense du modèle BETWISE ;
  *  - « marche » : buts attendus déduits des cotes de référence (1X2 + plus/moins 2,5), marge retirée.
  */
+import { METHODE_MARGE, sansMarge, type MethodeMarge } from "./marge";
+
 export type Grid = number[][];
 const MAX = 10;
 const pmf = (l: number, k: number) => { let p = Math.exp(-l); for (let i = 1; i <= k; i++) p *= l / i; return p; };
@@ -115,12 +117,13 @@ export function probOf(g: Grid, market: string, param: number | null, sel: strin
 function bisect(f: (x: number) => number, lo: number, hi: number) { for (let k = 0; k < 50; k++) { const m = (lo + hi) / 2; if (f(m) < 0) lo = m; else hi = m; } return (lo + hi) / 2; }
 
 /** Buts attendus (domicile, extérieur) déduits des cotes : total calé sur +2,5, partage calé sur 1 contre 2. */
-export function lambdasFromOdds(o: { c1?: number | null; cN?: number | null; c2?: number | null; plus25?: number | null; moins25?: number | null }): { lh: number; la: number; approx: boolean } | null {
+export function lambdasFromOdds(o: { c1?: number | null; cN?: number | null; c2?: number | null; plus25?: number | null; moins25?: number | null }, methode: MethodeMarge = METHODE_MARGE): { lh: number; la: number; approx: boolean } | null {
   if (!o.c1 || !o.cN || !o.c2) return null;
   const hasOU = !!o.plus25 && !!o.moins25;
-  const pOver = hasOU ? (1 / o.plus25!) / (1 / o.plus25! + 1 / o.moins25!) : 0.5;
+  const pOver = hasOU ? sansMarge([o.plus25!, o.moins25!], methode)[0] : 0.5;
   const total = bisect((t) => (1 - Math.exp(-t) * (1 + t + (t * t) / 2)) - pOver, 0.3, 8);
-  const target = (1 / o.c1) / (1 / o.c1 + 1 / o.c2); // part du « 1 » hors nul
+  const [p1, , p2] = sansMarge([o.c1, o.cN, o.c2], methode);
+  const target = p1 / (p1 + p2); // part du « 1 » hors nul
   const share = bisect((s) => { const g = makeGrid(total * s, total * (1 - s)); const a = sum(g, R1X2["1"]), b = sum(g, R1X2["2"]); return a / (a + b) - target; }, 0.03, 0.97);
   return { lh: total * share, la: total * (1 - share), approx: !hasOU };
 }
