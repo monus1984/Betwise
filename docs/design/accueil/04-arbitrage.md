@@ -84,7 +84,7 @@ Cela sert aussi d'« indicateur de confiance » séparé de la probabilité, que
 | D4 | « Je pense qu'il faut changer même le nom de l'onglet et le positionner (Mes pronostiqueurs, Mon réseau ou autre) » | Renommer l'onglet Sources ; proposition en section 5 |
 | D5 | OK | Trois pistes d'avatar dessinées avant de choisir |
 | D6 | OK | Écrans en HTML par Claude, images de l'avatar par ChatGPT |
-| D7 | Pas de réponse | Matchs → Prédictions : en attente |
+| D7 | « Prédictions » (11:09) | Onglet Matchs renommé Prédictions dans ce lot |
 | D8 | OK | Scénarios au lot suivant ; couverture africaine dans un lot à part, juste après |
 | D9 | « Betster = mélange entre Betwise et tipster (ton avis ?) » | Nom proposé par Mounir ; avis de Claude en section 5 ; vérification de marque à faire |
 
@@ -101,3 +101,7 @@ Cela sert aussi d'« indicateur de confiance » séparé de la probabilité, que
 **Nom de l'onglet Sources (D4) :** dans une barre de cinq onglets, il y a la place pour 9 à 10 caractères. « Mes pronostiqueurs » ne tient pas, « Mon réseau » est flou. Proposition : **« Tipsters »** sur l'onglet, mot que tes utilisateurs emploient déjà, et « Mes pronostiqueurs » en titre de page. Ordre des onglets : Accueil · Prédictions · Mes paris · Tipsters · Coach.
 
 **Betster (D9) :** bon nom. Court, se lit pareil en français et en anglais, on y entend « bet », « tipster » et « best », et il va bien à un personnage qui donne son avis. Deux réserves : une recherche rapide ne montre pas de marque connue de ce nom, mais ce n'est pas une vérification de marque (à faire auprès de l'OAPI pour l'Afrique francophone avant d'en faire un logo) ; et le personnage parle au nom de BETWISE, il ne doit pas passer pour un tipster de plus qu'on note comme les autres.
+
+### Validation des propositions — 19/11/2026, 11:09
+
+Mounir : « D7 = Prédictions ; D1 et D2, D4 = ok ». Les propositions de la section 5 (ordre de l'accueil, carte Coach avec masquage des montants, onglet « Tipsters » et ordre des onglets) sont retenues. Prochaine étape : maquettes HTML du jour chargé, clair et sombre.
