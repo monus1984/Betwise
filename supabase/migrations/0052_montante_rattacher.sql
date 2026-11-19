@@ -1,4 +1,3 @@
--- EN ATTENTE : non appliquée, à valider par Mounir.
 -- 0052 — Rattacher un pari à une montante (19/11). Les utilisateurs n'ont pas le droit de modifier bets directement :
 -- cette fonction le fait pour eux, après contrôle (montante et pari au même propriétaire, montante en cours,
 -- pari non annulé et pas déjà rattaché, paliers prévus non dépassés). Le numéro du palier est attribué ici.
