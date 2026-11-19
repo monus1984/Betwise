@@ -1,5 +1,7 @@
 # Betster : variantes d'expression à produire (brief pour ChatGPT)
 
+> **19/11, 17 h : solution de repli seulement.** L'audit de ChatGPT écarte l'alternance de PNG comme livraison finale. La cible est décrite dans `etude-avatar-reel.md`.
+
 19/11, demande de Mounir : rendre Betster plus vivant. L'animation actuelle (branche `accueil`, `src/components/betster-anime.tsx`) bouge le portrait validé sans le modifier. Pour aller plus loin (clignement, bouche qui suit la voix, sourire), il faut des variantes **du même portrait**. Elles ne seront intégrées qu'après validation de Mounir (règle CLAUDE.md : pas de nouvelle apparence sans validation).
 
 ## Référence
