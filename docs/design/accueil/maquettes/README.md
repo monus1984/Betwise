@@ -21,3 +21,18 @@ Ce qui reste à dessiner : soirée en direct, lendemain, jour creux, nouvel abon
 | `PageEntiere.dc.html` | Toute la page d'un coup, pour la lecture |
 
 Corrections : voir `04-arbitrage.md`, section 6.
+
+## v3 — 19/11, 11:32 : les autres états
+
+Rangée du bas de la toile, tous en thème sombre, écran 360 × 800. Un seul composant (`Main.dc.html`, propriété `etat`) : la structure ne change pas, seul le contenu change.
+
+| Artboard | État | Ce qui change |
+| --- | --- | --- |
+| `Direct.dc.html` | Soirée en direct | Carte « Ce soir avec Betster » : état de chaque sélection du coupon ; scores et minute sur les cartes ; mention que les pourcentages sont ceux d'avant le match (pas de probabilité en direct dans le moteur) ; matchs terminés avec « passé » ou « pas passé » |
+| `Lendemain.dc.html` | Lendemain | Carte « Le bilan d'hier » : 4 sur 5, probabilité annoncée en moyenne, recul sur 30 jours ; puis les matchs du jour |
+| `Creux.dc.html` | Jour creux | Prochains matchs couverts (ici la Ligue des champions : « marché seul, pas d'avis du modèle »), accès au calendrier et à l'import ; pas de bloc Tipsters ni de coupon |
+| `Nouveau.dc.html` | Nouvel abonné | Avis de Betster et matchs comme d'habitude ; bloc « Bien démarrer » en trois étapes ; carte Coach vide qui dit ce qui y apparaîtra |
+| `HorsLigne.dc.html` | Hors ligne | Bandeau en tête, données datées de la dernière mise à jour, ajout au coupon en attente du réseau |
+
+Le « match non couvert » apparaît dans chaque état (Ligue 1 ivoirienne), sans pourcentage.
+Les chiffres sur 30 jours du bilan (46 sur 53, 78 % annoncés, 87 % passés) sont ceux, réels, des coups du jour BETWISE mesurés le 19/11 ; tout le reste est fictif.

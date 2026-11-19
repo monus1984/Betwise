@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>BETWISE — accueil, hors ligne</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Barlow+Condensed:wght@600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 360px; height: 800px; font-family: Inter, system-ui, sans-serif">
+<dc-import name="Main" theme="sombre" vue="écran" etat="hors ligne" coupon="{{coupon}}" hint-size="360px,800px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"coupon":{"editor":"boolean","default":true},"$preview":{"width":360,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return { coupon: this.props.coupon ?? true }; }
+}
+</script>
+</body>
+</html>

@@ -21,6 +21,9 @@ body{margin:0}
 </helmet>
 <div class="bw {{themeClass}}" style="{{rootStyle}}">
 <div style="{{scrollStyle}}">
+<sc-if value="{{horsLigne}}" hint-placeholder-val="{{false}}">
+<div role="status" style="display: flex; gap: 8px; align-items: center; padding: 10px 16px; background: rgb(var(--draw-soft)); color: rgb(var(--draw-ink)); font-size: 12px; line-height: 1.35"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink: 0"><path d="M2 8.8a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0M12 19.5v.01M3 3l18 18"></path></svg><span><b>Hors ligne.</b> Tu vois les données de 09:14 ; rien n'est mis à jour, l'ajout au coupon attend le réseau.</span></div>
+</sc-if>
 
 <!-- En-tête -->
 <header style="display: flex; align-items: center; justify-content: space-between; padding: 20px 16px 8px 16px">
@@ -28,7 +31,7 @@ body{margin:0}
 <div aria-hidden="true" style="width: 28px; height: 28px; border-radius: 8px; background: rgb(var(--brand)); color: rgb(var(--onfill)); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 19px">B</div>
 <div style="display: flex; flex-direction: column">
 <span style="font-weight: 800; font-size: 16px; letter-spacing: -0.01em">BETWISE</span>
-<span style="font-size: 11px; color: rgb(var(--muted))">Samedi 22 novembre</span>
+<span style="font-size: 11px; color: rgb(var(--muted))">{{date}}</span>
 </div>
 </div>
 <div style="display: flex; gap: 2px">
@@ -38,6 +41,7 @@ body{margin:0}
 </header>
 
 <!-- L'avis de Betster -->
+<sc-if value="{{heroAvis}}" hint-placeholder-val="{{true}}">
 <section aria-label="L'avis de Betster" style="margin: 4px 16px 0 16px; border-radius: 22px; padding: 16px; background: linear-gradient(160deg, rgb(var(--hero1)) 0%, rgb(var(--hero2)) 100%); color: rgb(243 245 247); display: flex; flex-direction: column; gap: 14px">
 <div style="display: flex; gap: 12px; align-items: flex-start">
 <div style="position: relative; flex-shrink: 0">
@@ -69,28 +73,86 @@ body{margin:0}
 </div>
 <a href="#autres" style="font-size: 12px; color: rgb(123 224 196); text-decoration: none; align-self: center">2 autres coups du jour ›</a>
 </section>
+</sc-if>
+
+<!-- Ce soir : matchs en direct -->
+<sc-if value="{{heroDirect}}" hint-placeholder-val="{{false}}">
+<section aria-label="Ce soir avec Betster" style="margin: 4px 16px 0 16px; border-radius: 22px; padding: 16px; background: linear-gradient(160deg, rgb(var(--hero1)) 0%, rgb(var(--hero2)) 100%); color: rgb(243 245 247); display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; gap: 12px; align-items: flex-start"><svg role="img" aria-label="Betster, emplacement de l'avatar" width="56" height="56" viewBox="0 0 56 56" style="flex-shrink: 0"><circle cx="28" cy="28" r="28" fill="rgb(32 191 160)" fill-opacity="0.18"></circle><circle cx="28" cy="23" r="10" fill="none" stroke="rgb(123 224 196)" stroke-width="2"></circle><path d="M12 48c3-8 9-12 16-12s13 4 16 12" fill="none" stroke="rgb(123 224 196)" stroke-width="2" stroke-linecap="round"></path></svg>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 600; color: rgb(123 224 196)">Ce soir avec Betster</span><p style="margin: 0; font-size: 15px; line-height: 1.35; font-weight: 600">Ton coupon tient : une sélection gagnée, deux encore en jeu.</p></div>
+</div>
+<div style="display: flex; flex-direction: column; border-radius: 14px; background: rgb(255 255 255 / 0.07)">
+<sc-for list="{{enJeu}}" as="e" hint-placeholder-count="3">
+<div style="{{e.ligne}}"><span style="display: flex; flex-direction: column; gap: 1px; min-width: 0"><span style="font-size: 13px; font-weight: 600">{{e.sel}}</span><span style="font-size: 11px; color: rgb(201 211 220)">{{e.match}}</span></span><span style="{{e.badge}}">{{e.etat}}</span></div>
+</sc-for>
+</div>
+<p style="margin: 0; font-size: 11.5px; line-height: 1.4; color: rgb(201 211 220)">Pendant un match, les pourcentages restent ceux d'avant le coup d'envoi : BETWISE ne calcule pas encore de probabilité en direct.</p>
+</section>
+</sc-if>
+
+<!-- Lendemain : le bilan d'hier -->
+<sc-if value="{{heroBilan}}" hint-placeholder-val="{{false}}">
+<section aria-label="Le bilan d'hier" style="margin: 4px 16px 0 16px; border-radius: 22px; padding: 16px; background: linear-gradient(160deg, rgb(var(--hero1)) 0%, rgb(var(--hero2)) 100%); color: rgb(243 245 247); display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; gap: 12px; align-items: flex-start"><svg role="img" aria-label="Betster, emplacement de l'avatar" width="56" height="56" viewBox="0 0 56 56" style="flex-shrink: 0"><circle cx="28" cy="28" r="28" fill="rgb(32 191 160)" fill-opacity="0.18"></circle><circle cx="28" cy="23" r="10" fill="none" stroke="rgb(123 224 196)" stroke-width="2"></circle><path d="M12 48c3-8 9-12 16-12s13 4 16 12" fill="none" stroke="rgb(123 224 196)" stroke-width="2" stroke-linecap="round"></path></svg>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 600; color: rgb(123 224 196)">Le bilan d'hier</span><p style="margin: 0; font-size: 15px; line-height: 1.35; font-weight: 600">4 de mes 5 analyses sont passées. Lyon – Lens m'a donné tort.</p></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div style="padding: 10px; border-radius: 12px; background: rgb(255 255 255 / 0.07); display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1">4 sur 5</span><span style="font-size: 10.5px; color: rgb(201 211 220)">passées hier</span></div>
+<div style="padding: 10px; border-radius: 12px; background: rgb(255 255 255 / 0.07); display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1">64 %</span><span style="font-size: 10.5px; color: rgb(201 211 220)">annoncé en moyenne</span></div>
+<div style="padding: 10px; border-radius: 12px; background: rgb(255 255 255 / 0.07); display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1">46 / 53</span><span style="font-size: 10.5px; color: rgb(201 211 220)">sur 30 jours</span></div>
+</div>
+<p style="margin: 0; font-size: 11.5px; line-height: 1.4; color: rgb(201 211 220)">Une journée ne prouve rien : sur 30 jours, les coups du jour annonçaient 78 % et en ont passé 87 %.</p>
+<a href="#bilan" style="height: 44px; border-radius: 12px; background: rgb(123 224 196); color: rgb(7 26 38); display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 700; text-decoration: none">Voir le détail d'hier</a>
+</section>
+</sc-if>
+
+<!-- Jour creux -->
+<sc-if value="{{heroCreux}}" hint-placeholder-val="{{false}}">
+<section aria-label="L'avis de Betster" style="margin: 4px 16px 0 16px; border-radius: 22px; padding: 16px; background: linear-gradient(160deg, rgb(var(--hero1)) 0%, rgb(var(--hero2)) 100%); color: rgb(243 245 247); display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; gap: 12px; align-items: flex-start"><svg role="img" aria-label="Betster, emplacement de l'avatar" width="56" height="56" viewBox="0 0 56 56" style="flex-shrink: 0"><circle cx="28" cy="28" r="28" fill="rgb(32 191 160)" fill-opacity="0.18"></circle><circle cx="28" cy="23" r="10" fill="none" stroke="rgb(123 224 196)" stroke-width="2"></circle><path d="M12 48c3-8 9-12 16-12s13 4 16 12" fill="none" stroke="rgb(123 224 196)" stroke-width="2" stroke-linecap="round"></path></svg>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 600; color: rgb(123 224 196)">L'avis de Betster</span><p style="margin: 0; font-size: 15px; line-height: 1.35; font-weight: 600">Pas de match couvert avant mardi. La Ligue des champions reprend : voici déjà ce que je vois.</p></div>
+</div>
+<div style="display: flex; gap: 8px">
+<a href="#calendrier" style="flex-grow: 1; height: 44px; border-radius: 12px; background: rgb(123 224 196); color: rgb(7 26 38); display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 700; text-decoration: none">Voir le calendrier</a>
+<a href="#import" style="flex-grow: 1; height: 44px; border-radius: 12px; border: 1px solid rgb(255 255 255 / 0.25); color: rgb(243 245 247); display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 600; text-decoration: none">Importer un ticket</a>
+</div>
+</section>
+</sc-if>
+
+<!-- Nouvel abonné -->
+<sc-if value="{{bienvenue}}" hint-placeholder-val="{{false}}">
+<section aria-label="Bien démarrer" style="margin: 14px 16px 0 16px; border-radius: 20px; background: rgb(var(--surface)); border: 1px solid rgb(var(--line)); padding: 14px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700">Bien démarrer</h2>
+<sc-for list="{{etapes}}" as="t" hint-placeholder-count="3">
+<a href="#etape" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: rgb(var(--ink))"><span aria-hidden="true" style="width: 32px; height: 32px; border-radius: 16px; background: rgb(var(--brand-soft)); color: rgb(var(--brand)); font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">{{t.n}}</span><span style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1"><span style="font-size: 14px; font-weight: 600">{{t.titre}}</span><span style="font-size: 12px; color: rgb(var(--muted))">{{t.texte}}</span></span><span aria-hidden="true" style="color: rgb(var(--brand))">›</span></a>
+</sc-for>
+</section>
+</sc-if>
+
 
 <!-- Matchs du jour -->
 <section aria-label="Matchs du jour" style="margin: 22px 16px 0 16px; display: flex; flex-direction: column; gap: 10px">
 <div style="display: flex; align-items: baseline; justify-content: space-between">
-<h2 style="margin: 0; font-size: 17px; font-weight: 700">Matchs du jour</h2>
-<span style="font-size: 11.5px; color: rgb(var(--muted))">12 analysés · 2 sans analyse</span>
+<h2 style="margin: 0; font-size: 17px; font-weight: 700">{{titreMatchs}}</h2>
+<span style="font-size: 11.5px; color: rgb(var(--muted))">{{sousTitre}}</span>
 </div>
+<sc-if value="{{filtres}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; gap: 6px; overflow: hidden">
 <button type="button" aria-pressed="true" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 0; background: rgb(var(--ink)); color: rgb(var(--canvas)); font-size: 12px; font-weight: 600">Tous</button>
 <button type="button" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid rgb(var(--line)); background: transparent; color: rgb(var(--soft)); font-size: 12px; font-weight: 500">Forte convergence</button>
 <button type="button" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid rgb(var(--line)); background: transparent; color: rgb(var(--soft)); font-size: 12px; font-weight: 500">Mes paris</button>
 <button type="button" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid rgb(var(--line)); background: transparent; color: rgb(var(--soft)); font-size: 12px; font-weight: 500">Afrique</button>
 </div>
+</sc-if>
 <sc-for list="{{matchs}}" as="m" hint-placeholder-count="6">
 <article style="border-radius: 16px; background: rgb(var(--surface)); border: 1px solid rgb(var(--line)); padding: 12px; display: flex; flex-direction: column; gap: 10px">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
 <span style="font-size: 11px; color: rgb(var(--muted))">{{m.comp}} · {{m.heure}}</span>
-<sc-if value="{{m.pari}}" hint-placeholder-val="{{false}}"><span style="font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: rgb(var(--brand-soft)); color: rgb(var(--brand))">Ton pari · en attente</span></sc-if>
+<span style="display: flex; gap: 6px"><sc-if value="{{m.pari}}" hint-placeholder-val="{{false}}"><span style="{{m.pariStyle}}">{{m.pariTexte}}</span></sc-if><sc-if value="{{m.statut}}" hint-placeholder-val="{{false}}"><span style="{{m.statutStyle}}">{{m.statut}}</span></sc-if></span>
 </div>
 <div style="display: flex; flex-direction: column; gap: 6px">
-<div style="display: flex; align-items: center; gap: 8px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 12px; background: rgb(var(--surface2)); color: rgb(var(--soft)); font-size: 9.5px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{m.i1}}</span><span style="font-size: 14px; font-weight: 600">{{m.dom}}</span></div>
-<div style="display: flex; align-items: center; gap: 8px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 12px; background: rgb(var(--surface2)); color: rgb(var(--soft)); font-size: 9.5px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{m.i2}}</span><span style="font-size: 14px; font-weight: 600">{{m.ext}}</span></div>
+<div style="display: flex; align-items: center; gap: 8px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 12px; background: rgb(var(--surface2)); color: rgb(var(--soft)); font-size: 9.5px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{m.i1}}</span><span style="font-size: 14px; font-weight: 600; flex-grow: 1">{{m.dom}}</span><sc-if value="{{m.aScore}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px">{{m.sc1}}</span></sc-if></div>
+<div style="display: flex; align-items: center; gap: 8px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 12px; background: rgb(var(--surface2)); color: rgb(var(--soft)); font-size: 9.5px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{m.i2}}</span><span style="font-size: 14px; font-weight: 600; flex-grow: 1">{{m.ext}}</span><sc-if value="{{m.aScore}}" hint-placeholder-val="{{false}}"><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px">{{m.sc2}}</span></sc-if></div>
 </div>
 <sc-if value="{{m.couvert}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; flex-direction: column; gap: 6px">
@@ -107,6 +169,7 @@ body{margin:0}
 <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: rgb(var(--soft)); flex-shrink: 0"><svg aria-hidden="true" width="12" height="10" viewBox="0 0 12 10"><rect x="0" y="6" width="3" height="4" rx="1" style="{{m.b1}}"></rect><rect x="4.5" y="3" width="3" height="7" rx="1" style="{{m.b2}}"></rect><rect x="9" y="0" width="3" height="10" rx="1" style="{{m.b3}}"></rect></svg>{{m.conv}}</span>
 </div>
 <span style="font-size: 10.5px; color: rgb(var(--muted))">{{m.couv}}</span>
+<sc-if value="{{m.verdict}}" hint-placeholder-val="{{false}}"><span style="{{m.verdictStyle}}">{{m.verdict}}</span></sc-if>
 </div>
 </sc-if>
 <sc-if value="{{m.nonCouvert}}" hint-placeholder-val="{{false}}">
@@ -117,10 +180,11 @@ body{margin:0}
 </sc-if>
 </article>
 </sc-for>
-<a href="#predictions" style="height: 44px; border-radius: 12px; border: 1px solid rgb(var(--line)); display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 600; text-decoration: none">Voir les 14 matchs du jour</a>
+<a href="#predictions" style="height: 44px; border-radius: 12px; border: 1px solid rgb(var(--line)); display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 600; text-decoration: none">{{lienMatchs}}</a>
 </section>
 
 <!-- Coach BETWISE -->
+<sc-if value="{{coachPlein}}" hint-placeholder-val="{{true}}">
 <section aria-label="Mon Coach" style="margin: 22px 16px 0 16px; border-radius: 20px; background: rgb(var(--surface)); border: 1px solid rgb(var(--line)); padding: 14px; display: flex; flex-direction: column; gap: 12px">
 <div style="display: flex; align-items: center; justify-content: space-between">
 <h2 style="margin: 0; font-size: 17px; font-weight: 700">Mon Coach</h2>
@@ -147,6 +211,14 @@ body{margin:0}
 </div>
 <a href="#coach" style="height: 44px; border-radius: 12px; background: rgb(var(--brand)); color: rgb(var(--onfill)); display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13.5px; font-weight: 700; text-decoration: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"></path></svg>Parler au coach</a>
 </section>
+</sc-if>
+<sc-if value="{{coachVide}}" hint-placeholder-val="{{false}}">
+<section aria-label="Mon Coach" style="margin: 22px 16px 0 16px; border-radius: 20px; background: rgb(var(--surface)); border: 1px solid rgb(var(--line)); padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700">Mon Coach</h2>
+<p style="margin: 0; font-size: 13px; line-height: 1.45; color: rgb(var(--soft))">Ta bankroll, ton rendement et tes points de vigilance apparaîtront ici dès ton premier pari importé.</p>
+<a href="#coach" style="height: 44px; border-radius: 12px; border: 1px solid rgb(var(--line)); display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 600; text-decoration: none">Poser une question au coach</a>
+</section>
+</sc-if>
 
 <!-- Import -->
 <section id="import" aria-label="Importer un ticket" style="margin: 14px 16px 0 16px; border-radius: 20px; border: 1.5px dashed rgb(var(--brand)); padding: 14px; display: flex; align-items: center; gap: 12px">
@@ -159,6 +231,7 @@ body{margin:0}
 </section>
 
 <!-- Tipsters -->
+<sc-if value="{{tipstersVisible}}" hint-placeholder-val="{{true}}">
 <section aria-label="Ce que disent tes tipsters" style="margin: 22px 16px 0 16px; display: flex; flex-direction: column; gap: 10px">
 <div style="display: flex; align-items: baseline; justify-content: space-between">
 <h2 style="margin: 0; font-size: 17px; font-weight: 700">Ce que disent tes tipsters</h2>
@@ -177,6 +250,7 @@ body{margin:0}
 </sc-for>
 </div>
 </section>
+</sc-if>
 
 <div style="height: 24px"></div>
 </div>
@@ -193,7 +267,7 @@ body{margin:0}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["sombre","clair"],"default":"sombre"},"vue":{"editor":"enum","options":["écran","page entière"],"default":"écran"},"coupon":{"editor":"boolean","default":true},"$preview":{"width":360,"height":800}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["sombre","clair"],"default":"sombre"},"vue":{"editor":"enum","options":["écran","page entière"],"default":"écran"},"etat":{"editor":"enum","options":["jour chargé","soirée en direct","lendemain","jour creux","nouvel abonné","hors ligne"],"default":"jour chargé"},"coupon":{"editor":"boolean","default":true},"$preview":{"width":360,"height":800}}'>
 class Component extends DCLogic {
   constructor(props) { super(props); this.state = { masque: false }; }
   cadre(ecran, coupon) {
@@ -213,20 +287,66 @@ class Component extends DCLogic {
     const seg = (w, c) => 'display: block; width: ' + w + '%; background: rgb(var(' + c + '))';
     const on = 'fill: rgb(var(--brand))', off = 'fill: rgb(var(--line))';
     const CONV = { 3: 'Forte convergence', 2: 'Convergence moyenne', 1: 'Marché et modèle divergent' };
-    const m = (comp, heure, dom, ext, i1, i2, p1, pN, p2, marche, pick, pp, niv, couv, pari) => {
+    const pill = (c, f) => 'font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 6px; white-space: nowrap; background: rgb(var(' + f + ')); color: rgb(var(' + c + '))';
+    const base = { pari: false, pariTexte: 'Ton pari · en attente', pariStyle: pill('--brand', '--brand-soft'), statut: '', statutStyle: '', aScore: false, verdict: '', verdictStyle: '' };
+    const m = (comp, heure, dom, ext, i1, i2, p1, pN, p2, marche, pick, pp, niv, couv, x) => {
       const best = Math.max(p1, pN, p2);
       const col = (p) => (p === best ? '--brand' : '--surface2');
-      return { comp, heure, dom, ext, i1, i2, p1, pN, p2, marche, pick, pp, conv: CONV[niv], couv, pari: !!pari, couvert: true, nonCouvert: false,
+      return { ...base, comp, heure, dom, ext, i1, i2, p1, pN, p2, marche, pick, pp, conv: CONV[niv], couv, couvert: true, nonCouvert: false,
         s1: seg(p1, col(p1)), sN: seg(pN, col(pN)), s2: seg(p2, col(p2)),
-        b1: on, b2: niv >= 2 ? on : off, b3: niv >= 3 ? on : off };
+        b1: on, b2: niv >= 2 ? on : off, b3: niv >= 3 ? on : off, ...(x || {}) };
     };
-    const matchs = [
+    const nc = (comp, heure, dom, ext, i1, i2, x) => ({ ...base, comp, heure, dom, ext, i1, i2, couvert: false, nonCouvert: true, ...(x || {}) });
+    const pari = (texte, ton) => ({ pari: true, pariTexte: texte, pariStyle: ton === 'gain' ? pill('--gain', '--gain-soft') : ton === 'perte' ? pill('--loss', '--surface2') : pill('--brand', '--brand-soft') });
+    const direct = (min, a, b) => ({ statut: 'En direct · ' + min + 'e', statutStyle: pill('--draw-ink', '--draw-soft'), aScore: true, sc1: a, sc2: b });
+    const fini = (a, b) => ({ statut: 'Terminé', statutStyle: pill('--soft', '--surface2'), aScore: true, sc1: a, sc2: b });
+    const vu = (ok, t) => ({ verdict: (ok ? 'Passé · ' : 'Pas passé · ') + t, verdictStyle: 'font-size: 11.5px; font-weight: 600; color: rgb(var(' + (ok ? '--gain' : '--loss') + '))' });
+    const AV = 'avant le match · marché et modèle';
+    const etat = this.props.etat ?? 'jour chargé';
+    const C2 = 'Marché et modèle · cote relevée il y a 2 h';
+    const charge = [
       m('Premier League', '13:30', 'Arsenal', 'Brentford', 'AR', 'BR', 68, 19, 13, 'Résultat', 'Arsenal gagne', 68, 3, 'Marché et modèle · cote relevée il y a 2 h'),
       m('Premier League', '16:00', 'Chelsea', 'Newcastle', 'CH', 'NE', 47, 26, 27, 'Double chance', 'Chelsea ou nul', 73, 2, 'Marché et modèle · cote relevée il y a 2 h', true),
       m('Serie A', '18:00', 'Inter', 'Lazio', 'IN', 'LA', 55, 25, 20, 'Autre marché : total de buts', 'Plus de 2,5 buts', 58, 2, 'Marché et modèle · cote relevée il y a 3 h'),
       m('Liga', '18:30', 'Real Madrid', 'Séville', 'RM', 'SE', 71, 17, 12, 'Résultat', 'Real Madrid gagne', 71, 3, 'Marché et modèle · cote relevée il y a 2 h'),
       { comp: 'Ligue 1 ivoirienne', heure: '16:00', dom: 'ASEC Mimosas', ext: 'Africa Sports', i1: 'AS', i2: 'AF', couvert: false, nonCouvert: true, pari: false },
       m('Ligue 1', '21:00', 'Lyon', 'Lens', 'LY', 'LE', 41, 28, 31, 'Autre marché : les deux marquent', 'Oui', 57, 1, 'Marché et modèle · cote relevée il y a 5 h'),
+    ];
+    charge[1] = { ...charge[1], ...pari('Ton pari · en attente') };
+    const JEUX = {
+      'soirée en direct': [
+        m('Liga', '18:30', 'Real Madrid', 'Séville', 'RM', 'SE', 71, 17, 12, 'Résultat', 'Real Madrid gagne', 71, 3, 'Probabilité d’' + AV, { ...direct(67, 1, 0), ...pari('Ton pari · en bonne voie') }),
+        m('Ligue 1', '21:00', 'Lyon', 'Lens', 'LY', 'LE', 41, 28, 31, 'Autre marché : les deux marquent', 'Oui', 57, 1, 'Probabilité d’' + AV, { ...direct(23, 0, 0), ...pari('Ton pari · en jeu') }),
+        m('Premier League', '16:00', 'Chelsea', 'Newcastle', 'CH', 'NE', 47, 26, 27, 'Double chance', 'Chelsea ou nul', 73, 2, 'Probabilité d’' + AV, { ...fini(2, 0), ...pari('Ton pari · gagné', 'gain'), ...vu(true, 'Chelsea ou nul, annoncé à 73 %') }),
+        m('Premier League', '13:30', 'Arsenal', 'Brentford', 'AR', 'BR', 68, 19, 13, 'Résultat', 'Arsenal gagne', 68, 3, 'Probabilité d’' + AV, { ...fini(3, 1), ...vu(true, 'Arsenal gagne, annoncé à 68 %') }),
+        m('Serie A', '18:00', 'Inter', 'Lazio', 'IN', 'LA', 55, 25, 20, 'Autre marché : total de buts', 'Plus de 2,5 buts', 58, 2, 'Probabilité d’' + AV, { ...fini(1, 1), ...vu(false, 'plus de 2,5 buts, annoncé à 58 %') }),
+        nc('Ligue 1 ivoirienne', '16:00', 'ASEC Mimosas', 'Africa Sports', 'AS', 'AF', fini(2, 1)),
+      ],
+      'lendemain': [
+        m('Premier League', '15:00', 'Liverpool', 'Manchester City', 'LI', 'MC', 44, 27, 29, 'Autre marché : les deux marquent', 'Oui', 66, 3, C2),
+        m('Serie A', '18:00', 'Milan', 'Juventus', 'MI', 'JU', 38, 33, 29, 'Autre marché : total de buts', 'Moins de 2,5 buts', 61, 2, C2),
+        m('Liga', '21:00', 'Barcelone', 'Atlético', 'BA', 'AT', 56, 24, 20, 'Résultat', 'Barcelone gagne', 56, 2, C2),
+      ],
+      'jour creux': [
+        m('Ligue des champions', 'mar. 21:00', 'PSG', 'Bayern', 'PS', 'BA', 39, 24, 37, 'Autre marché : les deux marquent', 'Oui', 67, 0, 'Marché seul · pas d’avis du modèle sur cette compétition · cote relevée il y a 6 h', { conv: 'Sans avis du modèle', b1: off, b2: off, b3: off }),
+        m('Ligue des champions', 'mer. 21:00', 'Inter', 'Benfica', 'IN', 'BE', 58, 24, 18, 'Résultat', 'Inter gagne', 58, 0, 'Marché seul · pas d’avis du modèle sur cette compétition · cote relevée il y a 6 h', { conv: 'Sans avis du modèle', b1: off, b2: off, b3: off }),
+        nc('Ligue 1 ivoirienne', 'mer. 16:00', 'Stade d’Abidjan', 'SOA', 'SA', 'SO'),
+      ],
+    };
+    JEUX['nouvel abonné'] = charge.map((x) => ({ ...x, pari: false }));
+    JEUX['hors ligne'] = charge.map((x) => (x.couvert ? { ...x, couv: 'Données de 09:14 · pas à jour' } : x));
+    const matchs = JEUX[etat] ?? charge;
+    const lg = (last) => 'display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px' + (last ? '' : '; border-bottom: 1px solid rgb(255 255 255 / 0.1)');
+    const bd = (c) => 'flex-shrink: 0; font-size: 10.5px; font-weight: 700; padding: 3px 7px; border-radius: 6px; background: rgb(255 255 255 / 0.12); color: ' + c;
+    const enJeu = [
+      { sel: 'Chelsea ou nul', match: 'Chelsea 2 – 0 Newcastle · terminé', etat: 'Gagné', ligne: lg(false), badge: bd('rgb(123 224 160)') },
+      { sel: 'Real Madrid gagne', match: 'Real Madrid 1 – 0 Séville · 67e', etat: 'En bonne voie', ligne: lg(false), badge: bd('rgb(243 208 138)') },
+      { sel: 'Lyon – Lens : les deux marquent', match: '0 – 0 · 23e', etat: 'Pas encore', ligne: lg(true), badge: bd('rgb(201 211 220)') },
+    ];
+    const etapes = [
+      { n: '1', titre: 'Importe ton premier ticket', texte: 'Une capture suffit : BETWISE le lit et le règle seul.' },
+      { n: '2', titre: 'Suis un tipster', texte: 'Ses pronos sont notés sur leurs vrais résultats.' },
+      { n: '3', titre: 'Fixe ton budget de la semaine', texte: 'Ton coach te prévient avant que tu le dépasses.' },
     ];
     const ligne = (last) => 'display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px' + (last ? '' : '; border-bottom: 1px solid rgb(var(--line))');
     const badge = (c, f) => 'flex-shrink: 0; font-size: 10.5px; font-weight: 700; padding: 3px 7px; border-radius: 6px; background: rgb(var(' + f + ')); color: rgb(var(' + c + '))';
@@ -247,7 +367,18 @@ class Component extends DCLogic {
     ];
     return {
       themeClass: clair ? 'clair' : '',
-      ...this.cadre((this.props.vue ?? 'écran') === 'écran', this.props.coupon ?? true),
+      ...this.cadre((this.props.vue ?? 'écran') === 'écran', (this.props.coupon ?? true) && !['jour creux', 'nouvel abonné', 'lendemain'].includes(etat)),
+      date: { 'lendemain': 'Dimanche 23 novembre', 'jour creux': 'Jeudi 20 novembre' }[etat] ?? 'Samedi 22 novembre',
+      horsLigne: etat === 'hors ligne',
+      heroAvis: ['jour chargé', 'nouvel abonné', 'hors ligne'].includes(etat),
+      heroDirect: etat === 'soirée en direct', heroBilan: etat === 'lendemain', heroCreux: etat === 'jour creux',
+      bienvenue: etat === 'nouvel abonné', etapes, enJeu,
+      coachPlein: etat !== 'nouvel abonné', coachVide: etat === 'nouvel abonné',
+      tipstersVisible: !['nouvel abonné', 'jour creux'].includes(etat),
+      filtres: !['jour creux'].includes(etat),
+      titreMatchs: { 'soirée en direct': 'Ce soir', 'lendemain': 'Matchs d’aujourd’hui', 'jour creux': 'Les prochains jours' }[etat] ?? 'Matchs du jour',
+      sousTitre: { 'soirée en direct': '2 en direct · 4 terminés', 'lendemain': '9 analysés · 1 sans analyse', 'jour creux': 'Aucun match couvert dans les 48 h' }[etat] ?? '12 analysés · 2 sans analyse',
+      lienMatchs: { 'soirée en direct': 'Tous les scores du jour', 'jour creux': 'Tout le calendrier', 'lendemain': 'Voir les 10 matchs d’aujourd’hui' }[etat] ?? 'Voir les 14 matchs du jour',
       matchs, tipsters, onglets, masque, visible: !masque,
       oeilLabel: masque ? 'Afficher les montants' : 'Masquer les montants',
       toggle: () => this.setState({ masque: !this.state.masque }),

@@ -143,3 +143,7 @@ Proposition : **l'avis de Betster est le premier coup du jour de la catégorie A
 | --- | --- | --- |
 | D10 | L'avis de Betster = premier coup du jour Audacieux, sinon premier Sûr | Oui |
 | D11 | « Convergence » à la place de « confiance » dans l'écran | Oui |
+
+### Décisions de Mounir — 19/11/2026, 11:29
+
+« ok avançons » : D10 (avis de Betster = premier coup du jour Audacieux, sinon premier Sûr) et D11 (« convergence » à la place de « confiance ») retenus. Suite : les autres états de l'accueil.
