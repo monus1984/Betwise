@@ -1,4 +1,5 @@
 "use client";
+import { BetsterAnime } from "@/components/betster-anime";
 
 /**
  * Betster flottant : toujours au même endroit (en bas à droite, au-dessus des onglets et du coupon), il ouvre la
@@ -21,8 +22,7 @@ export function BetsterFab() {
     <div className="pointer-events-none fixed inset-x-0 z-30 mx-auto flex max-w-xl justify-end px-4" style={{ bottom: `calc(${bas}px + env(safe-area-inset-bottom))` }}>
       <Link href="/coach?v=discussion" aria-label="Parler à Betster"
         className="betster-fab pointer-events-auto relative block h-[58px] w-[58px] rounded-full shadow-lg shadow-brand/40 ring-2 ring-brand transition active:scale-95">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/betster/betster-112.webp" alt="" width={58} height={58} className="h-full w-full rounded-full" />
+        <BetsterAnime etat="repos" taille={58} decoratif />
         <span aria-hidden className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-on-fill">
           <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" /></svg>
         </span>
