@@ -14,6 +14,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx tsx scripts/discover-api-football.ts
+      - run: npx tsx scripts/probe-joueurs.ts
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
