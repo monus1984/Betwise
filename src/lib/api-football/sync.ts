@@ -201,7 +201,24 @@ export type MatchDetails = {
   buteurs?: { n: string; e: "1" | "2"; m: number; x?: number }[]; issue?: "FT" | "AET" | "PEN"; vainqueur?: "1" | "2" | null;
   /** Chronologie affichée sur la fiche match : buts, buts contre son camp, penalties manqués, cartons. */
   evts?: { t: "but" | "pen" | "csc" | "pen_rate" | "jaune" | "rouge"; n: string | null; e: "1" | "2"; m: number; x?: number }[];
+  /** Joueurs du match (depuis le 19/11/2026) : minutes jouées, tirs, tirs cadrés, passes décisives. */
+  joueurs?: { n: string; e: "1" | "2"; min: number; t: number; c: number; pd: number }[];
 };
+
+/** Statistiques par joueur de la feuille de match ; absentes tant que le fournisseur ne les a pas publiées. */
+export function joueursOf(f: AfFixture): MatchDetails["joueurs"] {
+  const out: NonNullable<MatchDetails["joueurs"]> = [];
+  for (const t of f.players ?? []) {
+    const e = t.team.id === f.teams.home.id ? "1" as const : t.team.id === f.teams.away.id ? "2" as const : null;
+    if (!e) continue;
+    for (const p of t.players) {
+      const s = p.statistics?.[0]; if (!s || !p.player?.name) continue;
+      out.push({ n: p.player.name, e, min: s.games?.minutes ?? 0, t: s.shots?.total ?? 0, c: s.shots?.on ?? 0, pd: s.goals?.assists ?? 0 });
+    }
+  }
+  // Une feuille où personne n'a joué une minute n'est pas encore publiée
+  return out.some((x) => x.min > 0) ? out : undefined;
+}
 
 /** Chronologie d'un match à partir de sa feuille d'événements (direct ou match terminé). */
 export function timelineOf(f: AfFixture): NonNullable<MatchDetails["evts"]> {
@@ -229,6 +246,7 @@ export function detailsOf(f: AfFixture): { details: MatchDetails; hasStats: bool
     d.corners = pair("Corner Kicks"); d.jaunes = pair("Yellow Cards"); d.rouges = pair("Red Cards"); d.tirs = pair("Total Shots"); d.cadres = pair("Shots on Goal");
     d.fautes = pair("Fouls"); d.hors_jeu = pair("Offsides");
   }
+  d.joueurs = joueursOf(f);
   const st = f.fixture.status.short;
   if (st === "FT" || st === "AET" || st === "PEN") d.issue = st;
   d.vainqueur = f.teams.home.winner === true ? "1" : f.teams.away.winner === true ? "2" : null;

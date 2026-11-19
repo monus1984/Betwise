@@ -9,6 +9,8 @@ export type AfFixture = {
   events?: { time: { elapsed: number | null; extra: number | null }; team: { id: number }; player: { name: string | null }; type: string; detail: string; comments: string | null }[];
   goals: { home: number | null; away: number | null };
   statistics?: { team: { id: number }; statistics: { type: string; value: number | string | null }[] }[];
+  /** Statistiques par joueur : présentes quand le match est demandé par identifiant (byIds), sans requête de plus. */
+  players?: { team: { id: number }; players: { player: { id: number; name: string }; statistics: { games: { minutes: number | null }; shots: { total: number | null; on: number | null }; goals: { assists: number | null } }[] }[] }[];
   score: { fulltime: { home: number | null; away: number | null }; halftime?: { home: number | null; away: number | null } };
 };
 export type AfStanding = { rank: number; team: { id: number; name: string }; points: number; goalsDiff: number; group: string | null; form: string | null; description: string | null; all: { played: number; win: number; draw: number; lose: number; goals: { for: number; against: number } } };
