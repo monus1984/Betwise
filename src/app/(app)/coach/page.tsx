@@ -21,14 +21,15 @@ export const dynamic = "force-dynamic";
  * Coach (19/11) : le tableau de bord de l'abonné d'abord ; la bankroll et les outils en onglets ;
  * la conversation s'ouvre par Betster flottant (?v=discussion).
  */
-export default async function CoachPage({ searchParams }: { searchParams: Promise<{ nouvelle?: string; v?: string; q?: string; ok?: string; err?: string }> }) {
+export default async function CoachPage({ searchParams }: { searchParams: Promise<{ nouvelle?: string; suite?: string; v?: string; q?: string; ok?: string; err?: string }> }) {
   const sp = await searchParams;
   const db = await createClient();
 
   if (sp.v === "discussion") {
     let conversationId: string | null = null;
     let messages: ChatMsg[] = [];
-    if (!sp.nouvelle) {
+    // Toujours une nouvelle conversation à l'ouverture (demande de Mounir, 19/11) ; la précédente se reprend par ?suite=1
+    if (sp.suite && !sp.nouvelle) {
       const { data: c } = await db.from("conversations").select("id").order("created_at", { ascending: false }).limit(1).maybeSingle();
       if (c) {
         conversationId = c.id;
@@ -42,7 +43,7 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
     return (
       <>
         <PageHeader title="Betster" subtitle="Il lit tes paris, tes sources et ta bankroll, puis explique les chiffres. Il n’en invente aucun." action={<Link href="/coach">Tableau de bord</Link>} />
-        <CoachChat key={conversationId ?? "nouvelle"} initialId={conversationId} initial={messages} suggestions={COACH_SUGGESTIONS} initialText={(sp.q ?? "").slice(0, 300)} />
+        <CoachChat key={conversationId ?? `nouvelle-${sp.nouvelle ?? ""}`} initialId={conversationId} initial={messages} suggestions={COACH_SUGGESTIONS} initialText={(sp.q ?? "").slice(0, 300)} />
       </>
     );
   }

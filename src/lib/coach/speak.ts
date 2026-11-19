@@ -93,7 +93,7 @@ function phoneVoice(text: string, done: () => void, etat?: (e: EtatSon) => void)
  * Lit des blocs de texte dans l'ordre. `onBlock(i)` annonce le bloc en cours, `onBlock(null)` la fin ou l'arrêt.
  * Un nouvel appel, ou stopSpeaking(), interrompt la lecture en cours.
  */
-export function speakBlocks(blocks: string[], onBlock?: (i: number | null) => void, onEtat?: (e: EtatSon) => void) {
+export function speakBlocks(blocks: string[], onBlock?: (i: number | null) => void, onEtat?: (e: EtatSon) => void, options: { telephone?: boolean } = {}) {
   stopSpeaking();
   const id = ++run;
   const vivant = () => id === run;
@@ -105,20 +105,22 @@ export function speakBlocks(blocks: string[], onBlock?: (i: number | null) => vo
     onBlock?.(i);
     const suite = () => { if (vivant()) void lire(i + 1); };
     const etat = (e: EtatSon) => { if (vivant()) onEtat?.(e); };
+    // Sans repli sur la voix du téléphone : on s'arrête là et l'écran garde le texte
+    const repli = () => { if (options.telephone === false) { etat("echec"); run++; } else phoneVoice(blocks[i], suite, etat); };
     etat("charge");
     const url = await demande(i);
     if (!vivant()) return;
     void demande(i + 1); // le bloc suivant se prépare pendant la lecture
-    if (!url) return phoneVoice(blocks[i], suite, etat);
+    if (!url) return repli();
     try {
       if (!player) player = new Audio();
       const a = player;
       a.onended = () => { URL.revokeObjectURL(url); enveloppes.delete(url); suite(); };
-      a.onerror = () => { URL.revokeObjectURL(url); if (vivant()) phoneVoice(blocks[i], suite, etat); };
+      a.onerror = () => { URL.revokeObjectURL(url); if (vivant()) repli(); };
       a.onplaying = () => etat("joue");
       a.src = url;
       await a.play();
-    } catch { if (vivant()) phoneVoice(blocks[i], suite, etat); }
+    } catch { if (vivant()) repli(); }
   };
   void lire(0);
 }

@@ -96,7 +96,8 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
             {voiceOut ? "🔊 Réponses à voix haute" : "🔈 Voix coupée"}
           </button>
         ) : <span />}
-        {msgs.length > 0 && <Link href="/coach?v=discussion&nouvelle=1" className="text-xs text-slate-600 underline">Nouvelle conversation</Link>}
+        {msgs.length > 0 ? <Link href={`/coach?v=discussion&nouvelle=${Date.now()}`} className="text-xs text-slate-600 underline">Nouvelle conversation</Link>
+          : <Link href="/coach?v=discussion&suite=1" className="text-xs text-slate-600 underline">Reprendre la précédente</Link>}
       </div>
 
       {msgs.length === 0 && (
