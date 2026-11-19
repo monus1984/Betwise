@@ -53,3 +53,7 @@ Hors de ce lot : fiche Matchs (étape 3), catalogue de marchés (étape 4), Coac
 | D14 | « Mes paris » quitte la barre d'onglets : bloc sur l'accueil et accès depuis le Coach | Oui |
 | D15 | Profils de risque : Sûr → Prudent, Audacieux → Équilibré, Risqué → Audacieux, partout dans l'application | Oui |
 | D16 | La première version (`accueil`) sert de base : on garde le chargement, les règles testées, l'avatar et le masquage des montants, on refait la page et la navigation | Oui |
+
+## 5. Décision de Mounir — 19/11/2026, 15:26
+
+« Oui tu peux commencer » : plan validé, D14, D15 et D16 retenus. Développement sur la branche `accueil`.
