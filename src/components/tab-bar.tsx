@@ -7,7 +7,7 @@ const TABS = [
   { href: "/", label: "Prédictions", icon: TrendIcon, aussi: ["/reglages", "/notifications"] },
   { href: "/matchs", label: "Matchs", icon: BallIcon, aussi: [] },
   { href: "/paris", label: "Mes paris", icon: TicketIcon, aussi: ["/nouveau", "/import", "/sources", "/bilan"] },
-  { href: "/coach", label: "Coach", icon: CoachIcon, aussi: ["/options", "/bankroll"] },
+  { href: "/coach", label: "Coach", icon: CoachIcon, aussi: ["/options", "/bankroll", "/montantes"] },
 ] as const;
 
 /** Navigation principale (19/11, 15:54) : Prédictions (accueil), Matchs, Mes paris (avec les sources), Coach. La conversation passe par Betster flottant. Ajouter un pari ou importer se fait par le bouton flottant (AddFab). */
