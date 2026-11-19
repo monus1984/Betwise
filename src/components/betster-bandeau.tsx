@@ -27,6 +27,7 @@ export function BandeauBetster({ prenom, synthese, maj, expression, briefing }: 
           <p className="text-[12px] font-semibold text-brand">Betster{parle ? ` · ${bloc! + 1} sur ${briefing.length}` : ""}</p>
           {!parle && <p className="text-[16px] font-bold leading-snug">Bonjour{prenom ? ` ${prenom}` : ""} !</p>}
           {parle && son === "charge" && <p className="mt-1 text-[11.5px] text-ink-muted">Je prépare ma voix…</p>}
+          {parle && son === "telephone" && <p className="mt-1 text-[11.5px] text-ink-muted">La voix de Betster n’est pas disponible pour l’instant : je continue avec la voix du téléphone.</p>}
           {parle && son === "echec" && <p className="mt-1 text-[11.5px] font-semibold text-draw-ink">Le son n’a pas pu démarrer sur ce téléphone. Vérifie le volume « Multimédia », puis réessaie.</p>}
           <p className={`mt-1 leading-snug ${parle ? "text-[14px] text-ink" : "text-[13.5px] text-ink-soft"}`} aria-live="polite">{parle ? briefing[bloc!] : synthese}</p>
         </div>
