@@ -15,7 +15,7 @@ const RELEVE: AfOdds = {
       { name: "Goals Over/Under First Half", values: [{ value: "Over 1.5", odd: "2.18" }, { value: "Under 1.5", odd: "1.69" }] },
       { name: "HT/FT Double", values: [{ value: "Home/Draw", odd: "15.00" }, { value: "Draw/Home", odd: "4.85" }, { value: "Away/Away", odd: "7.00" }] },
       { name: "Both Teams Score", values: [{ value: "Yes", odd: "1.50" }, { value: "No", odd: "2.45" }] },
-      { name: "Exact Score", values: [{ value: "1:0", odd: "10.00" }, { value: "2:1", odd: "8.00" }, { value: "5:0", odd: "51.00" }] },
+      { name: "Exact Score", values: [{ value: "1:0", odd: "10.00" }, { value: "2:1", odd: "8.00" }, { value: "5:0", odd: "51.00" }, { value: "0:0", odd: "11.60" }, { value: "0:4", odd: "100.00" }] },
       { name: "Highest Scoring Half", values: [{ value: "Draw", odd: "4.05" }, { value: "1st Half", odd: "3.04" }, { value: "2nd Half", odd: "1.97" }] },
       { name: "Double Chance", values: [{ value: "Home/Draw", odd: "1.26" }, { value: "Home/Away", odd: "1.26" }, { value: "Draw/Away", odd: "2.11" }] },
       { name: "Total - Home", values: [{ value: "Over 1.5", odd: "1.55" }, { value: "Over 1", odd: "1.12" }] },
@@ -65,12 +65,15 @@ describe("cotes d'un bookmaker (API-Football)", () => {
     expect(get("1X2", null, "1")).toBe(1.81); // 1xBet, pas Bet365 (1,80)
     expect(get("OU", 2.5, "Plus")).toBe(1.51);
     expect(get("OU", 0.5, "Plus")).toBeNull(); // 1,00 n'est pas un prix
-    expect(get("OU", 0.5, "Moins")).toBe(11.6);
+    expect(get("OU", 0.5, "Moins")).toBeNull(); // 11,60 : plafond de l'échelle, pas un prix
     expect(get("OU", 8.5, "Plus")).toBeNull(); // ligne au-delà de 6,5
     expect(get("DNB", null, "1")).toBe(1.33);
     expect(get("AH", 1, "2")).toBe(1.67);
     expect(get("AH", 1.5, "2")).toBe(1.42);
     expect(get("CS", null, "5-0")).toBeNull(); // scores au-delà de 4 buts non repris
+    expect(get("CS", null, "0-0")).toBeNull(); // collé au plafond de « moins de 0,5 but »
+    expect(get("CS", null, "0-4")).toBeNull(); // 100 : plafond des scores exacts
+    expect(get("CS", null, "2-1")).toBe(8);
     expect(get("HT_TT1", 0.5, "Plus")).toBe(1.58);
     expect(get("CORN", 9.5, "Plus")).toBe(1.62);
     expect(get("CARD", 4.5, "Plus")).toBe(2.1);

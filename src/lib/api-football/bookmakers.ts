@@ -67,7 +67,15 @@ export function mapAfBet(bet: string, value: string): { market: string; param: n
   return null;
 }
 
-/** Les cotes reprises d'un bookmaker pour un match. Une cote de 1,00 ou hors bornes n'est pas un prix : écartée. */
+/**
+ * Valeurs plafond du relevé : 11,60 est le haut de l'échelle des marchés « plus / moins » et handicap (le « 0-0 » et
+ * le « moins de 0,5 but » y sont collés sur presque tous les matchs, quel que soit le match), 100 celui des scores exacts.
+ * Le vrai prix est au-dessus : ce n'est pas une cote à afficher.
+ */
+const PLAFONDS = [11.6];
+const estUnPrix = (c: number) => Number.isFinite(c) && c >= 1.02 && c < 100 && !PLAFONDS.includes(c);
+
+/** Les cotes reprises d'un bookmaker pour un match. Une cote de 1,00, plafonnée ou hors bornes n'est pas un prix : écartée. */
 export function cotesBookmaker(o: AfOdds, bookmakerId: number): CoteBook[] {
   const b = o.bookmakers.find((x) => x.id === bookmakerId);
   if (!b) return [];
@@ -75,7 +83,7 @@ export function cotesBookmaker(o: AfOdds, bookmakerId: number): CoteBook[] {
   for (const bet of b.bets) for (const v of bet.values) {
     const k = mapAfBet(bet.name, String(v.value));
     const c = Number(v.odd);
-    if (!k || !Number.isFinite(c) || c < 1.02 || c > 500) continue;
+    if (!k || !estUnPrix(c)) continue;
     const cle = `${k.market}|${k.param}|${k.sel}`;
     if (vus.has(cle)) continue;
     vus.add(cle);
