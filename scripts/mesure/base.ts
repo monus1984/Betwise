@@ -92,6 +92,38 @@ async function historique(db: Db, rapportMarche: (r: MesureMarche, titre: string
   return { hs, r };
 }
 
+/**
+ * 4 bis. Convergence : l'écart entre le marché et le modèle sur l'issue que le marché donne favorite dit-il quelque chose
+ * de la fiabilité de la probabilité affichée ? Probabilité affichée = celle du marché (cotes de clôture, sans la marge),
+ * comme dans l'application. Seuils de l'arbitrage du 19/11 : moins de 3 points, 3 à 10, plus de 10.
+ */
+function convergence(xs: { p: { p: [number, number, number]; hg: number; ag: number }; marche: [number, number, number] }[], k: (p: { hg: number; ag: number }) => 0 | 1 | 2) {
+  type L = { pm: number; pmod: number; y: 0 | 1; ecart: number };
+  const lignes: L[] = xs.map(({ p, marche }) => {
+    const i = marche.indexOf(Math.max(...marche)) as 0 | 1 | 2;
+    return { pm: marche[i], pmod: p.p[i], y: (k(p) === i ? 1 : 0) as 0 | 1, ecart: p.p[i] - marche[i] };
+  });
+  const groupes: [string, (l: L) => boolean][] = [
+    ["Forte (moins de 3 points)", (l) => Math.abs(l.ecart) < 0.03],
+    ["Moyenne (3 à 10 points)", (l) => Math.abs(l.ecart) >= 0.03 && Math.abs(l.ecart) <= 0.1],
+    ["Divergence (plus de 10 points)", (l) => Math.abs(l.ecart) > 0.1],
+    ["… dont modèle plus optimiste que le marché", (l) => l.ecart > 0.03],
+    ["… dont modèle plus pessimiste que le marché", (l) => l.ecart < -0.03],
+  ];
+  const brier = (ls: L[], f: (l: L) => number) => ls.reduce((a, l) => a + (f(l) - l.y) ** 2, 0) / Math.max(1, ls.length);
+  for (const [titre, filtre] of [["toutes les favorites du marché", () => true], ["favorites du marché à 60 % ou plus", (l: L) => l.pm >= 0.6]] as [string, (l: L) => boolean][]) {
+    const base = lignes.filter(filtre);
+    console.log(`\n### Convergence marché / modèle, ${titre} (${base.length} matchs)\n`);
+    console.log("| Convergence | Matchs | Part | Annoncé (marché) | Arrivé | Écart (points) | Brier marché | Brier modèle |");
+    console.log("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+    for (const [nom, f] of groupes) {
+      const g = base.filter(f); if (!g.length) continue;
+      const pMoy = g.reduce((a, l) => a + l.pm, 0) / g.length, freq = g.reduce((a, l) => a + l.y, 0) / g.length;
+      console.log(`| ${nom} | ${g.length} | ${pct(g.length / base.length, 0)} | ${pct(pMoy, 1)} | ${pct(freq, 1)} | ${pts(freq - pMoy)} | ${d3(brier(g, (l) => l.pm))} | ${d3(brier(g, (l) => l.pmod))} |`);
+    }
+  }
+}
+
 /** 4. Modèle maison rejoué semaine après semaine, comparé aux cotes de clôture sur les mêmes matchs. */
 async function modele(db: Db, hs: { ligue: string; played_on: string; home_nom: string; away_nom: string; home_goals: number; away_goals: number; cote_1: number | null; cote_n: number | null; cote_2: number | null }[]) {
   type A = { league: number; played_at: string; home_id: number; home_nom: string; away_id: number; away_nom: string; home_goals: number; away_goals: number; xg_home: number | null; xg_away: number | null };
@@ -115,13 +147,16 @@ async function modele(db: Db, hs: { ligue: string; played_on: string; home_nom: 
     const best = cands.length === 1 ? cands[0] : cands.sort((a, b) => note(b) - note(a))[0];
     const ok = best && (cands.length === 1 || note(best) > 0);
     if (ok) rapproches++;
-    return { p, marche: ok ? (proportionnelle([Number(best.cote_1), Number(best.cote_n), Number(best.cote_2)]) as [number, number, number]) : null };
+    const c3 = ok ? [Number(best.cote_1), Number(best.cote_n), Number(best.cote_2)] : null;
+    return { p, marche: c3 ? (proportionnelle(c3) as [number, number, number]) : null, marcheApp: c3 ? (puissance(c3) as [number, number, number]) : null };
   });
   const k = (p: { hg: number; ag: number }): 0 | 1 | 2 => (p.hg > p.ag ? 0 : p.hg === p.ag ? 1 : 2);
   const communs = paires.filter((x) => x.marche);
   const freq = ([0, 1, 2] as const).map((i) => communs.filter((x) => k(x.p) === i).length / Math.max(1, communs.length)) as [number, number, number];
   console.log(`Résultat du match, log-loss sur les ${communs.length} matchs où les cotes de clôture sont retrouvées (${rapproches} sur ${pr.length}) :`);
   console.log(`modèle **${d3(logLoss3(communs.map((x) => ({ p: x.p.p, k: k(x.p) })))!)}** · cotes de clôture **${d3(logLoss3(communs.map((x) => ({ p: x.marche!, k: k(x.p) })))!)}** · fréquences de base ${d3(logLoss3(communs.map((x) => ({ p: freq, k: k(x.p) })))!)} · hasard ${d3(Math.log(3))} (plus bas = meilleur).\n`);
+
+  convergence(communs.map((x) => ({ p: x.p, marche: x.marcheApp! })), k); // marge retirée comme dans l'application
 
   const obs1x2: Obs[] = pr.flatMap((p) => p.p.map((x, i) => ({ p: x, y: (k(p) === i ? 1 : 0) as 0 | 1 })));
   const obsOU: Obs[] = pr.map((p) => ({ p: p.pPlus25, y: (p.hg + p.ag > 2.5 ? 1 : 0) as 0 | 1 }));
