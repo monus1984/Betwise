@@ -15,7 +15,7 @@ const MATCH = "id, kickoff_at, statut, home:teams!matches_home_team_id_fkey(nom)
 type M = { id: string; kickoff_at: string; statut: string; home: One<{ nom: string }>; away: One<{ nom: string }>; competition: One<{ code_externe: string | null }> };
 
 export type TodayPick = { id: string; categorie: Categorie; match_id: string; match: string; home: string; away: string; market: string; param: number | null; sel: string; kickoff: string; comp: string | null; selection: string; p: number; cote: number | null; coteJuste: number; pModele: number | null; soutiens: string[]; statut: string };
-export type TheirPick = { qui: string; type: "pari" | "prono"; match_id: string; match: string; kickoff: string; selection: string; cote: number | null; p: number | null; categorie: Categorie | "hors" | null; verdict: string; tone: "good" | "mid" | "bad" | "none"; aussiBetwise: boolean };
+export type TheirPick = { qui: string; type: "pari" | "prono"; publie: string | null; market: string; match_id: string; match: string; kickoff: string; selection: string; cote: number | null; p: number | null; categorie: Categorie | "hors" | null; verdict: string; tone: "good" | "mid" | "bad" | "none"; aussiBetwise: boolean };
 
 const key = (m: string, market: string, param: number | null, sel: string) => `${m}|${market}|${param === null ? "" : Number(param)}|${sel}`;
 
@@ -31,19 +31,19 @@ export async function loadToday(db: Db, userId: string) {
   const srcIds = [...(follows ?? []).map((f) => f.source_id), ...(perso ? [perso.id] : [])];
 
   const [{ data: preds }, { data: bets }] = await Promise.all([
-    srcIds.length ? db.from("predictions").select(`market_code, market_param, selection, cote_annoncee, source:sources(nom, type), match:matches!inner(${MATCH})`).in("source_id", srcIds).neq("statut", "annule").gte("match.kickoff_at", from).lte("match.kickoff_at", to).limit(100) : Promise.resolve({ data: [] as never[] }),
+    srcIds.length ? db.from("predictions").select(`market_code, market_param, selection, cote_annoncee, published_at, source:sources(nom, type), match:matches!inner(${MATCH})`).in("source_id", srcIds).neq("statut", "annule").gte("match.kickoff_at", from).lte("match.kickoff_at", to).limit(100) : Promise.resolve({ data: [] as never[] }),
     db.from("bet_selections").select(`market_code, market_param, selection, cote, origin:sources!bet_selections_origin_source_id_fkey(nom, type), bets!inner(user_id, statut, virtuel), match:matches!inner(${MATCH})`).eq("bets.user_id", userId).eq("bets.statut", "en_cours").gte("match.kickoff_at", from).lte("match.kickoff_at", to).limit(100),
   ]);
 
-  type Raw = { market_code: string; market_param: number | null; selection: string; cote: number | null; qui: string; type: "pari" | "prono"; m: M };
+  type Raw = { market_code: string; market_param: number | null; selection: string; cote: number | null; qui: string; type: "pari" | "prono"; publie: string | null; m: M };
   const theirsRaw: Raw[] = [
     ...((bets ?? []) as unknown as { market_code: string; market_param: number | null; selection: string; cote: number; origin: One<{ nom: string; type: string }>; bets: One<{ virtuel: boolean }>; match: One<M> }[]).map((b) => {
       const o = one(b.origin);
-      return { market_code: b.market_code, market_param: b.market_param, selection: b.selection, cote: Number(b.cote), qui: `${one(b.bets)?.virtuel ? "Ton test" : "Ton pari"}${o && o.type !== "perso" ? ` (${o.nom})` : ""}`, type: "pari" as const, m: one(b.match)! };
+      return { market_code: b.market_code, market_param: b.market_param, selection: b.selection, cote: Number(b.cote), qui: `${one(b.bets)?.virtuel ? "Ton test" : "Ton pari"}${o && o.type !== "perso" ? ` (${o.nom})` : ""}`, type: "pari" as const, publie: null, m: one(b.match)! };
     }),
-    ...((preds ?? []) as unknown as { market_code: string; market_param: number | null; selection: string; cote_annoncee: number | null; source: One<{ nom: string; type: string }>; match: One<M> }[])
+    ...((preds ?? []) as unknown as { market_code: string; market_param: number | null; selection: string; cote_annoncee: number | null; published_at: string | null; source: One<{ nom: string; type: string }>; match: One<M> }[])
       .filter((p) => one(p.source)?.nom !== "Coups du jour BETWISE" && one(p.source)?.type !== "modele_betwise")
-      .map((p) => ({ market_code: p.market_code, market_param: p.market_param, selection: p.selection, cote: p.cote_annoncee === null ? null : Number(p.cote_annoncee), qui: one(p.source)?.type === "perso" ? "Ton prono" : one(p.source)?.nom ?? "?", type: "prono" as const, m: one(p.match)! })),
+      .map((p) => ({ market_code: p.market_code, market_param: p.market_param, selection: p.selection, cote: p.cote_annoncee === null ? null : Number(p.cote_annoncee), qui: one(p.source)?.type === "perso" ? "Ton prono" : one(p.source)?.nom ?? "?", type: "prono" as const, publie: p.published_at, m: one(p.match)! })),
   ].filter((r) => r.m);
 
   type P = { id: string; categorie: Categorie; rang: number; market_code: string; market_param: number | null; selection: string; probabilite: number; cote_ref: number | null; cote_juste: number; p_modele: number | null; match: One<M> };
@@ -71,7 +71,7 @@ export async function loadToday(db: Db, userId: string) {
     const verdict = p === null ? (r.cote ? "pas de cote de référence : classé d’après sa cote" : "pas de données sur ce match")
       : p >= 0.667 ? `${APP_NAME} confirme : ${Math.round(p * 100)} %` : p >= 0.5 ? `${APP_NAME} est partagé : ${Math.round(p * 100)} %` : `${APP_NAME} n’y croit pas : ${Math.round(p * 100)} %`;
     const tone: TheirPick["tone"] = p === null ? "none" : p >= 0.667 ? "good" : p >= 0.5 ? "mid" : "bad";
-    return { qui: r.qui, type: r.type, match_id: r.m.id, match: `${h} – ${a}`, kickoff: r.m.kickoff_at, selection: pickLabel(r.market_code, r.market_param === null ? null : Number(r.market_param), r.selection, h, a),
+    return { qui: r.qui, type: r.type, publie: r.publie, market: r.market_code, match_id: r.m.id, match: `${h} – ${a}`, kickoff: r.m.kickoff_at, selection: pickLabel(r.market_code, r.market_param === null ? null : Number(r.market_param), r.selection, h, a),
       cote: r.cote, p, categorie, tone, aussiBetwise: betwiseKeys.has(key(r.m.id, r.market_code, r.market_param, r.selection)),
       verdict: value !== null && r.cote ? `${verdict}${value <= -0.08 ? " · cote trop basse" : ""}` : verdict };
   }).sort((x, y) => Date.parse(x.kickoff) - Date.parse(y.kickoff));

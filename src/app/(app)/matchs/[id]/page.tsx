@@ -32,7 +32,7 @@ type Just = { lambda_dom?: number; lambda_ext?: number; score_probable?: string;
 type Evt = { t: "but" | "pen" | "csc" | "pen_rate" | "jaune" | "rouge"; n: string | null; e: "1" | "2"; m: number; x?: number };
 const EVT: Record<Evt["t"], { icon: string; txt: string }> = { but: { icon: "⚽", txt: "" }, pen: { icon: "⚽", txt: " (penalty)" }, csc: { icon: "⚽", txt: " (contre son camp)" }, pen_rate: { icon: "✖️", txt: " (penalty manqué)" }, jaune: { icon: "🟨", txt: "" }, rouge: { icon: "🟥", txt: "" } };
 const TABS = [
-  { k: "analyse", t: "Analyse" }, { k: "stats", t: "Stats" }, { k: "marches", t: "Marchés" }, { k: "sources", t: "Sources" },
+  { k: "analyse", t: "Analyse" }, { k: "stats", t: "Stats" }, { k: "marches", t: "Marchés" }, { k: "sources", t: "Tipsters" },
 ] as const;
 const TZ = "Africa/Abidjan";
 

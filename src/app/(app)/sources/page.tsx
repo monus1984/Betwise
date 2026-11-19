@@ -8,7 +8,7 @@ import { labelType, ProofBadge } from "./source-ui";
 
 export const dynamic = "force-dynamic";
 
-const VUES = [["suivies", "Mes sources"], ["classement", "Classement"], ["decouvrir", "Découvrir"]] as const;
+const VUES = [["suivies", "Suivis"], ["classement", "Classement"], ["decouvrir", "Découvrir"]] as const;
 const pc = (x: number | null) => (x === null ? "—" : `${Math.round(x * 100)} %`);
 const unit = (x: number | null) => (x === null ? "—" : `${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x * 100).toFixed(0)} %`);
 
@@ -36,7 +36,7 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHeader title="Sources" subtitle="Qui t’oriente, et ce que valent ses pronos."
+      <PageHeader title="Mes pronostiqueurs" subtitle="Les tipsters, pages et canaux qui t’orientent, et ce que valent leurs pronos."
         action={<Link href="/sources/nouvelle">+ Source</Link>} />
       <nav className="mb-4 flex gap-2 overflow-x-auto" aria-label="Vues des sources">
         {VUES.map(([k, mot]) => (
