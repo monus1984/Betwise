@@ -2,6 +2,7 @@ import type { createClient } from "@/lib/supabase/server";
 import { MODEL_VERSION } from "../model/version";
 import { lambdasFromOdds, makeGrid, probOf, type Grid } from "./grid";
 import { METHODE_MARGE, sansMarge, type MethodeMarge } from "./marge";
+import { jambesDe } from "../bets/combo";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
 /**
@@ -76,11 +77,11 @@ export function releveFrais(releveAt: string, kickoffAt: string | null, now = Da
   return ref - Date.parse(releveAt) <= RELEVE_MAX_HEURES * 3600000;
 }
 
-/** Cotes de bookmaker des matchs demandés. Jusqu'à 200 lignes par match et 1 000 par requête : quatre matchs à la fois. */
+/** Cotes de bookmaker des matchs demandés. Jusqu’à 300 lignes par match et 1 000 par requête : trois matchs à la fois. */
 async function loadBookOdds(db: Db, ids: string[]): Promise<Map<string, CoteBookmaker[]>> {
   const out = new Map<string, CoteBookmaker[]>();
   const lots: string[][] = [];
-  for (let i = 0; i < ids.length; i += 4) lots.push(ids.slice(i, i + 4));
+  for (let i = 0; i < ids.length; i += 3) lots.push(ids.slice(i, i + 3));
   const [{ data: ms }, ...res] = await Promise.all([
     db.from("matches").select("id, kickoff_at").in("id", ids),
     ...lots.map((lot) => db.from("bookmaker_odds").select("match_id, bookmaker, market_code, market_param, selection, cote, releve_at").in("match_id", lot).limit(1000)),
@@ -138,6 +139,9 @@ export function probOfSignal(s: Signal, market: string, param: number | null, se
 /** Toutes les sélections calculables d'un match : simples, buts par équipe, handicaps, combos même match. */
 const PO = ["Plus", "Moins"], ON = ["Oui", "Non"], R3 = ["1", "N", "2"];
 export const MG_RANGES = ["0-1", "1-2", "1-3", "2-3", "2-4", "3-4", "3-5", "4-6"];
+/** Nombre exact de buts : dans le match, puis pour une équipe (« 5-99 » et « 3-99 » : ce nombre ou plus). */
+export const NB_EXACT = ["0-0", "1-1", "2-2", "3-3", "4-4", "5-99"];
+export const NB_EQUIPE = ["0-0", "1-1", "2-2", "3-99"];
 export const ALL_CANDIDATES: [string, number | null, string][] = [
   ...["1", "N", "2"].map((x) => ["1X2", null, x] as [string, null, string]),
   ...["1N", "N2", "12"].map((x) => ["DC", null, x] as [string, null, string]),
@@ -164,6 +168,18 @@ export const ALL_CANDIDATES: [string, number | null, string][] = [
   ...MG_RANGES.map((x) => ["MG", null, x] as [string, null, string]),
   ...[-2, -1, 1, 2].flatMap((l) => R3.map((x) => ["EH", l, x] as [string, number, string])),
   ["WTN", null, "1"], ["WTN", null, "2"],
+  // Mi-temps (suite)
+  ...["1N", "N2", "12"].map((x) => ["H2_DC", null, x] as [string, null, string]),
+  ["H2_BTTS", null, "Oui"], ["H2_BTTS", null, "Non"],
+  ...["HT_TT1", "HT_TT2", "H2_TT1", "H2_TT2"].flatMap((m) => [0.5, 1.5].flatMap((l) => PO.map((x) => [m, l, x] as [string, number, string]))),
+  ...["HT_DNB", "H2_DNB", "WEH", "WBH", "SBH"].flatMap((m) => ["1", "2"].map((x) => [m, null, x] as [string, null, string])),
+  ...["HT_OE", "H2_OE"].flatMap((m) => ["Pair", "Impair"].map((x) => [m, null, x] as [string, null, string])),
+  ["BH", null, "Oui"], ["BH", null, "Non"],
+  // Buts (suite) : nombre exact, buts d'une équipe, première équipe à marquer
+  ...NB_EXACT.map((x) => ["MG", null, x] as [string, null, string]),
+  ...["MG1", "MG2"].flatMap((m) => NB_EQUIPE.map((x) => [m, null, x] as [string, null, string])),
+  ...["OE1", "OE2"].flatMap((m) => ["Pair", "Impair"].map((x) => [m, null, x] as [string, null, string])),
+  ["FTS", null, "1"], ["FTS", null, "Aucun"], ["FTS", null, "2"],
 ];
 
 /** Sélections candidates d'un match, de la plus probable à la moins probable. « all » : la liste exhaustive. */
@@ -182,11 +198,23 @@ export function bestPick(s: Signal): Pick {
   return all.find((p) => p.p <= 0.9) ?? all[all.length - 1];
 }
 
-const STAT_NOM: Record<string, string> = { CORN: "corners", CARD: "cartons", SHOT: "tirs", SOT: "tirs cadrés" };
+const STAT_NOM: Record<string, string> = { CORN: "corners", CARD: "cartons", SHOT: "tirs", SOT: "tirs cadrés", FOUL: "fautes", OFF: "hors-jeu" };
+/** « 2-2 » → 2 buts exactement ; « 0-1 » → 1 but au plus ; « 3-99 » → 3 buts ou plus ; sinon une tranche. */
+function tranche(sel: string): string {
+  const [a, b] = sel.split("-"), pl = (n: string) => `${n} but${n === "0" || n === "1" ? "" : "s"}`;
+  if (a === b) return a === "0" ? "aucun but" : `${pl(a)} exactement`;
+  if (a === "0") return `${pl(b)} au plus`;
+  if (Number(b) >= 9) return `${pl(a)} ou plus`;
+  return `entre ${a} et ${b} buts`;
+}
+const maj = (x: string) => x[0].toUpperCase() + x.slice(1);
 export function pickLabel(market: string, param: number | null, sel: string, home: string, away: string): string {
   const line = param !== null ? String(Math.abs(param)).replace(".", ",") : "";
   const buts = (x: string) => `${x === "Plus" ? "plus" : "moins"} de ${line} but${param !== null && Math.abs(param) < 1 ? "" : "s"}`;
   const btts = (x: string) => (x === "Oui" ? "les deux marquent" : "une équipe ne marque pas");
+  if (market.startsWith("HT_")) return `Mi-temps : ${pickLabel(market.slice(3), param, sel, home, away)}`;
+  if (market.startsWith("H2_")) return `2e mi-temps : ${pickLabel(market.slice(3), param, sel, home, away)}`;
+  const team = sel === "1" ? home : away, signe = param !== null && param > 0 ? "+" : "";
   switch (market) {
     case "1X2": return sel === "1" ? home : sel === "2" ? away : "Match nul";
     case "DC": return sel === "1N" ? `${home} ou nul` : sel === "N2" ? `${away} ou nul` : "Pas de nul";
@@ -203,8 +231,8 @@ export function pickLabel(market: string, param: number | null, sel: string, hom
     }
     case "DC_OU": case "1X2_OU": { const [a, b] = sel.split("|"); return `${pickLabel(market === "DC_OU" ? "DC" : "1X2", null, a, home, away)} et ${buts(b)}`; }
     case "DC_BTTS": case "1X2_BTTS": { const [a, b] = sel.split("|"); return `${pickLabel(market === "DC_BTTS" ? "DC" : "1X2", null, a, home, away)} et ${btts(b)}`; }
-    case "CORN": case "CARD": case "SHOT": case "SOT": return `${sel === "Plus" ? "Plus" : "Moins"} de ${line} ${STAT_NOM[market]}`;
-    case "CORN1": case "CORN2": case "CARD1": case "CARD2": case "SOT1": case "SOT2": return `${market.endsWith("1") ? home : away} : ${sel === "Plus" ? "plus" : "moins"} de ${line} ${STAT_NOM[market.slice(0, -1)]}`;
+    case "CORN": case "CARD": case "SHOT": case "SOT": case "FOUL": case "OFF": return `${sel === "Plus" ? "Plus" : "Moins"} de ${line} ${STAT_NOM[market]}`;
+    case "CORN1": case "CORN2": case "CARD1": case "CARD2": case "SOT1": case "SOT2": case "SHOT1": case "SHOT2": case "FOUL1": case "FOUL2": case "OFF1": case "OFF2": return `${market.endsWith("1") ? home : away} : ${sel === "Plus" ? "plus" : "moins"} de ${line} ${STAT_NOM[market.slice(0, -1)]}`;
     case "CORN_1X2": return sel === "N" ? "Autant de corners" : `${sel === "1" ? home : away} a le plus de corners`;
     case "RED": return sel === "Oui" ? "Au moins un carton rouge" : "Pas de carton rouge";
     case "BUT": return `${sel} marque`;
@@ -218,12 +246,29 @@ export function pickLabel(market: string, param: number | null, sel: string, hom
     case "BH": return sel === "Oui" ? "But dans les deux mi-temps" : "Une mi-temps sans but";
     case "LIBRE": return sel;
     case "QUALIF": return `${sel === "1" ? home : away} se qualifie`;
-    case "HT_1X2": case "HT_DC": case "HT_OU": case "HT_BTTS": case "HT_CS": case "HT_TT1": case "HT_TT2": return `Mi-temps : ${pickLabel(market.slice(3), param, sel, home, away)}`;
-    case "H2_1X2": case "H2_OU": case "H2_BTTS": case "H2_DC": case "H2_TT1": case "H2_TT2": return `2e mi-temps : ${pickLabel(market.slice(3), param, sel, home, away)}`;
+    case "WBH": return `${team} gagne les deux mi-temps`;
+    case "SBH": return `${team} marque dans les deux mi-temps`;
+    case "OE1": case "OE2": return `${market === "OE1" ? home : away} : nombre de buts ${sel === "Pair" ? "pair" : "impair"}`;
+    case "MG1": case "MG2": return `${market === "MG1" ? home : away} : ${tranche(sel)}`;
+    case "FTS": return /^aucun/i.test(sel) ? "Aucun but dans le match" : `${team} marque en premier`;
+    case "LTS": return /^aucun/i.test(sel) ? "Aucun but dans le match" : `${team} marque en dernier`;
+    case "GB": return sel === "Oui" ? `Un but avant la ${line}e minute` : `Pas de but avant la ${line}e minute`;
+    case "OG": return sel === "Oui" ? "Un but contre son camp" : "Pas de but contre son camp";
+    case "PKM": return sel === "Oui" ? "Un penalty manqué" : "Pas de penalty manqué";
+    case "BUTL": return /^aucun/i.test(sel) ? "Aucun buteur" : `${sel} marque le dernier but`;
+    case "BUT2": return `${sel} marque 2 buts ou plus`;
+    case "BUT3": return `${sel} marque 3 buts ou plus`;
+    case "PCARD": return `${sel} reçoit un carton`;
+    case "CARD_1X2": return sel === "N" ? "Autant de cartons" : `${team} a le plus de cartons`;
+    case "RED1": case "RED2": return `${market === "RED1" ? home : away} : ${sel === "Oui" ? "au moins un carton rouge" : "pas de carton rouge"}`;
+    case "CORN_AH": return `${team} : corners, handicap ${signe}${String(param).replace(".", ",")}`;
+    case "CORN_OE": return `Nombre de corners ${sel === "Pair" ? "pair" : "impair"}`;
+    case "CORN_DC": return sel === "12" ? "Pas le même nombre de corners" : `${sel === "1N" ? home : away} a autant ou plus de corners`;
+    case "COMBO": { const js = jambesDe(sel); return js ? js.map((j, i) => { const t = pickLabel(j.market, j.param, j.sel, home, away); return i === 0 ? t : t[0].toLowerCase() + t.slice(1); }).join(" + ") : sel; }
     case "HTFT": { const [a, b] = sel.split("/"); const n = (x: string) => (x === "1" ? home : x === "2" ? away : "nul"); return `Mi-temps ${n(a)} / fin ${n(b)}`; }
     case "HMG": return sel === "1" ? "Plus de buts en 1re mi-temps" : sel === "2" ? "Plus de buts en 2e mi-temps" : "Autant de buts dans les deux mi-temps";
     case "OE": return `Nombre de buts ${sel === "Pair" ? "pair" : "impair"}`;
-    case "MG": { const [a, b] = sel.split("-"); return a === "0" ? `${b} but${b === "1" ? "" : "s"} au plus` : `Entre ${a} et ${b} buts`; }
+    case "MG": return maj(tranche(sel));
     case "EH": {
       // Handicap européen (3 issues), handicap donné pour l'équipe à domicile : dit en clair ce qu'il faut pour gagner
       const h = param ?? 0, pl = (n: number) => `${n} but${n > 1 ? "s" : ""}`;
@@ -239,8 +284,8 @@ export function pickLabel(market: string, param: number | null, sel: string, hom
 
 /** Famille d'un marché, pour filtrer les options. */
 export function familleOf(market: string): "resultat" | "buts" | "combo" | "mitemps" {
-  if (market.startsWith("HT_") || market.startsWith("H2_") || market === "HTFT" || market === "HMG" || market === "WEH" || market === "BH") return "mitemps";
-  if (["DC_OU", "1X2_OU", "DC_BTTS", "1X2_BTTS", "OU_BTTS"].includes(market)) return "combo";
-  if (["OU", "BTTS", "TT1", "TT2", "OE", "MG"].includes(market)) return "buts";
+  if (market.startsWith("HT_") || market.startsWith("H2_") || ["HTFT", "HMG", "WEH", "BH", "WBH", "SBH"].includes(market)) return "mitemps";
+  if (["DC_OU", "1X2_OU", "DC_BTTS", "1X2_BTTS", "OU_BTTS", "COMBO"].includes(market)) return "combo";
+  if (["OU", "BTTS", "TT1", "TT2", "OE", "MG", "OE1", "OE2", "MG1", "MG2", "FTS", "LTS"].includes(market)) return "buts";
   return "resultat";
 }

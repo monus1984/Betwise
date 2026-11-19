@@ -10,6 +10,7 @@ import { getLlm, type LlmImage } from "../llm/provider";
 import { normalizeTeam, teamSimilarity } from "../odds-api/client";
 import { loadSignals, probOfSignal } from "../probs/signals";
 import { coteEstimee } from "../options/build";
+import { selectionCombo } from "../bets/combo";
 
 type Db = SupabaseClient<Database, "betwise">;
 
@@ -166,8 +167,13 @@ export function normalizePick(marketText: string, pickText: string, home: string
   // au handicap rembourse la sélection (vérifié sur ticket : Bénin -1, victoire 0-1, cote retirée du combiné).
   {
     const h = `${m} ${p}`.match(/handicap\s*([12])\s*\(?\s*([+\-−]?\s*\d+(?:[.,]\d+)?)\s*\)?/);
-    if (h && !/europ|3 issues|3 way/.test(`${m} ${p}`))
-      return { market_code: "AH", market_param: Number(h[2].replace(/\s/g, "").replace("−", "-").replace(",", ".")), selection: h[1], label_pick: pickText, ok: true };
+    if (h && !/europ|3 issues|3 way|corner/.test(`${m} ${p}`)) {
+      // « Handicap 1 (-1) 1ère mi-temps » : le même handicap, sur une seule mi-temps ; un handicap de 0 = remboursé si nul
+      const t = `${m} ${p}`, pre = /mi[- ]?temps|\b(mt|ht)\b/.test(t) ? (/\b(2e|2ème|2eme|2nde|seconde|deuxième)\b/.test(t) ? "H2_" : "HT_") : "";
+      const v = Number(h[2].replace(/\s/g, "").replace("−", "-").replace(",", "."));
+      if (pre && v === 0) return { market_code: `${pre}DNB`, market_param: null, selection: h[1], label_pick: pickText, ok: true };
+      return { market_code: `${pre}AH`, market_param: v, selection: h[1], label_pick: pickText, ok: true };
+    }
   }
   const side = (name: string): "1" | "2" | null => {
     if (!name) return null;
@@ -190,6 +196,13 @@ export function normalizePick(marketText: string, pickText: string, home: string
   // Pronos de tipsters, libellés courts (avec l'équipe nommée seule ou dans le texte)
   const all = `${m} ${p}`;
   const teamSide = team ? side(team) : null;
+  // Pair ou impair : le choix d'abord (le nom du marché contient souvent les deux mots, « Total pair/impair »)
+  const parite = (): "Pair" | "Impair" | null => { for (const t of [p, all]) { if (/\bimpair\b|\bodd\b/.test(t)) return "Impair"; if (/\bpair\b|\beven\b/.test(t)) return "Pair"; } return null; };
+  // Plusieurs conditions écrites à la suite (« Victoire & +1,5 buts & +8,5 corners ») : un combiné libre si chacune est comprise
+  const essaiCombo = (): NormalizedSelection | null => {
+    const ps = pickText.split(/\s+&\s+|\s+\+\s+(?!\d)|\s+et\s+(?=plus|moins|\+|-|les deux|btts|over|under)/i).map((x) => x.trim()).filter(Boolean);
+    return ps.length >= 2 ? comboLibre(ps.map((x) => normalizePick("", x, home, away, team, alias)), pickText) : null;
+  };
   // Betclic MyCombi et codes de tipsters : plusieurs paris du même match sur une ligne, « marché A / marché B » et « choix A / choix B ».
   // Lus comme un seul marché, ils devenaient le dernier seulement (« + de 2,5 / Oui » enregistré comme « les deux marquent »).
   if (!/&/.test(marketText + pickText) && !/mi[- ]?temps\s*\/\s*fin|\b(ht|mt)\s*\/\s*ft\b/i.test(marketText + " " + pickText) && !parseDoubleChance(p, side, isDraw)) {
@@ -197,7 +210,7 @@ export function normalizePick(marketText: string, pickText: string, home: string
     if (ps.length >= 2 && ms.length === ps.length) {
       const parts = ps.map((x, i) => normalizePick(ms[i], x, home, away, team, alias));
       const combo = parts.length === 2 ? combiner(parts[0], parts[1], pickText) : null;
-      return combo ?? { market_code: "1X2", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Plusieurs paris du même match réunis sur une ligne : gardés tels quels, à régler à la main." };
+      return combo ?? comboLibre(parts, pickText) ?? { market_code: "1X2", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Plusieurs paris du même match réunis sur une ligne : gardés tels quels, à régler à la main." };
     }
   }
   // « Remboursé si nul » : un nul rend la mise, ce n'est pas une victoire sèche
@@ -236,16 +249,30 @@ export function normalizePick(marketText: string, pickText: string, home: string
   // Statistiques, buteurs, prolongation, qualification : réglés sur le détail du match
   const mention = (): "1" | "2" | null => teamSide ?? (home && all.includes(home.toLowerCase()) ? "1" : away && all.includes(away.toLowerCase()) ? "2" : null);
   const yesNo = non || /\b(non|no|pas de|aucun)\b/.test(p) ? "Non" : "Oui";
-  const stat = /corner/.test(all) ? "CORN" : /tirs? cadr|shots? on (goal|target)/.test(all) ? "SOT" : /carton|\bcards?\b|jaune/.test(all) ? "CARD" : /\btirs?\b(?! au but)|\bshots?\b/.test(all) ? "SHOT" : null;
+  const stat = /corner/.test(all) ? "CORN" : /tirs? cadr|shots? on (goal|target)/.test(all) ? "SOT" : /carton|\bcards?\b|jaune/.test(all) ? "CARD" : /\btirs?\b(?! au but)|\bshots?\b/.test(all) ? "SHOT" : /\bfautes?\b|\bfouls?\b/.test(all) ? "FOUL" : /hors[- ]?jeu|offsides?/.test(all) ? "OFF" : null;
+  // « Rice reçoit un carton », « Joueur averti : Declan Rice » : un joueur nommé, pas un total de cartons
+  if ((stat === "CARD" || (!stat && /averti|\bbooked\b/.test(all))) && /re[çc]oit|prend(?:ra)? un carton|averti|\bbooked\b|carton pour/.test(all) && !ouLine(p) && !mention() && !/[ée]quipe|match/.test(p)) {
+    const name = nomJoueur(pickText);
+    if (name.length >= 3) return { market_code: "PCARD", market_param: null, selection: name, label_pick: pickText, ok: true };
+  }
   if (stat) {
+    if (/\d\s*buts?\b|\bbuts?\s*\+|\bmarque/.test(all)) { const c = essaiCombo(); if (c) return c; }
     if (/\d\s*buts?\b|\bbuts?\s*\+|\bmarque/.test(all)) return { market_code: stat, market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari qui mêle buts et statistiques (corners, cartons) : pas encore suivi. La ligne est gardée telle quelle, à régler à la main." };
     const o = ouLine(p), t = mention();
     // Statistique d'un joueur (« Mbappé : plus de 1,5 tir cadré ») : BETWISE ne suit que les totaux du match ou d'une équipe.
     // La lire comme un total du match la ferait gagner presque à coup sûr : on la signale au lieu de la régler de travers.
     const joueur = /joueur|player/.test(all) || (!!o && !t && ((stat === "SOT" && o.line <= 3.5) || (stat === "SHOT" && o.line <= 6.5)));
     if (joueur) return { market_code: stat, market_param: o?.line ?? null, selection: pickText, label_pick: pickText, ok: false, reason: `Statistique d’un joueur (tirs, tirs cadrés…) : pas suivie par ${APP_NAME}. La ligne est gardée telle quelle, à régler à la main.` };
-    if (stat === "CARD" && /rouge|red/.test(all) && !o) return { market_code: "RED", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
-    if (o) return { market_code: t && stat !== "SHOT" ? `${stat}${t}` : stat, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
+    if (stat === "CARD" && /rouge|red/.test(all) && !o) return { market_code: t ? `RED${t}` : "RED", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
+    if (stat === "CARD" && /le plus|plus de cartons que|most/.test(all) && !o) { const r = isDraw(p) || /égalité|autant/.test(p) ? "N" : t; if (r) return { market_code: "CARD_1X2", market_param: null, selection: r, label_pick: pickText, ok: true }; }
+    if (stat === "CORN" && /handicap/.test(all)) {
+      const hc = p.match(/([+\-–]\s*\d+(?:[.,]\d+)?)/), eq = all.match(/handicap\s*([12])\b/), sd = eq ? (eq[1] as "1" | "2") : t;
+      const v = hc ? Number(hc[1].replace(/\s/g, "").replace("–", "-").replace(",", ".")) : null;
+      return sd && v !== null && (v * 2) % 1 === 0 ? { market_code: "CORN_AH", market_param: v, selection: sd, label_pick: pickText, ok: true }
+        : { market_code: "CORN_AH", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Handicap sur les corners : équipe ou ligne non reconnue. La ligne est gardée telle quelle, à régler à la main." };
+    }
+    if (stat === "CORN" && parite()) return { market_code: "CORN_OE", market_param: null, selection: parite()!, label_pick: pickText, ok: true };
+    if (o) return { market_code: t ? `${stat}${t}` : stat, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
     if (stat === "CORN" && /le plus|plus de corners|most/.test(all)) { const r = isDraw(p) || /égalité|autant/.test(p) ? "N" : t; if (r) return { market_code: "CORN_1X2", market_param: null, selection: r, label_pick: pickText, ok: true }; }
     return { market_code: stat, market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari sur les statistiques : précise la ligne (ex. plus de 9,5)." };
   }
@@ -254,30 +281,58 @@ export function normalizePick(marketText: string, pickText: string, home: string
     const ko = (reason: string): NormalizedSelection => ({ market_code: "PK", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason });
     const uneDes = /une des|l[’']une des|au moins une/.test(all);
     if (!uneDes && /(les|des) (2|deux) équipes marquent|chaque équipe|chacune/.test(all)) return ko("Penalty marqué par chacune des deux équipes : pari pas suivi, gardé tel quel et réglé à la main.");
-    if (/manqu|rat[ée]|arr[êe]t/.test(all)) return ko("Penalty manqué ou arrêté : pari pas suivi, gardé tel quel et réglé à la main.");
+    if (/manqu|rat[ée]|arr[êe]t/.test(all)) return { market_code: "PKM", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
     if (!uneDes && mention()) return ko("Penalty d’une équipe précise : pari pas suivi, gardé tel quel et réglé à la main.");
     if (/marqu|transform|réussi|inscrit|but sur/.test(all)) return { market_code: "PKB", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
     if (/accord|siffl|dans le match|y aura|aura[- ]t[- ]il|obtenu/.test(all) || /^p[ée]nalty\s*[-–—:]?\s*(oui|non|yes|no)?$/.test(all.trim()) || /^(oui|non|yes|no)$/.test(p)) return { market_code: "PK", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
     return ko("Pari sur un penalty : formulation pas reconnue, gardé tel quel et réglé à la main.");
   }
-  // « Un joueur va marquer un doublé » : n'importe quel joueur du match
+  // But contre son camp dans le match
+  if (/contre son camp|\bcsc\b|own goal/.test(all)) return { market_code: "OG", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
+  // Triplé d'un joueur nommé
+  if (/tripl[ée]|hat[- ]?trick|coup du chapeau/.test(all)) {
+    const name = nomJoueur(pickText);
+    return name.length >= 3 && !/\b(un|n'importe quel|n’importe quel) joueur\b/.test(all) ? { market_code: "BUT3", market_param: null, selection: name, label_pick: pickText, ok: true }
+      : { market_code: "BUT3", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Triplé : indique le nom du joueur. Sans nom, la ligne est gardée telle quelle, à régler à la main." };
+  }
+  // Doublé : « un joueur » = n'importe quel joueur du match ; sinon le joueur nommé marque 2 buts ou plus
   if (/doublé|\bbrace\b/.test(all)) {
     if (/\b(un|n'importe quel|n’importe quel) joueur\b|any player/.test(all)) return { market_code: "DBL", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
-    return { market_code: "DBL", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Doublé d’un joueur précis : pari pas suivi, gardé tel quel et réglé à la main." };
+    const name = nomJoueur(pickText);
+    return name.length >= 3 ? { market_code: "BUT2", market_param: null, selection: name, label_pick: pickText, ok: true }
+      : { market_code: "DBL", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Doublé : indique le nom du joueur. Sans nom, la ligne est gardée telle quelle, à régler à la main." };
   }
+  // Première / dernière équipe à marquer : avec une équipe nommée ou « aucun but ». Un joueur nommé reste un pari « buteur ».
+  if (/[ée]quipe (?:à|a) marquer|ouvr(?:e|ira) le score|marque(?:ra)? (?:en|le) (?:premier|dernier)(?! but)|(?:premier|dernier) but(?!eur)/.test(all) && !/buteur/.test(all)) {
+    const reste = p.replace(/(?:premi[èe]re|derni[èe]re) [ée]quipe (?:à|a) marquer|marque(?:ra)? (?:en|le) (?:premier|dernier)|ouvr(?:e|ira) le score|(?:le )?(?:premier|dernier) but|marque(?:ra)?|[:–—-]/g, " ").replace(/\s+/g, " ").trim();
+    const sd = /\baucune?\b|pas de but/.test(p) ? "Aucun" : teamSide ?? (reste ? side(reste) : null);
+    if (sd) return { market_code: /derni[èe]re?/.test(all) ? "LTS" : "FTS", market_param: null, selection: sd, label_pick: pickText, ok: true };
+  }
+
   // Joueur « décisif », passeur, remplaçant compris, deux joueurs au choix : la feuille de match ne suffit pas à trancher
   if (/rempla[çc]ant|décisif|decisif|passeur|passe décisive|double chance buteur/.test(all))
     return { market_code: "BUT", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari sur un joueur avec une condition (remplaçant, passeur, deux joueurs au choix) : gardé tel quel, à régler à la main." };
-  if (/buteur|marque à tout moment|\bscorer\b|marque(ra)? (un but|le premier)/.test(all)) {
-    const first = /premier|first|1er/.test(all);
-    const name = pickText.replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ").replace(/\b(premier|1er|buteur|marque(ra)?( à tout moment| un but| le premier but)?|but|:)\b/gi, " ").replace(/[:–—-]/g, " ").replace(/\s+/g, " ").trim();
-    return name.length >= 3 ? { market_code: first ? "BUT1" : "BUT", market_param: null, selection: name, label_pick: pickText, ok: true } : { market_code: "BUT", market_param: null, selection: "", label_pick: pickText, ok: false, reason: "Buteur : indique le nom du joueur." };
+  if (/buteur|marque à tout moment|\bscorer\b|marque(ra)? (un but|le premier|le dernier)/.test(all)) {
+    const first = /premier|first|1er/.test(all), last = /dernier|\blast\b/.test(all);
+    const name = nomJoueur(pickText);
+    return name.length >= 3 ? { market_code: first ? "BUT1" : last ? "BUTL" : "BUT", market_param: null, selection: name, label_pick: pickText, ok: true } : { market_code: "BUT", market_param: null, selection: "", label_pick: pickText, ok: false, reason: "Buteur : indique le nom du joueur." };
   }
   if (/tirs au but|penalty shoot/.test(all)) return { market_code: "PEN", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
   if (/prolongation|extra time/.test(all)) return { market_code: "ET", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
   if (/qualifi|vainqueur final|remporte (le trophée|la coupe)|to qualify/.test(all)) { const r = teamSide ?? who(p.replace(/se qualifie|qualifié|qualification|vainqueur final|:/g, " ").trim()); const r12 = r === "1" || r === "2" ? r : null; return { market_code: "QUALIF", market_param: null, selection: r12 ?? pickText, label_pick: pickText, ok: !!r12 }; }
-  if (/score exact/.test(all) && /mi[- ]?temps/.test(all)) { const cs = p.match(/(\d+)\s*[-:]\s*(\d+)/); return { market_code: "HT_CS", market_param: null, selection: cs ? `${cs[1]}-${cs[2]}` : pickText, label_pick: pickText, ok: !!cs }; }
+  if (/score exact/.test(all) && /mi[- ]?temps/.test(all)) { const cs = p.match(/(\d+)\s*[-:]\s*(\d+)/); return { market_code: /\b(2e|2ème|2eme|2nde|seconde|deuxième)\b/.test(all) ? "H2_CS" : "HT_CS", market_param: null, selection: cs ? `${cs[1]}-${cs[2]}` : pickText, label_pick: pickText, ok: !!cs }; }
 
+  // « Gagne les deux mi-temps », « marque dans les deux mi-temps » : une équipe nommée
+  { const wb = /(?:gagne|remporte|gagner|remporter)(?:ra)? les (?:2|deux) mi[- ]?temps|win both halves/.test(all);
+    const sb = !wb && /marqu(?:e|era|ent|er) dans (?:les|chaque|chacune des) (?:2 |deux )?mi[- ]?temps|score in both halves/.test(all);
+    if (wb || sb) {
+      const nm = all.match(/^(.*?)\s*(?:va gagner|va remporter|va marquer|gagnera|remportera|marquera|gagne|remporte|marque) (?:les|dans)/);
+      const sd = teamSide ?? (nm && nm[1].trim() ? side(nm[1].trim()) : null) ?? (all.match(/[ée]quipe\s*([12])/)?.[1] as "1" | "2" | undefined) ?? null;
+      const neg = non || /^(non|no)$/.test(p) || /[-–—:]\s*non$/.test(p);
+      const code = wb ? "WBH" : "SBH";
+      return sd && !neg ? { market_code: code, market_param: null, selection: sd, label_pick: pickText, ok: true }
+        : { market_code: code, market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: neg ? "Pari « non » sur les deux mi-temps : pas suivi, gardé tel quel et réglé à la main." : "Pari sur les deux mi-temps : équipe non reconnue." };
+    } }
   // « Gagne au moins une mi-temps » : l'une ou l'autre, pas forcément la première
   if (/(gagne|remporte|gagner|remporter) au moins (1|une) mi[- ]?temps/.test(all)) {
     const nm = all.match(/^(.*?)\s*(?:va gagner|va remporter|gagne|remporte) au moins/);
@@ -289,7 +344,8 @@ export function normalizePick(marketText: string, pickText: string, home: string
   // But dans chacune des deux mi-temps, sans équipe précise
   if (/buts? (?:marqué )?dans (?:les|chaque|chacune des) (?:2 |deux )?mi[- ]?temps/.test(all)) {
     const neg = non || /^(non|no)$/.test(p) || /[-–—:]\s*non$/.test(p);
-    if (mention() || /[ée]quipe\s*[12]/.test(all)) return { market_code: "BH", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Une équipe marque dans les deux mi-temps : pari pas suivi, gardé tel quel et réglé à la main." };
+    { const sd = mention() ?? (all.match(/[ée]quipe\s*([12])/)?.[1] as "1" | "2" | undefined) ?? null;
+      if (sd) return neg ? { market_code: "SBH", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari « non » sur les deux mi-temps : pas suivi, gardé tel quel et réglé à la main." } : { market_code: "SBH", market_param: null, selection: sd, label_pick: pickText, ok: true }; }
     return { market_code: "BH", market_param: null, selection: neg ? "Non" : "Oui", label_pick: pickText, ok: true };
   }
   // Mi-temps la plus prolifique
@@ -305,6 +361,9 @@ export function normalizePick(marketText: string, pickText: string, home: string
     const [x1, x2] = parts.length === 2 ? parts.map(code) : [null, null];
     return x1 && x2 ? { market_code: "HTFT", market_param: null, selection: `${x1}/${x2}`, label_pick: pickText, ok: true } : { market_code: "HTFT", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Mi-temps / fin de match : choisis les deux résultats." };
   }
+  // But avant une minute donnée : « But dans les 15 premières minutes », « But avant la 30e minute », « But entre la 1re et la 15e minute »
+  { const g = all.match(/buts? (?:marqué )?(?:avant|dans) (?:la |les )?(\d{1,2})\s*(?:e|ère|ere|eme|ème|['’])?\s*(?:premi[èe]res? )?min/) ?? all.match(/buts? (?:marqué )?entre (?:la )?[01](?:re|ère|ere|e)? (?:minute )?et (?:la )?(\d{1,2})/);
+    if (g && Number(g[1]) >= 1 && Number(g[1]) <= 90) return { market_code: "GB", market_param: Number(g[1]), selection: non || /\b(non|no|pas de|aucun)\b/.test(p) ? "Non" : "Oui", label_pick: pickText, ok: true }; }
   // Marchés d'une mi-temps : « Ghana – 1ère mi-temps », « +0,5 but en 1ère mi-temps », « Nul à la mi-temps », « 2e mi-temps : Italie »
   if (/mi[- ]?temps|\b(mt|ht)\b/.test(all)) {
     const h2 = /\b(2e|2ème|2eme|2nde|seconde|deuxième)\b/.test(all);
@@ -312,6 +371,10 @@ export function normalizePick(marketText: string, pickText: string, home: string
     const q = p.replace(/(1(ère|ere|re)|première|premiere|2(e|ème|eme|nde)|seconde|deuxième)?\s*mi[- ]?temps|\b(mt|ht)\b|\b(à la|a la|en|de la|résultat)\b/g, " ").replace(/[:–—-]/g, " ").replace(/\s+/g, " ").trim();
     const o = ouLine(p.replace(/total individuel\s*[12]/, " "));
     const ti = all.match(/total individuel\s*([12])/);
+    if (parite()) return { market_code: `${pre}OE`, market_param: null, selection: parite()!, label_pick: pickText, ok: true };
+    { const hd = all.match(/handicap\s*([12])\s*\(?\s*([+-]?\d+(?:[.,]\d+)?)\s*\)?/); const v = hd ? Number(hd[2].replace(",", ".")) : null;
+      if (hd && v !== null && (v * 2) % 1 === 0) return { market_code: v === 0 ? `${pre}DNB` : `${pre}AH`, market_param: v === 0 ? null : v, selection: hd[1], label_pick: pickText, ok: true }; }
+    if (/rembours[ée]e? si (?:match )?nul|draw no bet/.test(all)) { const r = who(q.replace(/rembours[ée]e? si (?:match )?nul|[()]/g, " ").replace(/\s+/g, " ").trim()) ?? teamSide; if (r === "1" || r === "2") return { market_code: `${pre}DNB`, market_param: null, selection: r, label_pick: pickText, ok: true }; }
     if (ti && o) return { market_code: `${pre}TT${ti[1]}`, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
     if (o && (/\b(buts?|over|under|total)\b/.test(p) || /^(\+|plus|moins)/.test(q))) return { market_code: `${pre}OU`, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
     if (/(2|deux) (équipes )?(?:vont marquer|marquent)|btts/.test(all)) return { market_code: `${pre}BTTS`, market_param: null, selection: non || /\bnon\b/.test(q) ? "Non" : "Oui", label_pick: pickText, ok: true };
@@ -320,6 +383,13 @@ export function normalizePick(marketText: string, pickText: string, home: string
     if (r) return { market_code: `${pre}1X2`, market_param: null, selection: r, label_pick: pickText, ok: true };
     return { market_code: `${pre}1X2`, market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari de mi-temps : choisis le marché et le choix." };
   }
+  // Nombre exact de buts, dans le match ou pour une équipe : « Nombre exact de buts : 2 », « Sénégal : 2 buts exactement »
+  { const ex = all.match(/nombre exact de buts\D*(\d)(?!\d|[.,]\d)/) ?? p.match(/(?:^|\s)(\d)\s*buts?\s*exactement$/) ?? p.match(/exactement\s*(\d)\s*buts?$/);
+    // « perd de 1 but exactement », « gagne par 2 buts exactement » parlent de l'écart, pas du nombre de buts
+    if (ex && !/perd|gagn|[ée]cart|victoire/.test(all)) { const t = mention(); return { market_code: t ? `MG${t}` : "MG", market_param: null, selection: `${ex[1]}-${ex[1]}`, label_pick: pickText, ok: true }; } }
+  // Écart exact : « Sénégal gagne par 1 but exactement », « gagne de 2 buts d'écart » = handicap européen, issue « nul »
+  { const ex = p.match(/^(.*?)\s+gagne (?:de|par) (?:exactement )?(\d) buts?(?: exactement| d['’]écart)?$/);
+    if (ex && /exactement|d['’]écart/.test(p)) { const sd = side(ex[1]); if (sd) return { market_code: "EH", market_param: sd === "1" ? -Number(ex[2]) : Number(ex[2]), selection: "N", label_pick: pickText, ok: true }; } }
   // 1xBet : « Total Individuel 2 Plus de (0.5) » = buts de l'équipe 2 ; « Total Plus de (1.5) » = buts du match.
   { const ti = all.match(/total individuel\s*([12])\s*(.*)$/); const o = ti ? ouLine(ti[2]) : null;
     if (ti && o) return { market_code: `TT${ti[1]}`, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
@@ -357,8 +427,10 @@ export function normalizePick(marketText: string, pickText: string, home: string
       if (btA && ou) return { market_code: "OU_BTTS", market_param: ou.line, selection: `${ou.dir}|${btA}`, label_pick: pickText, ok: true };
     }
   }
-  if (/\bimpair\b|\bodd\b/.test(all)) return { market_code: "OE", market_param: null, selection: "Impair", label_pick: pickText, ok: true };
-  if (/\bpair\b|\beven\b/.test(all)) return { market_code: "OE", market_param: null, selection: "Pair", label_pick: pickText, ok: true };
+  // Pair / impair : du match, ou des buts d'une équipe (« Total individuel 1 », « buts de l'équipe 2 », « buts du Sénégal »)
+  { const pi = parite();
+    if (pi) { const te = all.match(/individuel\s*([12])|[ée]quipe\s*([12])/); const t = te ? (te[1] ?? te[2]) : /buts? (?:de|du|des|d['’])\s*\S/.test(all) ? mention() : null;
+      return { market_code: t ? `OE${t}` : "OE", market_param: null, selection: pi, label_pick: pickText, ok: true }; } }
   if (/sans encaisser|win to nil/.test(all)) { const r = teamSide ?? side(p.replace(/gagne|sans encaisser( de but)?|win to nil/g, "").trim()); return { market_code: "WTN", market_param: null, selection: r ?? pickText, label_pick: pickText, ok: !!r }; }
   { const r = p.match(/^(?:entre\s*)?(\d)\s*(?:-|à|a|et)\s*(\d)\s*buts?$/); if (r && Number(r[1]) <= Number(r[2])) return { market_code: "MG", market_param: null, selection: `${r[1]}-${r[2]}`, label_pick: pickText, ok: true }; }
   if (m.includes("handicap") && /europ|3 issues|1x2|3 way/.test(m)) {
@@ -366,6 +438,14 @@ export function normalizePick(marketText: string, pickText: string, home: string
     if (r && w) return { market_code: "EH", market_param: w === "2" ? -Number(r[2]) : Number(r[2]), selection: w, label_pick: pickText, ok: true };
   }
   if (/(les )?(2|deux) (équipes )?(?:vont marquer|marquent)|btts/.test(all)) return { market_code: "BTTS", market_param: null, selection: non || /(ne )?marquent pas|pas marquer|\bnon\b|\bno\b/.test(p) ? "Non" : "Oui", label_pick: pickText, ok: true };
+  // « Garde sa cage inviolée », « n'encaisse pas » : l'adversaire ne marque pas ; « ne marque pas » : l'équipe elle-même
+  { const neg = non || /^(non|no)$/.test(p) || /[-–—:]\s*non$/.test(p);
+    if (/cage inviol|clean sheet|n['’]encaisse(?:ra)? pas|ne prend(?:ra)? pas de but|garde sa cage/.test(all) && !/gagne|victoire|\bwin/.test(all)) {
+      const sd = teamSide ?? side(p.replace(/garde(?:ra)? sa cage inviolée?|clean sheet|n['’]encaisse(?:ra)? pas(?: de but)?|ne prend(?:ra)? pas de but|[:–—-]|\b(oui|non)\b/g, " ").replace(/\s+/g, " ").trim());
+      if (sd) return { market_code: `TT${sd === "1" ? "2" : "1"}`, market_param: 0.5, selection: neg ? "Plus" : "Moins", label_pick: pickText, ok: true };
+    }
+    const nm = p.match(/^(.*?)\s*(?:ne marque(?:ra)? pas|ne va pas marquer)$/); const s2 = nm ? (nm[1].trim() ? side(nm[1].trim()) : teamSide) : null;
+    if (nm && s2 && !/(2|deux)|équipes/.test(p)) return { market_code: `TT${s2}`, market_param: 0.5, selection: "Moins", label_pick: pickText, ok: true }; }
   // « Slovaquie va marquer », « marque » après une équipe nommée seule : au moins un but de cette équipe
   { const vm = p.match(/^(.*?)\s*(?:va marquer|marquera|marque(?: au moins (?:1|un) but)?)$/); const sd = vm ? (vm[1].trim() ? side(vm[1].trim()) : teamSide) : null;
     if (vm && sd && !/(2|deux)|équipes/.test(p)) return { market_code: `TT${sd}`, market_param: 0.5, selection: "Plus", label_pick: pickText, ok: true }; }
@@ -427,6 +507,7 @@ export function normalizePick(marketText: string, pickText: string, home: string
   const reste = normalizeTeam(p.replace(/[+]/g, " plus ")).split(" ").filter((w) => w && !connus.has(w) && !/^(victoire|gagne|gagnant|vainqueur|wins?|to|nul|draw|x|match)$/.test(w));
   // Marché distinct qui parle de résultat : on tolère deux mots d'écart sur le nom (« Manchester Utd », « Bayern Munich F. »). Sinon, rien ne doit rester.
   const connu = reste.length === 0 || (ditResultat && !!m.trim() && reste.length <= 2);
+  if (!r || !connu) { const c = essaiCombo(); if (c) return c; }
   if (r && !connu) return { market_code: "1X2", market_param: null, selection: pickText, label_pick: pickText, ok: false,
     reason: /[+]\s*\d|\d[.,]\d/.test(p) ? "Choix ambigu (buts du match ou de l’équipe ?) : choisis le marché, sinon la ligne est gardée telle quelle." : m.trim() ? `Marché « ${marketText} » pas reconnu : choisis-le à la main, sinon la ligne est gardée telle quelle.` : "Choix pas reconnu : choisis le marché, sinon la ligne est gardée telle quelle." };
   return { market_code: "1X2", market_param: null, selection: r ?? pickText, label_pick: pickText, ok: !!r };
@@ -444,6 +525,20 @@ function combiner(a: NormalizedSelection, b: NormalizedSelection, label: string)
   if (dc && bt) return mk("DC_BTTS", null, `${dc.selection}|${bt.selection}`);
   if (r && bt) return mk("1X2_BTTS", null, `${r.selection}|${bt.selection}`);
   return null;
+}
+
+/** Plusieurs paris simples du même match réunis en un combiné libre (marché COMBO) ; null si l'un d'eux n'est pas compris. */
+function comboLibre(parts: NormalizedSelection[], label: string): NormalizedSelection | null {
+  if (parts.length < 2 || parts.some((x) => !x.ok || !x.selection)) return null;
+  const selection = selectionCombo(parts.map((x) => ({ market: x.market_code, param: x.market_param, sel: x.selection })));
+  return selection ? { market_code: "COMBO", market_param: null, selection, label_pick: label, ok: true } : null;
+}
+
+/** Nom d'un joueur dans un libellé : ce qui reste une fois retirés les mots du pari. */
+export function nomJoueur(texte: string): string {
+  return texte.replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ")
+    .replace(/(?<![\p{L}\d])(premier|dernier|1er|buteur|joueur|averti|marquera|marque|va marquer|à tout moment|un but|le but|but|un doublé|doublé|un triplé|triplé|hat[- ]?trick|reçoit|recoit|prendra|prend|un carton|carton|jaune|rouge|pour|oui|non|[23] buts? ou plus|au moins [23] buts?|le|un)(?![\p{L}\d])/giu, " ")
+    .replace(/[:–—\-()+]/g, " ").replace(/\s+/g, " ").trim();
 }
 
 /** Libellé d'origine d'une ligne, tel qu'on le garde quand le pari n'est pas reconnu : « marché : choix », 120 caractères au plus. */

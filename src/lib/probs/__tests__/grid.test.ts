@@ -79,3 +79,39 @@ describe("marchés par mi-temps ajoutés le 18/11", () => {
     expect(probOf(g, "PKB", null, "Oui")).toBeNull();
   });
 });
+
+describe("marchés ajoutés le 19/11", () => {
+  const g = makeGrid(1.7, 1.05);
+  const p = (m: string, prm: number | null, s: string) => probOf(g, m, prm, s)!;
+  it("les issues d'un même marché se partagent bien 100 %", () => {
+    expect(p("OE1", null, "Pair") + p("OE1", null, "Impair")).toBeCloseTo(1, 6);
+    expect(p("HT_OE", null, "Pair") + p("HT_OE", null, "Impair")).toBeCloseTo(1, 6);
+    expect(["0-0", "1-1", "2-2", "3-99"].reduce((s, x) => s + p("MG2", null, x), 0)).toBeCloseTo(1, 4);
+    expect(["0-0", "1-1", "2-2", "3-3", "4-4", "5-99"].reduce((s, x) => s + p("MG", null, x), 0)).toBeCloseTo(1, 6);
+    expect(p("FTS", null, "1") + p("FTS", null, "2") + p("FTS", null, "Aucun")).toBeCloseTo(1, 6);
+    expect(p("H2_DNB", null, "1") + p("H2_DNB", null, "2")).toBeCloseTo(1, 6);
+  });
+  it("le favori marque plus souvent en premier, gagne plus souvent les deux mi-temps", () => {
+    expect(p("FTS", null, "1")).toBeGreaterThan(p("FTS", null, "2"));
+    expect(p("WBH", null, "1")).toBeGreaterThan(p("WBH", null, "2"));
+    expect(p("WBH", null, "1")).toBeLessThan(p("WEH", null, "1"));
+    expect(p("SBH", null, "1")).toBeLessThan(p("TT1", 1.5, "Plus")); // marquer dans chaque mi-temps suppose au moins 2 buts
+  });
+  it("un combiné compté score par score retrouve les combinés déjà connus", () => {
+    expect(p("COMBO", null, "1X2:1 & OU@2.5:Plus")).toBeCloseTo(p("1X2_OU", 2.5, "1|Plus"), 6);
+    expect(p("COMBO", null, "DC:1N & BTTS:Oui")).toBeCloseTo(p("DC_BTTS", null, "1N|Oui"), 6);
+    expect(p("COMBO", null, "OU@2.5:Plus & BTTS:Oui")).toBeCloseTo(p("OU_BTTS", 2.5, "Plus|Oui"), 6);
+    expect(p("COMBO", null, "HT_1X2:1 & H2_1X2:1")).toBeCloseTo(p("WBH", null, "1"), 4);
+    expect(p("COMBO", null, "HT_1X2:1 & 1X2:1")).toBeCloseTo(p("HTFT", null, "1/1"), 4);
+    // deux conditions qui vont ensemble : plus probable que le produit des deux
+    expect(p("COMBO", null, "1X2:1 & TT1@1.5:Plus")).toBeGreaterThan(p("1X2", null, "1") * p("TT1", 1.5, "Plus"));
+    // trois conditions, dont une contradictoire
+    expect(p("COMBO", null, "1X2:1 & BTTS:Non & TT2@0.5:Plus")).toBe(0);
+  });
+  it("pas de probabilité quand une condition ne se règle pas sur le score", () => {
+    expect(probOf(g, "COMBO", null, "1X2:1 & CORN@8.5:Plus")).toBeNull();
+    expect(probOf(g, "COMBO", null, "1X2:1")).toBeNull();
+    expect(probOf(g, "GB", 15, "Oui")).toBeNull();
+    expect(probOf(g, "HT_WEH", null, "1")).toBeNull();
+  });
+});

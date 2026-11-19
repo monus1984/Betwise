@@ -2,7 +2,7 @@ import { APP_NAME } from "@/lib/app-name";
 import Link from "next/link";
 import { OddButton } from "@/components/slip";
 import { shortName } from "@/components/match-ui";
-import { MG_RANGES, pickLabel, picksOf, type Signal } from "@/lib/probs/signals";
+import { MG_RANGES, NB_EQUIPE, NB_EXACT, pickLabel, picksOf, type Signal } from "@/lib/probs/signals";
 import { probOf } from "@/lib/probs/grid";
 import { quandReleve } from "./cotes-bookmaker";
 import { legFrom } from "@/lib/slip/leg";
@@ -37,6 +37,8 @@ export function MatchMarkets({ m, sg }: { m: M; sg: Signal }) {
     .sort((x, y) => Math.abs(x.plus!.cote - x.moins!.cote) - Math.abs(y.plus!.cote - y.moins!.cote)).slice(0, max).sort((x, y) => x.l - y.l);
   const scoresBook = sg.bookAll.filter((o) => o.market === "CS").sort((x, y) => x.cote - y.cote).slice(0, 8);
   const corners = lignesBook("CORN", 4), cartons = lignesBook("CARD", 3);
+  // Handicap sur les corners : les lignes les plus proches de l'équilibre (cote entre 1,5 et 2,6)
+  const cornersAh = sg.bookAll.filter((o) => o.market === "CORN_AH" && o.cote >= 1.5 && o.cote <= 2.6).sort((x, y) => (x.param ?? 0) - (y.param ?? 0) || x.sel.localeCompare(y.sel)).slice(0, 8);
   const row = (cols: 2 | 3, cells: (React.ReactNode | null)[]) => <div className={`grid gap-1.5 ${cols === 3 ? "grid-cols-3" : "grid-cols-2"}`}>{cells}</div>;
 
   // Deux étages : les marchés pour lesquels on a une vraie cote de bookmaker, puis ceux dont la probabilité est
@@ -73,7 +75,7 @@ export function MatchMarkets({ m, sg }: { m: M; sg: Signal }) {
         <p className="mt-1.5 text-[11px] text-ink-muted">−1,5 : gagner par 2 buts ou plus. +1,5 : ne pas perdre par 2 buts ou plus.</p>
       </Block>
       ) },
-      { m: ["HT_1X2", "HT_DC", "HT_OU", "HT_BTTS", "H2_1X2", "H2_OU", "HTFT", "HMG"], n: (
+      { m: ["HT_1X2", "HT_DC", "HT_OU", "HT_BTTS", "H2_1X2", "H2_OU", "HTFT", "HMG", "HT_DNB", "H2_DNB", "H2_DC", "H2_BTTS", "HT_OE", "H2_OE", "WEH", "WBH", "SBH", "BH", "HT_TT1", "HT_TT2", "H2_TT1", "H2_TT2"], n: (
       <Block key="Mi-temps" title="Mi-temps">
         <Sub>Résultat à la mi-temps</Sub>
         {row(3, [cell("HT_1X2", null, "1", h), cell("HT_1X2", null, "N", "Nul"), cell("HT_1X2", null, "2", a)])}
@@ -83,19 +85,40 @@ export function MatchMarkets({ m, sg }: { m: M; sg: Signal }) {
         <div className="space-y-1.5">{[0.5, 1.5].map((l) => <div key={l}>{row(2, [cell("HT_OU", l, "Plus", `Plus de ${L(l)}`), cell("HT_OU", l, "Moins", `Moins de ${L(l)}`)])}</div>)}</div>
         <Sub>Les deux marquent en 1re mi-temps</Sub>
         {row(2, [cell("HT_BTTS", null, "Oui", "Oui"), cell("HT_BTTS", null, "Non", "Non")])}
+        <Group title="1re mi-temps : remboursé si nul, pair ou impair, buts d’une équipe">
+          {row(2, [cell("HT_DNB", null, "1", `${h} (remb. si nul)`), cell("HT_DNB", null, "2", `${a} (remb. si nul)`)])}
+          {row(2, [cell("HT_OE", null, "Pair", "Buts : pair"), cell("HT_OE", null, "Impair", "Buts : impair")])}
+          {(["HT_TT1", "HT_TT2"] as const).map((t) => <div key={t}>{row(2, [cell(t, 0.5, "Plus", `${t === "HT_TT1" ? h : a} marque`), cell(t, 0.5, "Moins", `${t === "HT_TT1" ? h : a} ne marque pas`)])}</div>)}
+        </Group>
         <Group title="2e mi-temps">
           {row(3, [cell("H2_1X2", null, "1", h), cell("H2_1X2", null, "N", "Nul"), cell("H2_1X2", null, "2", a)])}
+          {row(3, [cell("H2_DC", null, "1N", `${h} ou nul`), cell("H2_DC", null, "12", "Pas de nul"), cell("H2_DC", null, "N2", `${a} ou nul`)])}
+          {row(2, [cell("H2_DNB", null, "1", `${h} (remb. si nul)`), cell("H2_DNB", null, "2", `${a} (remb. si nul)`)])}
           {[0.5, 1.5].map((l) => <div key={l}>{row(2, [cell("H2_OU", l, "Plus", `Plus de ${L(l)}`), cell("H2_OU", l, "Moins", `Moins de ${L(l)}`)])}</div>)}
+          {row(2, [cell("H2_BTTS", null, "Oui", "Les deux marquent"), cell("H2_BTTS", null, "Non", "Pas les deux")])}
+          {row(2, [cell("H2_OE", null, "Pair", "Buts : pair"), cell("H2_OE", null, "Impair", "Buts : impair")])}
+          {(["H2_TT1", "H2_TT2"] as const).map((t) => <div key={t}>{row(2, [cell(t, 0.5, "Plus", `${t === "H2_TT1" ? h : a} marque`), cell(t, 0.5, "Moins", `${t === "H2_TT1" ? h : a} ne marque pas`)])}</div>)}
+        </Group>
+        <Group title="Sur les deux mi-temps">
+          {row(2, [cell("WEH", null, "1", `${h} gagne au moins une mi-temps`), cell("WEH", null, "2", `${a} gagne au moins une mi-temps`)])}
+          {row(2, [cell("WBH", null, "1", `${h} gagne les deux`), cell("WBH", null, "2", `${a} gagne les deux`)])}
+          {row(2, [cell("SBH", null, "1", `${h} marque dans les deux`), cell("SBH", null, "2", `${a} marque dans les deux`)])}
+          {row(2, [cell("BH", null, "Oui", "But dans les deux mi-temps"), cell("BH", null, "Non", "Une mi-temps sans but")])}
         </Group>
         <Group title="Mi-temps / fin de match">{["1", "N", "2"].flatMap((x) => ["1", "N", "2"].map((y) => cell("HTFT", null, `${x}/${y}`, pickLabel("HTFT", null, `${x}/${y}`, h, a), true)))}</Group>
         <Group title="Mi-temps avec le plus de buts">{row(3, [cell("HMG", null, "1", "1re"), cell("HMG", null, "N", "Autant"), cell("HMG", null, "2", "2e")])}</Group>
       </Block>
       ) },
-      { m: ["OE", "MG"], n: (
+      { m: ["OE", "MG", "OE1", "OE2", "MG1", "MG2", "FTS"], n: (
       <Block key="Autres paris sur les buts" title="Autres paris sur les buts">
+        <Sub>Première équipe à marquer</Sub>
+        {row(3, [cell("FTS", null, "1", h), cell("FTS", null, "Aucun", "Aucun but"), cell("FTS", null, "2", a)])}
         <Sub>Pair ou impair</Sub>
         {row(2, [cell("OE", null, "Pair", "Pair"), cell("OE", null, "Impair", "Impair")])}
+        <Group title="Nombre exact de buts">{NB_EXACT.map((x) => cell("MG", null, x, pickLabel("MG", null, x, h, a), true))}</Group>
         <Group title="Tranche de buts">{MG_RANGES.map((x) => cell("MG", null, x, pickLabel("MG", null, x, h, a), true))}</Group>
+        <Group title={`Buts de ${h} : nombre exact, pair ou impair`}>{[...NB_EQUIPE.map((x) => cell("MG1", null, x, pickLabel("MG1", null, x, h, a), true)), cell("OE1", null, "Pair", pickLabel("OE1", null, "Pair", h, a), true), cell("OE1", null, "Impair", pickLabel("OE1", null, "Impair", h, a), true)]}</Group>
+        <Group title={`Buts de ${a} : nombre exact, pair ou impair`}>{[...NB_EQUIPE.map((x) => cell("MG2", null, x, pickLabel("MG2", null, x, h, a), true)), cell("OE2", null, "Pair", pickLabel("OE2", null, "Pair", h, a), true), cell("OE2", null, "Impair", pickLabel("OE2", null, "Impair", h, a), true)]}</Group>
       </Block>
       ) },
       { m: ["WTN", "EH"], n: (
@@ -126,6 +149,11 @@ export function MatchMarkets({ m, sg }: { m: M; sg: Signal }) {
       {book && (corners.length > 0 || cartons.length > 0 || scoresBook.length > 0) && (
         <Block title="Corners, cartons, score exact" note={`cotes ${book}`}>
           {corners.length > 0 && <><Sub>Corners dans le match</Sub><div className="space-y-1.5">{corners.map((x) => <div key={x.l}>{row(2, [bookCell("CORN", x.l, "Plus", `Plus de ${L(x.l)}`), bookCell("CORN", x.l, "Moins", `Moins de ${L(x.l)}`)])}</div>)}</div></>}
+          {cornersAh.length > 0 && <Group title="Corners : handicap, double chance, pair ou impair">
+            {cornersAh.map((o) => bookCell("CORN_AH", o.param, o.sel, pickLabel("CORN_AH", o.param, o.sel, h, a), true))}
+            {["1N", "12", "N2"].map((x) => bookCell("CORN_DC", null, x, pickLabel("CORN_DC", null, x, h, a), true))}
+            {["Pair", "Impair"].map((x) => bookCell("CORN_OE", null, x, pickLabel("CORN_OE", null, x, h, a), true))}
+          </Group>}
           {cartons.length > 0 && <><Sub>Cartons dans le match</Sub><div className="space-y-1.5">{cartons.map((x) => <div key={x.l}>{row(2, [bookCell("CARD", x.l, "Plus", `Plus de ${L(x.l)}`), bookCell("CARD", x.l, "Moins", `Moins de ${L(x.l)}`)])}</div>)}</div></>}
           {scoresBook.length > 0 && <Group title="Score exact : les huit plus probables">{scoresBook.map((o) => bookCell("CS", null, o.sel, `Score exact ${o.sel}`, true))}</Group>}
           <p className="mt-2 text-[11px] text-ink-muted">Corners et cartons : pas de pourcentage, {APP_NAME} ne les estime pas encore. Le pari est réglé avec les statistiques du match.</p>
@@ -136,9 +164,10 @@ export function MatchMarkets({ m, sg }: { m: M; sg: Signal }) {
       {estimes.length > 0 && <Etage estime titre="Estimations" texte={suivis.length || cotes.length ? "Aucune cote de bookmaker sur ces marchés : la probabilité est déduite du résultat et du nombre de buts attendus. À comparer à la cote de ton bookmaker avant de t’y fier." : "Aucune cote de bookmaker sur ce match : toutes les probabilités viennent du modèle statistique. Elles sont moins fiables que des cotes de marché."} />}
       {estimes.map((b) => b.n)}
       {m.ouvert && (
-        <Block title="Corners, cartons, tirs, buteurs" note="sans pourcentage">
+        <Block title="Corners, cartons, tirs, joueurs" note="sans pourcentage">
           <div className="flex flex-wrap gap-1.5">
-            {[["CORN", "Corners"], ["CARD", "Cartons"], ["RED", "Carton rouge"], ["SOT", "Tirs cadrés"], ["BUT", "Buteur"], ["BUT1", "Premier buteur"], ["QUALIF", "Qualification"], ["ET", "Prolongation"]].map(([code, label]) => (
+            {[["CORN", "Corners"], ["CORN_AH", "Handicap corners"], ["CARD", "Cartons"], ["PCARD", "Joueur averti"], ["RED", "Carton rouge"], ["SOT", "Tirs cadrés"], ["SHOT", "Tirs"], ["FOUL", "Fautes"], ["OFF", "Hors-jeu"],
+              ["BUT", "Buteur"], ["BUT1", "Premier buteur"], ["BUTL", "Dernier buteur"], ["BUT2", "Doublé d’un joueur"], ["GB", "But avant la minute…"], ["PK", "Penalty"], ["OG", "But contre son camp"], ["QUALIF", "Qualification"], ["ET", "Prolongation"]].map(([code, label]) => (
               <Link key={code} href={`/nouveau?match=${m.id}&market=${code}`} className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium">{label}</Link>
             ))}
           </div>

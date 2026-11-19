@@ -15,6 +15,12 @@ const SELS: [string, number | null, string][] = [["1X2", null, "1"], ["1X2", nul
   ["DC_OU", 1.5, "1N|Plus"], ["DC_OU", 2.5, "N2|Moins"], ["1X2_OU", 2.5, "1|Plus"], ["1X2_OU", 2, "2|Plus"], ["DC_BTTS", null, "12|Oui"], ["1X2_BTTS", null, "N|Non"], ["OU_BTTS", 2.5, "Plus|Oui"], ["OU_BTTS", 3, "Moins|Non"], ["CS", null, "1-1"]];
 const SQL = "pggpppgpgpgpgpggpppggpgppppppppppgpppppgpgpgpgggpgggggpgpgpgpgggppgpggggggggppgggpgpgpgpgprggprrgrgpgpgpgrppgrrprpgpgpgpppppgggggggggggggggggpppgppppppppprrgggrgggggggggggrprgppprpppppggggppggggpggggppppggppppgppppppppgpppgpgggggggggpgggpgpprrppprpgprpgpgrppgrrprpgpgpgppggpgggggpggggggggggggpgpppgpgprrprrgggpgggrgpgppgpppgpppgeggpgppgpgpgggpepgpggpgggpgggpeppgpggpgggpgggeggggggggpggpppeppppppppgppggpeppgppgppggpgggegppppgppppgpgpepppgpgggggggggeggggggpgpgggppegggggpggggpgpgegggggppgpgpgppegpgppppppgpppgegpppppppppgpgpeppgpgppppppgpgepgpppgppgpppppepppgppggpggpgpegpggpgpgpgpgpgegpppggpgppgpgpepppppgpgggpgggegggggpgpppgpppepgpppggpgpgppppppgggppgpgpgggggpgggggpppgpppppppppggggggpppgpppppppppgpppgpgpggpppgpppgpppppppppppppgppppppggpppppgpppppgpppgpppppgpppppppppgggggpgpgpggppgggpppgpppppppppppgpgpgpgpgpppppppppgpgpgpppppppgpppggggpgppppppppppppppppppppggppggggpggggppppggpppppppppggppppppppp";
 
+/** Marchés ajoutés le 19/11 (0049) : 27 sélections × les mêmes 15 scores = 405 cas, réglés par betwise.settle_sel() (les combinés y sont réglés). */
+const SELS2: [string, number | null, string][] = [["WBH", null, "1"], ["WBH", null, "2"], ["SBH", null, "1"], ["SBH", null, "2"], ["OE1", null, "Pair"], ["OE1", null, "Impair"], ["OE2", null, "Pair"], ["MG1", null, "0-0"], ["MG1", null, "2-9"], ["MG2", null, "1-1"], ["MG", null, "2-2"],
+  ["HT_AH", -0.5, "1"], ["HT_AH", 0, "2"], ["H2_AH", -1, "1"], ["HT_DNB", null, "1"], ["H2_DNB", null, "2"], ["HT_OE", null, "Pair"], ["H2_OE", null, "Impair"], ["H2_CS", null, "1-0"], ["HT_CS", null, "0-0"], ["HT_EH", -1, "N"], ["H2_MG", null, "1-2"],
+  ["COMBO", null, "DC:1N & OU@1.5:Plus"], ["COMBO", null, "1X2:2 & BTTS:Oui"], ["COMBO", null, "HT_1X2:1 & 1X2:1"], ["COMBO", null, "DNB:1 & OU@2:Plus"], ["COMBO", null, "WEH:1 & TT1@1.5:Plus & OE:Impair"]];
+const SQL2 = "ppppppppgppppegpppppppppppppeppppppppggpgggegpppppppgpppgpepgppgppggpgpggpppggpggppgpgppgggggppppggggppgggppgpppppgpppppppppppgggpgggpgpppggggpppppgppppppggpppgppppppgppgpppgpppgegrprgprgrprrrpeppprpppgpgprppegrgrpgrprgrrrgegrrprgrprpgpgrepgpgppgpgpgggpegppgpgpppppggpegppgpppppppgppepgpgppgpppgpppeppgppgpppgppppepppgpgggggggpgepppppgggggpgpgpgpppppppppppgpgppgppppppgpppgpgpppprrgegpgpgpgppppppgpgpgpgpg";
+
 describe("issue() suit le règlement en base", () => {
   it("900 cas identiques à settle_selection()", () => {
     expect(SQL.length).toBe(SELS.length * SCORES.length);
@@ -24,6 +30,18 @@ describe("issue() suit le règlement en base", () => {
       const r = issue(m, p, s, { h, a, hth, hta });
       const c = r === "gagne" ? "g" : r === "perdu" ? "p" : r === "rembourse" ? "r" : "e";
       if (c !== SQL[k]) ecarts.push(`${m} ${p ?? ""} ${s} sur ${h}-${a} (mi-temps ${hth ?? "?"}-${hta ?? "?"}) : ${c} au lieu de ${SQL[k]}`);
+      k++;
+    }
+    expect(ecarts).toEqual([]);
+  });
+  it("405 cas des marchés ajoutés le 19/11, identiques à settle_sel()", () => {
+    expect(SQL2.length).toBe(SELS2.length * SCORES.length);
+    const ecarts: string[] = [];
+    let k = 0;
+    for (const [m, p, s] of SELS2) for (const [h, a, hth, hta] of SCORES) {
+      const r = issue(m, p, s, { h, a, hth, hta });
+      const c = r === "gagne" ? "g" : r === "perdu" ? "p" : r === "rembourse" ? "r" : "e";
+      if (c !== SQL2[k]) ecarts.push(`${m} ${p ?? ""} ${s} sur ${h}-${a} (mi-temps ${hth ?? "?"}-${hta ?? "?"}) : ${c} au lieu de ${SQL2[k]}`);
       k++;
     }
     expect(ecarts).toEqual([]);

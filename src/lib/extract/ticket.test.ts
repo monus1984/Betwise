@@ -166,7 +166,7 @@ describe("marchés ajoutés le 18/11 : penalty, mi-temps, paris composés", () =
     expect(n("", "Penalty accordé - Non")).toMatchObject({ market_code: "PK", selection: "Non", ok: true });
     expect(n("Penalty marqué dans le match", "Non")).toMatchObject({ market_code: "PKB", selection: "Non", ok: true });
     expect(n("Portugal marque un penalty", "Oui")).toMatchObject({ ok: false });
-    expect(n("Penalty manqué", "Oui")).toMatchObject({ ok: false });
+    expect(n("Penalty manqué", "Oui")).toMatchObject({ market_code: "PKM", selection: "Oui", ok: true });
     // La séance de tirs au but reste un autre marché
     expect(n("Tirs au but", "Oui")).toMatchObject({ market_code: "PEN", selection: "Oui", ok: true });
   });
@@ -208,7 +208,7 @@ describe("marchés ajoutés le 18/11 : penalty, mi-temps, paris composés", () =
   it("deux paris du même match sur une ligne", () => {
     expect(n("Résultat du match (t. rég) / Nombre total de buts (t. rég)", "Portugal / + de 1,5")).toMatchObject({ market_code: "1X2_OU", market_param: 1.5, selection: "2|Plus", ok: true });
     expect(n("Double chance (t. rég) / Les 2 équipes marquent (t. rég)", "Galles ou Nul / Non")).toMatchObject({ market_code: "DC_BTTS", selection: "1N|Non", ok: true });
-    expect(n("Résultat du match (t. rég) / Les 2 équipes marquent (t. rég) / Nombre total de buts (t. rég)", "Portugal / Oui / + de 2,5")).toMatchObject({ ok: false });
+    expect(n("Résultat du match (t. rég) / Les 2 équipes marquent (t. rég) / Nombre total de buts (t. rég)", "Portugal / Oui / + de 2,5")).toMatchObject({ market_code: "COMBO", selection: "1X2:2 & BTTS:Oui & OU@2.5:Plus", ok: true });
     // Une double chance écrite avec une barre n'est pas deux paris
     expect(n("Double chance (t. rég)", "Galles / Nul")).toMatchObject({ market_code: "DC", selection: "1N", ok: true });
     expect(n("Double chance & nombre de buts", "Portugal / Nul & + de 1,5")).toMatchObject({ market_code: "DC_OU", selection: "N2|Plus", ok: true });
@@ -246,5 +246,70 @@ describe("date du ticket selon le bookmaker", () => {
     expect(parseFrDate("08/11/2026 à 13h38")).toBe("2026-11-08T13:38:00.000Z");
     expect(parseFrDate("08-11-2026 13:38")).toBe("2026-11-08T13:38:00.000Z");
     expect(parseFrDate("hier")).toBeNull();
+  });
+});
+
+describe("marchés ajoutés le 19/11 : combinés libres, joueurs, ordre des buts, statistiques", () => {
+  const n = (m: string, p: string, team?: string) => normalizePick(m, p, "Sénégal", "Mali", team);
+  it("combiné libre : chaque condition comprise, sinon la ligne reste telle quelle", () => {
+    expect(n("Résultat du match (t. rég) / Nombre total de corners", "Sénégal / + de 8,5")).toMatchObject({ market_code: "COMBO", selection: "1X2:1 & CORN@8.5:Plus", ok: true });
+    expect(n("", "Sénégal gagne & plus de 8,5 corners & les deux équipes marquent")).toMatchObject({ market_code: "COMBO", selection: "1X2:1 & CORN@8.5:Plus & BTTS:Oui", ok: true });
+    expect(n("Résultat du match (t. rég) / Marché inconnu", "Sénégal / Bidule")).toMatchObject({ ok: false });
+    // les combinés déjà suivis gardent leur marché
+    expect(n("Résultat du match (t. rég) / Nombre total de buts (t. rég)", "Mali / + de 1,5")).toMatchObject({ market_code: "1X2_OU", selection: "2|Plus" });
+  });
+  it("mi-temps : gagne les deux, marque dans les deux, handicap, pair / impair", () => {
+    expect(n("", "Sénégal gagne les deux mi-temps")).toMatchObject({ market_code: "WBH", selection: "1", ok: true });
+    expect(n("Mali gagnera les 2 mi-temps", "Oui")).toMatchObject({ market_code: "WBH", selection: "2", ok: true });
+    expect(n("Mali gagnera les 2 mi-temps", "Non")).toMatchObject({ market_code: "WBH", ok: false });
+    expect(n("", "Mali marque dans les deux mi-temps")).toMatchObject({ market_code: "SBH", selection: "2", ok: true });
+    expect(n("Équipe 1 marquera dans chaque mi-temps", "Oui")).toMatchObject({ market_code: "SBH", selection: "1", ok: true });
+    expect(n("", "But dans les deux mi-temps")).toMatchObject({ market_code: "BH", selection: "Oui", ok: true });
+    expect(n("1ère mi-temps : total pair/impair", "Impair")).toMatchObject({ market_code: "HT_OE", selection: "Impair", ok: true });
+    expect(n("", "Handicap 1 (-1) 1ère mi-temps")).toMatchObject({ market_code: "HT_AH", market_param: -1, selection: "1", ok: true });
+    expect(n("Score exact 2e mi-temps", "1-0")).toMatchObject({ market_code: "H2_CS", selection: "1-0", ok: true });
+  });
+  it("ordre et minute des buts", () => {
+    expect(n("Première équipe à marquer", "Sénégal")).toMatchObject({ market_code: "FTS", selection: "1", ok: true });
+    expect(n("Première équipe à marquer", "Aucun but")).toMatchObject({ market_code: "FTS", selection: "Aucun", ok: true });
+    expect(n("", "Mali ouvre le score")).toMatchObject({ market_code: "FTS", selection: "2", ok: true });
+    expect(n("Dernière équipe à marquer", "Mali")).toMatchObject({ market_code: "LTS", selection: "2", ok: true });
+    expect(n("", "But dans les 15 premières minutes")).toMatchObject({ market_code: "GB", market_param: 15, selection: "Oui", ok: true });
+    expect(n("But avant la 30e minute", "Non")).toMatchObject({ market_code: "GB", market_param: 30, selection: "Non", ok: true });
+    // un joueur nommé reste un pari « buteur »
+    expect(n("Premier buteur", "Sadio Mané")).toMatchObject({ market_code: "BUT1", selection: "Sadio Mané", ok: true });
+    expect(n("Dernier buteur", "Sadio Mané")).toMatchObject({ market_code: "BUTL", selection: "Sadio Mané", ok: true });
+  });
+  it("joueurs : doublé, triplé, carton", () => {
+    expect(n("", "Sadio Mané marque un doublé")).toMatchObject({ market_code: "BUT2", selection: "Sadio Mané", ok: true });
+    expect(n("Un joueur va marquer un doublé", "Oui")).toMatchObject({ market_code: "DBL", selection: "Oui", ok: true });
+    expect(n("Triplé", "Sadio Mané")).toMatchObject({ market_code: "BUT3", selection: "Sadio Mané", ok: true });
+    expect(n("", "Yves Bissouma reçoit un carton")).toMatchObject({ market_code: "PCARD", selection: "Yves Bissouma", ok: true });
+    expect(n("Joueur averti", "Yves Bissouma")).toMatchObject({ market_code: "PCARD", selection: "Yves Bissouma", ok: true });
+    // un total de cartons reste un total
+    expect(n("Nombre de cartons", "+ de 4,5")).toMatchObject({ market_code: "CARD", market_param: 4.5, selection: "Plus", ok: true });
+  });
+  it("buts : nombre exact, écart exact, cage inviolée, pair / impair d'une équipe", () => {
+    expect(n("Nombre exact de buts", "2")).toMatchObject({ market_code: "MG", selection: "2-2", ok: true });
+    expect(n("", "Sénégal gagne par 1 but exactement")).toMatchObject({ market_code: "EH", market_param: -1, selection: "N", ok: true });
+    expect(n("", "Mali gagne de 2 buts d'écart")).toMatchObject({ market_code: "EH", market_param: 2, selection: "N", ok: true });
+    expect(n("", "Sénégal garde sa cage inviolée")).toMatchObject({ market_code: "TT2", market_param: 0.5, selection: "Moins", ok: true });
+    expect(n("", "Mali ne marque pas")).toMatchObject({ market_code: "TT2", market_param: 0.5, selection: "Moins", ok: true });
+    expect(n("Total individuel 2 pair/impair", "Pair")).toMatchObject({ market_code: "OE2", selection: "Pair", ok: true });
+    expect(n("Total pair/impair", "Impair")).toMatchObject({ market_code: "OE", selection: "Impair", ok: true });
+    // l'écart « ou plus » reste un handicap
+    expect(n("Écart de buts (t. rég)", "Sénégal gagne de 2 buts ou +")).toMatchObject({ market_code: "AH", market_param: -1.5, selection: "1" });
+  });
+  it("penalty, but contre son camp, statistiques d'équipe", () => {
+    expect(n("But contre son camp", "Oui")).toMatchObject({ market_code: "OG", selection: "Oui", ok: true });
+    expect(n("Penalty manqué dans le match", "Non")).toMatchObject({ market_code: "PKM", selection: "Non", ok: true });
+    expect(n("Nombre de fautes", "+ de 24,5")).toMatchObject({ market_code: "FOUL", market_param: 24.5, selection: "Plus", ok: true });
+    expect(n("Hors-jeu", "Moins de 3,5")).toMatchObject({ market_code: "OFF", market_param: 3.5, selection: "Moins", ok: true });
+    expect(n("Tirs du Sénégal", "+ de 12,5")).toMatchObject({ market_code: "SHOT1", market_param: 12.5, selection: "Plus", ok: true });
+    expect(n("Handicap corners", "Mali +2,5")).toMatchObject({ market_code: "CORN_AH", market_param: 2.5, selection: "2", ok: true });
+    expect(n("Corners pair/impair", "Pair")).toMatchObject({ market_code: "CORN_OE", selection: "Pair", ok: true });
+    expect(n("Équipe avec le plus de cartons", "Mali")).toMatchObject({ market_code: "CARD_1X2", selection: "2", ok: true });
+    expect(n("Carton rouge pour le Mali", "Oui")).toMatchObject({ market_code: "RED2", selection: "Oui", ok: true });
+    expect(n("Carton rouge dans le match", "Non")).toMatchObject({ market_code: "RED", selection: "Non", ok: true });
   });
 });

@@ -196,6 +196,8 @@ export async function applyFixtures(db: Db, fixtures: AfFixture[]) {
 
 export type MatchDetails = {
   corners?: [number, number]; jaunes?: [number, number]; rouges?: [number, number]; tirs?: [number, number]; cadres?: [number, number];
+  /** Fautes et hors-jeu par équipe : relevés depuis le 19/11/2026 (absents des matchs détaillés avant). */
+  fautes?: [number, number]; hors_jeu?: [number, number];
   buteurs?: { n: string; e: "1" | "2"; m: number; x?: number }[]; issue?: "FT" | "AET" | "PEN"; vainqueur?: "1" | "2" | null;
   /** Chronologie affichée sur la fiche match : buts, buts contre son camp, penalties manqués, cartons. */
   evts?: { t: "but" | "pen" | "csc" | "pen_rate" | "jaune" | "rouge"; n: string | null; e: "1" | "2"; m: number; x?: number }[];
@@ -225,6 +227,7 @@ export function detailsOf(f: AfFixture): { details: MatchDetails; hasStats: bool
     const val = (list: NonNullable<typeof sh>, type: string) => { const v = list.find((x) => x.type === type)?.value; return v === null || v === undefined ? 0 : Number(v) || 0; };
     const pair = (type: string): [number, number] | undefined => (sh!.some((x) => x.type === type) && sa!.some((x) => x.type === type) ? [val(sh!, type), val(sa!, type)] : undefined);
     d.corners = pair("Corner Kicks"); d.jaunes = pair("Yellow Cards"); d.rouges = pair("Red Cards"); d.tirs = pair("Total Shots"); d.cadres = pair("Shots on Goal");
+    d.fautes = pair("Fouls"); d.hors_jeu = pair("Offsides");
   }
   const st = f.fixture.status.short;
   if (st === "FT" || st === "AET" || st === "PEN") d.issue = st;

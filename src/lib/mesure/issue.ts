@@ -3,6 +3,8 @@
  * Miroir de betwise.settle_selection() (SQL), qui reste la seule référence pour régler les paris :
  * le test issue.test.ts vérifie que les deux donnent le même résultat sur 600 cas.
  */
+import { jambesDe } from "../bets/combo";
+
 export type Score = { h: number; a: number; hth: number | null; hta: number | null };
 export type Issue = "gagne" | "perdu" | "rembourse" | null; // null : non calculable (score à la mi-temps absent, choix inconnu)
 
@@ -37,6 +39,30 @@ export function issue(market: string, param: number | null, selection: string, s
     if (s.hth === null || s.hta === null) return null;
     const oui = s.hth + s.hta >= 1 && total - s.hth - s.hta >= 1;
     return sel === "OUI" || sel === "YES" ? gp(oui) : sel === "NON" || sel === "NO" ? gp(!oui) : null;
+  }
+  if (market === "WBH") {
+    if (s.hth === null || s.hta === null) return null;
+    const h2h = s.h - s.hth, h2a = s.a - s.hta;
+    return sel === "1" ? gp(s.hth > s.hta && h2h > h2a) : sel === "2" ? gp(s.hta > s.hth && h2a > h2h) : null;
+  }
+  if (market === "SBH") {
+    if (s.hth === null || s.hta === null) return null;
+    return sel === "1" ? gp(s.hth >= 1 && s.h - s.hth >= 1) : sel === "2" ? gp(s.hta >= 1 && s.a - s.hta >= 1) : null;
+  }
+  if (market === "OE1" || market === "OE2") {
+    const v = market === "OE1" ? s.h : s.a;
+    return sel === "PAIR" || sel === "EVEN" ? gp(v % 2 === 0) : sel === "IMPAIR" || sel === "ODD" ? gp(v % 2 === 1) : null;
+  }
+  if (market === "MG1" || market === "MG2") { const r = sel.match(/^(\d+)-(\d+)$/), v = market === "MG1" ? s.h : s.a; return r ? gp(v >= Number(r[1]) && v <= Number(r[2])) : null; }
+  if (market === "COMBO") {
+    // Toutes les conditions doivent se régler sur le score : sinon null (réglé en base sur la feuille de match)
+    const js = jambesDe(selection);
+    if (!js) return null;
+    const rs = js.map((j) => issue(j.market, j.param, j.sel, s));
+    if (rs.includes("perdu")) return "perdu"; // une condition perdue suffit, même si une autre n'est pas encore calculable
+    if (rs.includes(null)) return null;
+    const remb = rs.filter((r) => r === "rembourse").length;
+    return remb === 0 ? "gagne" : remb === rs.length ? "rembourse" : null; // une condition remboursée parmi des gagnées : cote à recalculer, pas tranché ici
   }
   if (market === "OE") return sel === "PAIR" || sel === "EVEN" ? gp(total % 2 === 0) : sel === "IMPAIR" || sel === "ODD" ? gp(total % 2 === 1) : null;
   if (market === "MG") { const r = sel.match(/^(\d+)-(\d+)$/); return r ? gp(total >= Number(r[1]) && total <= Number(r[2])) : null; }

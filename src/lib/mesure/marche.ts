@@ -22,21 +22,14 @@ export const FAMILLES: { cle: string; nom: string; type: TypeFamille; marches: s
   { cle: "TT", nom: "Buts d'une équipe", type: "deduit", marches: ["TT1", "TT2"] },
   { cle: "AH", nom: "Handicap ±1,5", type: "deduit", marches: ["AH"] },
   { cle: "COMBO", nom: "Combinés du match (deux conditions)", type: "deduit", marches: ["DC_OU", "1X2_OU", "DC_BTTS", "1X2_BTTS", "OU_BTTS"] },
-  { cle: "AUTRES", nom: "Pair / impair, tranche de buts, handicap européen, sans encaisser", type: "deduit", marches: ["OE", "MG", "EH", "WTN"] },
-  { cle: "MT1", nom: "1re mi-temps (résultat, buts, les deux marquent)", type: "mitemps", marches: ["HT_1X2", "HT_DC", "HT_OU", "HT_BTTS", "HT_TT1", "HT_TT2"] },
-  { cle: "MT2", nom: "2e mi-temps (résultat, buts, les deux marquent)", type: "mitemps", marches: ["H2_1X2", "H2_DC", "H2_OU", "H2_BTTS", "H2_TT1", "H2_TT2"] },
-  { cle: "MTX", nom: "Mi-temps / fin, mi-temps la plus prolifique, gagne une mi-temps, but dans les deux", type: "mitemps", marches: ["HTFT", "HMG", "WEH", "BH"] },
+  { cle: "AUTRES", nom: "Pair / impair, tranche de buts, handicap européen, sans encaisser", type: "deduit", marches: ["OE", "MG", "EH", "WTN", "OE1", "OE2", "MG1", "MG2"] },
+  { cle: "MT1", nom: "1re mi-temps (résultat, buts, les deux marquent)", type: "mitemps", marches: ["HT_1X2", "HT_DC", "HT_DNB", "HT_OU", "HT_BTTS", "HT_TT1", "HT_TT2", "HT_OE"] },
+  { cle: "MT2", nom: "2e mi-temps (résultat, buts, les deux marquent)", type: "mitemps", marches: ["H2_1X2", "H2_DC", "H2_DNB", "H2_OU", "H2_BTTS", "H2_TT1", "H2_TT2", "H2_OE"] },
+  { cle: "MTX", nom: "Mi-temps / fin, mi-temps la plus prolifique, gagne une mi-temps, but dans les deux", type: "mitemps", marches: ["HTFT", "HMG", "WEH", "BH", "WBH", "SBH"] },
 ];
 
-const PO = ["Plus", "Moins"], ON = ["Oui", "Non"];
-/** Tout ce que l'application sait chiffrer : la liste de la fiche match, plus les marchés de mi-temps ajoutés le 18/11. */
-export const SELECTIONS: [string, number | null, string][] = [
-  ...ALL_CANDIDATES,
-  ...["1N", "N2", "12"].map((x) => ["H2_DC", null, x] as [string, null, string]),
-  ...ON.map((x) => ["H2_BTTS", null, x] as [string, null, string]),
-  ...["HT_TT1", "HT_TT2", "H2_TT1", "H2_TT2"].flatMap((m) => PO.map((x) => [m, 0.5, x] as [string, number, string])),
-  ["WEH", null, "1"], ["WEH", null, "2"], ...ON.map((x) => ["BH", null, x] as [string, null, string]),
-];
+/** Tout ce que l'application sait chiffrer et que le score suffit à régler (la « première équipe à marquer » demande l'ordre des buts). */
+export const SELECTIONS: [string, number | null, string][] = ALL_CANDIDATES.filter(([m]) => m !== "FTS" && m !== "LTS");
 
 const familleDe = (market: string, param: number | null) =>
   FAMILLES.find((f) => f.marches.includes(`${market}@${param}`)) ?? FAMILLES.find((f) => f.marches.includes(market)) ?? null;

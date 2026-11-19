@@ -23,7 +23,7 @@ const RELEVE: AfOdds = {
       { name: "Both Teams To Score - Second Half", values: [{ value: "Yes", odd: "2.65" }] },
       { name: "Odd/Even", values: [{ value: "Odd", odd: "1.85" }, { value: "Even", odd: "1.85" }] },
       { name: "Corners Over Under", values: [{ value: "Over 9.5", odd: "1.62" }, { value: "Over 9", odd: "1.41" }] },
-      { name: "Corners Asian Handicap", values: [{ value: "Home -1", odd: "1.59" }] },
+      { name: "Total Corners (1st Half)", values: [{ value: "Over 4.5", odd: "1.68" }] },
       { name: "Cards Over/Under", values: [{ value: "Over 4.5", odd: "2.10" }] },
     ] },
   ],
@@ -41,9 +41,11 @@ describe("cotes d'un bookmaker (API-Football)", () => {
   });
   it("ne garde que les demi-lignes des plus / moins", () => {
     expect(mapAfBet("Goals Over/Under", "Under 2.5")).toEqual({ market: "OU", param: 2.5, sel: "Moins" });
-    expect(mapAfBet("Goals Over/Under", "Over 2.0")).toBeNull();
+    // ligne entière : gardée (elle rembourse à l'égalité), sauf pour les marchés où elle n'est pas demandée
+    expect(mapAfBet("Goals Over/Under", "Over 2.0")).toEqual({ market: "OU", param: 2, sel: "Plus" });
+    expect(mapAfBet("Corners Over Under", "Over 9")).toBeNull();
     expect(mapAfBet("Goals Over/Under", "Over 2.25")).toBeNull();
-    expect(mapAfBet("Total - Away", "Over 1")).toBeNull();
+    expect(mapAfBet("Total - Away", "Over 1")).toEqual({ market: "TT2", param: 1, sel: "Plus" });
     expect(mapAfBet("Away Team Total Goals(2nd Half)", "Over 0.5")).toEqual({ market: "H2_TT2", param: 0.5, sel: "Plus" });
   });
   it("écrit le handicap du point de vue de l'équipe choisie", () => {
@@ -54,8 +56,22 @@ describe("cotes d'un bookmaker (API-Football)", () => {
     expect(mapAfBet("Asian Handicap", "Home -1.25")).toBeNull();
     expect(mapAfBet("Asian Handicap", "Home -0.5")).toBeNull();
   });
+  it("marchés ajoutés le 19/11 : mi-temps, pair / impair d'une équipe, corners", () => {
+    expect(mapAfBet("Asian Handicap First Half", "Home -1")).toEqual({ market: "HT_AH", param: -1, sel: "1" });
+    expect(mapAfBet("Asian Handicap First Half", "Away +0")).toEqual({ market: "HT_DNB", param: null, sel: "2" });
+    expect(mapAfBet("Asian Handicap First Half", "Home -0.75")).toBeNull();
+    expect(mapAfBet("Asian Handicap (2nd Half)", "Away -1.5")).toEqual({ market: "H2_AH", param: 1.5, sel: "2" });
+    expect(mapAfBet("Odd/Even - First Half", "Even")).toEqual({ market: "HT_OE", param: null, sel: "Pair" });
+    expect(mapAfBet("Home Odd/Even", "Odd")).toEqual({ market: "OE1", param: null, sel: "Impair" });
+    expect(mapAfBet("Correct Score - Second Half", "1:0")).toEqual({ market: "H2_CS", param: null, sel: "1-0" });
+    expect(mapAfBet("Corners Asian Handicap", "Home -1")).toEqual({ market: "CORN_AH", param: -1, sel: "1" });
+    expect(mapAfBet("Corners Asian Handicap", "Away -2.5")).toEqual({ market: "CORN_AH", param: 2.5, sel: "2" });
+    expect(mapAfBet("Corners Asian Handicap", "Away +0")).toEqual({ market: "CORN_AH", param: 0, sel: "2" });
+    expect(mapAfBet("Corners. Double Chance", "Home/Draw")).toEqual({ market: "CORN_DC", param: null, sel: "1N" });
+    expect(mapAfBet("Corners. Odd/Even", "Odd")).toEqual({ market: "CORN_OE", param: null, sel: "Impair" });
+  });
   it("laisse de côté ce qui n'a pas de marché correspondant", () => {
-    expect(mapAfBet("Corners Asian Handicap", "Home -1")).toBeNull();
+    expect(mapAfBet("Total Corners (1st Half)", "Over 4.5")).toBeNull();
     expect(mapAfBet("Marché inconnu", "Home")).toBeNull();
     expect(mapAfBet("Match Winner", "Autre")).toBeNull();
   });

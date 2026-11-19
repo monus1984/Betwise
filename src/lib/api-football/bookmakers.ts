@@ -14,24 +14,36 @@ export type CoteBook = { m: string; p: number | null; s: string; c: number };
 const R3: Record<string, string> = { Home: "1", Draw: "N", Away: "2" };
 const DC: Record<string, string> = { "Home/Draw": "1N", "Home/Away": "12", "Draw/Away": "N2" };
 const ON: Record<string, string> = { Yes: "Oui", No: "Non" };
+const PI: Record<string, string> = { Odd: "Impair", Even: "Pair" };
 const SIMPLE: Record<string, [string, Record<string, string>]> = {
   "Match Winner": ["1X2", R3], "First Half Winner": ["HT_1X2", R3], "Second Half Winner": ["H2_1X2", R3],
   "Double Chance": ["DC", DC], "Double Chance - First Half": ["HT_DC", DC], "Double Chance - Second Half": ["H2_DC", DC],
   "Both Teams Score": ["BTTS", ON], "Both Teams Score - First Half": ["HT_BTTS", ON], "Both Teams To Score - Second Half": ["H2_BTTS", ON],
   "Highest Scoring Half": ["HMG", { "1st Half": "1", "2nd Half": "2", Draw: "N" }],
-  "Odd/Even": ["OE", { Odd: "Impair", Even: "Pair" }],
-  "Corners 1x2": ["CORN_1X2", R3],
+  "Odd/Even": ["OE", PI], "Odd/Even - First Half": ["HT_OE", PI], "Odd/Even - Second Half": ["H2_OE", PI], "Home Odd/Even": ["OE1", PI], "Away Odd/Even": ["OE2", PI],
+  "Corners 1x2": ["CORN_1X2", R3], "Corners. Double Chance": ["CORN_DC", DC], "Corners. Odd/Even": ["CORN_OE", PI],
 };
-/** Marchés « plus / moins » : code BETWISE et ligne la plus haute gardée. Seules les demi-lignes (0,5 ; 1,5…) sont reprises. */
-const LIGNES: Record<string, [string, number]> = {
-  "Goals Over/Under": ["OU", 6.5], "Goals Over/Under First Half": ["HT_OU", 3.5], "Goals Over/Under - Second Half": ["H2_OU", 3.5],
-  "Total - Home": ["TT1", 4.5], "Total - Away": ["TT2", 4.5],
-  "Home Team Total Goals(1st Half)": ["HT_TT1", 2.5], "Away Team Total Goals(1st Half)": ["HT_TT2", 2.5],
-  "Home Team Total Goals(2nd Half)": ["H2_TT1", 2.5], "Away Team Total Goals(2nd Half)": ["H2_TT2", 2.5],
-  "Corners Over Under": ["CORN", 15.5], "Home Corners Over/Under": ["CORN1", 9.5], "Away Corners Over/Under": ["CORN2", 9.5],
-  "Cards Over/Under": ["CARD", 8.5],
+/**
+ * Marchés « plus / moins » : code BETWISE, ligne la plus haute gardée, et lignes entières acceptées ou non.
+ * Une ligne entière (« plus de 2 ») rembourse à l'égalité, ce que le règlement sait faire ; les quarts de but (2,25 ; 2,75)
+ * paient ou perdent à moitié : pas repris.
+ */
+const LIGNES: Record<string, [string, number, boolean]> = {
+  "Goals Over/Under": ["OU", 6.5, true], "Goals Over/Under First Half": ["HT_OU", 3.5, true], "Goals Over/Under - Second Half": ["H2_OU", 3.5, true],
+  "Total - Home": ["TT1", 4.5, true], "Total - Away": ["TT2", 4.5, true],
+  "Home Team Total Goals(1st Half)": ["HT_TT1", 2.5, false], "Away Team Total Goals(1st Half)": ["HT_TT2", 2.5, false],
+  "Home Team Total Goals(2nd Half)": ["H2_TT1", 2.5, false], "Away Team Total Goals(2nd Half)": ["H2_TT2", 2.5, false],
+  "Corners Over Under": ["CORN", 15.5, false], "Home Corners Over/Under": ["CORN1", 9.5, false], "Away Corners Over/Under": ["CORN2", 9.5, false],
+  "Cards Over/Under": ["CARD", 8.5, false],
 };
-const SCORES: Record<string, [string, number]> = { "Exact Score": ["CS", 4], "Correct Score - First Half": ["HT_CS", 2] };
+const SCORES: Record<string, [string, number]> = { "Exact Score": ["CS", 4], "Correct Score - First Half": ["HT_CS", 2], "Correct Score - Second Half": ["H2_CS", 2] };
+/** Handicaps : préfixe du marché, valeurs absolues gardées (0 = remboursé si nul, sauf pour les corners où 0 reste un handicap). */
+const HANDICAPS: Record<string, { ah: string; dnb: string | null; lignes: number[] }> = {
+  "Asian Handicap": { ah: "AH", dnb: "DNB", lignes: [1, 1.5, 2, 2.5] }, // ±0,5 = résultat ou double chance
+  "Asian Handicap First Half": { ah: "HT_AH", dnb: "HT_DNB", lignes: [1, 1.5, 2] },
+  "Asian Handicap (2nd Half)": { ah: "H2_AH", dnb: "H2_DNB", lignes: [1, 1.5, 2] },
+  "Corners Asian Handicap": { ah: "CORN_AH", dnb: null, lignes: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5] },
+};
 
 /** Un libellé du fournisseur → marché, ligne et sélection BETWISE ; null si le marché n'est pas repris. */
 export function mapAfBet(bet: string, value: string): { market: string; param: number | null; sel: string } | null {
@@ -42,8 +54,8 @@ export function mapAfBet(bet: string, value: string): { market: string; param: n
   if (ligne) {
     const r = v.match(/^(Over|Under) (\d+(?:\.\d+)?)$/);
     if (!r) return null;
-    const l = Number(r[2]);
-    return (l * 2) % 2 === 1 && l <= ligne[1] ? { market: ligne[0], param: l, sel: r[1] === "Over" ? "Plus" : "Moins" } : null;
+    const l = Number(r[2]), demi = (l * 2) % 2 === 1;
+    return (demi || (ligne[2] && Number.isInteger(l) && l >= 1)) && l <= ligne[1] ? { market: ligne[0], param: l, sel: r[1] === "Over" ? "Plus" : "Moins" } : null;
   }
   if (bet === "HT/FT Double") {
     const [a, b] = v.split("/");
@@ -54,15 +66,16 @@ export function mapAfBet(bet: string, value: string): { market: string; param: n
     const r = v.match(/^(\d+):(\d+)$/);
     return r && Number(r[1]) <= score[1] && Number(r[2]) <= score[1] ? { market: score[0], param: null, sel: `${Number(r[1])}-${Number(r[2])}` } : null;
   }
-  if (bet === "Asian Handicap") {
+  const hc = HANDICAPS[bet];
+  if (hc) {
     // « Home -1 » et « Away -1 » sont les deux côtés de la même ligne, écrite du point de vue de l'équipe à domicile :
     // « Away -1 » est donc l'extérieur avec +1. BETWISE écrit le handicap du point de vue de l'équipe choisie.
     const r = v.match(/^(Home|Away) ([+-]?\d+(?:\.\d+)?)$/);
     if (!r) return null;
     const h = Number(r[2]), sel = r[1] === "Home" ? "1" : "2";
-    if (h === 0) return { market: "DNB", param: null, sel };
-    if (![1, 1.5, 2, 2.5].includes(Math.abs(h))) return null; // ±0,5 = résultat ou double chance ; quarts de but non repris
-    return { market: "AH", param: sel === "1" ? h : -h, sel };
+    if (h === 0 && hc.dnb) return { market: hc.dnb, param: null, sel };
+    if (!hc.lignes.includes(Math.abs(h))) return null; // quarts de but non repris
+    return { market: hc.ah, param: sel === "1" ? h : h === 0 ? 0 : -h, sel };
   }
   return null;
 }

@@ -20,7 +20,7 @@ export const SELECTIONS: Record<string, string[]> = {
   HTFT: ["1/1", "1/N", "1/2", "N/1", "N/N", "N/2", "2/1", "2/N", "2/2"],
   HMG: ["1", "N", "2"],
   OE: ["Pair", "Impair"],
-  MG: ["0-1", "1-2", "1-3", "2-3", "2-4", "3-4", "3-5", "4-6"],
+  MG: ["0-0", "1-1", "2-2", "3-3", "4-4", "5-99", "0-1", "1-2", "1-3", "2-3", "2-4", "3-4", "3-5", "4-6"],
   EH: ["1", "N", "2"],
   WTN: ["1", "2"],
   HT_CS: [],
@@ -33,12 +33,22 @@ export const SELECTIONS: Record<string, string[]> = {
   HT_TT1: ["Plus", "Moins"], HT_TT2: ["Plus", "Moins"], H2_TT1: ["Plus", "Moins"], H2_TT2: ["Plus", "Moins"],
   WEH: ["1", "2"], BH: ["Oui", "Non"], PK: ["Oui", "Non"], PKB: ["Oui", "Non"], DBL: ["Oui", "Non"],
   LIBRE: [],
+  // Ajoutés le 19/11
+  HT_AH: ["1", "2"], H2_AH: ["1", "2"], HT_DNB: ["1", "2"], H2_DNB: ["1", "2"], HT_OE: ["Pair", "Impair"], H2_OE: ["Pair", "Impair"], H2_CS: [],
+  OE1: ["Pair", "Impair"], OE2: ["Pair", "Impair"], MG1: ["0-0", "1-1", "2-2", "3-99", "0-1", "1-2", "2-3"], MG2: ["0-0", "1-1", "2-2", "3-99", "0-1", "1-2", "2-3"],
+  WBH: ["1", "2"], SBH: ["1", "2"], FTS: ["1", "Aucun", "2"], LTS: ["1", "Aucun", "2"], GB: ["Oui", "Non"], OG: ["Oui", "Non"], PKM: ["Oui", "Non"],
+  BUTL: [], BUT2: [], BUT3: [], PCARD: [], CARD_1X2: ["1", "N", "2"], RED1: ["Oui", "Non"], RED2: ["Oui", "Non"],
+  SHOT1: ["Plus", "Moins"], SHOT2: ["Plus", "Moins"], CORN_AH: ["1", "2"], CORN_OE: ["Pair", "Impair"], CORN_DC: ["1N", "12", "N2"],
+  FOUL: ["Plus", "Moins"], FOUL1: ["Plus", "Moins"], FOUL2: ["Plus", "Moins"], OFF: ["Plus", "Moins"], OFF1: ["Plus", "Moins"], OFF2: ["Plus", "Moins"],
+  COMBO: [],
 };
 /** Marchés « plus / moins » d'une ligne : la sélection s'affiche avec la ligne. */
-export const LINE_MARKETS = ["OU", "TT1", "TT2", "HT_OU", "H2_OU", "HT_TT1", "HT_TT2", "H2_TT1", "H2_TT2", "CORN", "CORN1", "CORN2", "CARD", "CARD1", "CARD2", "SHOT", "SOT", "SOT1", "SOT2"];
-const DEFAULT_LINE: Record<string, string> = { TT1: "0.5", TT2: "0.5", HT_OU: "0.5", H2_OU: "0.5", HT_TT1: "0.5", HT_TT2: "0.5", H2_TT1: "0.5", H2_TT2: "0.5", AH: "-1.5", EH: "-1", CORN: "9.5", CORN1: "4.5", CORN2: "4.5", CARD: "3.5", CARD1: "1.5", CARD2: "1.5", SHOT: "24.5", SOT: "8.5", SOT1: "4.5", SOT2: "3.5" };
+export const LINE_MARKETS = ["OU", "TT1", "TT2", "HT_OU", "H2_OU", "HT_TT1", "HT_TT2", "H2_TT1", "H2_TT2", "CORN", "CORN1", "CORN2", "CARD", "CARD1", "CARD2", "SHOT", "SOT", "SOT1", "SOT2", "SHOT1", "SHOT2", "FOUL", "FOUL1", "FOUL2", "OFF", "OFF1", "OFF2"];
+const DEFAULT_LINE: Record<string, string> = { TT1: "0.5", TT2: "0.5", HT_OU: "0.5", H2_OU: "0.5", HT_TT1: "0.5", HT_TT2: "0.5", H2_TT1: "0.5", H2_TT2: "0.5", AH: "-1.5", EH: "-1", CORN: "9.5", CORN1: "4.5", CORN2: "4.5", CARD: "3.5", CARD1: "1.5", CARD2: "1.5", SHOT: "24.5", SOT: "8.5", SOT1: "4.5", SOT2: "3.5",
+  HT_AH: "-1", H2_AH: "-1", CORN_AH: "-1.5", GB: "15", SHOT1: "12.5", SHOT2: "10.5", FOUL: "24.5", FOUL1: "12.5", FOUL2: "12.5", OFF: "3.5", OFF1: "1.5", OFF2: "1.5" };
 /** Texte d'aide pour les marchés à saisie libre. */
-export const freePlaceholder = (market: string) => (market === "LIBRE" ? "Le pari comme sur le ticket, ex. Mbappé buteur ou passeur" : market === "BUT" || market === "BUT1" ? "Nom du joueur, ex. Mbappé" : market === "HT_CS" ? "ex. 1-0" : "ex. 2-1");
+export const freePlaceholder = (market: string) => (market === "LIBRE" ? "Le pari comme sur le ticket, ex. Mbappé buteur ou passeur" : ["BUT", "BUT1", "BUTL", "BUT2", "BUT3", "PCARD"].includes(market) ? "Nom du joueur, ex. Mbappé"
+  : market === "COMBO" ? "Conditions séparées par &, ex. DC:1N & OU@2.5:Plus" : market === "HT_CS" || market === "H2_CS" ? "ex. 1-0" : "ex. 2-1");
 
 /** Marchés combinés d'un même match : sélection « A|B ». */
 export const COMBO_PARTS: Record<string, [string[], string[]]> = {
@@ -50,7 +60,7 @@ export const COMBO_PARTS: Record<string, [string[], string[]]> = {
 };
 /** Ligne par défaut à la sélection d'un marché. */
 export const defaultParam = (market: string) => DEFAULT_LINE[market] ?? (market.includes("OU") ? "2.5" : "");
-export const paramLabel = (market: string) => (market === "AH" ? "Handicap" : market === "EH" ? "Handicap (équipe à domicile)" : /^(CORN|CARD|SHOT|SOT)/.test(market) ? "Ligne" : /TT[12]$/.test(market) ? "Ligne (buts de l’équipe)" : market === "HT_OU" || market === "H2_OU" ? "Ligne (buts de la mi-temps)" : "Ligne (buts)");
+export const paramLabel = (market: string) => (market === "AH" || market.endsWith("_AH") ? "Handicap" : market === "GB" ? "Minute" : market === "EH" ? "Handicap (équipe à domicile)" : /^(CORN|CARD|SHOT|SOT|FOUL|OFF)/.test(market) ? "Ligne" : /TT[12]$/.test(market) ? "Ligne (buts de l’équipe)" : market === "HT_OU" || market === "H2_OU" ? "Ligne (buts de la mi-temps)" : "Ligne (buts)");
 
 export const toNum = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
 
@@ -58,13 +68,14 @@ export function labelSel(market: string, s: string, m: MatchHit | null) {
   const team = (x: string) => (x === "1" ? (m ? short(m.home) : "Dom.") : x === "2" ? (m ? short(m.away) : "Ext.") : "Nul");
   if (market === "HTFT") { const [a, b] = s.split("/"); return `${team(a)} / ${team(b)}`; }
   if (market === "HMG") return s === "1" ? "1re mi-temps" : s === "2" ? "2e mi-temps" : "Autant";
-  if (market === "MG") { const [a, b] = s.split("-"); return a === "0" ? `${b} au plus` : `${a} à ${b} buts`; }
-  if (["1X2", "DNB", "AH", "HT_1X2", "H2_1X2", "EH", "WTN", "QUALIF", "CORN_1X2", "WEH"].includes(market)) {
+  if (market === "MG" || market === "MG1" || market === "MG2") { const [a, b] = s.split("-"); return a === b ? `${a} exactement` : Number(b) >= 9 ? `${a} ou plus` : a === "0" ? `${b} au plus` : `${a} à ${b} buts`; }
+  if ((market === "FTS" || market === "LTS") && s === "Aucun") return "Aucun but";
+  if (["1X2", "DNB", "AH", "HT_1X2", "H2_1X2", "EH", "WTN", "QUALIF", "CORN_1X2", "WEH", "HT_AH", "H2_AH", "HT_DNB", "H2_DNB", "WBH", "SBH", "CORN_AH", "CARD_1X2", "FTS", "LTS"].includes(market)) {
     if (s === "1") return m ? short(m.home) : "Domicile";
     if (s === "2") return m ? short(m.away) : "Extérieur";
     return "Nul";
   }
-  if (market === "DC" || market === "HT_DC" || market === "H2_DC") return { "1N": "Dom. ou nul", "12": "Dom. ou ext.", N2: "Nul ou ext." }[s] ?? s;
+  if (market === "DC" || market === "HT_DC" || market === "H2_DC" || market === "CORN_DC") return { "1N": "Dom. ou nul", "12": "Dom. ou ext.", N2: "Nul ou ext." }[s] ?? s;
   if (s === "Plus" || s === "Moins") return s === "Plus" ? "Plus de" : "Moins de";
   // « Oui / Non » ne veut dire « les deux marquent » que sur ces marchés : ailleurs (penalty, tirs au but, carton rouge…) on écrit Oui ou Non
   if (s === "Oui" || s === "Non") return /BTTS$/.test(market) ? (s === "Oui" ? "Les deux marquent" : "Pas les deux") : s;

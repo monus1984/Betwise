@@ -21,6 +21,9 @@ const BOOK: CoteBookmaker[] = [
   b("OE", null, "Pair", 1.85), b("OE", null, "Impair", 1.85),
   b("CORN", 8.5, "Plus", 1.33), b("CORN", 8.5, "Moins", 2.81), b("CORN", 9.5, "Plus", 1.62), b("CORN", 9.5, "Moins", 2.11), b("CORN", 10.5, "Plus", 2.04), b("CORN", 10.5, "Moins", 1.69), b("CORN", 11.5, "Plus", 2.6), b("CORN", 11.5, "Moins", 1.41),
   b("CARD", 4.5, "Plus", 2.1), b("CARD", 4.5, "Moins", 1.67),
+  // Marchés ajoutés le 19/11
+  b("HT_DNB", null, "1", 1.39), b("HT_DNB", null, "2", 2.76), b("H2_OE", null, "Pair", 1.83), b("H2_OE", null, "Impair", 1.87), b("OE1", null, "Pair", 1.83), b("OE1", null, "Impair", 1.87),
+  b("CORN_AH", -1.5, "1", 1.75), b("CORN_AH", 1.5, "2", 1.94), b("CORN_AH", -2.5, "1", 2.13), b("CORN_AH", 2.5, "2", 1.62), b("CORN_DC", null, "1N", 1.2), b("CORN_DC", null, "12", 1.12), b("CORN_DC", null, "N2", 2.3), b("CORN_OE", null, "Pair", 1.9), b("CORN_OE", null, "Impair", 1.9),
   b("CS", null, "1-0", 10), b("CS", null, "2-0", 10), b("CS", null, "2-1", 8), b("CS", null, "1-1", 8), b("CS", null, "3-1", 11), b("CS", null, "2-2", 11), b("CS", null, "3-0", 14), b("CS", null, "0-1", 14), b("CS", null, "1-2", 13),
 ];
 

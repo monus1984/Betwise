@@ -5,6 +5,8 @@
  *  - « marche » : buts attendus déduits des cotes de référence (1X2 + plus/moins 2,5), marge retirée.
  */
 import { METHODE_MARGE, sansMarge, type MethodeMarge } from "./marge";
+import { jambesDe } from "../bets/combo";
+import { issue, type Score } from "../mesure/issue";
 
 export type Grid = number[][];
 const MAX = 10;
@@ -43,6 +45,8 @@ const RDC: Record<string, (i: number, j: number) => boolean> = { "1N": (i, j) =>
 type Rule = (i: number, j: number) => boolean;
 const ou = (sel: string, line: number): Rule => (i, j) => (sel === "Plus" ? i + j > line : i + j < line);
 
+/** Marchés qui existent aussi sur une seule mi-temps. */
+const BASES_MI_TEMPS = new Set(["1X2", "DC", "DNB", "OU", "BTTS", "CS", "TT1", "TT2", "AH", "OE", "EH", "MG", "WTN", "OE1", "OE2", "MG1", "MG2"]);
 const BTTS: Record<string, Rule> = { Oui: (i, j) => i > 0 && j > 0, Non: (i, j) => i === 0 || j === 0 };
 /** Probabilité de gagner quand une égalité à la ligne rembourse : p(gagné) / (p(gagné) + p(perdu)). */
 const sansRembourse = (g: Grid, win: Rule, push: Rule) => { const w = sum(g, win), l = sum(g, (i, j) => !win(i, j) && !push(i, j)); return w + l > 0 ? w / (w + l) : null; };
@@ -50,6 +54,11 @@ const sansRembourse = (g: Grid, win: Rule, push: Rule) => { const w = sum(g, win
 /** Probabilité d'une sélection ; null si le marché n'est pas calculable (ligne en quart, sélection inconnue). */
 export function probOf(g: Grid, market: string, param: number | null, sel: string): number | null {
   const ouOk = (s: string) => s === "Plus" || s === "Moins";
+  // Marché d'une seule mi-temps (« HT_ », « H2_ ») : le marché de base, calculé sur la grille de cette mi-temps
+  if ((market.startsWith("HT_") || market.startsWith("H2_")) && BASES_MI_TEMPS.has(market.slice(3))) {
+    const h = halves(g);
+    return h ? probOf(market.startsWith("HT_") ? h.ht : h.h2, market.slice(3), param, sel) : null;
+  }
   switch (market) {
     case "1X2": return R1X2[sel] ? sum(g, R1X2[sel]) : null;
     case "DC": return RDC[sel] ? sum(g, RDC[sel]) : null;
@@ -75,8 +84,18 @@ export function probOf(g: Grid, market: string, param: number | null, sel: strin
       return sum(g, (i, j) => res(i + param, j) === sel);
     }
     case "WTN": return sel === "1" ? sum(g, (i, j) => i > j && j === 0) : sel === "2" ? sum(g, (i, j) => j > i && i === 0) : null;
-    case "HT_1X2": case "HT_DC": case "HT_OU": case "HT_BTTS": case "HT_CS": case "HT_TT1": case "HT_TT2": { const h = halves(g); return h ? probOf(h.ht, market.slice(3), param, sel) : null; }
-    case "H2_1X2": case "H2_OU": case "H2_BTTS": case "H2_DC": case "H2_TT1": case "H2_TT2": { const h = halves(g); return h ? probOf(h.h2, market.slice(3), param, sel) : null; }
+    case "OE1": case "OE2": { const v = (i: number, j: number) => (market === "OE1" ? i : j); return sel === "Pair" ? sum(g, (i, j) => v(i, j) % 2 === 0) : sel === "Impair" ? sum(g, (i, j) => v(i, j) % 2 === 1) : null; }
+    case "MG1": case "MG2": { const r = sel.match(/^(\d+)-(\d+)$/); if (!r) return null; const lo = Number(r[1]), hi = Number(r[2]); return lo <= hi ? sum(g, (i, j) => { const v = market === "MG1" ? i : j; return v >= lo && v <= hi; }) : null; }
+    // Gagne les deux mi-temps ; marque dans les deux mi-temps : produit des deux mi-temps, tirées séparément
+    case "WBH": { const h = halves(g); if (!h || (sel !== "1" && sel !== "2")) return null; return sum(h.ht, R1X2[sel]) * sum(h.h2, R1X2[sel]); }
+    case "SBH": { const h = halves(g); if (!h || (sel !== "1" && sel !== "2")) return null; const marque = (x: Grid) => sum(x, (i, j) => (sel === "1" ? i : j) >= 1); return marque(h.ht) * marque(h.h2); }
+    // Première ou dernière équipe à marquer : part des buts attendus de l'équipe, s'il y a au moins un but
+    case "FTS": case "LTS": {
+      const l = LAMBDAS.get(g); if (!l || l.lh + l.la <= 0) return null;
+      const aucun = Math.exp(-(l.lh + l.la));
+      return sel === "Aucun" ? aucun : sel === "1" ? (l.lh / (l.lh + l.la)) * (1 - aucun) : sel === "2" ? (l.la / (l.lh + l.la)) * (1 - aucun) : null;
+    }
+    case "COMBO": return probCombo(g, sel);
     // Gagne au moins une mi-temps : 1 − (ne gagne pas la 1re) × (ne gagne pas la 2e), les deux mi-temps étant tirées séparément
     case "WEH": { const h = halves(g); if (!h || (sel !== "1" && sel !== "2")) return null; return 1 - (1 - sum(h.ht, R1X2[sel])) * (1 - sum(h.h2, R1X2[sel])); }
     // But dans les deux mi-temps : aucune des deux ne finit 0-0
@@ -112,6 +131,32 @@ export function probOf(g: Grid, market: string, param: number | null, sel: strin
     }
   }
   return null;
+}
+
+/**
+ * Combiné sur un même match : probabilité que toutes les conditions soient gagnées, comptée score par score
+ * (les conditions ne sont pas indépendantes : « victoire » et « plus de 2,5 buts » vont souvent ensemble).
+ * null dès qu'une condition ne se règle pas sur le score (corners, buteur…).
+ */
+function probCombo(g: Grid, sel: string): number | null {
+  const js = jambesDe(sel); if (!js) return null;
+  const etat = (s: Score) => { const rs = js.map((j) => issue(j.market, j.param, j.sel, s)); return rs.includes("perdu") ? "perdu" : rs.includes(null) ? null : rs.every((r) => r === "gagne") ? "gagne" : "rembourse"; };
+  let w = 0, l = 0, miTemps = false;
+  boucle: for (let i = 0; i <= MAX; i++) for (let j = 0; j <= MAX; j++) {
+    const e = etat({ h: i, a: j, hth: null, hta: null });
+    if (e === null) { miTemps = true; break boucle; }
+    if (e === "gagne") w += g[i][j]; else if (e === "perdu") l += g[i][j];
+  }
+  if (!miTemps) return w + l > 0 ? w / (w + l) : null;
+  const h = halves(g); if (!h) return null;
+  const M2 = 7; w = 0; l = 0;
+  for (let i = 0; i <= M2; i++) for (let j = 0; j <= M2; j++) for (let k = 0; k <= M2; k++) for (let m = 0; m <= M2; m++) {
+    const e = etat({ h: i + k, a: j + m, hth: i, hta: j });
+    if (e === null) return null;
+    const p = h.ht[i][j] * h.h2[k][m];
+    if (e === "gagne") w += p; else if (e === "perdu") l += p;
+  }
+  return w + l > 0 ? w / (w + l) : null;
 }
 
 function bisect(f: (x: number) => number, lo: number, hi: number) { for (let k = 0; k < 50; k++) { const m = (lo + hi) / 2; if (f(m) < 0) lo = m; else hi = m; } return (lo + hi) / 2; }
