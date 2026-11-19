@@ -193,3 +193,31 @@ input, select, textarea { color: rgb(var(--c-ink)); }
   :root:not([data-theme="light"]) body { background: radial-gradient(120% 360px at 50% -140px, rgb(var(--c-brand) / .14), transparent 70%) fixed, rgb(var(--c-canvas)); }
 }
 :root[data-theme="dark"] body { background: radial-gradient(120% 360px at 50% -140px, rgb(var(--c-brand) / .14), transparent 70%) fixed, rgb(var(--c-canvas)); }
+
+/* Betster flottant : un halo qui respire doucement, pour signaler qu'on peut lui parler. Coupé si l'utilisateur réduit les animations. */
+@keyframes betster-halo { 0%, 100% { box-shadow: 0 0 0 0 rgb(var(--c-brand) / .45); } 50% { box-shadow: 0 0 0 8px rgb(var(--c-brand) / 0); } }
+.betster-fab { animation: betster-halo 3.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .betster-fab { animation: none; } }
+
+/* Animation du portrait de Betster : repos (respire, balance la tête), pense (tête penchée, anneau), parle (suit le niveau de la voix) */
+@keyframes betster-respire {
+  0%, 100% { transform: translateY(0) rotate(0) scale(1); }
+  25% { transform: translateY(-1.5px) rotate(-3deg) scale(1.03); }
+  50% { transform: translateY(0) rotate(0) scale(1.045); }
+  75% { transform: translateY(-1.5px) rotate(3deg) scale(1.03); }
+}
+@keyframes betster-pense { 0%, 100% { transform: rotate(-7deg) translateY(-1px); } 50% { transform: rotate(-4deg) translateY(1px); } }
+@keyframes betster-tourne { to { transform: rotate(360deg); } }
+@keyframes betster-parle {
+  0%, 100% { transform: scale(1) rotate(0); box-shadow: 0 0 0 0 rgb(var(--c-brand) / .55); }
+  20% { transform: scale(1.06) rotate(-2deg); box-shadow: 0 0 0 6px rgb(var(--c-brand) / .25); }
+  45% { transform: scale(1.01) rotate(1deg); }
+  65% { transform: scale(1.07) rotate(2deg); box-shadow: 0 0 0 8px rgb(var(--c-brand) / .2); }
+}
+.betster-anime .betster-portrait { transform-origin: 50% 85%; }
+.betster-anime[data-etat="repos"] .betster-portrait { animation: betster-respire 3.6s ease-in-out infinite; }
+.betster-anime[data-etat="pense"] .betster-portrait { animation: betster-pense 1.6s ease-in-out infinite; }
+.betster-anime[data-etat="pense"] .betster-anneau { background: conic-gradient(from 0deg, rgb(var(--c-brand)) 0 30%, transparent 30% 100%); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); animation: betster-tourne 1s linear infinite; }
+.betster-anime[data-etat="parle"] .betster-portrait { animation: betster-parle .7s ease-in-out infinite; }
+.betster-anime[data-etat="parle"][data-voix] .betster-portrait { animation: none; transform: scale(calc(1 + var(--niveau, 0) * .09)) rotate(calc(var(--niveau, 0) * -3deg)); box-shadow: 0 0 0 calc(var(--niveau, 0) * 10px) rgb(var(--c-brand) / .3); }
+@media (prefers-reduced-motion: reduce) { .betster-anime .betster-portrait, .betster-anime .betster-anneau { animation: none !important; transform: none !important; } }

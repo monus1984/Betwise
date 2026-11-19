@@ -25,12 +25,45 @@ export function stopSpeaking() {
   try { window.speechSynthesis?.cancel(); } catch { /* ignore */ }
 }
 
+/**
+ * Niveau de la voix pour animer Betster (19/11). L'enveloppe sonore est calculée sur une copie décodée du fichier,
+ * jamais sur la lecture elle-même : l'animation ne peut pas couper le son. Pas d'enveloppe pour la voix du téléphone.
+ */
+const PAS = 0.05; // une valeur toutes les 50 ms
+const enveloppes = new Map<string, Float32Array>();
+async function calculerEnveloppe(url: string, blob: Blob) {
+  try {
+    const Ctx = window.OfflineAudioContext ?? (window as unknown as { webkitOfflineAudioContext?: typeof OfflineAudioContext }).webkitOfflineAudioContext;
+    if (!Ctx) return;
+    const audio = await new Ctx(1, 1, 24000).decodeAudioData(await blob.arrayBuffer());
+    const d = audio.getChannelData(0), n = Math.max(1, Math.round(audio.sampleRate * PAS));
+    const env = new Float32Array(Math.ceil(d.length / n));
+    let max = 0;
+    for (let i = 0; i < env.length; i++) {
+      let t = 0; const fin = Math.min(d.length, (i + 1) * n);
+      for (let j = i * n; j < fin; j++) t += d[j] * d[j];
+      env[i] = Math.sqrt(t / Math.max(1, fin - i * n)); max = Math.max(max, env[i]);
+    }
+    if (max > 0) for (let i = 0; i < env.length; i++) env[i] = Math.min(1, env[i] / (max * 0.7));
+    enveloppes.set(url, env);
+  } catch { /* pas d'animation fine, la lecture continue */ }
+}
+/** Entre 0 et 1 pendant que la voix du Coach joue ; null sinon (voix du téléphone, silence, pas encore calculé). */
+export function niveauVoix(): number | null {
+  if (!player || player.paused || !player.src) return null;
+  const env = enveloppes.get(player.src);
+  if (!env) return null;
+  return env[Math.min(env.length - 1, Math.floor(player.currentTime / PAS))] ?? 0;
+}
+
 async function fetchVoice(text: string): Promise<string | null> {
   if (serveurKo) return null;
   try {
     const r = await fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
     if (!r.ok) { if (r.status === 503 || r.status === 401) serveurKo = true; return null; }
-    return URL.createObjectURL(await r.blob());
+    const blob = await r.blob(); const url = URL.createObjectURL(blob);
+    void calculerEnveloppe(url, blob);
+    return url;
   } catch { return null; }
 }
 
@@ -72,7 +105,7 @@ export function speakBlocks(blocks: string[], onBlock?: (i: number | null) => vo
     try {
       if (!player) player = new Audio();
       const a = player;
-      a.onended = () => { URL.revokeObjectURL(url); suite(); };
+      a.onended = () => { URL.revokeObjectURL(url); enveloppes.delete(url); suite(); };
       a.onerror = () => { URL.revokeObjectURL(url); if (vivant()) phoneVoice(blocks[i], suite); };
       a.src = url;
       await a.play();

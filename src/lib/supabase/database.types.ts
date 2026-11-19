@@ -610,6 +610,48 @@ export type Database = {
           },
         ]
       }
+      montantes: {
+        Row: {
+          id: string
+          user_id: string
+          nom: string
+          mise_depart: number
+          objectif: number
+          paliers_prevus: number
+          niveau: string | null
+          statut: string
+          created_at: string
+          updated_at: string
+          termine_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string
+          nom: string
+          mise_depart: number
+          objectif: number
+          paliers_prevus: number
+          niveau?: string | null
+          statut?: string
+          created_at?: string
+          updated_at?: string
+          termine_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          nom?: string
+          mise_depart?: number
+          objectif?: number
+          paliers_prevus?: number
+          niveau?: string | null
+          statut?: string
+          created_at?: string
+          updated_at?: string
+          termine_at?: string | null
+        }
+        Relationships: []
+      }
       bets: {
         Row: {
           id: string
@@ -637,6 +679,8 @@ export type Database = {
           assurance: boolean
           virtuel: boolean
           cashout: number | null
+          montante_id: string | null
+          palier: number | null
         }
         Insert: {
           id?: string
@@ -664,6 +708,8 @@ export type Database = {
           assurance?: boolean
           virtuel?: boolean
           cashout?: number | null
+          montante_id?: string | null
+          palier?: number | null
         }
         Update: {
           id?: string
@@ -691,6 +737,8 @@ export type Database = {
           assurance?: boolean
           virtuel?: boolean
           cashout?: number | null
+          montante_id?: string | null
+          palier?: number | null
         }
         Relationships: [
           {
@@ -1853,6 +1901,13 @@ export type Database = {
       }
       notifications_read: {
         Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      montante_rattacher: {
+        Args: {
+          p_montante_id: string
+          p_bet_id: string
+        }
         Returns: number
       }
       settle_bet: {

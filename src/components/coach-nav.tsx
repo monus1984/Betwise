@@ -1,12 +1,22 @@
 import Link from "next/link";
 
-/** Sous-navigation du Coach : la discussion d'abord, les outils (budget, sélections du jour, tests) en retrait. */
-export function CoachNav({ current }: { current: "discussion" | "outils" | "options" | "jour" }) {
-  const actif = current === "discussion" ? "discussion" : "outils";
-  const items = [{ k: "discussion", t: "Discussion", href: "/coach" }, { k: "outils", t: "Outils", href: "/coach?v=outils" }] as const;
+/** Navigation du Coach (19/11) : synthèse (tableau de bord), bankroll, montantes, outils. La conversation s'ouvre par Betster flottant. */
+export function CoachNav({ current }: { current: "tableau" | "bankroll" | "montantes" | "outils" | "options" | "jour" }) {
+  const actif = ["tableau", "bankroll", "montantes"].includes(current) ? current : "outils";
+  const items = [{ k: "tableau", t: "Synthèse", href: "/coach" }, { k: "bankroll", t: "Bankroll", href: "/bankroll" }, { k: "montantes", t: "Montantes", href: "/montantes" }, { k: "outils", t: "Outils", href: "/coach?v=outils" }] as const;
+  return <SousNav items={items} actif={actif} label="Coach" />;
+}
+
+/** Navigation de Mes paris (19/11) : mes paris, ajouter (charger, saisir, simuler, communauté), sources. */
+export function ParisNav({ current }: { current: "paris" | "ajouter" | "sources" }) {
+  const items = [{ k: "paris", t: "Mes paris", href: "/paris" }, { k: "ajouter", t: "Ajouter", href: "/paris/ajouter" }, { k: "sources", t: "Sources", href: "/sources" }] as const;
+  return <SousNav items={items} actif={current} label="Mes paris" />;
+}
+
+function SousNav({ items, actif, label }: { items: readonly { k: string; t: string; href: string }[]; actif: string; label: string }) {
   return (
-    <nav className="mb-4 grid grid-cols-2 rounded-xl border border-line bg-surface-2 p-1 text-[13px] font-medium" aria-label="Coach">
-      {items.map((i) => <Link key={i.k} href={i.href} className={`truncate rounded-lg px-1 py-2 text-center ${actif === i.k ? "bg-surface shadow-card" : "text-ink-muted"}`} aria-current={actif === i.k ? "page" : undefined}>{i.t}</Link>)}
+    <nav className={`mb-4 grid ${items.length === 4 ? "grid-cols-4" : "grid-cols-3"} rounded-xl border border-line bg-surface-2 p-1 text-[13px] font-medium`} aria-label={label}>
+      {items.map((i) => <Link key={i.k} href={i.href} className={`truncate rounded-lg px-1 py-2 text-center ${actif === i.k ? "bg-surface font-semibold shadow-card" : "text-ink-muted"}`} aria-current={actif === i.k ? "page" : undefined}>{i.t}</Link>)}
     </nav>
   );
 }

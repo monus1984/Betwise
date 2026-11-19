@@ -43,11 +43,11 @@ function Progress({ goal: g, onEdit }: { goal: GoalState; onEdit: () => void }) 
         </p>
       )}
       <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-        <Mise label="Très probable" v={g.mises.sur} cls="text-gain" />
-        <Mise label="Audacieux" v={g.mises.audacieux} cls="text-draw" />
-        <Mise label="Risqué" v={g.mises.risque} cls="text-loss" sub={g.mises.risque ? `budget ${F(g.mises.budgetRisque)}` : "pas encore de gains"} />
+        <Mise label="Prudent" v={g.mises.sur} cls="text-gain" />
+        <Mise label="Équilibré" v={g.mises.audacieux} cls="text-draw" />
+        <Mise label="Audacieux" v={g.mises.risque} cls="text-loss" sub={g.mises.risque ? `budget ${F(g.mises.budgetRisque)}` : "pas encore de gains"} />
       </div>
-      <p className="mt-2 text-[11px] text-ink-muted">Mise conseillée par pari aujourd’hui. Le Risqué se joue seulement avec 30 % de tes gains, pour ne jamais entamer ta bankroll de départ.</p>
+      <p className="mt-2 text-[11px] text-ink-muted">Mise conseillée par pari aujourd’hui. Le Audacieux se joue seulement avec 30 % de tes gains, pour ne jamais entamer ta bankroll de départ.</p>
       {(g.statut === "atteint" || g.statut === "echu") && (
         <button disabled={pending} onClick={() => start(async () => { await stopObjectif(); router.refresh(); })} className="mt-3 w-full rounded-lg border border-line py-2 text-sm">Clore et fixer un nouvel objectif</button>
       )}

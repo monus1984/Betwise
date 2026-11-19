@@ -1,12 +1,12 @@
 /**
  * Catégories de risque BETWISE, fixées avec l'utilisateur et vérifiées sur 4 004 matchs (3 saisons, 5 championnats) :
  *  - Sûr       : cote juste 1,10 à 1,20 (probabilité 83 à 91 %) — 87,9 % de réussite constatée
- *  - Audacieux : cote juste 1,20 à 1,50 (67 à 83 %)              — 76,4 %
- *  - Risqué    : cote juste 1,50 à 1,90 (53 à 67 %)              — 59,1 %
+ *  - Équilibré : cote juste 1,20 à 1,50 (67 à 83 %)              — 76,4 %
+ *  - Audacieux    : cote juste 1,50 à 1,90 (53 à 67 %)              — 59,1 %
  * Au-delà de 1,90 : « Très risqué » ; en deçà de 1,10, gain trop faible : non classé, jamais proposé.
  */
 export type Categorie = "sur" | "audacieux" | "risque";
-export const CAT_LABEL: Record<Categorie | "hors", string> = { sur: "Très probable", audacieux: "Audacieux", risque: "Risqué", hors: "Très risqué" };
+export const CAT_LABEL: Record<Categorie | "hors", string> = { sur: "Prudent", audacieux: "Équilibré", risque: "Audacieux", hors: "Très risqué" };
 export const CAT_STYLE: Record<Categorie | "hors", string> = {
   sur: "bg-gain-soft text-gain border-gain/30", audacieux: "bg-draw-soft text-draw border-draw/40",
   risque: "bg-loss-soft text-loss border-loss/30", hors: "bg-inverse text-on-inverse border-inverse",
@@ -27,7 +27,7 @@ export function categorieFromOdds(cote: number): Categorie | "hors" | null {
   return categorieOf(1 / cote / 1.05);
 }
 
-/** Mise conseillée : part de la bankroll actuelle. Risqué seulement sur le budget risque (pris sur les gains). */
+/** Mise conseillée : part de la bankroll actuelle. Audacieux seulement sur le budget risque (pris sur les gains). */
 export const MISE_PART: Record<Categorie, number> = { sur: 0.08, audacieux: 0.05, risque: 0.03 };
 export const PART_GAINS_RISQUABLE = 0.3;
 export const MARGE_SUPPOSEE = 0.05; // marge moyenne supposée des bookmakers de l'utilisateur
