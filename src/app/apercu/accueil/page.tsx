@@ -40,7 +40,7 @@ export default async function ApercuAccueil({ searchParams }: { searchParams: Pr
     <main className="mx-auto max-w-xl px-4 pb-28 pt-4">
       <p className="mb-3 rounded-lg bg-draw-soft p-2 text-[11px] text-draw-ink">Aperçu — données fictives.</p>
       <div id="etats-betster" className="mb-4 flex justify-around rounded-xl bg-surface p-3">{(["repos", "pense", "parle"] as const).map((e) => <span key={e} className="flex flex-col items-center gap-2 text-[11px] text-ink-muted"><BetsterAnime etat={e} taille={56} />{e}</span>)}</div>
-      <BandeauBetster prenom="Mounir" expression="positive" maj="09:14" synthese="Aujourd’hui, j’ai analysé 9 matchs à venir et retenu 6 propositions. Demain, 12 matchs déjà analysés." />
+      <BandeauBetster prenom="Mounir" expression="positive" maj="09:14" synthese="Aujourd’hui, j’ai analysé 9 matchs à venir et retenu 6 propositions. Demain, 12 matchs déjà analysés." briefing={["Bonjour Mounir. Aujourd’hui, j’ai analysé 9 matchs à venir et retenu 6 propositions.", "Profil prudent. Athletic Club contre Espanyol, aujourd’hui à 20 h : Athletic ou nul. Probabilité 82 %, donc ça ne passe pas environ 18 fois sur 100. Cote 1,13 chez 1xBet."]} />
       <ProfilsDuJour profils={PROFILS} titre="Les meilleures options du jour" />
       <section className="mt-6 flex flex-col gap-2.5"><h2 className="text-[17px] font-bold">Matchs du jour</h2>{CARTES.map((c) => <CarteMatchUI key={c.id} c={c} />)}</section>
       <Demain titre="Demain" total={12} matchs={[{ matchId: "d", home: "ES Troyes AC", away: "Le Havre AC", kickoff: H(28), comp: "FL1", propositions: [{ ...PROFILS.sur[0], label: "Troyes ou nul", marche: "Double chance", p: 0.84 }, { ...PROFILS.audacieux[1], label: "Moins de 2,5 buts", p: 0.66, profil: "risque" }] }]} />

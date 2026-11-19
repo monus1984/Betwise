@@ -9,6 +9,8 @@ import { createClient } from "@/lib/supabase/server";
 import { Mark } from "@/components/icons";
 import { InstallButton } from "@/components/install-button";
 import { loadAccueil } from "@/lib/accueil/load";
+import { briefing } from "@/lib/accueil/briefing";
+import type { Pourquoi } from "@/lib/matches/justification";
 import { BandeauBetster, Bienvenue, CarteMatchUI, Demain, IconeScan, ImportCarte, RaccourcisCoach, TipstersDuJour } from "@/components/accueil";
 import { ProfilsDuJour } from "@/components/profils-du-jour";
 import { heure, jourCourt, pct as pctP } from "@/components/proposition";
@@ -84,6 +86,10 @@ export default async function Home() {
     !acc.profilsDeDemain && acc.nbDemainAnalyses ? `Demain, ${pl2(acc.nbDemainAnalyses, "match")} déjà analysé${acc.nbDemainAnalyses > 1 ? "s" : ""}.` : "",
     !acc.nbPropositions && !acc.nbDemainAnalyses && acc.repli.length ? "Les prochains matchs couverts sont plus bas." : "",
   ].filter(Boolean).join(" ");
+  // Ce que Betster dit à voix haute : les mêmes données que l'écran, rien de plus
+  const brief = (l: typeof acc.profils.sur) => l.map((x) => ({ matchId: x.matchId, home: x.home, away: x.away, kickoff: x.kickoff, label: x.label, p: x.p, profil: x.profil, cote: x.book?.cote ?? x.cote?.cote ?? null, bookmaker: x.book?.bookmaker ?? null }));
+  const pourquoi = new Map<string, Pourquoi | null | undefined>([...acc.cartes.map((c) => [c.id, c.pourquoi] as const), ...acc.demain.map((m) => [m.matchId, m.pourquoi] as const)]);
+  const aDire = briefing({ prenom: profile?.pseudo ?? "", synthese, profils: { sur: brief(acc.profils.sur), audacieux: brief(acc.profils.audacieux), risque: brief(acc.profils.risque) }, pourquoi });
   const maj = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" });
   const matchsDuJour = acc.cartes.length > 0 && (
     <section aria-label="Matchs du jour" className="mt-6 flex flex-col gap-2.5">
@@ -115,7 +121,7 @@ export default async function Home() {
       </header>
       <h1 className="sr-only">Prédictions</h1>
 
-      <BandeauBetster prenom={profile?.pseudo ?? ""} synthese={synthese} maj={maj} expression={acc.avis?.expression ?? "neutre"} />
+      <BandeauBetster prenom={profile?.pseudo ?? ""} synthese={synthese} maj={maj} expression={acc.avis?.expression ?? "neutre"} briefing={aDire} />
       {nouveau && <Bienvenue />}
 
       {acc.nbPropositions > 0 && <ProfilsDuJour profils={acc.profils} titre={acc.profilsDeDemain ? "Les meilleures options de demain" : "Les meilleures options du jour"} />}

@@ -78,26 +78,7 @@ export function CarteMatchUI({ c }: { c: CarteMatch }) {
 }
 
 /** Bandeau de Betster : salutation, synthèse calculée de la journée, heure de mise à jour, accès à la conversation. */
-export function BandeauBetster({ prenom, synthese, maj, expression }: { prenom: string; synthese: string; maj: string; expression: string }) {
-  return (
-    <section aria-label="Betster" className="card-hero flex flex-col gap-3 rounded-[22px] p-4">
-      <div className="flex items-start gap-3">
-        <Betster expression={expression} taille={64} />
-        <div className="min-w-0">
-          <p className="text-[12px] font-semibold text-brand">Betster</p>
-          <p className="text-[16px] font-bold leading-snug">Bonjour{prenom ? ` ${prenom}` : ""} !</p>
-          <p className="mt-1 text-[13.5px] leading-snug text-ink-soft">{synthese}</p>
-        </div>
-      </div>
-      <div className="flex items-center justify-between gap-2">
-        <span className="min-w-0 text-[11px] leading-tight text-ink-muted">Mis à jour à {maj}</span>
-        <Link href="/coach?v=discussion" className="flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-xl bg-brand px-3.5 text-[13px] font-bold text-on-fill active:opacity-90">
-          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" /></svg>Parler à Betster
-        </Link>
-      </div>
-    </section>
-  );
-}
+export { BandeauBetster } from "@/components/betster-bandeau";
 
 /** Demain et les prochains jours : les matchs analysés, deux propositions chacun. */
 export function Demain({ matchs, titre, total }: { matchs: MatchAVenir[]; titre: string; total: number }) {
@@ -130,7 +111,7 @@ export function RaccourcisCoach({ solde, sept, budget, paris, vigilance, nouveau
         <Link href="/bankroll" className={tuile}><span className="text-[11.5px] text-ink-muted">Bankroll</span><span className="text-[20px] font-extrabold leading-tight tabular-nums">{nouveau ? "À créer" : solde}</span>{sept && <span className="text-[11px] text-ink-soft">{sept} sur 7 jours</span>}</Link>
         <Link href="/coach?v=outils" className={tuile}><span className="text-[11.5px] text-ink-muted">Budget et objectifs</span><span className="text-[14px] font-bold leading-snug">{budget ?? "À fixer"}</span></Link>
         <Link href="/paris" className={tuile}><span className="text-[11.5px] text-ink-muted">Mes paris</span><span className="text-[14px] font-bold leading-snug">{paris}</span></Link>
-        <Link href="/coach?v=discussion" className={`${tuile} border-brand/40 bg-brand-soft`}><span className="text-[11.5px] text-ink-muted">Conversation</span><span className="text-[14px] font-bold leading-snug text-brand">Parler à Betster ›</span></Link>
+        <Link href="/coach?v=discussion" className={`${tuile} border-brand/40 bg-brand-soft`}><span className="text-[11.5px] text-ink-muted">Conversation</span><span className="text-[14px] font-bold leading-snug text-brand">Écrire à Betster ›</span></Link>
       </div>
       {vigilance && (
         <Link href={vigilance.href} className="mt-2 flex items-start gap-2 rounded-xl bg-draw-soft p-2.5 text-draw-ink">
