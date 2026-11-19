@@ -1,12 +1,14 @@
 /**
  * API-Football : calendrier et scores des compétitions africaines et des amicaux, règlement automatique.
  * Avec --cotes : ajoute les cotes de référence (une fois par jour suffit).
+ * À chaque passage : cotes 1xBet des matchs proches (voir src/lib/api-football/bookmakers.ts).
  * Variables : API_FOOTBALL_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
  */
 import "dotenv/config";
 import { createAdminClient } from "../src/lib/supabase/admin";
 import { ApiFootball } from "../src/lib/api-football/client";
 import { AF_COMPETITIONS, AF_LINKED, AF_STANDINGS, fillDetails, syncStandings, linkAfFixtures, syncAfCompetition, syncAfOdds } from "../src/lib/api-football/sync";
+import { syncBookmakerOdds } from "../src/lib/api-football/bookmakers";
 
 async function main() {
   if (!process.env.API_FOOTBALL_KEY) { console.error("API_FOOTBALL_KEY manquant"); process.exit(1); }
@@ -26,6 +28,16 @@ async function main() {
   for (const code of Object.keys(AF_LINKED)) {
     try { const r = await linkAfFixtures(db, api, code); if (r.linked || r.pending) console.log(`[${code}] direct : ${r.linked} rattachés, ${r.pending} sans correspondance`); }
     catch (e) { console.error(`[${code}] rattachement :`, e instanceof Error ? e.message : e); }
+  }
+  // Cotes 1xBet des matchs à venir, avec l'heure du relevé : tous les matchs à 14 jours une fois par jour (--cotes),
+  // ceux des 36 prochaines heures à chaque passage. Aucune requête pour une compétition sans match dans l'horizon.
+  {
+    let matchs = 0, lignes = 0, requetes = 0;
+    for (const [code, c] of Object.entries({ ...AF_COMPETITIONS, ...AF_LINKED })) {
+      try { const r = await syncBookmakerOdds(db, api, code, c, withOdds ? 14 * 24 : 36); matchs += r.matches; lignes += r.rows; requetes += r.requetes; }
+      catch (e) { console.error(`[${code}] cotes 1xBet :`, e instanceof Error ? e.message : e); }
+    }
+    console.log(`Cotes 1xBet : ${matchs} match(s), ${lignes} cote(s), ${requetes} requête(s)`);
   }
   // Classements (une requête par compétition)
   { let n = 0; for (const code of Object.keys(AF_STANDINGS)) { try { n += (await syncStandings(db, api, code)).rows; } catch (e) { console.error(`[${code}] classement :`, e instanceof Error ? e.message : e); } } console.log(`Classements : ${n} lignes`); }

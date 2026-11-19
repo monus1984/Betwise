@@ -14,7 +14,9 @@ export type AfFixture = {
 export type AfStanding = { rank: number; team: { id: number; name: string }; points: number; goalsDiff: number; group: string | null; form: string | null; description: string | null; all: { played: number; win: number; draw: number; lose: number; goals: { for: number; against: number } } };
 export type AfOdds = {
   fixture: { id: number };
-  bookmakers: { name: string; bets: { name: string; values: { value: string; odd: string }[] }[] }[];
+  /** Heure du relevé des cotes chez le fournisseur. */
+  update?: string;
+  bookmakers: { id: number; name: string; bets: { name: string; values: { value: string | number; odd: string }[] }[] }[];
 };
 
 export const cleanKey = (k: string) => k.trim().replace(/^["']|["']$/g, "").trim();
@@ -49,11 +51,11 @@ export class ApiFootball {
     return this.get<{ league: { standings: AfStanding[][] } }>(`/standings?league=${league}&season=${season}`).then((j) => j.response[0]?.league.standings ?? []);
   }
 
-  /** Cotes d'avant-match d'une compétition (10 matchs par page). */
-  async odds(league: number, season: number, maxPages = 6) {
+  /** Cotes d'avant-match d'une compétition (10 matchs par page), tous bookmakers ou un seul. */
+  async odds(league: number, season: number, maxPages = 12, bookmaker?: number) {
     const out: AfOdds[] = [];
     for (let page = 1; page <= maxPages; page++) {
-      const j = await this.get<AfOdds>(`/odds?league=${league}&season=${season}&page=${page}`);
+      const j = await this.get<AfOdds>(`/odds?league=${league}&season=${season}${bookmaker ? `&bookmaker=${bookmaker}` : ""}&page=${page}`);
       out.push(...j.response);
       if (!j.paging || page >= j.paging.total) break;
     }

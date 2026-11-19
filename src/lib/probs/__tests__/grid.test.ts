@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { lambdasFromOdds, makeGrid, probOf } from "../grid";
+import { sansMarge } from "../marge";
 
 describe("grille de scores", () => {
   const g = makeGrid(1.6, 1.1);
@@ -45,7 +46,12 @@ describe("grille de scores", () => {
     const l = lambdasFromOdds({ c1: 1.24, cN: 6.1, c2: 10.825, plus25: 1.47, moins25: 2.62 })!;
     expect(l.lh + l.la).toBeGreaterThan(3.1); expect(l.lh + l.la).toBeLessThan(3.5);
     expect(l.lh).toBeGreaterThan(l.la * 3);
-    expect(probOf(makeGrid(l.lh, l.la), "OU", 2.5, "Plus")).toBeCloseTo((1 / 1.47) / (1 / 1.47 + 1 / 2.62), 3);
+    // la grille redonne la probabilité « plus de 2,5 » tirée des cotes, avec la méthode de retrait de marge en vigueur
+    expect(probOf(makeGrid(l.lh, l.la), "OU", 2.5, "Plus")).toBeCloseTo(sansMarge([1.47, 2.62])[0], 3);
+    const prop = lambdasFromOdds({ c1: 1.24, cN: 6.1, c2: 10.825, plus25: 1.47, moins25: 2.62 }, "proportionnelle")!;
+    expect(probOf(makeGrid(prop.lh, prop.la), "OU", 2.5, "Plus")).toBeCloseTo((1 / 1.47) / (1 / 1.47 + 1 / 2.62), 3);
+    // méthode puissance : le favori est annoncé plus haut, donc plus de buts attendus pour lui
+    expect(l.lh / l.la).toBeGreaterThan(prop.lh / prop.la);
   });
 });
 

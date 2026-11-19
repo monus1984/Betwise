@@ -505,6 +505,57 @@ export type Database = {
           },
         ]
       }
+      bookmaker_odds: {
+        Row: {
+          match_id: string
+          bookmaker: string
+          market_code: string
+          market_param: number | null
+          selection: string
+          cote: number
+          releve_at: string
+          source: string
+          imported_at: string
+        }
+        Insert: {
+          match_id: string
+          bookmaker: string
+          market_code: string
+          market_param?: number | null
+          selection: string
+          cote: number
+          releve_at: string
+          source: string
+          imported_at?: string
+        }
+        Update: {
+          match_id?: string
+          bookmaker?: string
+          market_code?: string
+          market_param?: number | null
+          selection?: string
+          cote?: number
+          releve_at?: string
+          source?: string
+          imported_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmaker_odds_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookmaker_odds_market_code_fkey"
+            columns: ["market_code"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       odds_observations: {
         Row: {
           id: string
@@ -1905,6 +1956,14 @@ export type Database = {
           p_result: Database["betwise"]["Enums"]["settle_result"]
         }
         Returns: undefined
+      }
+      replace_bookmaker_odds: {
+        Args: {
+          p_bookmaker: string
+          p_source: string
+          p_matches: Json
+        }
+        Returns: number
       }
       log_libelle_inconnu: {
         Args: {

@@ -8,8 +8,13 @@
  */
 export type MethodeMarge = "proportionnelle" | "puissance" | "shin";
 export const METHODES_MARGE: MethodeMarge[] = ["proportionnelle", "puissance", "shin"];
-/** Méthode utilisée par l'application. */
-export const METHODE_MARGE: MethodeMarge = "proportionnelle";
+/**
+ * Méthode utilisée par l'application. « puissance » depuis le 19/11/2026 : sur 4 004 matchs de championnat (cotes de
+ * clôture) et 136 matchs internationaux, la méthode proportionnelle annonçait les favoris trop bas (60 % et plus :
+ * +1,2 et +11 points d'écart avec la réalité) ; la méthode puissance ramène ces écarts à −0,7 et +6 points et réduit
+ * l'écart moyen de calibration sur tous les groupes de marchés. Détail : docs/mesures/.
+ */
+export const METHODE_MARGE: MethodeMarge = "puissance";
 
 export function proportionnelle(cotes: number[]): number[] {
   const inv = cotes.map((c) => 1 / c), tot = inv.reduce((a, b) => a + b, 0);

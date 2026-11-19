@@ -10,6 +10,7 @@ import { MODEL_VERSION } from "@/lib/model/version";
 import { LiveRefresh } from "@/components/live-refresh";
 import { getExtras, type Extras } from "@/lib/api-football/extras";
 import { probOf } from "@/lib/probs/grid";
+import { sansMarge } from "@/lib/probs/marge";
 import { loadSignals, pickLabel, picksOf } from "@/lib/probs/signals";
 import { MatchMarkets } from "./markets";
 import { AddToSlip } from "@/components/slip";
@@ -183,7 +184,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
                 <Verdict model={model} market={market} home={shortName(home)} away={shortName(away)} />
               </Card>
               <Card title="Buts">
-                <Compare label="+ de 2,5 buts" m={Number(e("OU", "Plus")?.probabilite ?? 0)} k={ref("OU", "Plus", 2.5) && ref("OU", "Moins", 2.5) ? (1 / ref("OU", "Plus", 2.5)!.cote) / (1 / ref("OU", "Plus", 2.5)!.cote + 1 / ref("OU", "Moins", 2.5)!.cote) : undefined} />
+                <Compare label="+ de 2,5 buts" m={Number(e("OU", "Plus")?.probabilite ?? 0)} k={ref("OU", "Plus", 2.5) && ref("OU", "Moins", 2.5) ? sansMarge([Number(ref("OU", "Plus", 2.5)!.cote), Number(ref("OU", "Moins", 2.5)!.cote)])[0] : undefined} />
                 <Compare label="Les deux marquent" m={Number(e("BTTS", "Oui")?.probabilite ?? 0)} />
                 {just && <p className="mt-2 text-xs text-ink-soft">Buts attendus <b className="tabular-nums">{fmtDec(just.lambda_dom)} – {fmtDec(just.lambda_ext)}</b> · score le plus probable <b>{just.score_probable}</b>{mk && <> · selon le marché <b className="tabular-nums">{fmtDec(mk.lh)} – {fmtDec(mk.la)}</b></>}</p>}
               </Card>

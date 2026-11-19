@@ -1,4 +1,5 @@
 import { APP_NAME } from "@/lib/app-name";
+import { sansMarge } from "@/lib/probs/marge";
 /** Briques visuelles des matchs : écusson à initiales, cases 1/N/2, drapeaux de compétition. */
 
 const PALETTE = ["#1e3a8a", "#7c2d12", "#14532d", "#581c87", "#7f1d1d", "#134e4a", "#713f12", "#312e81", "#831843", "#0c4a6e"];
@@ -56,8 +57,8 @@ export function confidenceLabel(p: number) {
 /** Probabilités du marché sans la marge du bookmaker. */
 export function marketProbs(c1?: number | null, cN?: number | null, c2?: number | null): Probs | null {
   if (!c1 || !cN || !c2) return null;
-  const a = 1 / c1, b = 1 / cN, c = 1 / c2, s = a + b + c;
-  return { p1: a / s, pN: b / s, p2: c / s, source: "marche" };
+  const [p1, pN, p2] = sansMarge([c1, cN, c2]); // même méthode que les pastilles et la grille (probs/marge.ts)
+  return { p1, pN, p2, source: "marche" };
 }
 
 /** Pastille « issue la plus probable » : libellé, probabilité, cote (de référence, sinon cote juste), avis du modèle s'il diverge. */

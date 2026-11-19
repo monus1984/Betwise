@@ -15,7 +15,7 @@ jobs:
           cache: npm
       - run: npm ci
       # Provisoire sur la branche etape-2 : lance la mesure tant que mesure-probabilites.yml n'est pas sur main
-      - run: npx tsx scripts/import-history.ts && npx tsx scripts/mesure-probabilites.ts
+      - run: npx tsx scripts/mesure-probabilites.ts --enregistrer
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
