@@ -54,3 +54,18 @@ Je n'applique rien sans ton Ok explicite.
 ## Prochaine étape
 
 Ton retour sur l'aperçu. Ensuite : montantes si tu valides la migration, puis l'étape 1 de Betster animé.
+
+## Suite du 19/11 (16 h 15 – 16 h 30)
+
+### Montantes (validées par Mounir)
+
+- Migrations **0051** (table `montantes`, colonnes `bets.montante_id` et `bets.palier`) et **0052** (fonction `montante_rattacher`) appliquées en production après Ok explicite (16 h 15 et 16 h 22). Additives ; aucune donnée existante modifiée.
+- Coach › Montantes : création (mise, objectif, paliers, niveau, avec la cote à trouver par palier et la chance d'aller au bout d'après les cotes), fiche (paliers en couleur, capital, options des prochaines 48 h proches de la cote à trouver, rattachement du pari, arrêt). Statut atteinte ou cassée déduit des paris réglés.
+- Commits `ce8af37`, `adcaaf3`. Règles testées : `src/lib/montantes/regles.ts`.
+- Limite : un pari rattaché ne se détache pas (pas de suppression rétroactive) ; non essayé sur un vrai compte.
+
+### Betster animé, étape 1
+
+- Portrait validé inchangé. L'animation porte sur le cadre : respiration au repos, anneau qui tourne pendant que le Coach consulte les données, halo pendant la lecture à voix haute. Bouton Stop, texte toujours affiché, voix coupée par défaut (réglage existant), aucune animation si le téléphone demande moins de mouvement.
+- `src/components/betster-anime.tsx`, `src/app/(app)/coach/chat.tsx`, `src/components/accueil.tsx`, `src/app/globals.css`. Commit `f2a32b4`.
+- Étapes suivantes à décider : fournisseur de voix (Gemini préféré) et son coût, puis lèvres synchronisées.
