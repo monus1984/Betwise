@@ -81,10 +81,13 @@ async function loadBookOdds(db: Db, ids: string[]): Promise<Map<string, CoteBook
   const out = new Map<string, CoteBookmaker[]>();
   const lots: string[][] = [];
   for (let i = 0; i < ids.length; i += 4) lots.push(ids.slice(i, i + 4));
-  const res = await Promise.all(lots.map((lot) => db.from("bookmaker_odds").select("match_id, bookmaker, market_code, market_param, selection, cote, releve_at, match:matches(kickoff_at)").in("match_id", lot).limit(1000)));
+  const [{ data: ms }, ...res] = await Promise.all([
+    db.from("matches").select("id, kickoff_at").in("id", ids),
+    ...lots.map((lot) => db.from("bookmaker_odds").select("match_id, bookmaker, market_code, market_param, selection, cote, releve_at").in("match_id", lot).limit(1000)),
+  ]);
+  const kickoff = new Map((ms ?? []).map((m) => [m.id, m.kickoff_at]));
   for (const { data } of res) for (const o of data ?? []) {
-    const mt = o.match as { kickoff_at: string } | { kickoff_at: string }[] | null;
-    if (!releveFrais(o.releve_at, (Array.isArray(mt) ? mt[0] : mt)?.kickoff_at ?? null)) continue;
+    if (!releveFrais(o.releve_at, kickoff.get(o.match_id) ?? null)) continue;
     const l = out.get(o.match_id) ?? [];
     l.push({ market: o.market_code, param: o.market_param === null ? null : Number(o.market_param), sel: o.selection, cote: Number(o.cote), bookmaker: o.bookmaker, releveAt: o.releve_at });
     out.set(o.match_id, l);

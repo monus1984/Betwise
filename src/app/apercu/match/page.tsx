@@ -9,7 +9,7 @@ const b = (market: string, param: number | null, sel: string, cote: number): Cot
 const BOOK: CoteBookmaker[] = [
   b("1X2", null, "1", 1.81), b("1X2", null, "N", 4.34), b("1X2", null, "2", 4.29),
   b("DC", null, "1N", 1.26), b("DC", null, "12", 1.26), b("DC", null, "N2", 2.11), b("DNB", null, "1", 1.33), b("DNB", null, "2", 3.2),
-  b("OU", 0.5, "Moins", 11.6), b("OU", 1.5, "Plus", 1.13), b("OU", 1.5, "Moins", 5.36), b("OU", 2.5, "Plus", 1.51), b("OU", 2.5, "Moins", 2.55), b("OU", 3.5, "Plus", 2.38), b("OU", 3.5, "Moins", 1.68), b("OU", 4.5, "Plus", 3.94), b("OU", 4.5, "Moins", 1.25),
+  b("OU", 1.5, "Plus", 1.13), b("OU", 1.5, "Moins", 5.36), b("OU", 2.5, "Plus", 1.51), b("OU", 2.5, "Moins", 2.55), b("OU", 3.5, "Plus", 2.38), b("OU", 3.5, "Moins", 1.68), b("OU", 4.5, "Plus", 3.94), b("OU", 4.5, "Moins", 1.25),
   b("BTTS", null, "Oui", 1.5), b("BTTS", null, "Non", 2.45),
   b("TT1", 0.5, "Plus", 1.12), b("TT1", 1.5, "Plus", 1.55), b("TT1", 1.5, "Moins", 2.4), b("TT1", 2.5, "Plus", 2.75), b("TT1", 2.5, "Moins", 1.44),
   b("TT2", 0.5, "Plus", 1.31), b("TT2", 0.5, "Moins", 3.1), b("TT2", 1.5, "Plus", 2.42), b("TT2", 1.5, "Moins", 1.56), b("TT2", 2.5, "Plus", 6), b("TT2", 2.5, "Moins", 1.12),
@@ -21,7 +21,7 @@ const BOOK: CoteBookmaker[] = [
   b("OE", null, "Pair", 1.85), b("OE", null, "Impair", 1.85),
   b("CORN", 8.5, "Plus", 1.33), b("CORN", 8.5, "Moins", 2.81), b("CORN", 9.5, "Plus", 1.62), b("CORN", 9.5, "Moins", 2.11), b("CORN", 10.5, "Plus", 2.04), b("CORN", 10.5, "Moins", 1.69), b("CORN", 11.5, "Plus", 2.6), b("CORN", 11.5, "Moins", 1.41),
   b("CARD", 4.5, "Plus", 2.1), b("CARD", 4.5, "Moins", 1.67),
-  b("CS", null, "1-0", 10), b("CS", null, "2-0", 10), b("CS", null, "2-1", 8), b("CS", null, "1-1", 8), b("CS", null, "3-1", 11), b("CS", null, "0-0", 11.6), b("CS", null, "2-2", 11), b("CS", null, "3-0", 14), b("CS", null, "0-1", 14), b("CS", null, "1-2", 13),
+  b("CS", null, "1-0", 10), b("CS", null, "2-0", 10), b("CS", null, "2-1", 8), b("CS", null, "1-1", 8), b("CS", null, "3-1", 11), b("CS", null, "2-2", 11), b("CS", null, "3-0", 14), b("CS", null, "0-1", 14), b("CS", null, "1-2", 13),
 ];
 
 function signal(bookAll: CoteBookmaker[]): Signal {
