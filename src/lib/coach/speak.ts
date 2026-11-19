@@ -79,7 +79,7 @@ function phoneVoice(text: string, done: () => void, etat?: (e: EtatSon) => void)
     if (!parts.length) return done();
     parts.forEach((part, k) => {
       const u = new SpeechSynthesisUtterance(part);
-      u.lang = voice?.lang ?? "fr-FR"; u.rate = 0.95; u.pitch = 1.06;
+      u.lang = voice?.lang ?? "fr-FR"; u.rate = 0.95; u.pitch = 0.95;
       if (voice) u.voice = voice as SpeechSynthesisVoice;
       if (k === 0) u.onstart = () => etat?.("telephone");
       u.onerror = () => { etat?.("echec"); if (k === parts.length - 1) done(); };

@@ -6,9 +6,9 @@
  */
 const BASE = "https://generativelanguage.googleapis.com/v1beta";
 export const TTS_MODEL = process.env.GEMINI_TTS_MODEL || "gemini-3.8-flash-tts";
-export const TTS_VOICE = process.env.GEMINI_TTS_VOICE || "Kore";
-/** Consigne de ton : une présentatrice sportive, chaleureuse et vive, qui articule. */
-export const TTS_STYLE = process.env.GEMINI_TTS_STYLE || "voix de femme chaleureuse, énergique et dynamique, ton d'une présentatrice sportive francophone, articulation nette, débit posé";
+export const TTS_VOICE = process.env.GEMINI_TTS_VOICE || "Puck";
+/** Consigne de ton : Betster, un analyste sportif, voix d'homme chaleureuse et vive, qui articule (voix masculine demandée par Mounir le 19/11). */
+export const TTS_STYLE = process.env.GEMINI_TTS_STYLE || "voix d'homme chaleureuse, énergique et dynamique, ton d'un analyste sportif francophone, articulation nette, débit posé";
 
 export type TtsResult = { ok: true; wav: Buffer } | { ok: false; status: number; error: string };
 

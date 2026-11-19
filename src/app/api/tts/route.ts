@@ -8,11 +8,10 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 const MAX_CHARS = 1200;      // une étape d'analyse ou une réponse du Coach ; au-delà, le navigateur découpe
-const LECTURES_PAR_JOUR = 80; // par compte, pendant le test
 
 /**
  * Lit un texte avec la voix du Coach. Renvoie un MP3 (douze fois plus léger que le WAV d'origine), ou le WAV si la compression échoue.
- * Sans clé, en cas de quota ou de panne : 503 avec { fallback: true } — le téléphone lit alors avec sa propre voix.
+ * Sans clé ou en cas de panne : 503 avec { fallback: true } — le téléphone lit alors avec sa propre voix.
  */
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -26,8 +25,8 @@ export async function POST(req: Request) {
   const text = spoken(typeof body?.text === "string" ? body.text : "").slice(0, MAX_CHARS);
   if (text.length < 2) return NextResponse.json({ error: "texte vide" }, { status: 400 });
 
-  const { data: ok, error } = await supabase.rpc("tts_take", { p_max: LECTURES_PAR_JOUR });
-  if (error || !ok) return NextResponse.json({ fallback: true, error: "limite de lectures du jour atteinte" }, { status: 503 });
+  // Pas de plafond de lectures (décision de Mounir, 19/11). On continue de compter par compte et par jour, pour suivre le coût.
+  await supabase.rpc("tts_take", { p_max: 1000000 });
 
   const debut = Date.now();
   const r = await synthesize(text, key);
