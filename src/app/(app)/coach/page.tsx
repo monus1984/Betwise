@@ -10,18 +10,22 @@ import { COACH_SUGGESTIONS } from "@/lib/coach/prompt";
 import { loadForces, loadRepli, loadToday } from "@/lib/coach/today";
 import { Card } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
+import { TableauDeBord } from "./tableau-de-bord";
 import { CoachChat, type ChatMsg } from "./chat";
 import { CoupsDuJour } from "./coups-du-jour";
 import { BudgetCard } from "./budget-card";
 
 export const dynamic = "force-dynamic";
 
-/** Coach : la discussion d'abord. Le budget, les sélections du jour et les tests sont dans « Outils ». */
+/**
+ * Coach (19/11) : le tableau de bord de l'abonné d'abord ; la bankroll et les outils en onglets ;
+ * la conversation s'ouvre par Betster flottant (?v=discussion).
+ */
 export default async function CoachPage({ searchParams }: { searchParams: Promise<{ nouvelle?: string; v?: string; q?: string; ok?: string; err?: string }> }) {
   const sp = await searchParams;
   const db = await createClient();
 
-  if (sp.v !== "outils") {
+  if (sp.v === "discussion") {
     let conversationId: string | null = null;
     let messages: ChatMsg[] = [];
     if (!sp.nouvelle) {
@@ -37,14 +41,14 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
     }
     return (
       <>
-        <PageHeader title="Coach" subtitle="Il lit tes paris, tes sources et ta bankroll, puis explique les chiffres. Il n’en invente aucun." />
-        <CoachNav current="discussion" />
+        <PageHeader title="Betster" subtitle="Il lit tes paris, tes sources et ta bankroll, puis explique les chiffres. Il n’en invente aucun." action={<Link href="/coach">Tableau de bord</Link>} />
         <CoachChat key={conversationId ?? "nouvelle"} initialId={conversationId} initial={messages} suggestions={COACH_SUGGESTIONS} initialText={(sp.q ?? "").slice(0, 300)} />
       </>
     );
   }
 
   const { data: { user } } = await db.auth.getUser();
+  if (sp.v !== "outils") return <TableauDeBord db={db} userId={user!.id} />;
   const [{ data: summary }, { data: tests }, { data: bud }, { data: recents }] = await Promise.all([
     db.from("my_bankroll_summary").select("solde, exposition").maybeSingle(),
     db.from("bets").select("statut, mise, gain_net").eq("virtuel", true).neq("statut", "annule").limit(2000),

@@ -89,7 +89,7 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
             {voiceOut ? "🔊 Réponses à voix haute" : "🔈 Voix coupée"}
           </button>
         ) : <span />}
-        {msgs.length > 0 && <Link href="/coach?nouvelle=1" className="text-xs text-slate-600 underline">Nouvelle conversation</Link>}
+        {msgs.length > 0 && <Link href="/coach?v=discussion&nouvelle=1" className="text-xs text-slate-600 underline">Nouvelle conversation</Link>}
       </div>
 
       {msgs.length === 0 && (

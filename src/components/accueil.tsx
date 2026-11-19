@@ -64,6 +64,7 @@ export function CarteMatchUI({ c }: { c: CarteMatch }) {
               {c.verdict && <span className={`text-[11.5px] font-semibold ${c.verdict === "passe" ? "text-gain" : "text-loss"}`}>{c.verdict === "passe" ? "Passé" : "Pas passé"} · annoncé à {pct(c.choix.p)}</span>}
             </div>
           )}
+          {c.statut === "programme" && <Pourquoi p={c.pourquoi} />}
           <p className="flex items-center justify-between gap-2 text-[10.5px] text-ink-muted">
             <span>{COUVERTURE_FR[c.couverture]}{c.choix.cote?.age ? ` · cotes relevées ${c.choix.cote.age}` : ""}</span>
             {c.statut === "programme" && <Link href={`/matchs/${c.id}?v=marches`} className="shrink-0 font-semibold text-brand">Toutes les options ›</Link>}
@@ -93,7 +94,7 @@ export function BandeauBetster({ prenom, synthese, maj, expression }: { prenom: 
       </div>
       <div className="flex items-center justify-between gap-2">
         <span className="min-w-0 text-[11px] leading-tight text-ink-muted">Mis à jour à {maj}</span>
-        <Link href="/coach" className="flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-xl bg-brand px-3.5 text-[13px] font-bold text-on-fill active:opacity-90">
+        <Link href="/coach?v=discussion" className="flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-xl bg-brand px-3.5 text-[13px] font-bold text-on-fill active:opacity-90">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" /></svg>Parler à Betster
         </Link>
       </div>
@@ -114,6 +115,7 @@ export function Demain({ matchs, titre, total }: { matchs: MatchAVenir[]; titre:
             <span aria-hidden className="text-brand">›</span>
           </Link>
           <div className="mt-1 divide-y divide-line">{m.propositions.map((x) => <LigneProposition key={`${x.market}|${x.param}|${x.sel}`} x={x} />)}</div>
+          <Pourquoi p={m.pourquoi} />
         </article>
       ))}
       {matchs.length > 5 && <Link href="/matchs" className="flex h-11 items-center justify-center rounded-xl border border-line text-[13.5px] font-semibold">Tous les matchs</Link>}
@@ -131,7 +133,7 @@ export function RaccourcisCoach({ solde, sept, budget, paris, vigilance, nouveau
         <Link href="/bankroll" className={tuile}><span className="text-[11.5px] text-ink-muted">Bankroll</span><span className="text-[20px] font-extrabold leading-tight tabular-nums">{nouveau ? "À créer" : solde}</span>{sept && <span className="text-[11px] text-ink-soft">{sept} sur 7 jours</span>}</Link>
         <Link href="/coach?v=outils" className={tuile}><span className="text-[11.5px] text-ink-muted">Budget et objectifs</span><span className="text-[14px] font-bold leading-snug">{budget ?? "À fixer"}</span></Link>
         <Link href="/paris" className={tuile}><span className="text-[11.5px] text-ink-muted">Mes paris</span><span className="text-[14px] font-bold leading-snug">{paris}</span></Link>
-        <Link href="/coach" className={`${tuile} border-brand/40 bg-brand-soft`}><span className="text-[11.5px] text-ink-muted">Conversation</span><span className="text-[14px] font-bold leading-snug text-brand">Parler à Betster ›</span></Link>
+        <Link href="/coach?v=discussion" className={`${tuile} border-brand/40 bg-brand-soft`}><span className="text-[11.5px] text-ink-muted">Conversation</span><span className="text-[14px] font-bold leading-snug text-brand">Parler à Betster ›</span></Link>
       </div>
       {vigilance && (
         <Link href={vigilance.href} className="mt-2 flex items-start gap-2 rounded-xl bg-draw-soft p-2.5 text-draw-ink">
@@ -199,5 +201,16 @@ export function Bienvenue() {
         </Link>
       ))}
     </section>
+  );
+}
+
+/** Pourquoi ces propositions : la forme et le face-à-face, quand l'historique existe. Rien sinon. */
+export function Pourquoi({ p }: { p: import("@/lib/matches/justification").Pourquoi | null | undefined }) {
+  const l = p ? [p.forme, p.face, p.buts].filter(Boolean) as string[] : [];
+  if (!l.length) return null;
+  return (
+    <ul className="space-y-1 rounded-xl bg-surface-2 px-2.5 py-2 text-[11.5px] leading-snug text-ink-soft" aria-label="Pourquoi">
+      {l.map((x) => <li key={x} className="flex gap-1.5"><span aria-hidden className="mt-[5px] h-1 w-1 shrink-0 rounded-full bg-brand" />{x}</li>)}
+    </ul>
   );
 }

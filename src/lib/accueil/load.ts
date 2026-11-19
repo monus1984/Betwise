@@ -1,3 +1,4 @@
+import { loadPourquoi, type Pourquoi } from "@/lib/matches/justification";
 /**
  * Données du nouvel accueil (maquettes validées le 19/11, docs/design/accueil/) : l'avis de Betster, les matchs du jour,
  * ce que disent les tipsters suivis. Lecture seule. Rien n'est inventé : un match sans donnée est montré sans chiffre.
@@ -26,6 +27,8 @@ export type CarteMatch = {
   verdict: "passe" | "pas_passe" | null; tonPari: boolean;
   /** Jusqu'à trois propositions, une par niveau de risque quand elles existent (moteur d'options). */
   propositions: Proposition[];
+  /** Forme et face-à-face tirés des matchs terminés en base ; null si les équipes n'ont pas d'historique suivi. */
+  pourquoi?: Pourquoi | null;
 };
 export type Avis = CarteMatch & { categorie: string; expression: Expression; perdSur100: number };
 /** Une proposition affichée : marché, probabilité, cote avec sa source et son heure, niveau de risque. */
@@ -34,7 +37,7 @@ export type Proposition = {
   market: string; param: number | null; sel: string; marche: string; label: string; p: number;
   profil: Categorie; cote: Cote | null; book: { cote: number; bookmaker: string } | null; refCote: number | null; couverture: Couverture;
 };
-export type MatchAVenir = { matchId: string; home: string; away: string; kickoff: string; comp: string | null; propositions: Proposition[] };
+export type MatchAVenir = { matchId: string; home: string; away: string; kickoff: string; comp: string | null; propositions: Proposition[]; pourquoi?: Pourquoi | null };
 export type TipsterDuJour = { qui: string; match: string; selection: string; marche: string; p: number | null; publieAvant: boolean | null; tone: TheirPick["tone"]; aussiBetwise: boolean };
 
 const MATCH = "id, kickoff_at, statut, minute, score_home, score_away, ht_home, ht_away, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe)";
@@ -164,6 +167,12 @@ export async function loadAccueil(db: Db, userId: string) {
     const o = l[0].o;
     return { matchId, home: o.home, away: o.away, kickoff: o.kickoff, comp: o.comp || null, propositions: l.slice(0, 2).map(({ o: x, profil }) => proposition(x, profil, signals.get(matchId), releves.get(matchId))) };
   }).sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
+
+  // Justification (forme, face-à-face) pour les matchs à venir affichés
+  const aJustifier = [...new Set([...cartes.filter((c) => c.statut === "programme" && c.probs).map((c) => c.id), ...demain.map((m) => m.matchId)])].slice(0, 40);
+  const raisons = await loadPourquoi(db, aJustifier);
+  for (const c of cartes) c.pourquoi = raisons.get(c.id) ?? null;
+  for (const m of demain) m.pourquoi = raisons.get(m.matchId) ?? null;
 
   const nbPropositions = PROFILS.reduce((n, k) => n + profils[k].length, 0);
   return { avis, cartes, repli, tipsters, profils, profilsDeDemain, demain, nbPropositions,

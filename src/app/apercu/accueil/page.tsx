@@ -24,7 +24,7 @@ const carte = (o: Partial<CarteMatch>): CarteMatch => ({
 });
 const CARTES: CarteMatch[] = [
   carte({ id: "a", comp: "PD", home: "Real Madrid", away: "Séville", statut: "en_cours", minute: 67, score: [1, 0], tonPari: true }),
-  carte({ id: "b", home: "Athletic Club", away: "RCD Espanyol de Barcelona", comp: "PD", probs: { p1: 0.55, pN: 0.27, p2: 0.18 }, propositions: [
+  carte({ id: "b", home: "Athletic Club", away: "RCD Espanyol de Barcelona", comp: "PD", probs: { p1: 0.55, pN: 0.27, p2: 0.18 }, pourquoi: { forme: "Forme sur les 5 derniers : Athletic Club 3V 1N 1D, RCD Espanyol de Barcelona 1V 2N 2D", face: "Face-à-face, 4 derniers : 2 victoires Athletic Club, 1 victoire RCD Espanyol de Barcelona, 1 nul", buts: null }, propositions: [
     { ...PROFILS.sur[1], label: "Athletic ou nul", marche: "Double chance", p: 0.82, profil: "sur" },
     { ...PROFILS.audacieux[1], label: "Moins de 3,5 buts", p: 0.74, profil: "audacieux" },
     { ...PROFILS.risque[0], label: "Athletic Club gagne", marche: "Résultat", p: 0.55, profil: "risque" },

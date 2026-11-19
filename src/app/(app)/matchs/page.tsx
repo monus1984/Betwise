@@ -136,18 +136,19 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
                 <li key={m.id} className="flex items-center pr-2">
                   {!done && <span className="-mr-2 pl-1"><FollowStar matchId={m.id} initial={starred.has(m.id)} /></span>}
                   <Link href={`/matchs/${m.id}`} className={`flex min-w-0 flex-1 items-center gap-3 py-2.5 pr-3 active:bg-surface-2 ${done ? "pl-3" : "pl-2"}`}>
-                    <span className="w-10 shrink-0 text-center text-xs tabular-nums">
+                    <span className="w-11 shrink-0 self-start pt-1 text-center text-[13px] tabular-nums">
                       {done ? <span className="font-medium text-ink-muted">Fin</span>
                         : m.statut === "en_cours" && isStale(m.kickoff_at) ? <span className="text-[10px] leading-tight text-draw" title="La source n’a pas encore confirmé la fin du match">Fin ?</span>
                         : m.statut === "en_cours" ? <span className="font-semibold text-loss">● {m.minute ? `${m.minute}’` : "Live"}</span>
                         : m.statut === "reporte" ? <span className="text-draw">Rep.</span>
                         : <span className="font-medium text-ink-soft">{fmtTime(m.kickoff_at)}</span>}
                     </span>
-                    <span className="min-w-0 flex-1 space-y-1">
-                      <span className="flex items-center gap-2 text-sm"><TeamBadge name={h} size={18} /><span className={`truncate ${homeWin ? "font-semibold" : ""}`}>{shortName(h)}</span>{(done || live) && <span className={`ml-auto pl-2 font-semibold tabular-nums ${live ? "text-loss" : ""}`}>{m.score_home}</span>}</span>
-                      <span className="flex items-center gap-2 text-sm"><TeamBadge name={a} size={18} /><span className={`truncate ${awayWin ? "font-semibold" : ""}`}>{shortName(a)}</span>{(done || live) && <span className={`ml-auto pl-2 font-semibold tabular-nums ${live ? "text-loss" : ""}`}>{m.score_away}</span>}</span>
+                    {/* Noms d'équipe en entier, sur toute la largeur (19/11 : ils étaient coupés et trop petits) ; l'issue la plus probable passe dessous */}
+                    <span className="min-w-0 flex-1 space-y-1.5">
+                      <span className="flex items-center gap-2.5"><TeamBadge name={h} size={24} /><span className={`min-w-0 flex-1 text-[15px] leading-tight text-ink ${homeWin || !done ? "font-semibold" : "font-medium"}`}>{h}</span>{(done || live) && <span className={`pl-2 font-display text-lg font-bold tabular-nums ${live ? "text-loss" : ""}`}>{m.score_home}</span>}</span>
+                      <span className="flex items-center gap-2.5"><TeamBadge name={a} size={24} /><span className={`min-w-0 flex-1 text-[15px] leading-tight text-ink ${awayWin || !done ? "font-semibold" : "font-medium"}`}>{a}</span>{(done || live) && <span className={`pl-2 font-display text-lg font-bold tabular-nums ${live ? "text-loss" : ""}`}>{m.score_away}</span>}</span>
+                      {!done && !live && (() => { const sg = signals.get(m.id); if (!sg) return <span className="block pt-0.5 text-[11.5px] text-ink-muted">Analyse statistique indisponible</span>; const p = bestPick(sg); return <span className="block pt-0.5"><PickBadge label={pickLabel(p.market, p.param, p.sel, shortName(h), shortName(a))} p={p.p} cote={p.cote} source={sg.source} pModele={p.pModele} /></span>; })()}
                     </span>
-                    {!done && !live && (() => { const sg = signals.get(m.id); if (!sg) return <span className="w-[120px] shrink-0 text-right text-[11px] text-ink-muted">pas encore de cote</span>; const p = bestPick(sg); return <PickBadge label={pickLabel(p.market, p.param, p.sel, shortName(h), shortName(a))} p={p.p} cote={p.cote} source={sg.source} pModele={p.pModele} />; })()}
                   </Link>
                   {m.statut === "programme" && (() => { const sg = signals.get(m.id); if (!sg) return null; const p = bestPick(sg); return <AddToSlip size="sm" leg={legFrom({ matchId: m.id, home: h, away: a, kickoff: m.kickoff_at, comp: code, market: p.market, param: p.param, sel: p.sel, p: p.p, cote: p.cote })} />; })()}
                 </li>

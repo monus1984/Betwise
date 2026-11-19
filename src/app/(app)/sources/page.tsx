@@ -1,14 +1,17 @@
 import Link from "next/link";
+import { ParisNav } from "@/components/coach-nav";
 import { linkOf } from "@/lib/sources/link";
 import { PageHeader } from "@/components/page-header";
 import { Card, Empty } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 import { NIVEAU, SEUIL, classer, lire, niveau, raison, rendement, resume, reussite, type Proof } from "@/lib/sources/proof";
 import { labelType, ProofBadge } from "./source-ui";
+import { AXE_FR, forcesEtFaiblesses, type Axe, type LigneAxe } from "@/lib/sources/analyse";
+import { COMP_SHORT } from "@/components/match-ui";
 
 export const dynamic = "force-dynamic";
 
-const VUES = [["suivies", "Mes sources"], ["classement", "Classement"], ["decouvrir", "Découvrir"]] as const;
+const VUES = [["suivies", "Mes sources"], ["analyse", "Analyse"], ["classement", "Classement"], ["decouvrir", "Découvrir"]] as const;
 const pc = (x: number | null) => (x === null ? "—" : `${Math.round(x * 100)} %`);
 const unit = (x: number | null) => (x === null ? "—" : `${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x * 100).toFixed(0)} %`);
 
@@ -36,6 +39,7 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
+      <ParisNav current="sources" />
       <PageHeader title="Sources" subtitle="Les tipsters, pages et canaux qui t’orientent, et ce que valent leurs pronos."
         action={<Link href="/sources/nouvelle">+ Source</Link>} />
       <nav className="mb-4 flex gap-2 overflow-x-auto" aria-label="Vues des sources">
@@ -45,7 +49,9 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
         ))}
       </nav>
 
-      {vue !== "classement" && (() => {
+      {vue === "analyse" && <Analyse sources={suivies.filter((x) => x.type !== "modele_betwise")} />}
+
+      {vue !== "classement" && vue !== "analyse" && (() => {
         const list = vue === "suivies" ? suivies : aDecouvrir;
         if (list.length === 0) return <Empty titre={vue === "suivies" ? "Aucune source suivie" : "Rien à découvrir pour l’instant"} action={vue === "suivies" ? <Link href="/sources/nouvelle" className="rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-on-fill">Ajouter une source</Link> : undefined}>{vue === "suivies" ? "Ajoute un pronostiqueur, une page ou un canal que tu suis : ses pronos seront notés sur leurs vrais résultats." : "Les sources partagées par d’autres testeurs apparaîtront ici."}</Empty>;
         return (
@@ -121,5 +127,50 @@ function Rang({ rang, id, nom, type, proof }: { rang: number; id: string; nom: s
         </span>
       </Link>
     </li>
+  );
+}
+
+/** Analyse des sources suivies sur plusieurs critères (19/11) : volume, réussite face à l'attendu, rendement, pire série,
+ * preuve de publication, puis forces et faiblesses par compétition, marché et niveau de cote. */
+async function Analyse({ sources }: { sources: { id: string; nom: string; type: string; proof: Proof }[] }) {
+  if (!sources.length) return <Empty titre="Aucune source à analyser" action={<Link href="/sources/nouvelle" className="rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-on-fill">Ajouter une source</Link>}>Suis un tipster, une page ou un canal, puis charge ses captures.</Empty>;
+  const db = await createClient();
+  const ids = sources.map((x) => x.id);
+  const [{ data: met }, { data: axes }] = await Promise.all([
+    db.from("source_metrics").select("source_id, nb_regles, nb_gagnes, taux_reussite, rendement, pire_serie").eq("periode", "total").in("source_id", ids),
+    db.from("source_metrics_by_axis").select("source_id, axe, valeur, nb_declares, nb_gagnes, rendement").eq("periode", "total").in("source_id", ids),
+  ]);
+  const lignes = sources.map((x) => {
+    const m = met?.find((r) => r.source_id === x.id);
+    const la: LigneAxe[] = (axes ?? []).filter((a) => a.source_id === x.id).map((a) => ({ axe: a.axe as Axe, valeur: a.valeur, nb: Number(a.nb_declares), gagnes: Number(a.nb_gagnes), rendement: a.rendement === null ? null : Number(a.rendement) }));
+    const taux = m?.taux_reussite === null || m?.taux_reussite === undefined ? null : Number(m.taux_reussite);
+    return { ...x, m, taux, ...forcesEtFaiblesses(la, taux, COMP_SHORT) };
+  }).sort((a, b) => (b.m?.nb_regles ?? 0) - (a.m?.nb_regles ?? 0));
+  return (
+    <div className="space-y-3">
+      <p className="px-1 text-[12px] leading-relaxed text-ink-muted">Chaque source sur tous ses pronos réglés. Une force ou une faiblesse demande au moins 3 résultats sur le critère et un écart d’au moins 10 points avec sa réussite générale.</p>
+      {lignes.map((x) => (
+        <article key={x.id} className="tile p-3.5">
+          <Link href={`/sources/${x.id}`} className="flex items-baseline justify-between gap-2"><span className="text-[15px] font-bold">{x.nom}</span><span className="text-[11px] text-ink-muted">{labelType(x.type)} ›</span></Link>
+          {!x.m?.nb_regles ? <p className="mt-1 text-[12.5px] text-ink-muted">Pas encore de prono réglé.</p> : (
+            <>
+              <dl className="mt-2 grid grid-cols-3 gap-2 text-[11px]">
+                <div><dt className="text-ink-muted">Réglés</dt><dd className="text-[15px] font-bold">{x.m.nb_regles}</dd></div>
+                <div><dt className="text-ink-muted">Réussite</dt><dd className="text-[15px] font-bold">{pc(x.taux)}</dd>{x.proof.attendu !== null && <dd className="text-ink-muted">attendu {pc(x.proof.attendu)}</dd>}</div>
+                <div><dt className="text-ink-muted">Rendement</dt><dd className={`text-[15px] font-bold ${x.m.rendement === null ? "" : Number(x.m.rendement) >= 0 ? "text-gain" : "text-loss"}`}>{unit(x.m.rendement === null ? null : Number(x.m.rendement))}</dd></div>
+                <div><dt className="text-ink-muted">Pire série</dt><dd className="font-semibold">{x.m.pire_serie ?? "—"} perdus</dd></div>
+                <div className="col-span-2"><dt className="text-ink-muted">Publiés avant le match</dt><dd className="font-semibold">{x.proof.prouvesRegles} sur {x.proof.prouvesRegles + x.proof.apresCoupRegles}{x.proof.apresCoupRegles ? ` · ${x.proof.apresCoupRegles} ajoutés après coup` : ""}</dd></div>
+              </dl>
+              {(x.forces.length > 0 || x.faiblesses.length > 0) ? (
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="rounded-xl bg-gain-soft p-2.5 text-gain-ink"><p className="text-[11px] font-bold">Forces</p>{x.forces.length ? x.forces.map((f) => <p key={f.axe + f.valeur} className="mt-1 text-[12px] leading-snug"><b>{f.libelle}</b> <span className="opacity-80">({AXE_FR[f.axe].toLowerCase()})</span> : {f.gagnes} sur {f.nb}</p>) : <p className="mt-1 text-[12px]">Aucune nette pour l’instant</p>}</div>
+                  <div className="rounded-xl bg-loss-soft p-2.5 text-loss-ink"><p className="text-[11px] font-bold">Faiblesses</p>{x.faiblesses.length ? x.faiblesses.map((f) => <p key={f.axe + f.valeur} className="mt-1 text-[12px] leading-snug"><b>{f.libelle}</b> <span className="opacity-80">({AXE_FR[f.axe].toLowerCase()})</span> : {f.gagnes} sur {f.nb}</p>) : <p className="mt-1 text-[12px]">Aucune nette pour l’instant</p>}</div>
+                </div>
+              ) : <p className="mt-2 text-[12px] text-ink-muted">Pas encore assez de résultats par critère pour dégager une force ou une faiblesse.</p>}
+            </>
+          )}
+        </article>
+      ))}
+    </div>
   );
 }

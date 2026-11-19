@@ -193,3 +193,8 @@ input, select, textarea { color: rgb(var(--c-ink)); }
   :root:not([data-theme="light"]) body { background: radial-gradient(120% 360px at 50% -140px, rgb(var(--c-brand) / .14), transparent 70%) fixed, rgb(var(--c-canvas)); }
 }
 :root[data-theme="dark"] body { background: radial-gradient(120% 360px at 50% -140px, rgb(var(--c-brand) / .14), transparent 70%) fixed, rgb(var(--c-canvas)); }
+
+/* Betster flottant : un halo qui respire doucement, pour signaler qu'on peut lui parler. Coupé si l'utilisateur réduit les animations. */
+@keyframes betster-halo { 0%, 100% { box-shadow: 0 0 0 0 rgb(var(--c-brand) / .45); } 50% { box-shadow: 0 0 0 8px rgb(var(--c-brand) / 0); } }
+.betster-fab { animation: betster-halo 3.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .betster-fab { animation: none; } }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CoachNav } from "@/components/coach-nav";
 import { PageHeader } from "@/components/page-header";
 import { Card, Empty, Notice, fcfa } from "@/components/ui";
 import { LineChart } from "@/components/line-chart";
@@ -33,7 +34,8 @@ export default async function BankrollPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader title="Ma bankroll" subtitle="Où est ton argent, et d’où vient ton solde." action={<Link href="/">Accueil</Link>} />
+      <CoachNav current="bankroll" />
+      <PageHeader title="Ma bankroll" subtitle="Où est ton argent, et d’où vient ton solde." />
       <nav className="mb-4 flex gap-2 overflow-x-auto" aria-label="Vues de la bankroll">
         {VUES.map(([key, mot]) => (
           <Link key={key} href={`/bankroll?v=${key}`} scroll={false} aria-current={vue === key ? "page" : undefined}
