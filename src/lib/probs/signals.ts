@@ -259,6 +259,11 @@ export function pickLabel(market: string, param: number | null, sel: string, hom
     case "BUT2": return `${sel} marque 2 buts ou plus`;
     case "BUT3": return `${sel} marque 3 buts ou plus`;
     case "PCARD": return `${sel} reçoit un carton`;
+    case "PSHOT": case "PSOT": case "PAST": {
+      const i = sel.indexOf("|"), dir = sel.slice(0, i), nom = sel.slice(i + 1), quoi = market === "PSHOT" ? "tir" : market === "PSOT" ? "tir cadré" : "passe décisive";
+      const n = Number(param ?? 0), mot = `${quoi}${n >= 1 ? "s" : ""}`.replace("tir cadrés", "tirs cadrés").replace("passe décisives", "passes décisives");
+      return n === 0.5 && dir === "Plus" ? `${nom} : au moins 1 ${quoi}` : `${nom} : ${dir === "Plus" ? "plus" : "moins"} de ${line} ${mot}`;
+    }
     case "CARD_1X2": return sel === "N" ? "Autant de cartons" : `${team} a le plus de cartons`;
     case "RED1": case "RED2": return `${market === "RED1" ? home : away} : ${sel === "Oui" ? "au moins un carton rouge" : "pas de carton rouge"}`;
     case "CORN_AH": return `${team} : corners, handicap ${signe}${String(param).replace(".", ",")}`;

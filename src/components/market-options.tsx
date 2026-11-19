@@ -6,7 +6,7 @@ const GROUPS: [string, string[]][] = [
   ["1re mi-temps", ["HT_1X2", "HT_DC", "HT_DNB", "HT_AH", "HT_OU", "HT_BTTS", "HT_TT1", "HT_TT2", "HT_OE", "HT_CS"]],
   ["2e mi-temps", ["H2_1X2", "H2_DC", "H2_DNB", "H2_AH", "H2_OU", "H2_BTTS", "H2_TT1", "H2_TT2", "H2_OE", "H2_CS"]],
   ["Les deux mi-temps", ["HTFT", "HMG", "WEH", "WBH", "SBH", "BH"]],
-  ["Buteurs et joueurs", ["BUT", "BUT1", "BUTL", "BUT2", "BUT3", "DBL", "PCARD"]],
+  ["Buteurs et joueurs", ["BUT", "BUT1", "BUTL", "BUT2", "BUT3", "DBL", "PCARD", "PSHOT", "PSOT", "PAST"]],
   ["Penalty, but contre son camp", ["PK", "PKB", "PKM", "OG"]],
   ["Corners", ["CORN", "CORN1", "CORN2", "CORN_1X2", "CORN_DC", "CORN_AH", "CORN_OE"]],
   ["Cartons", ["CARD", "CARD1", "CARD2", "CARD_1X2", "RED", "RED1", "RED2"]],

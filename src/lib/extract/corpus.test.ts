@@ -12,15 +12,15 @@ describe("corpus des libellés réellement importés (10 au 18/11/2026)", () => 
     expect(CORPUS.map(dire)).toMatchSnapshot();
   });
 
-  it("209 libellés sur 230 au moins sont compris", () => {
+  it("213 libellés sur 230 au moins sont compris", () => {
     expect(CORPUS.length).toBe(230);
-    expect(CORPUS.filter((r) => lire(r).ok).length).toBeGreaterThanOrEqual(209);
+    expect(CORPUS.filter((r) => lire(r).ok).length).toBeGreaterThanOrEqual(213);
   });
 
   it("aucun des libellés non compris ne devient un autre marché en silence", () => {
     // Les seuls libellés gardés tels quels : anciennes lectures sans équipe, choix ambigu ou absent, paris de joueurs, paris mêlant buts et corners, penalty de chaque équipe
     const gardes = CORPUS.filter((r) => !lire(r).ok).map((r) => `${r[2]} | ${r[3]}`);
-    for (const g of gardes) expect(g).toMatch(/^(Victoire \| .+ – Victoire|1ère mi-temps \| .+ – 1ère mi-temps|PÉPITE DU JOUR \| |Les 2 équipes marquent un pénalty \| Oui|Nombre de tirs cadrés du joueur \(OPTA\) \| .+)$/);
+    for (const g of gardes) expect(g).toMatch(/^(Victoire \| .+ – Victoire|1ère mi-temps \| .+ – 1ère mi-temps|PÉPITE DU JOUR \| |Les 2 équipes marquent un pénalty \| Oui)$/);
   });
 
   it("lectures fausses corrigées le 18/11 : elles passaient pour comprises", () => {

@@ -271,7 +271,12 @@ export function normalizePick(marketText: string, pickText: string, home: string
     // Statistique d'un joueur (« Mbappé : plus de 1,5 tir cadré ») : BETWISE ne suit que les totaux du match ou d'une équipe.
     // La lire comme un total du match la ferait gagner presque à coup sûr : on la signale au lieu de la régler de travers.
     const joueur = /joueur|player/.test(all) || (!!o && !t && ((stat === "SOT" && o.line <= 3.5) || (stat === "SHOT" && o.line <= 6.5)));
-    if (joueur) return { market_code: stat, market_param: o?.line ?? null, selection: pickText, label_pick: pickText, ok: false, reason: `Statistique d’un joueur (tirs, tirs cadrés…) : pas suivie par ${APP_NAME}. La ligne est gardée telle quelle, à régler à la main.` };
+    if (joueur) {
+      // Tirs ou tirs cadrés d'un joueur nommé : réglés sur la feuille des joueurs (depuis le 19/11)
+      const nom = nomStat(pickText);
+      if (o && nom.length >= 3 && (stat === "SOT" || stat === "SHOT")) return { market_code: stat === "SOT" ? "PSOT" : "PSHOT", market_param: o.line, selection: `${o.dir}|${nom}`, label_pick: pickText, ok: true };
+      return { market_code: stat, market_param: o?.line ?? null, selection: pickText, label_pick: pickText, ok: false, reason: `Statistique d’un joueur : ${nom.length >= 3 ? "ligne" : "nom du joueur"} non reconnu${nom.length >= 3 ? "e" : ""}. La ligne est gardée telle quelle, à régler à la main.` };
+    }
     if (stat === "CARD" && /rouge|red/.test(all) && !o) return { market_code: t ? `RED${t}` : "RED", market_param: null, selection: yesNo, label_pick: pickText, ok: true };
     if (stat === "CARD" && /le plus|plus de cartons que|most/.test(all) && !o) { const r = isDraw(p) || /égalité|autant/.test(p) ? "N" : t; if (r) return { market_code: "CARD_1X2", market_param: null, selection: r, label_pick: pickText, ok: true }; }
     if (stat === "CORN" && /handicap/.test(all)) {
@@ -318,6 +323,11 @@ export function normalizePick(marketText: string, pickText: string, home: string
     if (sd) return { market_code: /derni[èe]re?/.test(all) ? "LTS" : "FTS", market_param: null, selection: sd, label_pick: pickText, ok: true };
   }
 
+  // Passe décisive d'un joueur nommé (sans « ou buteur », sans remplaçant) : réglée sur la feuille des joueurs
+  if (/passes? décisives?|passeur|\bassists?\b/.test(all) && !/rempla[çc]ant|buteur|décisif|decisif|double chance/.test(all)) {
+    const nom = nomStat(pickText), o = ouLine(p);
+    if (nom.length >= 3) return { market_code: "PAST", market_param: o?.line ?? 0.5, selection: `${o ? o.dir : yesNo === "Non" ? "Moins" : "Plus"}|${nom}`, label_pick: pickText, ok: true };
+  }
   // Joueur « décisif », passeur, remplaçant compris, deux joueurs au choix : la feuille de match ne suffit pas à trancher
   if (/rempla[çc]ant|décisif|decisif|passeur|passe décisive|double chance buteur/.test(all))
     return { market_code: "BUT", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari sur un joueur avec une condition (remplaçant, passeur, deux joueurs au choix) : gardé tel quel, à régler à la main." };
@@ -561,6 +571,14 @@ export function nomJoueur(texte: string): string {
   return texte.replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ")
     .replace(/(?<![\p{L}\d])(premier|dernier|1er|buteur|joueur|averti|marquera|marque|va marquer|à tout moment|un but|le but|but|un doublé|doublé|un triplé|triplé|hat[- ]?trick|reçoit|recoit|prendra|prend|un carton|carton|jaune|rouge|pour|oui|non|[23] buts? ou plus|au moins [23] buts?|le|un)(?![\p{L}\d])/giu, " ")
     .replace(/[:–—\-()+]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+/** Nom du joueur dans un pari sur ses statistiques : « Harry Kane + de 1,5 », « Mbappé : plus de 2,5 tirs cadrés », « Rice fait une passe décisive ». */
+export function nomStat(texte: string): string {
+  return texte.replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ")
+    .replace(/([+\-]|plus|moins|over|under)\s*(?:de\s*)?\(?\s*\d+(?:[.,]\d+)?\s*\)?/giu, " ")
+    .replace(/(?<![\p{L}\d])(au moins|tirs?|cadrés?|cadres?|passes?|décisives?|passeur|assists?|shots?|on target|joueur|du|de|fait|fera|une?|oui|non|opta|nombre)(?![\p{L}\d])/giu, " ")
+    .replace(/\d+/g, " ").replace(/[:–—\-()|]/g, " ").replace(/\s+/g, " ").trim();
 }
 
 /** Libellé d'origine d'une ligne, tel qu'on le garde quand le pari n'est pas reconnu : « marché : choix », 120 caractères au plus. */

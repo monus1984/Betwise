@@ -10,7 +10,7 @@ export const MARCHE_FR: Record<string, string> = {
   HT_OE: "Pair / impair en 1re mi-temps", H2_OE: "Pair / impair en 2e mi-temps", H2_CS: "Score exact de la 2e mi-temps", OE1: "Buts équipe 1 pair / impair", OE2: "Buts équipe 2 pair / impair",
   MG1: "Nombre de buts équipe 1", MG2: "Nombre de buts équipe 2", WBH: "Gagne les deux mi-temps", SBH: "Marque dans les deux mi-temps",
   FTS: "Première équipe à marquer", LTS: "Dernière équipe à marquer", GB: "But avant une minute donnée", OG: "But contre son camp", PKM: "Penalty manqué",
-  BUT1: "Premier buteur", BUTL: "Dernier buteur", BUT2: "Joueur : 2 buts ou plus", BUT3: "Joueur : 3 buts ou plus", PCARD: "Joueur averti", CARD_1X2: "Le plus de cartons",
+  BUT1: "Premier buteur", BUTL: "Dernier buteur", BUT2: "Joueur : 2 buts ou plus", BUT3: "Joueur : 3 buts ou plus", PCARD: "Joueur averti", PSHOT: "Tirs d’un joueur", PSOT: "Tirs cadrés d’un joueur", PAST: "Passes décisives d’un joueur", CARD_1X2: "Le plus de cartons",
   RED: "Carton rouge", RED1: "Carton rouge équipe 1", RED2: "Carton rouge équipe 2", SHOT1: "Tirs équipe 1", SHOT2: "Tirs équipe 2",
   CORN_AH: "Corners : handicap", CORN_OE: "Corners pair / impair", CORN_DC: "Corners : double chance", FOUL: "Fautes", FOUL1: "Fautes équipe 1", FOUL2: "Fautes équipe 2",
   OFF: "Hors-jeu", OFF1: "Hors-jeu équipe 1", OFF2: "Hors-jeu équipe 2", COMBO: "Combiné du match",

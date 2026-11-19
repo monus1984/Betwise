@@ -108,7 +108,9 @@ describe("matchSource", () => {
     expect(matchSource(null, src)).toBeNull();
   });
   it("statistique d'un joueur : jamais lue comme un total du match", () => {
-    for (const [m, pk] of [["Tirs cadrés du joueur", "Kylian Mbappé - Plus de 1,5"], ["Tirs cadrés", "Plus de 1,5"], ["Nombre de tirs cadrés", "+ de 0,5"]] as const) {
+    // Joueur nommé : réglé sur ses propres tirs cadrés (depuis le 19/11), jamais sur le total du match
+    expect(normalizePick("Tirs cadrés du joueur", "Kylian Mbappé - Plus de 1,5", "Italie", "France")).toMatchObject({ market_code: "PSOT", market_param: 1.5, selection: "Plus|Kylian Mbappé", ok: true });
+    for (const [m, pk] of [["Tirs cadrés", "Plus de 1,5"], ["Nombre de tirs cadrés", "+ de 0,5"]] as const) {
       const r = normalizePick(m, pk, "Italie", "France");
       expect(r.ok).toBe(false); expect(r.reason).toMatch(/joueur/);
     }
@@ -314,5 +316,24 @@ describe("marchés ajoutés le 19/11 : combinés libres, joueurs, ordre des buts
     expect(n("Équipe avec le plus de cartons", "Mali")).toMatchObject({ market_code: "CARD_1X2", selection: "2", ok: true });
     expect(n("Carton rouge pour le Mali", "Oui")).toMatchObject({ market_code: "RED2", selection: "Oui", ok: true });
     expect(n("Carton rouge dans le match", "Non")).toMatchObject({ market_code: "RED", selection: "Non", ok: true });
+  });
+});
+
+describe("statistiques d'un joueur (19/11)", () => {
+  const n = (m: string, p: string) => { const r = normalizePick(m, p, "Espagne", "Angleterre"); return `${r.market_code} ${r.market_param} ${r.selection} ${r.ok ? "ok" : "ko"}`; };
+  it("tirs cadrés et tirs d'un joueur nommé", () => {
+    expect(n("Nombre de tirs cadrés du joueur (OPTA)", "Harry Kane + de 1,5")).toBe("PSOT 1.5 Plus|Harry Kane ok");
+    expect(n("Nombre de tirs cadrés du joueur (OPTA)", "Lamine Yamal + de 1,5")).toBe("PSOT 1.5 Plus|Lamine Yamal ok");
+    expect(n("", "Mbappé : plus de 2,5 tirs")).toBe("PSHOT 2.5 Plus|Mbappé ok");
+    expect(n("Tirs du joueur", "Kane moins de 3,5")).toBe("PSHOT 3.5 Moins|Kane ok");
+  });
+  it("passe décisive", () => {
+    expect(n("", "Declan Rice fait une passe décisive")).toBe("PAST 0.5 Plus|Declan Rice ok");
+    expect(n("Passeur décisif", "Lamine Yamal")).toMatch(/ko$/); // « décisif » : buteur ou passeur, reste à la main
+    expect(n("", "Yamal passeur ou buteur")).toMatch(/ko$/);
+  });
+  it("sans nom, ou une équipe : pas un joueur", () => {
+    expect(n("Nombre de tirs cadrés du joueur (OPTA)", "+ de 1,5")).toMatch(/ko$/);
+    expect(n("", "Espagne plus de 4,5 tirs cadrés")).toBe("SOT1 4.5 Plus ok");
   });
 });

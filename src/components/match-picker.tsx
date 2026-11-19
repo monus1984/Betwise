@@ -40,12 +40,12 @@ export const SELECTIONS: Record<string, string[]> = {
   BUTL: [], BUT2: [], BUT3: [], PCARD: [], CARD_1X2: ["1", "N", "2"], RED1: ["Oui", "Non"], RED2: ["Oui", "Non"],
   SHOT1: ["Plus", "Moins"], SHOT2: ["Plus", "Moins"], CORN_AH: ["1", "2"], CORN_OE: ["Pair", "Impair"], CORN_DC: ["1N", "12", "N2"],
   FOUL: ["Plus", "Moins"], FOUL1: ["Plus", "Moins"], FOUL2: ["Plus", "Moins"], OFF: ["Plus", "Moins"], OFF1: ["Plus", "Moins"], OFF2: ["Plus", "Moins"],
-  COMBO: [],
+  COMBO: [], PSHOT: [], PSOT: [], PAST: [],
 };
 /** Marchés « plus / moins » d'une ligne : la sélection s'affiche avec la ligne. */
 export const LINE_MARKETS = ["OU", "TT1", "TT2", "HT_OU", "H2_OU", "HT_TT1", "HT_TT2", "H2_TT1", "H2_TT2", "CORN", "CORN1", "CORN2", "CARD", "CARD1", "CARD2", "SHOT", "SOT", "SOT1", "SOT2", "SHOT1", "SHOT2", "FOUL", "FOUL1", "FOUL2", "OFF", "OFF1", "OFF2"];
 const DEFAULT_LINE: Record<string, string> = { TT1: "0.5", TT2: "0.5", HT_OU: "0.5", H2_OU: "0.5", HT_TT1: "0.5", HT_TT2: "0.5", H2_TT1: "0.5", H2_TT2: "0.5", AH: "-1.5", EH: "-1", CORN: "9.5", CORN1: "4.5", CORN2: "4.5", CARD: "3.5", CARD1: "1.5", CARD2: "1.5", SHOT: "24.5", SOT: "8.5", SOT1: "4.5", SOT2: "3.5",
-  HT_AH: "-1", H2_AH: "-1", CORN_AH: "-1.5", GB: "15", SHOT1: "12.5", SHOT2: "10.5", FOUL: "24.5", FOUL1: "12.5", FOUL2: "12.5", OFF: "3.5", OFF1: "1.5", OFF2: "1.5" };
+  HT_AH: "-1", H2_AH: "-1", CORN_AH: "-1.5", GB: "15", SHOT1: "12.5", SHOT2: "10.5", FOUL: "24.5", FOUL1: "12.5", FOUL2: "12.5", OFF: "3.5", OFF1: "1.5", OFF2: "1.5", PSHOT: "1.5", PSOT: "0.5", PAST: "0.5" };
 /** Texte d'aide pour les marchés à saisie libre. */
 export const freePlaceholder = (market: string) => (market === "LIBRE" ? "Le pari comme sur le ticket, ex. Mbappé buteur ou passeur" : ["BUT", "BUT1", "BUTL", "BUT2", "BUT3", "PCARD"].includes(market) ? "Nom du joueur, ex. Mbappé"
   : market === "COMBO" ? "Conditions séparées par &, ex. DC:1N & OU@2.5:Plus" : market === "HT_CS" || market === "H2_CS" ? "ex. 1-0" : "ex. 2-1");
@@ -60,7 +60,7 @@ export const COMBO_PARTS: Record<string, [string[], string[]]> = {
 };
 /** Ligne par défaut à la sélection d'un marché. */
 export const defaultParam = (market: string) => DEFAULT_LINE[market] ?? (market.includes("OU") ? "2.5" : "");
-export const paramLabel = (market: string) => (market === "AH" || market.endsWith("_AH") ? "Handicap" : market === "GB" ? "Minute" : market === "EH" ? "Handicap (équipe à domicile)" : /^(CORN|CARD|SHOT|SOT|FOUL|OFF)/.test(market) ? "Ligne" : /TT[12]$/.test(market) ? "Ligne (buts de l’équipe)" : market === "HT_OU" || market === "H2_OU" ? "Ligne (buts de la mi-temps)" : "Ligne (buts)");
+export const paramLabel = (market: string) => (market === "AH" || market.endsWith("_AH") ? "Handicap" : market === "GB" ? "Minute" : market === "PAST" ? "Ligne (passes décisives)" : market === "PSHOT" || market === "PSOT" ? "Ligne (tirs du joueur)" : market === "EH" ? "Handicap (équipe à domicile)" : /^(CORN|CARD|SHOT|SOT|FOUL|OFF)/.test(market) ? "Ligne" : /TT[12]$/.test(market) ? "Ligne (buts de l’équipe)" : market === "HT_OU" || market === "H2_OU" ? "Ligne (buts de la mi-temps)" : "Ligne (buts)");
 
 export const toNum = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
 

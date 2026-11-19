@@ -57,3 +57,4 @@ Réglage requis côté tableau de bord : Project Settings → Data API → Expos
 | 0047_historique_mi_temps.sql | 2026-11-19 | `match_history.ht_home_goals`, `ht_away_goals` : score à la pause, pour mesurer les marchés de mi-temps |
 | 0048_cotes_par_bookmaker.sql | 2026-11-19 | Table `bookmaker_odds` (dernier relevé d'avant-match par bookmaker, avec l'heure du relevé) et `replace_bookmaker_odds()` réservée au service |
 | 0049_marches_etendus.sql | 2026-11-19 | 37 marchés de plus (mi-temps, buts d'une équipe, ordre des buts, joueurs, corners, cartons, tirs, fautes, hors-jeu) et le combiné libre `COMBO` ; `settle_selection()` et `settle_sel()` étendues |
+| 0050_stats_joueurs.sql | 2026-11-19 | Statistiques d'un joueur : marchés `PSHOT`, `PSOT`, `PAST` (choix « Plus\|Nom »), `joueur_de()` (un seul joueur doit répondre au nom), `settle_sel()` étendue ; 0 minute jouée = remboursé |
