@@ -162,3 +162,7 @@ D11 (« convergence » à la place de « confiance ») devient sans objet si D12
 ### Décisions de Mounir — 19/11/2026, 14:40
 
 « D12 et 13 validé » : la convergence est retirée de l'accueil (probabilité, couverture et fraîcheur restent) ; l'avis du modèle reste dans la fiche match comme second avis ; l'expression de Betster suit la probabilité et la couverture. D11 est sans objet. Maquettes mises à jour le même jour (filtre « 60 % et plus »).
+
+### Validation — 19/11/2026, 14:41
+
+Mounir : « continuer », en réponse à « dis-moi si tu valides directement » : maquettes validées, passage au développement sur la branche `accueil` (depuis `main`), sans écriture en base.
