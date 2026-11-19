@@ -69,3 +69,20 @@ Ton retour sur l'aperçu. Ensuite : montantes si tu valides la migration, puis l
 - Portrait validé inchangé. L'animation porte sur le cadre : respiration au repos, anneau qui tourne pendant que le Coach consulte les données, halo pendant la lecture à voix haute. Bouton Stop, texte toujours affiché, voix coupée par défaut (réglage existant), aucune animation si le téléphone demande moins de mouvement.
 - `src/components/betster-anime.tsx`, `src/app/(app)/coach/chat.tsx`, `src/components/accueil.tsx`, `src/app/globals.css`. Commit `f2a32b4`.
 - Étapes suivantes à décider : fournisseur de voix (Gemini préféré) et son coût, puis lèvres synchronisées.
+
+## Finition du lot (19/11, 17 h)
+
+Branche `accueil`, commit **`37dfdb4`** : 9 commits devant `main`, fusion sans conflit vérifiée. 38 fichiers de tests, 217 tests réussis ; contrôle de types et compilation réussis ; aperçu Vercel prêt, aucune erreur dans les journaux de l'aperçu sur la dernière heure (ce qui ne prouve pas qu'un écran connecté a été ouvert).
+
+- **Défaut corrigé, analyse des sources** : les statistiques par critère en base (`source_metrics_by_axis.nb_declares`) comptent aussi les pronos en attente et remboursés ; la réussite par critère était donc sous-estimée. L'écran calcule maintenant sur les seuls pronos gagnés ou perdus (`bilanDe()`, testé). La fonction de calcul en base n'est pas modifiée.
+- **Montantes, cas limites testés** (demande de l'audit) : palier remboursé, montante arrêtée, montante cassée, paliers épuisés sans objectif atteint, pari annulé, palier en cours.
+- **Animation du portrait** : renommée dans le code, ce n'est pas un personnage incarné (voir `docs/brand/betster/etude-avatar-reel.md`). Décision sur l'avatar réel reportée par Mounir, après son évaluation des coûts.
+
+### Reste non vérifié, à tester par Mounir
+
+1. Coach : tableau de bord, Bankroll, Montantes (créer, placer un pari, rattacher, arrêter), Outils.
+2. Mes paris : Ajouter (quatre entrées), Sources › Analyse.
+3. Matchs : noms d'équipe sur un petit écran, y compris les noms longs.
+4. Accueil : justification sous les propositions (présente pour les cinq grands championnats seulement).
+5. Betster flottant : ne gêne ni le coupon ni les boutons du bas ; conversation, voix et bouton Stop.
+6. Temps de chargement de l'accueil sur réseau mobile (deux requêtes de plus pour la justification).
