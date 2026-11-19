@@ -14,13 +14,13 @@
 body{margin:0}
 </style>
 </helmet>
-<div style="width: 360px; min-height: 1720px; font-family: Inter, system-ui, sans-serif">
-<dc-import name="Main" theme="clair" pli="{{pli}}" hint-size="360px,1720px"></dc-import>
+<div style="width: 360px; height: 800px; font-family: Inter, system-ui, sans-serif">
+<dc-import name="Main" theme="clair" vue="écran" coupon="{{coupon}}" hint-size="360px,800px"></dc-import>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"pli":{"editor":"boolean","default":true},"$preview":{"width":360,"height":1720}}'>
+<script type="text/x-dc" data-dc-script data-props='{"coupon":{"editor":"boolean","default":true},"$preview":{"width":360,"height":800}}'>
 class Component extends DCLogic {
-  renderVals() { return { pli: this.props.pli ?? true }; }
+  renderVals() { return { coupon: this.props.coupon ?? true }; }
 }
 </script>
 </body>

@@ -105,3 +105,41 @@ Cela sert aussi d'« indicateur de confiance » séparé de la probabilité, que
 ### Validation des propositions — 19/11/2026, 11:09
 
 Mounir : « D7 = Prédictions ; D1 et D2, D4 = ok ». Les propositions de la section 5 (ordre de l'accueil, carte Coach avec masquage des montants, onglet « Tipsters » et ordre des onglets) sont retenues. Prochaine étape : maquettes HTML du jour chargé, clair et sombre.
+
+## 6. Revue des maquettes par ChatGPT (`03b-revue-maquettes-chatgpt.md`, commit `9f3d99e`) — 19/11, 11:20
+
+Tous les points P0 sont retenus. Ils sont corrigés dans la maquette v2 (`maquettes/canvas/project/`, publiée à 11:23).
+
+| Point P0 | Correction |
+| --- | --- |
+| « Confiance » laisse croire à une mesure calibrée | Remplacé par **convergence** (écart marché / modèle). **Couverture** (marché et modèle, marché seul, rien) et **fraîcheur** (heure du relevé de la cote) sont affichées à part, sur chaque carte. La pastille « Confiant » de l'avatar est retirée : l'expression reste portée par le visage seul |
+| La probabilité d'un autre marché sous la barre 1 / N / 2 prête à confusion | Le marché est toujours nommé au-dessus de la sélection : « Résultat », « Double chance », « Autre marché : total de buts » |
+| Règle de choix de l'avis de Betster | Documentée ci-dessous ; la carte dit pourquoi ce choix et précise que ce n'est pas un calcul de valeur |
+| Onglets placés au bas du contenu, coupon absent | Les deux premiers cadres montrent l'écran réel (360 × 800) : le contenu défile, la barre « Mon coupon » et les onglets restent fixés en bas. Un troisième cadre montre la page entière |
+| Densité de la carte principale | Phrase de synthèse raccourcie, un seul bouton principal « Voir l'analyse », ajout au coupon en bouton secondaire |
+
+Autres points de la revue retenus : état actif des filtres, bloc Tipsters avec le match et le marché exacts, le niveau de preuve (« publié avant le match, heure vérifiée », « heure non vérifiée ») et un bilan avec sa période ; budget affiché seulement s'il est fixé ; masquage des montants gardé sur le téléphone ; aucune donnée fictive ne passe en production.
+
+### Les indicateurs, définis
+
+| Indicateur | Ce qu'il dit | Calcul (provisoire) |
+| --- | --- | --- |
+| Probabilité | Chance estimée de la sélection | Cotes de référence sans la marge (méthode « puissance »), sinon modèle seul, et c'est dit |
+| Convergence | Le marché et le modèle disent-ils la même chose ? | Forte : moins de 3 points d'écart ; moyenne : 3 à 10 ; divergent : plus de 10 ; absente si l'un des deux manque |
+| Couverture | Qu'a-t-on pour ce match ? | Marché et modèle, marché seul, modèle seul, rien |
+| Fraîcheur | Quand la cote a-t-elle été lue ? | Heure du relevé ; au-delà de 48 h, la cote n'est plus affichée |
+
+Les seuils de convergence reprennent ceux qui servent déjà au classement des coups du jour (bonus sous 3 points, pénalité au-delà de 10). Ce sont des règles provisoires : elles ne disent rien de la fiabilité tant qu'elles ne sont pas mesurées par famille de marchés. La mesure est à faire avant l'intégration (`scripts/mesure-probabilites.ts` sait déjà grouper par tranche).
+
+### La règle de l'avis de Betster
+
+Ce que fait le moteur aujourd'hui (`src/lib/coach/daily.ts`) : chaque matin, sur les matchs des 24 heures qui viennent et seulement là où une cote de référence existe, chaque sélection reçoit un score égal à sa probabilité, plus 3 points si le modèle est d'accord, moins 6 points s'il est nettement en dessous, plus 3 points si une cote est vérifiable, moins 3 points pour un match amical. Les trois meilleures de chaque catégorie (Sûr, Audacieux, Risqué, selon la cote) deviennent les coups du jour.
+
+Proposition : **l'avis de Betster est le premier coup du jour de la catégorie Audacieux** (cote 1,20 à 1,50), parce que c'est la catégorie qui équilibre chance et gain ; à défaut, le premier Sûr. La carte le dit en une phrase. Il n'existe aucun calcul de valeur (probabilité face à la cote) : rien dans l'écran ne doit le laisser entendre. Un tel calcul peut venir plus tard, mesuré, dans un lot à part.
+
+### À trancher par Mounir
+
+| N° | Question | Recommandation |
+| --- | --- | --- |
+| D10 | L'avis de Betster = premier coup du jour Audacieux, sinon premier Sûr | Oui |
+| D11 | « Convergence » à la place de « confiance » dans l'écran | Oui |

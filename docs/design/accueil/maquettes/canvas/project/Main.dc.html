@@ -19,7 +19,8 @@ body{margin:0}
 .bw button{font:inherit}
 </style>
 </helmet>
-<div class="bw {{themeClass}}" style="width: 360px; min-height: 1720px; box-sizing: border-box; background: rgb(var(--canvas)); color: rgb(var(--ink)); font-family: Inter, system-ui, sans-serif; position: relative; display: flex; flex-direction: column">
+<div class="bw {{themeClass}}" style="{{rootStyle}}">
+<div style="{{scrollStyle}}">
 
 <!-- En-tête -->
 <header style="display: flex; align-items: center; justify-content: space-between; padding: 20px 16px 8px 16px">
@@ -41,11 +42,10 @@ body{margin:0}
 <div style="display: flex; gap: 12px; align-items: flex-start">
 <div style="position: relative; flex-shrink: 0">
 <svg role="img" aria-label="Betster, emplacement de l'avatar" width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="28" fill="rgb(32 191 160)" fill-opacity="0.18"></circle><circle cx="28" cy="23" r="10" fill="none" stroke="rgb(123 224 196)" stroke-width="2"></circle><path d="M12 48c3-8 9-12 16-12s13 4 16 12" fill="none" stroke="rgb(123 224 196)" stroke-width="2" stroke-linecap="round"></path></svg>
-<span style="position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 9.5px; font-weight: 700; padding: 2px 6px; border-radius: 6px; background: rgb(123 224 160); color: rgb(7 26 38)">Confiant</span>
 </div>
 <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
 <span style="font-size: 12px; font-weight: 600; color: rgb(123 224 196)">L'avis de Betster</span>
-<p style="margin: 0; font-size: 15px; line-height: 1.35; font-weight: 600">Arsenal reçoit un Brentford qui n'a gagné qu'un de ses six derniers déplacements. Je prends la victoire d'Arsenal.</p>
+<p style="margin: 0; font-size: 15px; line-height: 1.35; font-weight: 600">Arsenal à domicile : c'est ma sélection la plus probable du jour.</p>
 </div>
 </div>
 <div style="display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 16px; background: rgb(255 255 255 / 0.07)">
@@ -57,15 +57,15 @@ body{margin:0}
 <span style="font-size: 16px; font-weight: 700">Arsenal gagne</span>
 <span style="font-size: 11.5px; color: rgb(201 211 220)">Arsenal – Brentford · Premier League · 13:30</span>
 <div style="display: flex; flex-wrap: wrap; gap: 6px">
-<span style="font-size: 11px; font-weight: 600; padding: 3px 7px; border-radius: 7px; background: rgb(255 255 255 / 0.1)">Cote 1xBet 1,52</span>
-<span style="font-size: 11px; font-weight: 600; padding: 3px 7px; border-radius: 7px; background: rgb(255 255 255 / 0.1); display: inline-flex; align-items: center; gap: 4px"><svg aria-hidden="true" width="12" height="10" viewBox="0 0 12 10"><rect x="0" y="6" width="3" height="4" rx="1" fill="rgb(123 224 196)"></rect><rect x="4.5" y="3" width="3" height="7" rx="1" fill="rgb(123 224 196)"></rect><rect x="9" y="0" width="3" height="10" rx="1" fill="rgb(123 224 196)"></rect></svg>Confiance forte</span>
+<span style="font-size: 11px; font-weight: 600; padding: 3px 7px; border-radius: 7px; background: rgb(255 255 255 / 0.1)">Cote 1xBet 1,52 · il y a 2 h</span>
+<span style="font-size: 11px; font-weight: 600; padding: 3px 7px; border-radius: 7px; background: rgb(255 255 255 / 0.1); display: inline-flex; align-items: center; gap: 4px"><svg aria-hidden="true" width="12" height="10" viewBox="0 0 12 10"><rect x="0" y="6" width="3" height="4" rx="1" fill="rgb(123 224 196)"></rect><rect x="4.5" y="3" width="3" height="7" rx="1" fill="rgb(123 224 196)"></rect><rect x="9" y="0" width="3" height="10" rx="1" fill="rgb(123 224 196)"></rect></svg>Forte convergence</span>
 </div>
 </div>
 </div>
-<p style="margin: 0; font-size: 11.5px; line-height: 1.4; color: rgb(201 211 220)">Le marché et le modèle sont d'accord à 2 points près. Le risque : ce choix perd 32 fois sur 100.</p>
-<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
-<a href="#analyse" style="height: 44px; border-radius: 12px; background: rgb(255 255 255 / 0.1); color: rgb(243 245 247); display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 600; text-decoration: none">Voir l'analyse</a>
-<button type="button" style="height: 44px; border-radius: 12px; border: 0; background: rgb(123 224 196); color: rgb(7 26 38); font-size: 13.5px; font-weight: 700">Ajouter au coupon</button>
+<p style="margin: 0; font-size: 11.5px; line-height: 1.4; color: rgb(201 211 220)">Ce choix perd 32 fois sur 100. Choisi parmi les coups du jour à cote 1,20–1,50 : la plus forte probabilité, avec l'accord du modèle. Ce n'est pas un calcul de valeur de la cote.</p>
+<div style="display: flex; gap: 8px; align-items: center">
+<a href="#analyse" style="flex-grow: 1; height: 44px; border-radius: 12px; background: rgb(123 224 196); color: rgb(7 26 38); display: flex; align-items: center; justify-content: center; font-size: 13.5px; font-weight: 700; text-decoration: none">Voir l'analyse</a>
+<button type="button" aria-label="Ajouter au coupon" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid rgb(255 255 255 / 0.25); background: transparent; color: rgb(243 245 247); display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></button>
 </div>
 <a href="#autres" style="font-size: 12px; color: rgb(123 224 196); text-decoration: none; align-self: center">2 autres coups du jour ›</a>
 </section>
@@ -77,8 +77,8 @@ body{margin:0}
 <span style="font-size: 11.5px; color: rgb(var(--muted))">12 analysés · 2 sans analyse</span>
 </div>
 <div style="display: flex; gap: 6px; overflow: hidden">
-<button type="button" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 0; background: rgb(var(--ink)); color: rgb(var(--canvas)); font-size: 12px; font-weight: 600">Tous</button>
-<button type="button" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid rgb(var(--line)); background: transparent; color: rgb(var(--soft)); font-size: 12px; font-weight: 500">Confiance forte</button>
+<button type="button" aria-pressed="true" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 0; background: rgb(var(--ink)); color: rgb(var(--canvas)); font-size: 12px; font-weight: 600">Tous</button>
+<button type="button" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid rgb(var(--line)); background: transparent; color: rgb(var(--soft)); font-size: 12px; font-weight: 500">Forte convergence</button>
 <button type="button" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid rgb(var(--line)); background: transparent; color: rgb(var(--soft)); font-size: 12px; font-weight: 500">Mes paris</button>
 <button type="button" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid rgb(var(--line)); background: transparent; color: rgb(var(--soft)); font-size: 12px; font-weight: 500">Afrique</button>
 </div>
@@ -101,15 +101,18 @@ body{margin:0}
 <span>1 · {{m.p1}} %</span><span style="text-align: center">N · {{m.pN}} %</span><span style="text-align: right">2 · {{m.p2}} %</span>
 </div>
 </div>
-<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 8px; border-top: 1px solid rgb(var(--line))">
-<span style="font-size: 13px; font-weight: 600">{{m.pick}} <span style="color: rgb(var(--muted)); font-weight: 500">· {{m.pp}} %</span></span>
-<span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: rgb(var(--soft))"><svg aria-hidden="true" width="12" height="10" viewBox="0 0 12 10"><rect x="0" y="6" width="3" height="4" rx="1" style="{{m.b1}}"></rect><rect x="4.5" y="3" width="3" height="7" rx="1" style="{{m.b2}}"></rect><rect x="9" y="0" width="3" height="10" rx="1" style="{{m.b3}}"></rect></svg>{{m.conf}}</span>
+<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px solid rgb(var(--line))">
+<div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 8px">
+<span style="display: flex; flex-direction: column; gap: 1px; min-width: 0"><span style="font-size: 10.5px; color: rgb(var(--muted))">{{m.marche}}</span><span style="font-size: 13px; font-weight: 600">{{m.pick}} <span style="color: rgb(var(--muted)); font-weight: 500">· {{m.pp}} %</span></span></span>
+<span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: rgb(var(--soft)); flex-shrink: 0"><svg aria-hidden="true" width="12" height="10" viewBox="0 0 12 10"><rect x="0" y="6" width="3" height="4" rx="1" style="{{m.b1}}"></rect><rect x="4.5" y="3" width="3" height="7" rx="1" style="{{m.b2}}"></rect><rect x="9" y="0" width="3" height="10" rx="1" style="{{m.b3}}"></rect></svg>{{m.conv}}</span>
+</div>
+<span style="font-size: 10.5px; color: rgb(var(--muted))">{{m.couv}}</span>
 </div>
 </sc-if>
 <sc-if value="{{m.nonCouvert}}" hint-placeholder-val="{{false}}">
 <div style="display: flex; gap: 8px; align-items: flex-start; padding: 10px; border-radius: 12px; background: rgb(var(--surface2))">
 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgb(var(--muted))" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16.5v.5"></path></svg>
-<span style="font-size: 12px; line-height: 1.4; color: rgb(var(--soft))"><b style="color: rgb(var(--ink))">Pas encore d'analyse pour ce match.</b> BETWISE n'a pas assez de données sur la Ligue 1 ivoirienne pour une probabilité fiable. Tu peux suivre le score et ajouter les pronos de tes tipsters.</span>
+<span style="font-size: 12px; line-height: 1.4; color: rgb(var(--soft))"><b style="color: rgb(var(--ink))">Pas d'analyse pour ce match.</b> Ni cote ni modèle sur cette compétition pour l'instant.</span>
 </div>
 </sc-if>
 </article>
@@ -165,8 +168,9 @@ body{margin:0}
 <sc-for list="{{tipsters}}" as="t" hint-placeholder-count="3">
 <div style="{{t.ligne}}">
 <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
-<span style="font-size: 13px; font-weight: 600">{{t.nom}} <span style="font-weight: 500; color: rgb(var(--muted))">· {{t.bilan}}</span></span>
+<span style="font-size: 13px; font-weight: 600">{{t.nom}}</span>
 <span style="font-size: 12px; color: rgb(var(--soft))">{{t.prono}}</span>
+<span style="font-size: 10.5px; color: rgb(var(--muted))">{{t.preuve}}</span>
 </div>
 <span style="{{t.badge}}">{{t.avis}}</span>
 </div>
@@ -174,49 +178,62 @@ body{margin:0}
 </div>
 </section>
 
-<div style="height: 96px"></div>
+<div style="height: 24px"></div>
+</div>
 
-<!-- Barre d'onglets -->
-<nav aria-label="Navigation principale" style="position: absolute; left: 0; right: 0; bottom: 0; height: 64px; background: rgb(var(--surface)); border-top: 1px solid rgb(var(--line)); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr))">
+<sc-if value="{{coupon}}" hint-placeholder-val="{{true}}">
+<a href="#coupon" style="{{couponStyle}}"><span style="display: flex; align-items: center; gap: 8px"><span style="min-width: 22px; height: 22px; border-radius: 11px; background: rgb(var(--onfill)); color: rgb(var(--brand)); font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center">2</span><span style="font-size: 13px; font-weight: 700">Mon coupon</span></span><span style="font-size: 13px; font-weight: 700">Cote 2,46 ›</span></a>
+</sc-if>
+
+<nav aria-label="Navigation principale" style="{{navStyle}}">
 <sc-for list="{{onglets}}" as="o" hint-placeholder-count="5">
 <a href="#onglet" style="{{o.style}}"><span aria-hidden="true" style="{{o.barre}}"></span><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{o.icone}}"></path></svg>{{o.nom}}</a>
 </sc-for>
 </nav>
 
-<sc-if value="{{pli}}" hint-placeholder-val="{{true}}">
-<div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 800px; border-top: 1.5px dashed rgb(240 138 128); pointer-events: none"><span style="position: absolute; right: 8px; top: -18px; font-size: 10px; font-weight: 600; color: rgb(240 138 128)">bas du premier écran</span></div>
-</sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["sombre","clair"],"default":"sombre"},"pli":{"editor":"boolean","default":true},"$preview":{"width":360,"height":1720}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["sombre","clair"],"default":"sombre"},"vue":{"editor":"enum","options":["écran","page entière"],"default":"écran"},"coupon":{"editor":"boolean","default":true},"$preview":{"width":360,"height":800}}'>
 class Component extends DCLogic {
   constructor(props) { super(props); this.state = { masque: false }; }
+  cadre(ecran, coupon) {
+    const base = 'width: 360px; box-sizing: border-box; background: rgb(var(--canvas)); color: rgb(var(--ink)); font-family: Inter, system-ui, sans-serif; position: relative; display: flex; flex-direction: column; ';
+    const bas = coupon ? 116 : 64;
+    return {
+      coupon,
+      rootStyle: base + (ecran ? 'height: 800px; overflow: hidden' : 'min-height: 800px'),
+      scrollStyle: ecran ? 'height: ' + (800 - bas) + 'px; overflow-y: auto; display: flex; flex-direction: column' : 'display: flex; flex-direction: column',
+      couponStyle: 'margin: 0 12px 8px 12px; height: 44px; border-radius: 14px; background: rgb(var(--brand)); color: rgb(var(--onfill)); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; text-decoration: none; ' + (ecran ? 'position: absolute; left: 0; right: 0; bottom: 64px' : ''),
+      navStyle: 'height: 64px; background: rgb(var(--surface)); border-top: 1px solid rgb(var(--line)); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); ' + (ecran ? 'position: absolute; left: 0; right: 0; bottom: 0' : ''),
+    };
+  }
   renderVals() {
     const clair = (this.props.theme ?? 'sombre') === 'clair';
     const masque = !!this.state.masque;
     const seg = (w, c) => 'display: block; width: ' + w + '%; background: rgb(var(' + c + '))';
     const on = 'fill: rgb(var(--brand))', off = 'fill: rgb(var(--line))';
-    const m = (comp, heure, dom, ext, i1, i2, p1, pN, p2, pick, pp, conf, niv, pari) => {
+    const CONV = { 3: 'Forte convergence', 2: 'Convergence moyenne', 1: 'Marché et modèle divergent' };
+    const m = (comp, heure, dom, ext, i1, i2, p1, pN, p2, marche, pick, pp, niv, couv, pari) => {
       const best = Math.max(p1, pN, p2);
       const col = (p) => (p === best ? '--brand' : '--surface2');
-      return { comp, heure, dom, ext, i1, i2, p1, pN, p2, pick, pp, conf, pari: !!pari, couvert: true, nonCouvert: false,
+      return { comp, heure, dom, ext, i1, i2, p1, pN, p2, marche, pick, pp, conv: CONV[niv], couv, pari: !!pari, couvert: true, nonCouvert: false,
         s1: seg(p1, col(p1)), sN: seg(pN, col(pN)), s2: seg(p2, col(p2)),
         b1: on, b2: niv >= 2 ? on : off, b3: niv >= 3 ? on : off };
     };
     const matchs = [
-      m('Premier League', '13:30', 'Arsenal', 'Brentford', 'AR', 'BR', 68, 19, 13, 'Arsenal gagne', 68, 'Confiance forte', 3),
-      m('Premier League', '16:00', 'Chelsea', 'Newcastle', 'CH', 'NE', 47, 26, 27, 'Chelsea ou nul', 73, 'Confiance moyenne', 2, true),
-      m('Serie A', '18:00', 'Inter', 'Lazio', 'IN', 'LA', 55, 25, 20, 'Plus de 2,5 buts', 58, 'Confiance moyenne', 2),
-      m('Liga', '18:30', 'Real Madrid', 'Séville', 'RM', 'SE', 71, 17, 12, 'Real Madrid gagne', 71, 'Confiance forte', 3),
+      m('Premier League', '13:30', 'Arsenal', 'Brentford', 'AR', 'BR', 68, 19, 13, 'Résultat', 'Arsenal gagne', 68, 3, 'Marché et modèle · cote relevée il y a 2 h'),
+      m('Premier League', '16:00', 'Chelsea', 'Newcastle', 'CH', 'NE', 47, 26, 27, 'Double chance', 'Chelsea ou nul', 73, 2, 'Marché et modèle · cote relevée il y a 2 h', true),
+      m('Serie A', '18:00', 'Inter', 'Lazio', 'IN', 'LA', 55, 25, 20, 'Autre marché : total de buts', 'Plus de 2,5 buts', 58, 2, 'Marché et modèle · cote relevée il y a 3 h'),
+      m('Liga', '18:30', 'Real Madrid', 'Séville', 'RM', 'SE', 71, 17, 12, 'Résultat', 'Real Madrid gagne', 71, 3, 'Marché et modèle · cote relevée il y a 2 h'),
       { comp: 'Ligue 1 ivoirienne', heure: '16:00', dom: 'ASEC Mimosas', ext: 'Africa Sports', i1: 'AS', i2: 'AF', couvert: false, nonCouvert: true, pari: false },
-      m('Ligue 1', '21:00', 'Lyon', 'Lens', 'LY', 'LE', 41, 28, 31, 'Les deux marquent', 57, 'Confiance faible', 1),
+      m('Ligue 1', '21:00', 'Lyon', 'Lens', 'LY', 'LE', 41, 28, 31, 'Autre marché : les deux marquent', 'Oui', 57, 1, 'Marché et modèle · cote relevée il y a 5 h'),
     ];
     const ligne = (last) => 'display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px' + (last ? '' : '; border-bottom: 1px solid rgb(var(--line))');
     const badge = (c, f) => 'flex-shrink: 0; font-size: 10.5px; font-weight: 700; padding: 3px 7px; border-radius: 6px; background: rgb(var(' + f + ')); color: rgb(var(' + c + '))';
     const tipsters = [
-      { nom: 'Alfred', bilan: '28 sur 38', prono: 'Arsenal gagne', avis: "D'accord avec Betster", ligne: ligne(false), badge: badge('--gain', '--gain-soft') },
-      { nom: 'Info foot international', bilan: '19 sur 31', prono: 'Chelsea gagne par 2 buts ou plus', avis: 'BETWISE : 24 %', ligne: ligne(false), badge: badge('--draw-ink', '--draw-soft') },
-      { nom: 'Abdoul K.', bilan: '41 sur 57', prono: 'ASEC Mimosas gagne', avis: 'Pas d’analyse', ligne: ligne(true), badge: badge('--soft', '--surface2') },
+      { nom: 'Alfred', prono: 'Arsenal – Brentford · Résultat : Arsenal gagne', preuve: 'Publié avant le match, heure vérifiée · 28 gagnés sur 38 en 30 jours', avis: 'Comme Betster', ligne: ligne(false), badge: badge('--gain', '--gain-soft') },
+      { nom: 'Info foot international', prono: 'Chelsea – Newcastle · Handicap : Chelsea −1,5', preuve: 'Heure de publication non vérifiée · 19 sur 31 en 30 jours', avis: 'BETWISE : 24 %', ligne: ligne(false), badge: badge('--draw-ink', '--draw-soft') },
+      { nom: 'Abdoul K.', prono: 'ASEC Mimosas – Africa Sports · Résultat : ASEC gagne', preuve: 'Publié avant le match · 41 sur 57 en 30 jours', avis: 'Pas d’analyse', ligne: ligne(true), badge: badge('--soft', '--surface2') },
     ];
     const tab = (nom, icone, actif) => ({ nom, icone,
       style: 'position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 10.5px; text-decoration: none; ' + (actif ? 'font-weight: 700; color: rgb(var(--brand))' : 'font-weight: 500; color: rgb(var(--muted))'),
@@ -229,7 +246,8 @@ class Component extends DCLogic {
       tab('Coach', 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM15.5 8.5l-2 5-5 2 2-5z', false),
     ];
     return {
-      themeClass: clair ? 'clair' : '', pli: this.props.pli ?? true,
+      themeClass: clair ? 'clair' : '',
+      ...this.cadre((this.props.vue ?? 'écran') === 'écran', this.props.coupon ?? true),
       matchs, tipsters, onglets, masque, visible: !masque,
       oeilLabel: masque ? 'Afficher les montants' : 'Masquer les montants',
       toggle: () => this.setState({ masque: !this.state.masque }),
