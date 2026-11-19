@@ -14,6 +14,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx tsx scripts/discover-api-football.ts
+      # Provisoire sur la branche etape-2 : comparaison des cotes 1xBet du fournisseur avec celles des tickets importés
+      - run: npx tsx scripts/probe-cotes-tickets.ts
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

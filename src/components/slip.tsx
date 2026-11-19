@@ -32,7 +32,8 @@ export function AddToSlip({ leg, size = "md", label }: { leg: Leg; size?: "sm" |
 }
 
 /** Case de cote façon bookmaker : libellé, cote, probabilité ; un appui l'ajoute au coupon. `wide` : ligne pleine largeur. */
-export function OddButton({ leg, name, disabled, wide }: { leg: Leg; name: string; disabled?: boolean; wide?: boolean }) {
+/** note : précision courte après la cote (« méd. » quand la cote est la médiane au milieu de cotes de bookmaker). */
+export function OddButton({ leg, name, disabled, wide, note }: { leg: Leg; name: string; disabled?: boolean; wide?: boolean; note?: string }) {
   const legs = useSlip();
   const on = legs.some((x) => x.matchId === leg.matchId && x.market === leg.market && (x.param ?? null) === (leg.param ?? null) && x.sel === leg.sel);
   const tone = on ? "text-white/80" : "text-ink-muted";
@@ -45,7 +46,7 @@ export function OddButton({ leg, name, disabled, wide }: { leg: Leg; name: strin
     >
       <span className={wide ? "min-w-0 flex-1 text-[13px] leading-snug" : `w-full truncate text-[11px] leading-tight ${tone}`}>{name}</span>
       {wide && leg.p !== null && <span className={`shrink-0 text-[11px] tabular-nums ${tone}`}>{Math.round(leg.p * 100)} %</span>}
-      <span className={`shrink-0 font-semibold tabular-nums ${wide ? "w-12 text-right text-sm" : "text-[15px]"}`}>{leg.estimee ? "≈" : ""}{C(leg.cote)}</span>
+      <span className={`shrink-0 font-semibold tabular-nums ${wide ? "min-w-12 text-right text-sm" : "text-[15px]"}`}>{leg.estimee ? "≈" : ""}{C(leg.cote)}{note && <span className={`ml-0.5 text-[9px] font-normal ${tone}`}>{note}</span>}</span>
       {!wide && leg.p !== null && <span className={`text-[10px] tabular-nums ${tone}`}>{Math.round(leg.p * 100)} %</span>}
     </button>
   );
@@ -82,7 +83,7 @@ export function SlipBar() {
                       <span className="block truncate text-[11px] text-ink-muted">{l.home} – {l.away} · {new Date(l.kickoff).toLocaleString("fr-FR", { weekday: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}</span>
                     </Link>
                     <span className="shrink-0 text-right tabular-nums">
-                      <span className="block text-sm font-semibold">{l.estimee ? "≈ " : ""}{C(l.cote)}</span>
+                      <span className="block text-sm font-semibold">{l.estimee ? "≈ " : ""}{C(l.cote)}{l.book && <span className="ml-1 text-[10px] font-normal text-ink-muted">{l.book}</span>}</span>
                       {l.p !== null && <span className="block text-[10px] text-ink-muted">{Math.round(l.p * 100)} %{cat ? ` · ${CAT_LABEL[cat]}` : ""}</span>}
                     </span>
                     <button type="button" aria-label="Retirer" onClick={() => slip.remove(l.matchId)} className="shrink-0 px-1 text-lg leading-none text-ink-muted">×</button>
@@ -98,7 +99,8 @@ export function SlipBar() {
                   <span className="tabular-nums"><b>{p >= 0.1 ? Math.round(p * 100) : (p * 100).toFixed(1).replace(".", ",")} %</b>{categorieOf(p) && <span className={`ml-1.5 rounded-full border px-1.5 text-[10px] ${CAT_STYLE[categorieOf(p)!]}`}>{CAT_LABEL[categorieOf(p)!]}</span>}</span>
                 </div>
               )}
-              {legs.some((l) => l.estimee) && <p className="mt-1 text-[10px] text-ink-muted">≈ : cote estimée (pas de cote de référence). Mets la cote de ton bookmaker à l’étape suivante.</p>}
+              {legs.some((l) => l.estimee) && <p className="mt-1 text-[10px] text-ink-muted">≈ : cote estimée (pas de cote de bookmaker). Mets la cote de ton bookmaker à l’étape suivante.</p>}
+              {legs.some((l) => l.book) && <p className="mt-1 text-[10px] text-ink-muted">Les cotes marquées d’un nom de bookmaker ont été relevées plus tôt : elles ont pu bouger, corrige-les à l’étape suivante si ton coupon dit autre chose.</p>}
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
               <Link href={slipHref(legs, true)} className="rounded-xl border border-line py-2.5 text-center text-sm font-semibold">Tester sans miser</Link>

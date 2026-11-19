@@ -11,6 +11,8 @@ export type Leg = {
   matchId: string; home: string; away: string; kickoff: string; comp: string;
   market: string; param: number | null; sel: string; label: string;
   cote: number; estimee: boolean; p: number | null;
+  /** Nom du bookmaker quand la cote est une vraie cote relevée chez lui (1xBet) ; absent pour la médiane ou une estimation. */
+  book?: string | null;
 };
 
 const KEY = "betwise.coupon";

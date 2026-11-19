@@ -17,9 +17,25 @@ export type Signal = {
   refOdd: (market: string, param: number | null, sel: string) => number | null;
   /** Probabilité tirée directement des cotes de référence pour les marchés cotés (1X2, plus/moins 2,5). */
   direct: (market: string, param: number | null, sel: string) => number | null;
+  /** Cote réelle d'un bookmaker (1xBet) pour une sélection ; null si elle n'a pas été chargée ou n'existe pas. */
+  bookOdd: (market: string, param: number | null, sel: string) => CoteReelle | null;
+  /** Toutes les cotes de bookmaker chargées pour ce match (corners, cartons, scores exacts compris). */
+  bookAll: CoteBookmaker[];
 };
-/** pModele : second avis du modèle sur la même sélection, quand il couvre le match et que p vient des cotes. */
-export type Pick = { market: string; param: number | null; sel: string; p: number; cote: number | null; pModele: number | null };
+/** Cote réelle d'un bookmaker, avec l'heure du relevé chez le fournisseur. */
+export type CoteReelle = { cote: number; bookmaker: string; releveAt: string };
+export type CoteBookmaker = CoteReelle & { market: string; param: number | null; sel: string };
+/**
+ * cote : cote de référence (médiane des bookmakers européens), quand elle existe. book : cote réelle d'un bookmaker.
+ * pModele : second avis du modèle sur la même sélection, quand il couvre le match et que p vient des cotes.
+ */
+export type Pick = { market: string; param: number | null; sel: string; p: number; cote: number | null; book: CoteReelle | null; pModele: number | null };
+
+/** La cote à afficher pour une sélection et son origine : bookmaker d'abord, médiane ensuite, sinon rien (estimation). */
+export function coteAffichee(p: { cote: number | null; book: CoteReelle | null }): { cote: number; origine: "bookmaker" | "mediane"; bookmaker: string | null } | null {
+  if (p.book) return { cote: p.book.cote, origine: "bookmaker", bookmaker: p.book.bookmaker };
+  return p.cote ? { cote: p.cote, origine: "mediane", bookmaker: null } : null;
+}
 
 const DRAW_BOOST = 0.1; // même correction que le modèle (poisson.ts)
 const CANDIDATES: [string, number | null, string][] = [
@@ -50,15 +66,50 @@ export function probasMarche(c: Cotes5, methode: MethodeMarge = METHODE_MARGE): 
   return { ...ml, grid, p: (market, param, sel) => probaDirecte(c, market, param, sel, methode) ?? probOf(grid, market, param, sel) };
 }
 
-/** Signaux (buts attendus + cotes) pour une liste de matchs, en deux requêtes. */
-export async function loadSignals(db: Db, ids: string[]): Promise<Map<string, Signal>> {
+/**
+ * Un relevé de bookmaker n'est repris que s'il a moins de 48 heures (par rapport à maintenant, ou au coup d'envoi une fois
+ * le match commencé). Le fournisseur ne rafraîchit pas les matchs lointains : un relevé de dix jours n'est plus une cote.
+ */
+export const RELEVE_MAX_HEURES = 48;
+export function releveFrais(releveAt: string, kickoffAt: string | null, now = Date.now()): boolean {
+  const ref = kickoffAt ? Math.min(now, Date.parse(kickoffAt)) : now;
+  return ref - Date.parse(releveAt) <= RELEVE_MAX_HEURES * 3600000;
+}
+
+/** Cotes de bookmaker des matchs demandés. Jusqu'à 200 lignes par match et 1 000 par requête : quatre matchs à la fois. */
+async function loadBookOdds(db: Db, ids: string[]): Promise<Map<string, CoteBookmaker[]>> {
+  const out = new Map<string, CoteBookmaker[]>();
+  const lots: string[][] = [];
+  for (let i = 0; i < ids.length; i += 4) lots.push(ids.slice(i, i + 4));
+  const res = await Promise.all(lots.map((lot) => db.from("bookmaker_odds").select("match_id, bookmaker, market_code, market_param, selection, cote, releve_at, match:matches(kickoff_at)").in("match_id", lot).limit(1000)));
+  for (const { data } of res) for (const o of data ?? []) {
+    const mt = o.match as { kickoff_at: string } | { kickoff_at: string }[] | null;
+    if (!releveFrais(o.releve_at, (Array.isArray(mt) ? mt[0] : mt)?.kickoff_at ?? null)) continue;
+    const l = out.get(o.match_id) ?? [];
+    l.push({ market: o.market_code, param: o.market_param === null ? null : Number(o.market_param), sel: o.selection, cote: Number(o.cote), bookmaker: o.bookmaker, releveAt: o.releve_at });
+    out.set(o.match_id, l);
+  }
+  return out;
+}
+
+/**
+ * Signaux (buts attendus + cotes) pour une liste de matchs, en deux requêtes.
+ * bookmakers : charge aussi les cotes réelles par bookmaker (fiche match, détail d'un pari) ; inutile pour les listes.
+ */
+export async function loadSignals(db: Db, ids: string[], opts: { bookmakers?: boolean } = {}): Promise<Map<string, Signal>> {
   const out = new Map<string, Signal>();
   if (!ids.length) return out;
-  const [{ data: est }, { data: odds }] = await Promise.all([
+  const [{ data: est }, { data: odds }, books] = await Promise.all([
     db.from("model_estimates").select("match_id, justification").eq("market_code", "1X2").eq("selection", "1").eq("model_version", MODEL_VERSION).in("match_id", ids),
     db.from("odds_observations").select("match_id, market_code, market_param, selection, cote, observed_at").eq("bookmaker", "ref:eu-median").in("match_id", ids).order("observed_at", { ascending: false }).limit(4000),
+    opts.bookmakers ? loadBookOdds(db, [...new Set(ids)]) : Promise.resolve(new Map<string, CoteBookmaker[]>()),
   ]);
   for (const id of ids) {
+    const bookAll = books.get(id) ?? [];
+    const bookOdd = (market: string, param: number | null, sel: string): CoteReelle | null => {
+      const o = bookAll.find((x) => x.market === market && x.sel === sel && x.param === param);
+      return o ? { cote: o.cote, bookmaker: o.bookmaker, releveAt: o.releveAt } : null;
+    };
     const mine = (odds ?? []).filter((o) => o.match_id === id);
     const refOdd = (market: string, param: number | null, sel: string) => {
       const o = mine.find((x) => x.market_code === market && x.selection === sel && (x.market_param === null ? param === null : Number(x.market_param) === param));
@@ -70,8 +121,8 @@ export async function loadSignals(db: Db, ids: string[]): Promise<Map<string, Si
     const market = ml ? { lh: ml.lh, la: ml.la, grid: ml.grid } : null;
     const j = est?.find((e) => e.match_id === id)?.justification as { lambda_dom?: number; lambda_ext?: number } | null | undefined;
     const model = j?.lambda_dom && j?.lambda_ext ? { lh: j.lambda_dom, la: j.lambda_ext, grid: makeGrid(j.lambda_dom, j.lambda_ext, DRAW_BOOST) } : null;
-    if (ml && market) out.set(id, { source: "marche", lh: ml.lh, la: ml.la, grid: market.grid, approx: ml.approx, market, model, refOdd, direct });
-    else if (model) out.set(id, { source: "modele", lh: model.lh, la: model.la, grid: model.grid, approx: false, market: null, model, refOdd, direct: () => null });
+    if (ml && market) out.set(id, { source: "marche", lh: ml.lh, la: ml.la, grid: market.grid, approx: ml.approx, market, model, refOdd, direct, bookOdd, bookAll });
+    else if (model) out.set(id, { source: "modele", lh: model.lh, la: model.la, grid: model.grid, approx: false, market: null, model, refOdd, direct: () => null, bookOdd, bookAll });
   }
   return out;
 }
@@ -118,7 +169,7 @@ export function picksOf(s: Signal, liste: "base" | "all" = "base"): Pick[] {
     const p = (s.source === "marche" ? s.direct(market, param, sel) : null) ?? probOf(s.grid, market, param, sel);
     if (p === null) return [];
     const cote = s.refOdd(market, param, sel);
-    return [{ market, param, sel, p, cote, pModele: s.source === "marche" && s.model ? probOf(s.model.grid, market, param, sel) : null }];
+    return [{ market, param, sel, p, cote, book: s.bookOdd(market, param, sel), pModele: s.source === "marche" && s.model ? probOf(s.model.grid, market, param, sel) : null }];
   }).sort((a, b) => b.p - a.p);
 }
 

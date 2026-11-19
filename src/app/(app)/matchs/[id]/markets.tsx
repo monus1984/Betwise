@@ -3,6 +3,8 @@ import Link from "next/link";
 import { OddButton } from "@/components/slip";
 import { shortName } from "@/components/match-ui";
 import { MG_RANGES, pickLabel, picksOf, type Signal } from "@/lib/probs/signals";
+import { probOf } from "@/lib/probs/grid";
+import { quandReleve } from "./cotes-bookmaker";
 import { legFrom } from "@/lib/slip/leg";
 
 type M = { id: string; kickoff_at: string; home: string; away: string; comp: string; ouvert: boolean };
@@ -13,11 +15,28 @@ export function MatchMarkets({ m, sg }: { m: M; sg: Signal }) {
   const picks = picksOf(sg, "all");
   const h = shortName(m.home), a = shortName(m.away);
   const get = (market: string, param: number | null, sel: string) => picks.find((p) => p.market === market && (p.param ?? null) === param && p.sel === sel) ?? null;
+  // Cotes réelles d'un bookmaker (1xBet), quand le fournisseur les a relevées pour ce match
+  const releve = sg.bookAll.length ? sg.bookAll.reduce((x, y) => (x.releveAt > y.releveAt ? x : y)) : null;
+  const book = releve?.bookmaker ?? null;
   const cell = (market: string, param: number | null, sel: string, name: string, wide = false) => {
     const p = get(market, param, sel); if (!p) return null;
-    const leg = legFrom({ matchId: m.id, home: m.home, away: m.away, kickoff: m.kickoff_at, comp: m.comp, market, param, sel, p: p.p, cote: p.cote });
+    const leg = legFrom({ matchId: m.id, home: m.home, away: m.away, kickoff: m.kickoff_at, comp: m.comp, market, param, sel, p: p.p, cote: p.cote, book: p.book });
+    // au milieu des cotes du bookmaker, une cote médiane est signalée ; une cote estimée porte déjà « ≈ »
+    return <OddButton key={`${market}${param}${sel}`} leg={leg} name={name} disabled={!m.ouvert} wide={wide} note={book && !p.book && p.cote ? "méd." : undefined} />;
+  };
+  // Marchés que l'application ne chiffre pas (corners, cartons) ou peu (score exact) : la cote du bookmaker, telle quelle
+  const bookCell = (market: string, param: number | null, sel: string, name: string, wide = false) => {
+    const o = sg.bookOdd(market, param, sel); if (!o) return null;
+    const leg = legFrom({ matchId: m.id, home: m.home, away: m.away, kickoff: m.kickoff_at, comp: m.comp, market, param, sel, p: probOf(sg.grid, market, param, sel), cote: null, book: o });
     return <OddButton key={`${market}${param}${sel}`} leg={leg} name={name} disabled={!m.ouvert} wide={wide} />;
   };
+  /** Lignes plus / moins d'un marché chez le bookmaker : les plus équilibrées (les deux côtés jouables), dans l'ordre. */
+  const lignesBook = (market: string, max: number) => [...new Set(sg.bookAll.filter((o) => o.market === market && o.param !== null).map((o) => o.param as number))]
+    .map((l) => ({ l, plus: sg.bookOdd(market, l, "Plus"), moins: sg.bookOdd(market, l, "Moins") }))
+    .filter((x) => x.plus && x.moins)
+    .sort((x, y) => Math.abs(x.plus!.cote - x.moins!.cote) - Math.abs(y.plus!.cote - y.moins!.cote)).slice(0, max).sort((x, y) => x.l - y.l);
+  const scoresBook = sg.bookAll.filter((o) => o.market === "CS").sort((x, y) => x.cote - y.cote).slice(0, 8);
+  const corners = lignesBook("CORN", 4), cartons = lignesBook("CARD", 3);
   const row = (cols: 2 | 3, cells: (React.ReactNode | null)[]) => <div className={`grid gap-1.5 ${cols === 3 ? "grid-cols-3" : "grid-cols-2"}`}>{cells}</div>;
 
   // Deux étages : les marchés pour lesquels on a une vraie cote de bookmaker, puis ceux dont la probabilité est
@@ -55,7 +74,7 @@ export function MatchMarkets({ m, sg }: { m: M; sg: Signal }) {
       </Block>
       ) },
       { m: ["HT_1X2", "HT_DC", "HT_OU", "HT_BTTS", "H2_1X2", "H2_OU", "HTFT", "HMG"], n: (
-      <Block key="Mi-temps" title="Mi-temps" note="probabilités indicatives">
+      <Block key="Mi-temps" title="Mi-temps">
         <Sub>Résultat à la mi-temps</Sub>
         {row(3, [cell("HT_1X2", null, "1", h), cell("HT_1X2", null, "N", "Nul"), cell("HT_1X2", null, "2", a)])}
         <Sub>Double chance à la mi-temps</Sub>
@@ -95,14 +114,26 @@ export function MatchMarkets({ m, sg }: { m: M; sg: Signal }) {
       </Block>
       ) },
   ];
+  const chezBook = (mk: string[]) => picks.some((p) => mk.includes(p.market) && p.book !== null);
   const reel = (mk: string[]) => picks.some((p) => mk.includes(p.market) && p.cote !== null);
-  const suivis = blocs.filter((b) => reel(b.m)), estimes = blocs.filter((b) => !reel(b.m));
+  const cotes = blocs.filter((b) => chezBook(b.m)), suivis = blocs.filter((b) => !chezBook(b.m) && reel(b.m)), estimes = blocs.filter((b) => !chezBook(b.m) && !reel(b.m));
+  const quand = releve ? quandReleve(releve.releveAt) : "";
 
   return (
     <div className="space-y-3">
+      {cotes.length > 0 && <Etage titre={`Cotes ${book}`} texte={`Cotes ${book} relevées ${quand} : elles ont pu bouger, ton coupon fait foi. Le pourcentage est notre estimation de la chance de gagner. « méd. » ou « ≈ » : sélection absente du relevé.`} />}
+      {cotes.map((b) => b.n)}
+      {book && (corners.length > 0 || cartons.length > 0 || scoresBook.length > 0) && (
+        <Block title="Corners, cartons, score exact" note={`cotes ${book}`}>
+          {corners.length > 0 && <><Sub>Corners dans le match</Sub><div className="space-y-1.5">{corners.map((x) => <div key={x.l}>{row(2, [bookCell("CORN", x.l, "Plus", `Plus de ${L(x.l)}`), bookCell("CORN", x.l, "Moins", `Moins de ${L(x.l)}`)])}</div>)}</div></>}
+          {cartons.length > 0 && <><Sub>Cartons dans le match</Sub><div className="space-y-1.5">{cartons.map((x) => <div key={x.l}>{row(2, [bookCell("CARD", x.l, "Plus", `Plus de ${L(x.l)}`), bookCell("CARD", x.l, "Moins", `Moins de ${L(x.l)}`)])}</div>)}</div></>}
+          {scoresBook.length > 0 && <Group title="Score exact : les huit plus probables">{scoresBook.map((o) => bookCell("CS", null, o.sel, `Score exact ${o.sel}`, true))}</Group>}
+          <p className="mt-2 text-[11px] text-ink-muted">Corners et cartons : pas de pourcentage, {APP_NAME} ne les estime pas encore. Le pari est réglé avec les statistiques du match.</p>
+        </Block>
+      )}
       {suivis.length > 0 && <Etage titre="Cotes de référence" texte="Marchés pour lesquels on a la cote médiane des bookmakers européens. La probabilité affichée en découle, marge retirée." />}
       {suivis.map((b) => b.n)}
-      {estimes.length > 0 && <Etage estime titre="Estimations" texte={suivis.length ? "Aucune cote de bookmaker sur ces marchés : la probabilité est déduite du résultat et du nombre de buts attendus. À comparer à la cote de ton bookmaker avant de t’y fier." : "Aucune cote de bookmaker sur ce match : toutes les probabilités viennent du modèle statistique. Elles sont moins fiables que des cotes de marché."} />}
+      {estimes.length > 0 && <Etage estime titre="Estimations" texte={suivis.length || cotes.length ? "Aucune cote de bookmaker sur ces marchés : la probabilité est déduite du résultat et du nombre de buts attendus. À comparer à la cote de ton bookmaker avant de t’y fier." : "Aucune cote de bookmaker sur ce match : toutes les probabilités viennent du modèle statistique. Elles sont moins fiables que des cotes de marché."} />}
       {estimes.map((b) => b.n)}
       {m.ouvert && (
         <Block title="Corners, cartons, tirs, buteurs" note="sans pourcentage">
@@ -115,7 +146,7 @@ export function MatchMarkets({ m, sg }: { m: M; sg: Signal }) {
         </Block>
       )}
       <p className="px-1 text-[11px] leading-relaxed text-ink-muted">
-        Cote sans « ≈ » : cote de référence des bookmakers européens. « ≈ » : cote estimée à partir des probabilités, avec 5 % de marge ; ton bookmaker peut payer un peu plus ou moins. Les marchés de mi-temps supposent que 45 % des buts tombent avant la pause : pourcentages indicatifs, pas encore vérifiés sur notre historique. Le pourcentage est la chance de gagner d’après les cotes de référence, marge retirée{sg.source === "modele" ? ` (ici le modèle ${APP_NAME}, faute de cote)` : ""}.
+        {book ? `Cote sans signe : cote ${book} relevée. « méd. » : cote médiane des bookmakers européens. ` : "Cote sans « ≈ » : cote médiane des bookmakers européens. "}« ≈ » : cote estimée à partir des probabilités, avec 5 % de marge ; ton bookmaker peut payer un peu plus ou moins. Le pourcentage est la chance de gagner d’après les cotes de référence, marge retirée{sg.source === "modele" ? ` (ici le modèle ${APP_NAME}, faute de cote)` : ""}. Vérifié sur 4 004 matchs de championnat : ce que l’application annonce à 75 % arrive 75 à 76 fois sur 100, marchés de mi-temps compris (45 % des buts supposés avant la pause, 44 % mesurés).
       </p>
     </div>
   );

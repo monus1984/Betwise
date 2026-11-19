@@ -4,7 +4,7 @@ import type { StandingRow } from "./standings";
 
 const rang = (team_nom: string, rang: number, points: number, bp: number, bc: number, forme: string, zone: string | null = null): StandingRow =>
   ({ comp_code: "UNL", groupe: "Ligue A - Groupe A", af_team_id: rang, rang, team_nom, team_id: team_nom, joues: 5, gagnes: 3, nuls: 0, perdus: 2, bp, bc, diff: bp - bc, points, forme, zone, updated_at: "2026-11-15T10:00:00Z" });
-const pick = (market: string, param: number | null, sel: string, p: number, cote: number | null = null) => ({ market, param, sel, p, cote, pModele: null });
+const pick = (market: string, param: number | null, sel: string, p: number, cote: number | null = null) => ({ market, param, sel, p, cote, book: null, pModele: null });
 
 const base: RecitInput = {
   home: "Belgique", away: "Italie",

@@ -13,6 +13,7 @@ import { probOf } from "@/lib/probs/grid";
 import { sansMarge } from "@/lib/probs/marge";
 import { loadSignals, pickLabel, picksOf } from "@/lib/probs/signals";
 import { MatchMarkets } from "./markets";
+import { CotesParBookmaker } from "./cotes-bookmaker";
 import { AddToSlip } from "@/components/slip";
 import { FollowStar } from "@/components/follow-star";
 import { StandingsTable } from "@/components/standings-table";
@@ -68,7 +69,9 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const just = (est?.[0]?.justification ?? null) as Just | null;
   const model = e("1X2", "1") ? { p1: Number(e("1X2", "1")!.probabilite), pN: Number(e("1X2", "N")!.probabilite), p2: Number(e("1X2", "2")!.probabilite) } : null;
   const market = marketProbs(ref("1X2", "1")?.cote, ref("1X2", "N")?.cote, ref("1X2", "2")?.cote);
-  const sg = (await loadSignals(supabase, [id])).get(id) ?? null;
+  const sg = (await loadSignals(supabase, [id], { bookmakers: true })).get(id) ?? null;
+  // Dernier relevé des cotes de bookmaker du match (une seule heure par bookmaker : le relevé est remplacé en bloc)
+  const releve = sg?.bookAll.length ? sg.bookAll.reduce((a, b) => (a.releveAt > b.releveAt ? a : b)) : null;
   const suivi = !!(await supabase.from("match_follows").select("match_id").eq("match_id", id).maybeSingle()).data;
   const [{ data: tf }, { data: st }] = await Promise.all([
     supabase.from("team_follows").select("team_id").in("team_id", [m.home_team_id, m.away_team_id]),
@@ -149,15 +152,15 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
               <ul className="divide-y divide-line">
                 {picks.map((p) => (
                   <li key={`${p.market}${p.param}${p.sel}`} className="flex items-center gap-2">
-                    <Link href={upcoming ? parier(p.market, p.sel, p.cote ?? undefined, p.param ?? undefined) : "#"} className="flex min-w-0 flex-1 items-center justify-between gap-3 py-2 text-sm active:bg-surface-2">
+                    <Link href={upcoming ? parier(p.market, p.sel, p.book?.cote ?? p.cote ?? undefined, p.param ?? undefined) : "#"} className="flex min-w-0 flex-1 items-center justify-between gap-3 py-2 text-sm active:bg-surface-2">
                       <span className="min-w-0 truncate">{pickLabel(p.market, p.param, p.sel, shortName(home), shortName(away))}{(p.cote === null || sg!.source === "modele") && <span className="ml-1.5 rounded-full bg-draw-soft px-1.5 py-0.5 text-[10px] font-semibold text-draw-ink">estimation</span>}</span>
-                      <span className="shrink-0 tabular-nums"><b>{Math.round(p.p * 100)} %</b> <span className="text-xs text-ink-muted">{p.cote ? `cote ${p.cote.toFixed(2)}` : `cote juste ${(1 / p.p).toFixed(2)}`}</span>{p.pModele !== null && <span className="ml-1 text-xs text-brand">· modèle {Math.round(p.pModele * 100)} %</span>}</span>
+                      <span className="shrink-0 tabular-nums"><b>{Math.round(p.p * 100)} %</b> <span className="text-xs text-ink-muted">{p.book ? `${p.book.bookmaker} ${fmtCote(p.book.cote)}` : p.cote ? `médiane ${fmtCote(p.cote)}` : `cote juste ${fmtCote(1 / p.p)}`}</span>{p.pModele !== null && <span className="ml-1 text-xs text-brand">· modèle {Math.round(p.pModele * 100)} %</span>}</span>
                     </Link>
-                    {m.statut === "programme" && <AddToSlip size="sm" leg={legFrom({ matchId: m.id, home, away, kickoff: m.kickoff_at, comp: comp?.code_externe ?? "", market: p.market, param: p.param, sel: p.sel, p: p.p, cote: p.cote })} />}
+                    {m.statut === "programme" && <AddToSlip size="sm" leg={legFrom({ matchId: m.id, home, away, kickoff: m.kickoff_at, comp: comp?.code_externe ?? "", market: p.market, param: p.param, sel: p.sel, p: p.p, cote: p.cote, book: p.book })} />}
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 text-[11px] text-ink-muted">« Cote juste » : la cote sans marge du bookmaker. Si ton bookmaker propose moins, le pari perd de l’argent sur la durée, même s’il passe souvent ; s’il propose plus, c’est une bonne affaire.</p>
+              <p className="mt-2 text-[11px] text-ink-muted">{releve ? `${releve.bookmaker} : cote relevée ${fmtRel(releve.releveAt)}, elle a pu bouger. ` : ""}« Médiane » : cote du milieu chez les bookmakers européens. « Cote juste » : la cote sans marge du bookmaker ; si le tien propose moins, le pari perd de l’argent sur la durée, même s’il passe souvent.</p>
             </Card>
           )}
           {!model ? (
@@ -200,17 +203,26 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         <div className="space-y-3">
           {sg ? <MatchMarkets m={{ id: m.id, kickoff_at: m.kickoff_at, home, away, comp: comp?.code_externe ?? "", ouvert: m.statut === "programme" }} sg={sg} /> : <Card><p className="text-sm text-ink-muted">Pas encore de cote ni d’estimation pour ce match. Elles arrivent chaque matin à partir de J-14.</p></Card>}
           {m.statut !== "programme" && sg && <p className="px-1 text-[11px] text-ink-muted">Match commencé ou terminé : les cotes sont affichées pour mémoire, le coupon est fermé.</p>}
-          <Card title="Cotes de référence" note="médiane des bookmakers européens">
-            <OddsRow cells={[{ sel: "1", name: shortName(home), o: ref("1X2", "1") }, { sel: "N", name: "Nul", o: ref("1X2", "N") }, { sel: "2", name: shortName(away), o: ref("1X2", "2") }]} market="1X2" upcoming={upcoming} href={parier} />
-            <OddsRow cells={[{ sel: "Plus", name: "+ de 2,5", o: ref("OU", "Plus", 2.5) }, { sel: "Moins", name: "− de 2,5", o: ref("OU", "Moins", 2.5) }]} market="OU" param={2.5} upcoming={upcoming} href={parier} />
-            {ref("1X2", "1") ? <p className="text-[11px] text-ink-muted">Mise à jour {fmtRel(ref("1X2", "1")!.observed_at)}. Touche une cote pour préremplir un pari.</p>
-              : <p className="text-xs text-ink-muted">Pas encore de cote de référence : elles arrivent chaque matin à partir de J-14.</p>}
-          </Card>
-          <Card title="Cotes vues par les utilisateurs">
-            {userObs.length === 0 ? <p className="text-xs text-ink-muted">Aucune pour l’instant. Chaque pari saisi sur ce match ajoute sa cote ici, avec l’heure.</p> : (
+          {sg && releve ? (
+            <CotesParBookmaker
+              bookmaker={releve.bookmaker} releveAt={releve.releveAt} medianeAt={ref("1X2", "1")?.observed_at ?? null} upcoming={upcoming} href={parier}
+              lignes={([["1X2", null, "1"], ["1X2", null, "N"], ["1X2", null, "2"], ["OU", 2.5, "Plus"], ["OU", 2.5, "Moins"], ["BTTS", null, "Oui"], ["BTTS", null, "Non"], ["DC", null, "1N"], ["DC", null, "12"], ["DC", null, "N2"]] as [string, number | null, string][])
+                .map(([market, param, sel]) => ({ market, param, sel, label: pickLabel(market, param, sel, shortName(home), shortName(away)), book: sg.bookOdd(market, param, sel)?.cote ?? null, mediane: sg.refOdd(market, param, sel) }))
+                .filter((l) => l.book !== null || l.mediane !== null)}
+            />
+          ) : (
+            <Card title="Cotes de référence" note="médiane des bookmakers européens">
+              <OddsRow cells={[{ sel: "1", name: shortName(home), o: ref("1X2", "1") }, { sel: "N", name: "Nul", o: ref("1X2", "N") }, { sel: "2", name: shortName(away), o: ref("1X2", "2") }]} market="1X2" upcoming={upcoming} href={parier} />
+              <OddsRow cells={[{ sel: "Plus", name: "+ de 2,5", o: ref("OU", "Plus", 2.5) }, { sel: "Moins", name: "− de 2,5", o: ref("OU", "Moins", 2.5) }]} market="OU" param={2.5} upcoming={upcoming} href={parier} />
+              {ref("1X2", "1") ? <p className="text-[11px] text-ink-muted">Mise à jour {fmtRel(ref("1X2", "1")!.observed_at)}. Pas de cote 1xBet relevée pour ce match : c’est la médiane qui est affichée partout. Touche une cote pour préremplir un pari.</p>
+                : <p className="text-xs text-ink-muted">Pas encore de cote de référence : elles arrivent chaque matin à partir de J-14.</p>}
+            </Card>
+          )}
+          <Card title="Cotes vues sur vos tickets" note="Betclic, 1xBet et les autres">
+            {userObs.length === 0 ? <p className="text-xs text-ink-muted">Aucune pour l’instant. Chaque pari saisi ou importé sur ce match ajoute sa cote ici, avec le bookmaker et l’heure. C’est la seule source pour Betclic Côte d’Ivoire, qu’aucun fournisseur de cotes ne relève.</p> : (
               <ul className="divide-y divide-line text-sm">
                 {userObs.slice(0, 12).map((o, i) => (
-                  <li key={i} className="flex justify-between py-1.5"><span>{o.market_code}{o.market_param ? ` ${o.market_param}` : ""} · {o.selection}{o.bookmaker ? ` · ${o.bookmaker}` : ""}</span><span className="tabular-nums">{Number(o.cote).toFixed(2)} <span className="text-xs text-ink-muted">{fmtRel(o.observed_at)}</span></span></li>
+                  <li key={i} className="flex justify-between gap-3 py-1.5"><span className="min-w-0 truncate">{pickLabel(o.market_code, o.market_param === null ? null : Number(o.market_param), o.selection, shortName(home), shortName(away))}{o.bookmaker ? <span className="text-ink-muted"> · {o.bookmaker}</span> : null}</span><span className="tabular-nums">{Number(o.cote).toFixed(2)} <span className="text-xs text-ink-muted">{fmtRel(o.observed_at)}</span></span></li>
                 ))}
               </ul>
             )}
@@ -417,6 +429,7 @@ function OddsRow({ cells, market, param, upcoming, href }: { cells: { sel: strin
   );
 }
 
+const fmtCote = (x: number) => x.toFixed(2).replace(".", ",");
 const fmtDec = (x?: number) => (x === undefined ? "?" : x.toFixed(1).replace(".", ","));
 const fmtDate = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit", timeZone: "UTC" });
 function countdown(iso: string) {
