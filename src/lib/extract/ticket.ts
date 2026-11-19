@@ -530,6 +530,8 @@ function combiner(a: NormalizedSelection, b: NormalizedSelection, label: string)
 /** Plusieurs paris simples du même match réunis en un combiné libre (marché COMBO) ; null si l'un d'eux n'est pas compris. */
 function comboLibre(parts: NormalizedSelection[], label: string): NormalizedSelection | null {
   if (parts.length < 2 || parts.some((x) => !x.ok || !x.selection)) return null;
+  // Deux conditions sur le même marché (« Sénégal + nul ») : ce n'est pas un combiné, c'est une autre écriture qu'on ne devine pas
+  if (new Set(parts.map((x) => `${x.market_code}@${x.market_param}`)).size !== parts.length) return null;
   const selection = selectionCombo(parts.map((x) => ({ market: x.market_code, param: x.market_param, sel: x.selection })));
   return selection ? { market_code: "COMBO", market_param: null, selection, label_pick: label, ok: true } : null;
 }

@@ -255,6 +255,9 @@ describe("marchés ajoutés le 19/11 : combinés libres, joueurs, ordre des buts
     expect(n("Résultat du match (t. rég) / Nombre total de corners", "Sénégal / + de 8,5")).toMatchObject({ market_code: "COMBO", selection: "1X2:1 & CORN@8.5:Plus", ok: true });
     expect(n("", "Sénégal gagne & plus de 8,5 corners & les deux équipes marquent")).toMatchObject({ market_code: "COMBO", selection: "1X2:1 & CORN@8.5:Plus & BTTS:Oui", ok: true });
     expect(n("Résultat du match (t. rég) / Marché inconnu", "Sénégal / Bidule")).toMatchObject({ ok: false });
+    // deux conditions sur le même marché ne font pas un combiné
+    expect(n("", "Sénégal + nul").market_code).not.toBe("COMBO");
+    expect(n("Résultat du match (t. rég) / Résultat du match (t. rég)", "Sénégal / Mali").market_code).not.toBe("COMBO");
     // les combinés déjà suivis gardent leur marché
     expect(n("Résultat du match (t. rég) / Nombre total de buts (t. rég)", "Mali / + de 1,5")).toMatchObject({ market_code: "1X2_OU", selection: "2|Plus" });
   });
