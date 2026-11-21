@@ -9,13 +9,14 @@ export function CoachNav({ current }: { current: "tableau" | "bankroll" | "monta
 
 /** Navigation de Mes paris (19/11) : mes paris, ajouter (charger, saisir, simuler, communauté), sources. */
 export function ParisNav({ current }: { current: "paris" | "ajouter" | "sources" }) {
-  const items = [{ k: "paris", t: "Mes paris", href: "/paris" }, { k: "ajouter", t: "Ajouter", href: "/paris/ajouter" }, { k: "sources", t: "Sources", href: "/sources" }] as const;
+  // Sources : onglet à part entière depuis le 21/11, retiré d'ici
+  const items = [{ k: "paris", t: "Mes paris", href: "/paris" }, { k: "ajouter", t: "Ajouter", href: "/paris/ajouter" }] as const;
   return <SousNav items={items} actif={current} label="Mes paris" />;
 }
 
 function SousNav({ items, actif, label }: { items: readonly { k: string; t: string; href: string }[]; actif: string; label: string }) {
   return (
-    <nav className={`mb-4 grid ${items.length === 4 ? "grid-cols-4" : "grid-cols-3"} rounded-xl border border-line bg-surface-2 p-1 text-[13px] font-medium`} aria-label={label}>
+    <nav className={`mb-4 grid ${items.length === 4 ? "grid-cols-4" : items.length === 2 ? "grid-cols-2" : "grid-cols-3"} rounded-xl border border-line bg-surface-2 p-1 text-[13px] font-medium`} aria-label={label}>
       {items.map((i) => <Link key={i.k} href={i.href} className={`truncate rounded-lg px-1 py-2 text-center ${actif === i.k ? "bg-surface font-semibold shadow-card" : "text-ink-muted"}`} aria-current={actif === i.k ? "page" : undefined}>{i.t}</Link>)}
     </nav>
   );

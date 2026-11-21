@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ParisNav } from "@/components/coach-nav";
 import { linkOf } from "@/lib/sources/link";
 import { PageHeader } from "@/components/page-header";
 import { Card, Empty } from "@/components/ui";
@@ -39,7 +38,7 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <ParisNav current="sources" />
+
       <PageHeader ajout aide="sources" title="Sources" subtitle="Les tipsters, pages et canaux qui t’orientent, et ce que valent leurs pronos."
         action={<Link href="/sources/nouvelle">+ Source</Link>} />
       <nav className="mb-4 flex gap-2 overflow-x-auto" aria-label="Vues des sources">

@@ -14,7 +14,7 @@ import { BoutonAjout } from "@/components/bouton-ajout";
 import { RecherchePourcentage } from "@/components/recherche-pourcentage";
 import { briefing } from "@/lib/accueil/briefing";
 import type { Pourquoi } from "@/lib/matches/justification";
-import { BandeauBetster, Bienvenue, CarteMatchUI, Demain, ImportCarte, RaccourcisCoach, TipstersDuJour } from "@/components/accueil";
+import { BandeauBetster, Bienvenue, CarteMatchUI, Demain, ImportCarte, TipstersDuJour } from "@/components/accueil";
 import { ProfilsDuJour } from "@/components/profils-du-jour";
 import { heure, jourCourt, pct as pctP } from "@/components/proposition";
 import { BoutonMasque, Montant } from "@/components/montant";
@@ -148,15 +148,6 @@ export default async function Home() {
         </section>
       )}
 
-      <RaccourcisCoach
-        nouveau={nouveau}
-        solde={<Montant texte={fcfa(solde)} />}
-        sept={d.courbe.length > 0 ? <Montant texte={signedF(sept)} /> : null}
-        budget={budget ? <Montant texte={`${fcfa(budget.mises)} misés sur ${fcfa(Number(bud!.mise_semaine))}`} /> : null}
-        paris={d.enCours ? `${pl2(d.enCours, "pari")} en cours${aConfirmer ? ` · ${aConfirmer} à confirmer` : ""}` : aConfirmer ? `${aConfirmer} à confirmer` : "Aucun en cours"}
-        vigilance={alertes[0] ? { titre: alertes[0].titre, href: alertes[0].cle === "budget" ? "/coach?v=outils" : alertes[0].cle === "serie" || alertes[0].cle === "combines" ? "/bilan" : "/paris" } : null}
-        masque={<BoutonMasque />}
-      />
 
       <div className="mt-3.5"><ImportCarte /></div>
       <TipstersDuJour t={acc.tipsters} />

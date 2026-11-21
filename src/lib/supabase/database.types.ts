@@ -1903,6 +1903,12 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      montante_supprimer: {
+        Args: {
+          p_montante_id: string
+        }
+        Returns: undefined
+      }
       montante_rattacher: {
         Args: {
           p_montante_id: string

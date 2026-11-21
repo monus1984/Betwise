@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { STATUT_FR, etat, pourLePalier, type Palier } from "@/lib/montantes/regles";
 import { loadOptions } from "@/lib/options/load";
 import { legFrom } from "@/lib/slip/leg";
-import { Arreter, Rattacher } from "./boutons";
+import { Arreter, ModifierSupprimer, Rattacher } from "./boutons";
 
 export const dynamic = "force-dynamic";
 
@@ -106,7 +106,10 @@ export default async function MontantePage({ params }: { params: Promise<{ id: s
         </section>
       )}
 
-      {!fini && <div className="mt-5"><Arreter id={id} /></div>}
+      <div className="mt-5 space-y-2">
+        <ModifierSupprimer edition={{ id, nom: m.nom, mise: Number(m.mise_depart), objectif: Number(m.objectif), paliers: m.paliers_prevus, niveau: m.niveau, joues: (paliers ?? []).filter((b) => b.statut !== "annule").length }} />
+        {!fini && <Arreter id={id} />}
+      </div>
     </>
   );
 }

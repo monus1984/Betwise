@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { arreterMontante, rattacherPalier } from "@/lib/montantes/actions";
+import { useRouter } from "next/navigation";
+import { arreterMontante, rattacherPalier, supprimerMontante } from "@/lib/montantes/actions";
+import { NouvelleMontante, type EditionMontante } from "../nouvelle";
 
 export function Rattacher({ montanteId, betId }: { montanteId: string; betId: string }) {
   const [pending, start] = useTransition();
@@ -22,6 +24,31 @@ export function Arreter({ id }: { id: string }) {
     <div className="flex gap-2">
       <button onClick={() => setSure(false)} className="flex-1 rounded-xl border border-line py-2.5 text-[13px] text-ink-soft">Continuer</button>
       <button disabled={pending} onClick={() => start(async () => { await arreterMontante(id); })} className="flex-1 rounded-xl bg-inverse py-2.5 text-[13px] font-semibold text-on-inverse">Confirmer l’arrêt</button>
+    </div>
+  );
+}
+
+/** Modifier ou supprimer : la suppression détache les paris (ils restent dans Mes paris), après confirmation. */
+export function ModifierSupprimer({ edition }: { edition: EditionMontante }) {
+  const [mode, setMode] = useState<"rien" | "modifier" | "supprimer">("rien");
+  const [err, setErr] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  const router = useRouter();
+  if (mode === "modifier") return <NouvelleMontante ouverte edition={edition} onFin={() => setMode("rien")} />;
+  if (mode === "supprimer") return (
+    <div className="tile space-y-2 p-3">
+      <p className="text-[13px] leading-snug">Supprimer « {edition.nom} » ? {edition.joues ? `Ses ${edition.joues} pari${edition.joues > 1 ? "s" : ""} rest${edition.joues > 1 ? "ent" : "e"} dans Mes paris et ta bankroll, sans la montante.` : "Aucun pari n’y est rattaché."} La suppression est définitive.</p>
+      <div className="flex gap-2">
+        <button onClick={() => setMode("rien")} className="flex-1 rounded-xl border border-line py-2.5 text-[13px] text-ink-soft">Garder</button>
+        <button disabled={pending} onClick={() => start(async () => { const r = await supprimerMontante(edition.id); if (!r.ok) setErr(r.error); else router.push("/montantes"); })} className="flex-1 rounded-xl bg-loss py-2.5 text-[13px] font-semibold text-on-fill disabled:opacity-50">{pending ? "…" : "Supprimer"}</button>
+      </div>
+      {err && <p className="text-[12px] text-loss">{err}</p>}
+    </div>
+  );
+  return (
+    <div className="flex gap-2">
+      <button onClick={() => setMode("modifier")} className="flex-1 rounded-xl border border-line py-2.5 text-[13px] font-medium text-ink-soft">Modifier</button>
+      <button onClick={() => setMode("supprimer")} className="flex-1 rounded-xl border border-line py-2.5 text-[13px] font-medium text-loss">Supprimer</button>
     </div>
   );
 }

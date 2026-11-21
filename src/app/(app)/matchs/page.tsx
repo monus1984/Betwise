@@ -106,13 +106,17 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   const ordre = (a: string, b: string) => { const [ra, ka] = cleGroupe(a), [rb, kb] = cleGroupe(b); return ra - rb || ka - kb || (COMP_ORDER.indexOf(a) + 1 || 999) - (COMP_ORDER.indexOf(b) + 1 || 999); };
   const epingles = [...groups.keys()].filter((c) => favoris.has(c)).sort(ordre);
   const autres = [...groups.keys()].filter((c) => !favoris.has(c)).sort(ordre);
+  // Tops matchs (21/11) : le direct et les prochains matchs des grandes compétitions et de celles épinglées, 8 au plus
+  const tops = filtre || comp || etat === "termines" ? [] : rows
+    .filter((m) => (m.statut === "programme" || (m.statut === "en_cours" && !isStale(m.kickoff_at))) && (COMPETITIONS[codeDe(m)]?.majeure || favoris.has(codeDe(m))))
+    .sort((a, b) => rangStatut(a) - rangStatut(b) || Date.parse(a.kickoff_at) - Date.parse(b.kickoff_at)).slice(0, 8);
   const q = (d: string, c: string | null) => `/matchs?d=${d}${c ? `&c=${c}` : ""}`;
 
   const carte = (code: string, list: Row[]) => {
     const nom = COMP_SHORT[code] ?? one(list[0].competition)?.nom ?? code;
     const live = list.filter((m) => m.statut === "en_cours" && !isStale(m.kickoff_at)).length;
     return (
-      <details key={code} open className="group mb-2 overflow-hidden rounded-xl border border-line bg-surface shadow-card">
+      <details key={code} open={!!filtre || !!comp || etat === "termines"} className="group mb-2 overflow-hidden rounded-xl border border-line bg-surface shadow-card">
         <summary className="flex cursor-pointer list-none items-center gap-2 border-b border-line bg-surface-2 py-0.5 pl-3 pr-1 [&::-webkit-details-marker]:hidden">
           <span className="text-sm">{COMP_FLAG[code] ?? "⚽"}</span>
           <span className="min-w-0 flex-1 truncate leading-tight">
@@ -120,6 +124,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
             <span className="block truncate text-[13px] font-bold text-ink">{nom}</span>
           </span>
           {live > 0 && <span className="shrink-0 text-xs font-semibold text-loss">● {live}</span>}
+          <span className="shrink-0 text-[11px] tabular-nums text-ink-muted group-open:hidden">{list.length} match{list.length > 1 ? "s" : ""}{list.find((x) => x.statut === "programme") ? ` · ${fmtTime(list.find((x) => x.statut === "programme")!.kickoff_at)}` : ""}</span>
           {STANDING_COMPS.includes(code) && <Link href={`/matchs/classement?c=${code}`} className="shrink-0 rounded-md px-1.5 py-1 text-[11px] font-medium text-brand">Classement</Link>}
           <CompFavori code={code} initial={favoris.has(code)} nom={nom} />
           <span aria-hidden className="w-3 shrink-0 text-ink-muted transition-transform group-open:rotate-90">›</span>
@@ -185,6 +190,21 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
         </div>
       )}
 
+      {tops.length > 0 && (
+        <section aria-label="Tops matchs" className="mb-4">
+          <h2 className="mb-1.5 px-1 text-[15px] font-bold">Tops matchs</h2>
+          <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface shadow-card">
+            {tops.map((m) => (
+              <li key={m.id}>
+                <p className="px-3 pt-1.5 text-[10.5px] font-semibold text-ink-muted">{COMP_FLAG[codeDe(m)] ?? "⚽"} {COMP_SHORT[codeDe(m)] ?? one(m.competition)?.nom}</p>
+                <ul><Ligne m={m} sg={signals.get(m.id) ?? null} starred={starred.has(m.id)} avecDate={false} /></ul>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {(epingles.length > 0 || autres.length > 0) && !filtre && !comp && <h2 className="mb-1.5 px-1 text-[15px] font-bold">Championnats</h2>}
+      {!filtre && !comp && (epingles.length > 0 || autres.length > 0) && <p className="-mt-1 mb-2 px-1 text-[11px] text-ink-muted">Touche un championnat pour voir ses matchs.</p>}
       {epingles.length > 0 && <h2 className="mb-1.5 px-1 text-xs font-semibold text-ink-soft">Mes compétitions</h2>}
       {epingles.map((c) => carte(c, groups.get(c)!))}
       {epingles.length > 0 && autres.length > 0 && <h2 className="mb-1.5 mt-3 px-1 text-xs font-semibold text-ink-soft">Toutes les compétitions</h2>}

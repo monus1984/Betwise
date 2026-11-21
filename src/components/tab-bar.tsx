@@ -6,11 +6,12 @@ import { usePathname } from "next/navigation";
 const TABS = [
   { href: "/", label: "Prédictions", icon: TrendIcon, aussi: ["/reglages", "/notifications"] },
   { href: "/matchs", label: "Matchs", icon: BallIcon, aussi: [] },
-  { href: "/paris", label: "Mes paris", icon: TicketIcon, aussi: ["/nouveau", "/import", "/sources", "/bilan"] },
+  { href: "/paris", label: "Mes paris", icon: TicketIcon, aussi: ["/nouveau", "/import", "/bilan"] },
+  { href: "/sources", label: "Sources", icon: SourcesIcon, aussi: [] },
   { href: "/coach", label: "Coach", icon: CoachIcon, aussi: ["/options", "/bankroll", "/montantes"] },
 ] as const;
 
-/** Navigation principale (19/11, 15:54) : Prédictions (accueil), Matchs, Mes paris (avec les sources), Coach. La conversation passe par Betster flottant. Ajouter un pari ou importer se fait par le bouton flottant (AddFab). */
+/** Navigation principale : Prédictions (accueil), Matchs, Mes paris, Sources (section à part entière depuis le 21/11), Coach. La conversation passe par Betster flottant. Ajouter un pari ou importer se fait par le bouton flottant (AddFab). */
 export function TabBar() {
   const path = usePathname();
   return (
@@ -19,7 +20,7 @@ export function TabBar() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="Navigation principale"
     >
-      <ul className="mx-auto grid max-w-xl grid-cols-4">
+      <ul className="mx-auto grid max-w-xl grid-cols-5">
         {TABS.map((t) => {
           const active = t.href === "/" ? path === "/" || t.aussi.some((a) => path.startsWith(a)) : path.startsWith(t.href) || t.aussi.some((a) => path.startsWith(a));
           const Icon = t.icon;
@@ -47,3 +48,4 @@ function TrendIcon() { return <svg {...P}><path d="M3 17l5-6 4 4 8-9" /><path d=
 function BallIcon() { return <svg {...P}><circle cx="12" cy="12" r="9" /><path d="M12 7l3.5 2.5-1.3 4h-4.4l-1.3-4z" /><path d="M12 3v4M5.3 8.5l3.5 1M18.7 8.5l-3.5 1M7.8 17.5l2-4M16.2 17.5l-2-4" /></svg>; }
 function TicketIcon() { return <svg {...P}><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 100 4v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a2 2 0 100-4z" /><path d="M13 6v12" strokeDasharray="2 2" /></svg>; }
 function CoachIcon() { return <svg {...P}><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></svg>; }
+function SourcesIcon() { return <svg {...P}><circle cx="9" cy="8" r="3.2" /><path d="M3 19a6 6 0 0 1 12 0" /><circle cx="17" cy="9" r="2.4" /><path d="M16 14.2a4.6 4.6 0 0 1 5 4.6" /></svg>; }
