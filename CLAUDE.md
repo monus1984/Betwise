@@ -12,6 +12,7 @@ Les documents de référence à lire avant toute intervention sont :
 Les briefs produit à lire intégralement avant de coder sont :
 - [Architecture UX, Prédictions, Coach et personnage Betster](docs/product/architecture-ux-predictions-coach-betster.md)
 - [Décisions d'identité de marque et personnage IA](docs/brand/decisions-identite-personnage-ia.md)
+- [Orientations de finalisation du prototype — couverture, tickets, voix, UX/UI et Coach](docs/product/orientations-finalisation-prototype-nov-2026.md) — brief produit consolidé du 21 novembre 2026 ; le lire intégralement avant de proposer le prochain lot.
 
 ## Ordre de travail obligatoire
 
