@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // « /apercu » : planche des composants, données fictives, inexistante en production
-const PUBLIC_PATHS = [...(process.env.NODE_ENV === "production" ? [] : ["/apercu"]), "/connexion", "/inscription", "/auth", "/api/health", "/api/cron", "/manifest.webmanifest", "/sw.js", "/icon-192.png", "/icon-512.png"];
+const PUBLIC_PATHS = [...(process.env.NODE_ENV === "production" ? [] : ["/apercu"]), "/connexion", "/inscription", "/auth", "/api/health", "/api/cron", "/api/voix" /* protégée par signature HMAC */, "/manifest.webmanifest", "/sw.js", "/icon-192.png", "/icon-512.png"];
 
 /** Rafraîchit la session Supabase et protège les pages privées. */
 export async function middleware(request: NextRequest) {
