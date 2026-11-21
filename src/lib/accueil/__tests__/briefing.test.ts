@@ -14,7 +14,7 @@ describe("briefing parlé de Betster", () => {
       profils: { sur: [p({})], audacieux: [p({ matchId: "m2", home: "Troyes", away: "Le Havre", label: "Moins de 2,5 buts", p: 0.66, profil: "audacieux", cote: null, bookmaker: null })], risque: [] },
       pourquoi: new Map([["m1", { forme: "Forme A", face: "Face-à-face, 2 derniers : 2 victoires Bayern, 0 victoire Cologne", buts: null }]]) });
     expect(b).toHaveLength(3);
-    expect(b[0]).toBe("Bonjour Mounir. 3 matchs analysés.");
+    expect(b[0]).toBe("Bonjour Mounir ! 3 matchs analysés.");
     expect(b[1]).toContain("Profil prudent. Bayern contre Cologne, demain à 19 h 30 : Bayern gagne. Probabilité 86 %, donc ça ne passe pas environ 14 fois sur 100. Cote 1,20 chez 1xBet. Face-à-face");
     expect(b[2]).toContain("Profil équilibré. Troyes contre Le Havre");
     expect(b[2]).not.toContain("Cote");

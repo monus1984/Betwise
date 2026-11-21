@@ -1,3 +1,11 @@
 {
-  "regions": ["cdg1"]
+  "regions": [
+    "cdg1"
+  ],
+  "functions": {
+    "api/voix.py": {
+      "includeFiles": "voix/**",
+      "maxDuration": 30
+    }
+  }
 }

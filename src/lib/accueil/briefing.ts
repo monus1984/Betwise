@@ -20,7 +20,7 @@ export function quand(iso: string, maintenant = new Date()): string {
 }
 
 export function briefing(input: { prenom: string; synthese: string; profils: Record<Categorie, PropBrief[]>; pourquoi: Map<string, Pourquoi | null | undefined>; maintenant?: Date }): string[] {
-  const blocs = [`Bonjour${input.prenom ? ` ${input.prenom}` : ""}. ${input.synthese}`.trim()];
+  const blocs = [`Bonjour${input.prenom ? ` ${input.prenom}` : ""} ! ${input.synthese}`.trim()];
   const vus = new Set<string>();
   for (const k of ORDRE) {
     // La meilleure proposition du profil, sur un match pas encore cité quand c'est possible
