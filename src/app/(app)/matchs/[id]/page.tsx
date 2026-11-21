@@ -14,6 +14,7 @@ import { sansMarge } from "@/lib/probs/marge";
 import { loadSignals, pickLabel, picksOf } from "@/lib/probs/signals";
 import { MatchMarkets } from "./markets";
 import { CotesParBookmaker } from "./cotes-bookmaker";
+import { BETCLIC_FR } from "@/lib/odds-api/betclic-ci";
 import { AddToSlip } from "@/components/slip";
 import { FollowStar } from "@/components/follow-star";
 import { StandingsTable } from "@/components/standings-table";
@@ -65,6 +66,8 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   for (const o of odds ?? []) { const k = `${o.market_code}|${o.market_param ?? ""}|${o.selection}|${o.bookmaker ?? "—"}`; if (!latest.has(k)) latest.set(k, o); }
   const ref = (code: string, sel: string, param?: number) => latest.get(`${code}|${param ?? ""}|${sel}|ref:eu-median`) ?? null;
   const userObs = [...latest.values()].filter((o) => o.origine !== "api");
+  const betclic = (sel: string) => latest.get(`1X2||${sel}|${BETCLIC_FR}`) ?? null;
+  const betclicAt = betclic("1")?.observed_at ?? null;
   const e = (code: string, sel: string) => (est ?? []).find((x) => x.market_code === code && x.selection === sel) ?? null;
   const just = (est?.[0]?.justification ?? null) as Just | null;
   const model = e("1X2", "1") ? { p1: Number(e("1X2", "1")!.probabilite), pN: Number(e("1X2", "N")!.probabilite), p2: Number(e("1X2", "2")!.probabilite) } : null;
@@ -203,12 +206,12 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         <div className="space-y-3">
           {sg ? <MatchMarkets m={{ id: m.id, kickoff_at: m.kickoff_at, home, away, comp: comp?.code_externe ?? "", ouvert: m.statut === "programme" }} sg={sg} /> : <Card><p className="text-sm text-ink-muted">Pas encore de cote ni d’estimation pour ce match. Elles arrivent chaque matin à partir de J-14.</p></Card>}
           {m.statut !== "programme" && sg && <p className="px-1 text-[11px] text-ink-muted">Match commencé ou terminé : les cotes sont affichées pour mémoire, le coupon est fermé.</p>}
-          {sg && releve ? (
+          {sg && (releve || betclicAt) ? (
             <CotesParBookmaker
-              bookmaker={releve.bookmaker} releveAt={releve.releveAt} medianeAt={ref("1X2", "1")?.observed_at ?? null} upcoming={upcoming} href={parier}
+              bookmaker={releve?.bookmaker ?? null} releveAt={releve?.releveAt ?? null} betclicAt={betclicAt} medianeAt={ref("1X2", "1")?.observed_at ?? null} upcoming={upcoming} href={parier}
               lignes={([["1X2", null, "1"], ["1X2", null, "N"], ["1X2", null, "2"], ["OU", 2.5, "Plus"], ["OU", 2.5, "Moins"], ["BTTS", null, "Oui"], ["BTTS", null, "Non"], ["DC", null, "1N"], ["DC", null, "12"], ["DC", null, "N2"]] as [string, number | null, string][])
-                .map(([market, param, sel]) => ({ market, param, sel, label: pickLabel(market, param, sel, shortName(home), shortName(away)), book: sg.bookOdd(market, param, sel)?.cote ?? null, mediane: sg.refOdd(market, param, sel) }))
-                .filter((l) => l.book !== null || l.mediane !== null)}
+                .map(([market, param, sel]) => ({ market, param, sel, label: pickLabel(market, param, sel, shortName(home), shortName(away)), book: sg.bookOdd(market, param, sel)?.cote ?? null, mediane: sg.refOdd(market, param, sel), betclicFr: market === "1X2" && betclic(sel) ? Number(betclic(sel)!.cote) : null }))
+                .filter((l) => l.book !== null || l.mediane !== null || l.betclicFr)}
             />
           ) : (
             <Card title="Cotes de référence" note="médiane des bookmakers européens">

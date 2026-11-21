@@ -22,7 +22,7 @@ export const SPORT_KEYS: Record<string, string> = {
 export type OddsSport = { key: string; group: string; title: string; description: string; active: boolean; has_outrights: boolean };
 export type OddsOutcome = { name: string; price: number; point?: number };
 export type OddsMarket = { key: "h2h" | "totals" | "spreads"; outcomes: OddsOutcome[] };
-export type OddsBookmaker = { key: string; title: string; markets: OddsMarket[] };
+export type OddsBookmaker = { key: string; title: string; last_update?: string; markets: OddsMarket[] };
 export type OddsEvent = {
   id: string;
   sport_key: string;
@@ -81,6 +81,14 @@ export class OddsApiClient {
   /** Cotes d'une compétition : 1X2 (h2h) et plus/moins (totals), bookmakers européens, décimales. */
   odds(sportKey: string, from?: string, to?: string) {
     const params: Record<string, string> = { regions: "eu", markets: "h2h,totals", oddsFormat: "decimal", dateFormat: "iso" };
+    if (from) params.commenceTimeFrom = from;
+    if (to) params.commenceTimeTo = to;
+    return this.get<OddsEvent[]>(`/sports/${sportKey}/odds`, params);
+  }
+
+  /** Cotes 1X2 d'une liste de bookmakers précis (1 crédit par appel jusqu'à 10 bookmakers), ex. betclic_fr. */
+  oddsBookmakers(sportKey: string, bookmakers: string[], from?: string, to?: string) {
+    const params: Record<string, string> = { bookmakers: bookmakers.join(","), markets: "h2h", oddsFormat: "decimal", dateFormat: "iso" };
     if (from) params.commenceTimeFrom = from;
     if (to) params.commenceTimeTo = to;
     return this.get<OddsEvent[]>(`/sports/${sportKey}/odds`, params);

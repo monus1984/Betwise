@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../supabase/database.types";
+import { BETCLIC_FR } from "./betclic-ci";
 import { OddsApiClient, median, teamSimilarity, type OddsEvent } from "./client";
 
 type Db = SupabaseClient<Database, "betwise">;
@@ -73,6 +74,52 @@ export async function syncReferenceOdds(db: Db, api: OddsApiClient, fdCode: stri
     }
   }
 
+  if (rows.length) {
+    const { error } = await db.from("odds_observations").insert(rows);
+    if (error) throw error;
+  }
+  return { events: events.length, matched, rows: rows.length };
+}
+
+
+/**
+ * Cotes 1X2 de Betclic France d'une compétition → odds_observations (bookmaker « Betclic FR », origine api).
+ * 1 crédit par appel. Sert de base à l'estimation affichée pour Betclic Côte d'Ivoire (voir betclic-ci.ts),
+ * qu'aucun fournisseur ne relève. Insertion seule, comme les cotes de référence.
+ */
+export async function syncBetclicFr(db: Db, api: OddsApiClient, fdCode: string, sportKey: string, aheadDays = 8) {
+  const now = new Date();
+  const to = new Date(now.getTime() + aheadDays * 86400000);
+  const iso = (d: Date) => d.toISOString().replace(/\.\d{3}Z$/, "Z");
+  const events = await api.oddsBookmakers(sportKey, ["betclic_fr"], iso(now), iso(to));
+  const avec = events.filter((e) => e.bookmakers.some((b) => b.key === "betclic_fr"));
+  if (avec.length === 0) return { events: events.length, matched: 0, rows: 0 };
+
+  const { data: comp } = await db.from("competitions").select("id").eq("code_externe", fdCode).maybeSingle();
+  if (!comp) return { events: events.length, matched: 0, rows: 0 };
+  const { data: matches } = await db
+    .from("matches")
+    .select("id, kickoff_at, home:teams!matches_home_team_id_fkey(nom, alias), away:teams!matches_away_team_id_fkey(nom, alias)")
+    .eq("competition_id", comp.id)
+    .gte("kickoff_at", new Date(now.getTime() - 6 * 3600000).toISOString())
+    .lte("kickoff_at", new Date(to.getTime() + 6 * 3600000).toISOString());
+  type M = { id: string; kickoff_at: string; home: { nom: string; alias: string[] } | null; away: { nom: string; alias: string[] } | null };
+  const pool = ((matches ?? []) as unknown as M[]).filter((m) => m.home && m.away);
+
+  const rows: Database["betwise"]["Tables"]["odds_observations"]["Insert"][] = [];
+  let matched = 0;
+  for (const ev of avec) {
+    const m = bestMatch(ev, pool);
+    if (!m) continue;
+    matched++;
+    const bk = ev.bookmakers.find((b) => b.key === "betclic_fr")!;
+    const h2h = bk.markets.find((x) => x.key === "h2h");
+    const observedAt = bk.last_update ?? now.toISOString();
+    for (const o of h2h?.outcomes ?? []) {
+      const sel = o.name === ev.home_team ? "1" : o.name === ev.away_team ? "2" : o.name.toLowerCase() === "draw" ? "N" : null;
+      if (sel && o.price > 1) rows.push({ match_id: m.id, market_code: "1X2", selection: sel, cote: round3(o.price), bookmaker: BETCLIC_FR, origine: "api", observed_at: observedAt });
+    }
+  }
   if (rows.length) {
     const { error } = await db.from("odds_observations").insert(rows);
     if (error) throw error;

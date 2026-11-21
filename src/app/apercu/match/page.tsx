@@ -47,13 +47,13 @@ export default async function ApercuMatch({ searchParams }: { searchParams: Prom
   const home = "Alpha FC", away = "Beta United";
   const m = { id: "00000000-0000-4000-8000-0000000000m1", kickoff_at: new Date(Date.now() + 60 * 3600000).toISOString(), home, away, comp: "DEMO", ouvert: true };
   const lignes = ([["1X2", null, "1"], ["1X2", null, "N"], ["1X2", null, "2"], ["OU", 2.5, "Plus"], ["OU", 2.5, "Moins"], ["BTTS", null, "Oui"], ["BTTS", null, "Non"], ["DC", null, "1N"], ["DC", null, "12"], ["DC", null, "N2"]] as [string, number | null, string][])
-    .map(([market, param, sel]) => ({ market, param, sel, label: pickLabel(market, param, sel, home, away), book: sg.bookOdd(market, param, sel)?.cote ?? null, mediane: sg.refOdd(market, param, sel) }))
+    .map(([market, param, sel]) => ({ market, param, sel, label: pickLabel(market, param, sel, home, away), book: sg.bookOdd(market, param, sel)?.cote ?? null, mediane: sg.refOdd(market, param, sel), betclicFr: market === "1X2" ? ({ "1": 1.78, N: 3.95, "2": 4.1 } as Record<string, number>)[sel] : null }))
     .filter((l) => l.book !== null || l.mediane !== null);
   return (
     <div className="mx-auto max-w-xl space-y-3 px-4 pb-32 pt-5">
       <p className="rounded-lg bg-surface-2 px-3 py-1.5 text-center text-[11px] text-ink-muted">Onglet Marchés · planche de contrôle, match et cotes fictifs{sans ? " · sans cote de bookmaker" : ""}</p>
       <MatchMarkets m={m} sg={sg} />
-      {!sans && <CotesParBookmaker bookmaker="1xBet" releveAt={RELEVE} medianeAt={new Date(Date.now() - 17 * 3600000).toISOString()} upcoming lignes={lignes} href={() => "#"} />}
+      {!sans && <CotesParBookmaker bookmaker="1xBet" releveAt={RELEVE} betclicAt={new Date(Date.now() - 2 * 3600000).toISOString()} medianeAt={new Date(Date.now() - 17 * 3600000).toISOString()} upcoming lignes={lignes} href={() => "#"} />}
     </div>
   );
 }
