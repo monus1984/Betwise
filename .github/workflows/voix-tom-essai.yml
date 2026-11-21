@@ -1,0 +1,32 @@
+# Essai de la voix libre « Tom » (Piper) — 21/11. Fabrique un extrait audio et mesure le temps de synthèse.
+# Ne touche ni à la base ni au site : il produit seulement un fichier téléchargeable (artefact).
+name: Essai voix Tom
+on:
+  push:
+    branches: [voix-tom]
+    paths: [".github/workflows/voix-tom-essai.yml", "scripts/voix/**"]
+jobs:
+  essai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Installer Piper et la voix
+        run: |
+          pip install -q piper-tts
+          mkdir -p voix && cd voix
+          base=https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/tom/medium
+          curl -sSfL -o fr_FR-tom-medium.onnx "$base/fr_FR-tom-medium.onnx"
+          curl -sSfL -o fr_FR-tom-medium.onnx.json "$base/fr_FR-tom-medium.onnx.json"
+          ls -la
+      - name: Fabriquer les extraits
+        run: python3 scripts/voix/essai_tom.py voix/fr_FR-tom-medium.onnx sortie
+      - name: Convertir en MP3
+        run: |
+          cd sortie
+          for f in *.wav; do ffmpeg -loglevel error -y -i "$f" -ac 1 -b:a 48k "${f%.wav}.mp3"; done
+          ls -la
+      - uses: actions/upload-artifact@v4
+        with: { name: voix-tom, path: "sortie/*.mp3", retention-days: 7 }
