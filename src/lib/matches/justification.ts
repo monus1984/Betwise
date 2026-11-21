@@ -4,10 +4,13 @@
  * dont les équipes n'ont pas d'historique suivi n'a pas de justification, et on ne l'invente pas.
  */
 import type { createClient } from "@/lib/supabase/server";
+import { enjeux } from "./enjeux";
+import { latestStandings, type StandingRow } from "./standings";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
 export type Joue = { at: string; h: string; a: string; sh: number; sa: number };
-export type Pourquoi = { forme: string | null; face: string | null; buts: string | null };
+/** enjeu : la phrase d'enjeu de classement la plus parlante (voir enjeux.ts), absente sans classement. */
+export type Pourquoi = { forme: string | null; face: string | null; buts: string | null; enjeu?: string | null };
 export const NB_FORME = 5;
 
 const pl = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
@@ -51,19 +54,24 @@ export function pourquoi(m: { homeId: string; awayId: string; home: string; away
 export async function loadPourquoi(db: Db, matchIds: string[]): Promise<Map<string, Pourquoi>> {
   const out = new Map<string, Pourquoi>();
   if (!matchIds.length) return out;
-  const { data: ms } = await db.from("matches").select("id, kickoff_at, af_home_id, af_away_id, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom)").in("id", matchIds);
-  const rows = ((ms ?? []) as unknown as { id: string; kickoff_at: string; af_home_id: number | null; af_away_id: number | null; home: { nom: string } | { nom: string }[] | null; away: { nom: string } | { nom: string }[] | null }[])
+  const { data: ms } = await db.from("matches").select("id, kickoff_at, af_home_id, af_away_id, home_team_id, away_team_id, competition:competitions(code_externe), home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom)").in("id", matchIds);
+  const rows = ((ms ?? []) as unknown as { id: string; kickoff_at: string; af_home_id: number | null; af_away_id: number | null; home_team_id: string; away_team_id: string; competition: { code_externe: string | null } | { code_externe: string | null }[] | null; home: { nom: string } | { nom: string }[] | null; away: { nom: string } | { nom: string }[] | null }[])
     .filter((r) => r.af_home_id && r.af_away_id);
   const teams = [...new Set(rows.flatMap((r) => [r.af_home_id as number, r.af_away_id as number]))];
   if (!teams.length) return out;
   const liste = teams.join(",");
   const depuis = new Date(Date.now() - 730 * 86400000).toISOString();
-  const [{ data: hist }, { data: recents }] = await Promise.all([
+  const codeDe = (r: (typeof rows)[number]) => (Array.isArray(r.competition) ? r.competition[0]?.code_externe : r.competition?.code_externe) ?? null;
+  const comps = [...new Set(rows.map(codeDe).filter((c): c is string => !!c))];
+  const [{ data: hist }, { data: recents }, { data: st }] = await Promise.all([
     db.from("af_history").select("fixture_id, played_at, home_id, away_id, home_goals, away_goals").gte("played_at", depuis)
       .or(`home_id.in.(${liste}),away_id.in.(${liste})`).order("played_at", { ascending: false }).limit(5000),
     db.from("matches").select("af_fixture_id, kickoff_at, af_home_id, af_away_id, score_home, score_away").eq("statut", "termine").gte("kickoff_at", depuis)
       .or(`af_home_id.in.(${liste}),af_away_id.in.(${liste})`).order("kickoff_at", { ascending: false }).limit(2000),
+    comps.length ? db.from("standings").select("*").in("comp_code", comps).limit(3000) : Promise.resolve({ data: [] as StandingRow[] }),
   ]);
+  const tables = new Map<string, StandingRow[]>();
+  for (const c of comps) tables.set(c, latestStandings(((st ?? []) as StandingRow[]).filter((x) => x.comp_code === c)));
   const vus = new Set<number>();
   const passes: Joue[] = [];
   for (const p of hist ?? []) {
@@ -79,7 +87,12 @@ export async function loadPourquoi(db: Db, matchIds: string[]): Promise<Map<stri
   for (const r of rows) {
     const t = Date.parse(r.kickoff_at);
     const avant = passes.filter((p) => Date.parse(p.at) < t);
-    out.set(r.id, pourquoi({ homeId: String(r.af_home_id), awayId: String(r.af_away_id), home: nom(r.home), away: nom(r.away) }, avant));
+    const pq = pourquoi({ homeId: String(r.af_home_id), awayId: String(r.af_away_id), home: nom(r.home), away: nom(r.away) }, avant);
+    const table = tables.get(codeDe(r) ?? "") ?? [];
+    const en = table.length ? enjeux({ home: nom(r.home), away: nom(r.away), comp: codeDe(r) ?? "", homeRow: table.find((x) => x.team_id === r.home_team_id) ?? null, awayRow: table.find((x) => x.team_id === r.away_team_id) ?? null, table }) : [];
+    // la phrase la plus parlante : un conditionnel (« en cas de victoire ») ou une zone, avant la simple position
+    const enjeu = en.find((l) => /victoire|pourrait/.test(l)) ?? en[0] ?? null;
+    out.set(r.id, { ...pq, enjeu });
   }
   return out;
 }

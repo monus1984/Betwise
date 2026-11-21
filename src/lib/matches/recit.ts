@@ -10,6 +10,7 @@ import type { Database } from "../supabase/database.types";
 import { categorieOf, type Categorie } from "../coach/categories";
 import { familleOf, loadSignals, pickLabel, picksOf, type Pick } from "../probs/signals";
 import { latestStandings, type StandingRow } from "./standings";
+import { enjeux, fraicheur } from "./enjeux";
 
 type Db = SupabaseClient<Database, "betwise">;
 type One<T> = T | T[] | null;
@@ -24,6 +25,8 @@ export type Passe = { date: string; home: string; away: string; sh: number; sa: 
 export type RecitInput = {
   home: string; away: string;
   rangs: { home: StandingRow | null; away: StandingRow | null };
+  /** Classement complet de la compétition (pour les enjeux : titre, places qualificatives, maintien). */
+  table?: StandingRow[]; comp?: string;
   /** Matchs terminés des deux équipes, du plus récent au plus ancien. */
   passes: Passe[];
   picks: Pick[]; source: "marche" | "modele" | null; butsAttendus: number | null;
@@ -48,11 +51,18 @@ export function zoneFr(zone: string | null): string | null {
   return null;
 }
 
-function etapeEnjeu({ home, away, rangs }: RecitInput): Etape | null {
+function etapeEnjeu({ home, away, rangs, table, comp }: RecitInput): Etape | null {
   const h = rangs.home, a = rangs.away;
   if (!h && !a) return null;
   const dit = (nom: string, r: StandingRow) => `${nom} est ${ord(r.rang)} avec ${pl(r.points, "point")} en ${pl(r.joues, "match")}${zoneFr(r.zone) ? `, ${zoneFr(r.zone)}` : ""}.`;
   const lignes = [h && dit(home, h), a && dit(away, a)].filter(Boolean) as string[];
+  const en = table?.length ? enjeux({ home, away, comp: comp ?? "", homeRow: h, awayRow: a, table }) : [];
+  if (en.length) {
+    lignes.push(...en);
+    const f = fraicheur(table!);
+    if (f) lignes.push(`Source : ${f}, selon API-Football.`);
+    return { cle: "enjeu", titre: "L’enjeu", lignes };
+  }
   if (h && a && h.groupe === a.groupe) {
     const ecart = Math.abs(h.points - a.points);
     lignes.push(ecart === 0 ? "Les deux équipes sont à égalité de points : ce match les départage." : ecart <= 3 ? `${pl(ecart, "point")} d’écart : le classement peut basculer ce soir-là.` : `${ecart} points d’écart entre les deux.`);
@@ -150,7 +160,7 @@ export async function loadRecit(db: Db, matchId: string): Promise<(Recit & { mat
   const home = one(m.home)?.nom ?? "", away = one(m.away)?.nom ?? "", comp = one(m.competition)?.code_externe ?? "";
   const ids = [m.home_team_id, m.away_team_id];
   const [{ data: st }, { data: past }, signals] = await Promise.all([
-    comp ? db.from("standings").select("*").eq("comp_code", comp).in("team_id", ids) : Promise.resolve({ data: [] }),
+    comp ? db.from("standings").select("*").eq("comp_code", comp).limit(400) : Promise.resolve({ data: [] }),
     db.from("matches").select("kickoff_at, score_home, score_away, details, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom)")
       .eq("statut", "termine").lt("kickoff_at", m.kickoff_at).or(`home_team_id.in.(${ids.join(",")}),away_team_id.in.(${ids.join(",")})`).order("kickoff_at", { ascending: false }).limit(14),
     loadSignals(db as never, [m.id]),
@@ -162,7 +172,7 @@ export async function loadRecit(db: Db, matchId: string): Promise<(Recit & { mat
     .map((p) => ({ date: p.kickoff_at, home: one(p.home)?.nom ?? "", away: one(p.away)?.nom ?? "", sh: p.score_home as number, sa: p.score_away as number,
       buteurs: (p.details?.evts ?? []).filter((e) => e.t === "but" || e.t === "pen").map((e) => ({ n: e.n, e: e.e })) }));
   const recit = buildRecit({
-    home, away, rangs: { home: rows.find((r) => r.team_id === m.home_team_id) ?? null, away: rows.find((r) => r.team_id === m.away_team_id) ?? null },
+    home, away, rangs: { home: rows.find((r) => r.team_id === m.home_team_id) ?? null, away: rows.find((r) => r.team_id === m.away_team_id) ?? null }, table: rows, comp,
     passes, picks: sg ? picksOf(sg, "all") : [], source: sg?.source ?? null, butsAttendus: sg ? sg.lh + sg.la : null,
   });
   return { ...recit, matchId: m.id, home, away, kickoff: m.kickoff_at, comp, statut: m.statut };

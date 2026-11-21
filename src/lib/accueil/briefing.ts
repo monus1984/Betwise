@@ -32,7 +32,7 @@ export function briefing(input: { prenom: string; synthese: string; profils: Rec
     const pct = Math.round(x.p * 100);
     const cote = x.cote ? ` Cote ${x.cote.toFixed(2).replace(".", ",")}${x.bookmaker ? ` chez ${x.bookmaker}` : ""}.` : "";
     const pq = dejaCite ? null : input.pourquoi.get(x.matchId);
-    const raison = pq ? [pq.face, pq.forme].filter(Boolean).slice(0, 1).map((t) => ` ${t}.`).join("") : "";
+    const raison = pq ? [pq.enjeu, pq.face, pq.forme].filter(Boolean).slice(0, 1).map((t) => ` ${String(t).replace(/\.$/, "")}.`).join("") : "";
     blocs.push(`Profil ${PROFIL[k]}. ${x.home} contre ${x.away}, ${quand(x.kickoff, input.maintenant)} : ${x.label}. Probabilité ${pct} %, donc ça ne passe pas environ ${100 - pct} fois sur 100.${cote}${raison}`);
   }
   if (blocs.length === 1) blocs.push("Je n’ai pas de proposition calculée pour l’instant, et je ne t’en invente pas. Les prochains matchs couverts sont affichés plus bas.");

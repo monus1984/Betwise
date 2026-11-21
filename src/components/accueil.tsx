@@ -184,7 +184,7 @@ export function Bienvenue() {
 
 /** Pourquoi ces propositions : la forme et le face-à-face, quand l'historique existe. Rien sinon. */
 export function Pourquoi({ p }: { p: import("@/lib/matches/justification").Pourquoi | null | undefined }) {
-  const l = p ? [p.forme, p.face, p.buts].filter(Boolean) as string[] : [];
+  const l = p ? [p.enjeu, p.forme, p.face, p.buts].filter(Boolean) as string[] : [];
   if (!l.length) return null;
   return (
     <ul className="space-y-1 rounded-xl bg-surface-2 px-2.5 py-2 text-[11.5px] leading-snug text-ink-soft" aria-label="Pourquoi">
