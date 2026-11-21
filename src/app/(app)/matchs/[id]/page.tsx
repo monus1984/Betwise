@@ -14,6 +14,7 @@ import { sansMarge } from "@/lib/probs/marge";
 import { loadSignals, pickLabel, picksOf } from "@/lib/probs/signals";
 import { MatchMarkets } from "./markets";
 import { CotesParBookmaker } from "./cotes-bookmaker";
+import { Aide } from "@/components/aide";
 import { BETCLIC_FR } from "@/lib/odds-api/betclic-ci";
 import { AddToSlip } from "@/components/slip";
 import { FollowStar } from "@/components/follow-star";
@@ -97,7 +98,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
       <LiveRefresh active={m.statut === "en_cours"} />
       {m.statut === "en_cours" && m.score_home !== null && <GoalWatcher scores={[{ id: m.id, label: `${shortName(home)} ${m.score_home}–${m.score_away} ${shortName(away)}`, h: m.score_home ?? 0, a: m.score_away ?? 0 }]} />}
       <div className="mb-3 flex items-center justify-between">
-        <Link href="/matchs" className="inline-flex items-center gap-1 text-sm text-ink-muted">‹ Matchs</Link>
+        <span className="flex items-center gap-2"><Link href="/matchs" className="inline-flex items-center gap-1 text-sm text-ink-muted">‹ Matchs</Link><Aide section="match" clair /></span>
         {m.statut !== "termine" && <span className="rounded-full bg-pitch"><FollowStar matchId={m.id} initial={suivi} light label /></span>}
       </div>
 

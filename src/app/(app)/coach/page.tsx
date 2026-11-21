@@ -66,7 +66,7 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <PageHeader title="Coach" subtitle="Les sélections du jour avec leur risque, tes points forts et ceux de tes sources." />
+      <PageHeader aide="coach" title="Coach" subtitle="Les sélections du jour avec leur risque, tes points forts et ceux de tes sources." />
       <CoachNav current="outils" />
       {sp.ok === "budget" && <div className="mb-3"><Notice kind="info">Budget enregistré.</Notice></div>}
       {sp.err && <div className="mb-3"><Notice>{sp.err === "budget" ? "Indique deux montants ; la perte maximale ne peut pas dépasser le budget de mise." : "Enregistrement impossible. Réessaie."}</Notice></div>}

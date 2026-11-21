@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { MatchMarkets } from "@/app/(app)/matchs/[id]/markets";
+import { Aide } from "@/components/aide";
 import { CotesParBookmaker } from "@/app/(app)/matchs/[id]/cotes-bookmaker";
 import { pickLabel, probaDirecte, probasMarche, type CoteBookmaker, type Signal } from "@/lib/probs/signals";
 
@@ -52,6 +53,7 @@ export default async function ApercuMatch({ searchParams }: { searchParams: Prom
   return (
     <div className="mx-auto max-w-xl space-y-3 px-4 pb-32 pt-5">
       <p className="rounded-lg bg-surface-2 px-3 py-1.5 text-center text-[11px] text-ink-muted">Onglet Marchés · planche de contrôle, match et cotes fictifs{sans ? " · sans cote de bookmaker" : ""}</p>
+      <Aide section="import" clair />
       <MatchMarkets m={m} sg={sg} />
       {!sans && <CotesParBookmaker bookmaker="1xBet" releveAt={RELEVE} betclicAt={new Date(Date.now() - 2 * 3600000).toISOString()} medianeAt={new Date(Date.now() - 17 * 3600000).toISOString()} upcoming lignes={lignes} href={() => "#"} />}
     </div>

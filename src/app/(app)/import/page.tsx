@@ -17,7 +17,7 @@ export default async function ImportPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <PageHeader title="Importer" subtitle="Ticket de bookmaker ou pronos d’un tipster : une capture, une vidéo ou le texte. Tu vérifies, puis tu enregistres." />
+      <PageHeader aide="import" title="Importer" subtitle="Ticket de bookmaker ou pronos d’un tipster : une capture, une vidéo ou le texte. Tu vérifies, puis tu enregistres." />
       <ImportFlow markets={markets ?? []} sources={ordered} defaultOrigin={mine?.id ?? null} initialText={sharedText} justSaved={!!sp.ok} nextTab={sp.next} initialTest={sp.test === "1"} />
     </>
   );

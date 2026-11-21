@@ -129,7 +129,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <LiveRefresh active={rows.some((r) => r.statut === "en_cours" || (r.statut === "programme" && Math.abs(Date.parse(r.kickoff_at) - Date.now()) < 15 * 60000))} />
-      <PageHeader title="Matchs" subtitle="Sur chaque match, l’issue la plus probable d’après les cotes de référence ; en bleu, d’après le modèle quand il n’y a pas de cote." />
+      <PageHeader aide="matchs" title="Matchs" subtitle="Sur chaque match, l’issue la plus probable d’après les cotes de référence ; en bleu, d’après le modèle quand il n’y a pas de cote." />
 
       {/* Recherche d'équipe, de compétition ou de pays */}
       <form action="/matchs" className="mb-3 flex gap-2" role="search">

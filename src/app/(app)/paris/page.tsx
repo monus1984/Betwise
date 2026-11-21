@@ -32,7 +32,7 @@ export default async function ParisPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <ParisNav current="paris" />
-      <PageHeader title="Mes paris" subtitle={tests ? "Choix testés sans miser : ta bankroll n’a pas bougé." : filter === "en_cours" ? "En attente de résultat ou de ta confirmation." : "Réglés."} action={<Link href="/bilan">Bilan</Link>} />
+      <PageHeader aide={tests ? "tests" : "paris"} title="Mes paris" subtitle={tests ? "Choix testés sans miser : ta bankroll n’a pas bougé." : filter === "en_cours" ? "En attente de résultat ou de ta confirmation." : "Réglés."} action={<Link href="/bilan">Bilan</Link>} />
       {sp.ajout && <p className="mb-4 rounded-lg border border-gain/30 bg-gain-soft p-3 text-sm text-gain-ink">{tests ? "Test enregistré." : "Pari enregistré."}</p>}
 
       <div className="mb-4 flex gap-2">

@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Mark } from "@/components/icons";
 import { InstallButton } from "@/components/install-button";
 import { loadAccueil } from "@/lib/accueil/load";
+import { Aide } from "@/components/aide";
 import { briefing } from "@/lib/accueil/briefing";
 import type { Pourquoi } from "@/lib/matches/justification";
 import { BandeauBetster, Bienvenue, CarteMatchUI, Demain, IconeScan, ImportCarte, RaccourcisCoach, TipstersDuJour } from "@/components/accueil";
@@ -109,6 +110,7 @@ export default async function Home() {
       <header className="mb-3 flex items-center justify-between gap-3">
         <span className="flex items-center gap-2"><Mark className="h-7 w-7" /><span className="min-w-0"><span className="block text-lg font-bold leading-tight tracking-tight">{APP_NAME}</span><span className="block text-[11px] capitalize text-ink-muted">{new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Abidjan" })}</span></span></span>
         <span className="flex items-center gap-0.5">
+          <Aide section="accueil" clair />
           <Link href="/import" aria-label="Importer un ticket" className="flex h-11 w-11 items-center justify-center rounded-full text-ink-soft active:bg-surface-2"><IconeScan /></Link>
           <Link href="/notifications" aria-label={cloche ? `Notifications, ${nonLues} non lues` : "Notifications"} className="relative flex h-11 w-11 items-center justify-center rounded-full text-ink-soft active:bg-surface-2">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
