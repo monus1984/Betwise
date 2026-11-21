@@ -19,6 +19,23 @@ export const AF_COMPETITIONS: Record<string, { league: number; season: number; n
   CAFCL: { league: 12, season: 2026, nom: "Ligue des champions CAF", pays: "Afrique", saison: "2026-2027", nations: false },
   CAFCC: { league: 20, season: 2026, nom: "Coupe de la confédération CAF", pays: "Afrique", saison: "2026-2027", nations: false },
   CIV1: { league: 386, season: 2026, nom: "Ligue 1 Côte d'Ivoire", pays: "Côte d'Ivoire", saison: "2026-2027", nations: false },
+  // Lot 1, vague 1 (21/11/2026) : identifiants et saisons vérifiés par l'audit (scripts/discover-api-football.ts, branche audit-lot1)
+  EL: { league: 3, season: 2026, nom: "Ligue Europa", pays: "Europe", saison: "2026-2027", nations: false },
+  ECL: { league: 848, season: 2026, nom: "Ligue Conférence", pays: "Europe", saison: "2026-2027", nations: false },
+  BE1: { league: 144, season: 2026, nom: "Belgique D1 (Jupiler Pro League)", pays: "Belgique", saison: "2026-2027", nations: false },
+  BE2: { league: 145, season: 2026, nom: "Belgique D2 (Challenger Pro League)", pays: "Belgique", saison: "2026-2027", nations: false },
+  TR1: { league: 203, season: 2026, nom: "Turquie D1 (Süper Lig)", pays: "Turquie", saison: "2026-2027", nations: false },
+  TR2: { league: 204, season: 2026, nom: "Turquie D2 (1. Lig)", pays: "Turquie", saison: "2026-2027", nations: false },
+  NL1: { league: 88, season: 2026, nom: "Pays-Bas D1 (Eredivisie)", pays: "Pays-Bas", saison: "2026-2027", nations: false },
+  NL2: { league: 89, season: 2026, nom: "Pays-Bas D2 (Eerste Divisie)", pays: "Pays-Bas", saison: "2026-2027", nations: false },
+  DK1: { league: 119, season: 2026, nom: "Danemark D1 (Superliga)", pays: "Danemark", saison: "2026-2027", nations: false },
+  NO1: { league: 103, season: 2026, nom: "Norvège D1 (Eliteserien)", pays: "Norvège", saison: "2026", nations: false },
+  KSA1: { league: 307, season: 2026, nom: "Arabie saoudite D1 (Saudi Pro League)", pays: "Arabie saoudite", saison: "2026-2027", nations: false },
+  ELC: { league: 40, season: 2026, nom: "Angleterre D2 (Championship)", pays: "Angleterre", saison: "2026-2027", nations: false },
+  FL2: { league: 62, season: 2026, nom: "Ligue 2", pays: "France", saison: "2026-2027", nations: false },
+  BL2: { league: 79, season: 2026, nom: "2. Bundesliga", pays: "Allemagne", saison: "2026-2027", nations: false },
+  SB: { league: 136, season: 2026, nom: "Serie B", pays: "Italie", saison: "2026-2027", nations: false },
+  SD: { league: 141, season: 2026, nom: "Liga 2 (Segunda División)", pays: "Espagne", saison: "2026-2027", nations: false },
 };
 
 // Noms API-Football → noms déjà utilisés pour les sélections (The Odds API)
@@ -67,9 +84,24 @@ export async function syncAfCompetition(db: Db, api: ApiFootball, code: string) 
   };
   const uniq = new Map<string, ReturnType<typeof teamRow>>();
   for (const f of fx) for (const t of [f.teams.home, f.teams.away]) { const r = teamRow(t); uniq.set(r.code_externe, r); }
-  const { data: teams, error: te } = await db.from("teams").upsert([...uniq.values()], { onConflict: "code_externe" }).select("id, code_externe");
-  if (te) throw te;
-  const tid = new Map(teams.map((t) => [t.code_externe!, t.id]));
+  // Club déjà connu par un autre championnat (ex. Lyon en Ligue Europa, venu de football-data.org) : on reprend son équipe
+  // grâce aux identifiants API-Football déjà rattachés à ses matchs, au lieu d'en créer un doublon.
+  const tid = new Map<string, string>();
+  if (!c.nations) {
+    const afIds = [...new Set(fx.flatMap((f) => [f.teams.home.id, f.teams.away.id]))];
+    const [{ data: hs }, { data: as }] = await Promise.all([
+      db.from("matches").select("af_home_id, home_team_id").in("af_home_id", afIds).limit(1000),
+      db.from("matches").select("af_away_id, away_team_id").in("af_away_id", afIds).limit(1000),
+    ]);
+    for (const h of hs ?? []) if (h.af_home_id) tid.set(`af:${h.af_home_id}`, h.home_team_id);
+    for (const a of as ?? []) if (a.af_away_id) tid.set(`af:${a.af_away_id}`, a.away_team_id);
+  }
+  const aCreer = [...uniq.values()].filter((r) => !tid.has(r.code_externe));
+  if (aCreer.length) {
+    const { data: teams, error: te } = await db.from("teams").upsert(aCreer, { onConflict: "code_externe" }).select("id, code_externe");
+    if (te) throw te;
+    for (const t of teams) tid.set(t.code_externe!, t.id);
+  }
 
   const now = new Date().toISOString();
   const rows = fx.map((f: AfFixture) => {
@@ -289,6 +321,7 @@ export async function fillDetails(db: Db, api: ApiFootball): Promise<{ filled: n
 /** Compétitions dont on garde le classement (championnats et phases de groupes). */
 export const AF_STANDINGS: Record<string, { league: number; season: number }> = {
   ...AF_LINKED, CIV1: { league: 386, season: 2026 }, CANQ: { league: 36, season: 2027 }, CAFCL: { league: 12, season: 2026 }, CAFCC: { league: 20, season: 2026 },
+  ...Object.fromEntries(["EL", "ECL", "BE1", "BE2", "TR1", "TR2", "NL1", "NL2", "DK1", "NO1", "KSA1", "ELC", "FL2", "BL2", "SB", "SD"].map((k) => [k, { league: AF_COMPETITIONS[k].league, season: AF_COMPETITIONS[k].season }])),
 };
 
 /** Classement d'une compétition, avec les noms d'équipes de BETWISE quand l'équipe est connue. Une requête. */

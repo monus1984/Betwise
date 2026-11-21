@@ -1,5 +1,6 @@
 import { APP_NAME } from "@/lib/app-name";
 import { sansMarge } from "@/lib/probs/marge";
+import { COMPETITIONS, COMP_ORDRE } from "@/lib/competitions";
 /** Briques visuelles des matchs : écusson à initiales, cases 1/N/2, drapeaux de compétition. */
 
 const PALETTE = ["#1e3a8a", "#7c2d12", "#14532d", "#581c87", "#7f1d1d", "#134e4a", "#713f12", "#312e81", "#831843", "#0c4a6e"];
@@ -24,9 +25,9 @@ export function TeamBadge({ name, size = 22 }: { name: string; size?: number }) 
   );
 }
 
-export const COMP_FLAG: Record<string, string> = { PL: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", PD: "🇪🇸", SA: "🇮🇹", BL1: "🇩🇪", FL1: "🇫🇷", CL: "⭐", UNL: "🇪🇺", CANQ: "🌍", AMI: "🤝", CAFCL: "🏆", CAFCC: "🏆", CIV1: "🇨🇮" };
-export const COMP_SHORT: Record<string, string> = { PL: "Premier League", PD: "Liga", SA: "Serie A", BL1: "Bundesliga", FL1: "Ligue 1", CL: "Ligue des champions", UNL: "Ligue des nations", CANQ: "Éliminatoires CAN", AMI: "Amicaux internationaux", CAFCL: "Ligue des champions CAF", CAFCC: "Coupe de la confédération", CIV1: "Ligue 1 ivoirienne" };
-export const COMP_ORDER = ["CANQ", "CIV1", "UNL", "CL", "CAFCL", "CAFCC", "PL", "PD", "SA", "BL1", "FL1", "AMI"];
+export const COMP_FLAG: Record<string, string> = Object.fromEntries(Object.entries(COMPETITIONS).map(([k, v]) => [k, v.drapeau]));
+export const COMP_SHORT: Record<string, string> = Object.fromEntries(Object.entries(COMPETITIONS).map(([k, v]) => [k, v.court]));
+export const COMP_ORDER = COMP_ORDRE;
 
 export type Probs = { p1: number; pN: number; p2: number; source: "modele" | "marche" };
 
