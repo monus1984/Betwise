@@ -3,10 +3,10 @@ Voix de Betster « Pierre enthousiaste » (21/11, choix de Mounir), gratuite : P
 Appelée seulement par /api/tts (côté serveur) : la demande porte une signature HMAC calculée avec la clé de service
 Supabase, qui ne circule jamais. Renvoie un WAV mono 24 kHz ; /api/tts le compresse en MP3.
 
-Réglages validés à l'écoute (extrait « pierre-enthousiaste ») :
-- débit 0,85 et intonation variée (noise 0,95) ;
+Réglages validés à l'écoute le 21/11 (extrait « C-pose », choisi pour l'articulation) :
+- débit 1,02, intonation régulière (noise 0,55), pauses régulières (noise_w 0,7) ;
 - voix montée d'environ 1,5 demi-ton : on fabrique à 22 050 Hz et on étiquette à 24 000 Hz, ce qui monte la hauteur
-  de 1,47 demi-ton et accélère de 8,8 % — compensé en fabriquant avec un débit 0,85 × 1,0884 ;
+  de 1,47 demi-ton et accélère de 8,8 % — compensé en fabriquant avec un débit 1,02 × 1,0884 ;
 - aigus éclaircis (+4 dB environ au-dessus de 3 kHz) et volume ramené à un niveau constant.
 """
 import hashlib, hmac, io, json, os, time, wave
@@ -30,7 +30,7 @@ def voix():
         from piper.config import SynthesisConfig
         _voix = PiperVoice.load(MODELE)
         locuteur = json.load(open(MODELE + ".json")).get("speaker_id_map", {}).get("pierre")
-        _reglages = SynthesisConfig(length_scale=0.85 * RAPPORT, noise_scale=0.95, noise_w_scale=0.9, speaker_id=locuteur)
+        _reglages = SynthesisConfig(length_scale=1.02 * RAPPORT, noise_scale=0.55, noise_w_scale=0.7, speaker_id=locuteur)
     return _voix, _reglages
 
 
