@@ -64,3 +64,7 @@ export function comparerPays(a: string, b: string) {
 
 /** Ordre global des compétitions (pays, puis ordre de déclaration dans le pays). */
 export const COMP_ORDRE = Object.keys(COMPETITIONS).sort((a, b) => comparerPays(COMPETITIONS[a].pays, COMPETITIONS[b].pays) || Object.keys(COMPETITIONS).indexOf(a) - Object.keys(COMPETITIONS).indexOf(b));
+
+/** Les 5 grands championnats européens : mis en avant sur Prédictions (21/11). */
+export const TOP5 = new Set(["PL", "PD", "SA", "BL1", "FL1"]);
+export const estTop5 = (code: string | null | undefined) => !!code && TOP5.has(code);

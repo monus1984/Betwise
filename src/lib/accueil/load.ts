@@ -11,6 +11,7 @@ import { loadOptions, type Periode } from "@/lib/options/load";
 import type { Option } from "@/lib/options/build";
 import { profilDe, type Categorie } from "@/lib/coach/categories";
 import { logoEquipe } from "@/lib/logos";
+import { estTop5 } from "@/lib/competitions";
 import { avisDuJour, couverture, expression, ilYA, libelleMarche, publieAvant, type Couverture, type Expression } from "./regles";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
@@ -135,7 +136,8 @@ export async function loadAccueil(db: Db, userId: string) {
     propositions: (profilsAuj.get(m.id) ?? []).map(({ o, profil }) => proposition(o, profil, signals.get(m.id), releves.get(m.id))) }));
   // En direct d'abord, puis à venir, puis terminés ; à heure égale, les matchs analysés avant les autres
   const rang = (c: CarteMatch) => (c.statut === "en_cours" ? 0 : c.statut === "programme" ? 1 : 2);
-  cartes.sort((a, b) => rang(a) - rang(b) || Date.parse(a.kickoff) - Date.parse(b.kickoff) || Number(!a.probs) - Number(!b.probs));
+  // Les 5 grands championnats d'abord (21/11), puis les autres ; dans chaque groupe, du plus proche au plus lointain
+  cartes.sort((a, b) => rang(a) - rang(b) || Number(!estTop5(a.comp)) - Number(!estTop5(b.comp)) || Date.parse(a.kickoff) - Date.parse(b.kickoff) || Number(!a.probs) - Number(!b.probs));
 
   let avis: Avis | null = null;
   if (avisPick) {
@@ -160,21 +162,22 @@ export async function loadAccueil(db: Db, userId: string) {
   const profils: Record<Categorie, Proposition[]> = { sur: [], audacieux: [], risque: [] };
   const optionDe = (pk: (typeof today.picks)[number]): Option => ({ matchId: pk.match_id, kickoff: pk.kickoff, home: pk.home, away: pk.away, comp: pk.comp ?? "", market: pk.market, param: pk.param, sel: pk.sel, label: pk.selection, famille: "resultat", p: pk.p, cote: pk.cote, source: "marche" });
   for (const pk of today.picks.filter((x) => x.statut === "programme")) profils[pk.categorie].push(proposition(optionDe(pk), pk.categorie, signals.get(pk.match_id), releves.get(pk.match_id)));
+  for (const k of PROFILS) profils[k].sort((a, b) => Number(!estTop5(a.comp)) - Number(!estTop5(b.comp)));
   const profilsDeDemain = !today.picks.some((x) => x.statut === "programme");
   if (profilsDeDemain) {
     const vus = new Set<string>();
-    for (const [, l] of [...parProfil(optDemain.options).entries()]) for (const { o, profil } of l) {
+    for (const [, l] of [...parProfil(optDemain.options).entries()].sort(([, a], [, b]) => Number(!estTop5(a[0].o.comp)) - Number(!estTop5(b[0].o.comp)))) for (const { o, profil } of l) {
       if (profils[profil].length >= 3 || vus.has(`${o.matchId}|${profil}`)) continue;
       vus.add(`${o.matchId}|${profil}`); profils[profil].push(proposition(o, profil, signals.get(o.matchId), releves.get(o.matchId)));
     }
-    for (const k of PROFILS) profils[k].sort((a, b) => b.p - a.p);
+    for (const k of PROFILS) profils[k].sort((a, b) => Number(!estTop5(a.comp)) - Number(!estTop5(b.comp)) || b.p - a.p);
   }
 
   // Demain : les matchs analysés, deux propositions chacun
   const demain: MatchAVenir[] = [...parProfil(optDemain.options).entries()].map(([matchId, l]) => {
     const o = l[0].o;
     return { matchId, home: o.home, away: o.away, kickoff: o.kickoff, comp: o.comp || null, propositions: l.slice(0, 2).map(({ o: x, profil }) => proposition(x, profil, signals.get(matchId), releves.get(matchId))) };
-  }).sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
+  }).sort((a, b) => Number(!estTop5(a.comp)) - Number(!estTop5(b.comp)) || Date.parse(a.kickoff) - Date.parse(b.kickoff));
 
   // Justification (forme, face-à-face) pour les matchs à venir affichés
   const aJustifier = [...new Set([...cartes.filter((c) => c.statut === "programme" && c.probs).map((c) => c.id), ...demain.map((m) => m.matchId)])].slice(0, 40);

@@ -7,6 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../supabase/database.types";
 import { loadSignals, picksOf } from "../probs/signals";
 import { profilDe, type Categorie } from "./categories";
+import { estTop5 } from "../competitions";
 
 type Db = SupabaseClient<Database, "betwise">;
 export const PICKS_SOURCE = "Coups du jour BETWISE";
@@ -42,7 +43,8 @@ export async function generateDailyPicks(db: Db, parCategorie = 3, refaire = fal
       // l'avis du modèle départage : accord = bonus, fort désaccord = pénalité
       const accord = pk.pModele === null ? 0 : pk.pModele >= pk.p - 0.03 ? 0.03 : pk.pModele < pk.p - 0.1 ? -0.06 : 0;
       // une cote de référence vérifiable vaut mieux qu'une probabilité calculée ; les amicaux sont moins fiables
-      const bonus = (pk.cote ? 0.03 : 0) - (compOf.get(match_id) === "AMI" ? 0.03 : 0);
+      // les 5 grands championnats européens passent devant à probabilité proche (21/11)
+      const bonus = (pk.cote ? 0.03 : 0) - (compOf.get(match_id) === "AMI" ? 0.03 : 0) + (estTop5(compOf.get(match_id)) ? 0.05 : 0);
       cands.push({ match_id, market: pk.market, param: pk.param, sel: pk.sel, p: pk.p, cote: pk.cote, pModele: pk.pModele, cat, score: pk.p + accord + bonus });
     }
   }

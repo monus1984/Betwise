@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { OptionRecherche } from "@/lib/accueil/load";
 import { COMP_FLAG } from "@/components/match-ui";
+import { estTop5 } from "@/lib/competitions";
 
 const PAS = [40, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95];
 const heure = (iso: string) => new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" });
@@ -21,7 +22,9 @@ export function RecherchePourcentage({ options }: { options: OptionRecherche[] }
     const parMatch = new Map<string, OptionRecherche[]>();
     for (const o of l) parMatch.set(o.matchId, [...(parMatch.get(o.matchId) ?? []), o]);
     const r = [...parMatch.values()].flatMap((x) => x.sort((a, b) => b.p - a.p).slice(0, 2));
-    return r.sort((a, b) => (tri === "heure" ? Date.parse(a.kickoff) - Date.parse(b.kickoff) || b.p - a.p : b.p - a.p));
+    // les 5 grands championnats d'abord, puis l'ordre choisi
+    const top = (o: OptionRecherche) => Number(!estTop5(o.comp));
+    return r.sort((a, b) => top(a) - top(b) || (tri === "heure" ? Date.parse(a.kickoff) - Date.parse(b.kickoff) || b.p - a.p : b.p - a.p));
   }, [options, min, max, tri]);
   if (!options.length) return null;
   const sel = "rounded-lg border border-line bg-surface px-2 py-1.5 text-sm font-semibold tabular-nums";
