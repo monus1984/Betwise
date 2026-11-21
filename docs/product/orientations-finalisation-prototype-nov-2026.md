@@ -328,3 +328,61 @@ Après chaque lot :
 Un utilisateur peut retrouver un match dans une couverture suffisamment large, consulter une analyse lisible, importer ou dicter un ticket Betclic/1xBet (ou utiliser un mode de repli clair), corriger les sélections, le suivre en Paris test et mesurer ses résultats sans engager d'argent réel.
 
 Le produit doit être fiable et honnête sur ses limites, utilisable sur un Android moyen et réalisable sans coûts lourds.
+
+## 17. Valeur différenciante BETWISE — suivi, analyse personnelle et bankroll
+
+Ces fonctionnalités doivent être considérées comme des éléments centraux de la proposition de valeur, et pas comme de simples options secondaires.
+
+### Sources et tipsters
+- Permettre à l'utilisateur de suivre les sources de pronostics qu'il consulte (tipsters, pages ou communautés).
+- Enregistrer les pronostics suivis avec leur source, date/heure, sélection et cote disponible au moment de l'enregistrement.
+- Calculer les performances à partir des pronostics réellement enregistrés et réglés : taux de réussite, rendement théorique si les données nécessaires sont présentes, régularité et résultats par championnat ou marché.
+- Ne pas présenter une source comme fiable sur la base d'un petit échantillon ou de résultats modifiables rétroactivement. Afficher le nombre de pronostics et la période observée.
+
+### Analyse des tickets et profil du parieur
+- Analyser les tickets enregistrés ou importés, ainsi que les Paris test, afin d'identifier les forces et faiblesses personnelles.
+- Mettre en évidence les performances par type de marché, plage de cote, compétition, format simple/combiné, nombre de sélections et source/tipster.
+- Repérer les tendances récurrentes et les erreurs possibles, sans jugement ni formulation culpabilisante.
+- Distinguer taux de réussite des sélections, taux de réussite des tickets, rendement théorique et bilan réel déclaré. Ne pas déduire la rentabilité du seul taux de réussite.
+- Les observations doivent être calculées sur l'historique disponible, avec taille d'échantillon et période visibles ; ne pas inventer de conclusions lorsque les données sont insuffisantes.
+
+### Bankroll et accompagnement du Coach
+- Faire du volet bankroll un outil de suivi : capital de départ, solde, mises, gains/pertes, évolution et historique.
+- Permettre à Betster d'expliquer les mouvements et les tendances observées dans la bankroll à partir des données de l'utilisateur.
+- Le Coach accompagne l'utilisateur avant, pendant et après ses choix : comprendre un match, examiner un ticket, suivre un résultat, analyser ses performances et consulter sa bankroll.
+- Le Coach peut signaler une concentration excessive des mises, une baisse de bankroll ou une série de pertes, sans présenter cela comme une prédiction ni encourager à récupérer les pertes.
+- Les conseils doivent rester informatifs, non prescriptifs et transparents. Aucune garantie de gain, aucune incitation à augmenter les mises ; l'utilisateur garde le contrôle.
+
+## 18. Brief de direction pour la vidéo promotionnelle BETWISE
+
+Claude doit utiliser ce brief pour préparer une vidéo de présentation. La vidéo de référence concurrente sert à inspirer le rythme et la mise en scène, sans copier sa marque, ses scènes ou son interface. L'enregistrement de BETWISE fourni par Mounir sert à comprendre les sections et les fonctionnalités réelles ; il ne doit pas être utilisé comme simple séquence de captures défilantes.
+
+### Positionnement à transmettre
+BETWISE est un compagnon analytique du parieur : il permet d'explorer les matchs, de comprendre les sélections, de retrouver et analyser ses tickets, de tester ses intuitions, de suivre ses sources, de mesurer ses résultats et de gérer sa bankroll avec l'aide de Betster.
+
+### Fonctionnalités à mettre en scène en priorité
+1. Centre de matchs organisé et riche, inspiré des usages de Flashscore : écussons, matchs classés du plus proche au plus éloigné, horaires/statuts lisibles et accès aux informations.
+2. Betster qui analyse les matchs du jour encore à venir (pas uniquement ceux du lendemain), présente les sélections du jour avec probabilités estimées lorsque le modèle et les données le permettent, puis explique le contexte factuel.
+3. Import intelligent de tickets Betclic et 1xBet par lien, code ou capture, selon la faisabilité réelle ; reconnaissance des sélections et validation par l'utilisateur.
+4. Analyse des tickets : mettre en évidence les forces et faiblesses du parieur et ses performances par marché, cote, championnat, format de ticket et source.
+5. Paris test : suivre ses intuitions et pronostics sans argent réel, puis mesurer les résultats.
+6. Suivi des sources/tipsters : comparer les pronostics enregistrés avec transparence sur le nombre d'observations et la période.
+7. Bankroll : visualiser le capital, les mises, les gains/pertes et l'évolution, avec Betster comme accompagnateur explicatif.
+8. Voix et Coach conversationnel : demander une analyse ou construire un ticket par la voix lorsque cette fonction est effectivement disponible.
+
+### Direction artistique et réalisation attendue
+- Produire une véritable publicité motion design / vidéo IA sports-tech, pas un diaporama de captures d'écran.
+- Prévoir un stade de football cinématographique, éclairages dynamiques, scènes en profondeur, smartphone mis en scène en perspective ou en 3D, animations de données, transitions maîtrisées, titres cinétiques et voix off française.
+- Les vrais écrans BETWISE doivent apparaître ponctuellement comme preuve du produit, intégrés dans une composition visuelle travaillée.
+- Construire un storyboard scène par scène, avec durée, visuel, mouvement caméra, texte écran, voix off et fonctionnalité représentée.
+- Choisir une durée courte (environ 35 à 45 secondes) et un format vertical 9:16, sauf autre décision validée.
+- Ne pas prétendre qu'un montage de captures 2D constitue une publicité 3D. Utiliser les outils vidéo adaptés disponibles et préciser les coûts/crédits avant toute génération payante.
+
+### Proposition de narration
+« Les matchs. Les analyses. Tes tickets. Tes résultats. »
+Puis montrer le parcours : explorer les matchs → comprendre une sélection avec Betster → importer/analyser un ticket → tester ses intuitions → mesurer ses performances et suivre sa bankroll.
+
+### Signature proposée
+« BETWISE — Comprends les matchs. Construis tes tickets. Teste tes intuitions. Apprends de tes résultats. »
+
+Ne montrer comme déjà disponible que les fonctionnalités réellement présentes et testées dans le prototype. Les fonctionnalités en développement doivent être indiquées comme concept ou à venir. Les probabilités sont des estimations, jamais des garanties.
