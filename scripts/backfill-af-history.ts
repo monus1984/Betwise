@@ -1,13 +1,16 @@
 /**
- * Historique API-Football des 5 championnats : résultats + xG + tirs, par lots de 20 matchs.
+ * Historique API-Football : résultats + xG + tirs, par lots de 20 matchs.
  * Idempotent : ne redemande que les matchs absents ou sans statistiques vérifiées.
- * Usage : tsx scripts/backfill-af-history.ts [saisons…]   (défaut : 2024 2025 2026)
+ * Usage : tsx scripts/backfill-af-history.ts [--ligues=144,145] [saisons…]   (défaut : 5 grands championnats, 2024 2025 2026)
+ * Le modèle BETWISE ne lit que les 5 grands championnats (src/lib/model/run.ts) ; les autres ligues servent à la
+ * justification (forme, face-à-face), qui cherche par équipe.
  */
 import "dotenv/config";
 import { createAdminClient } from "../src/lib/supabase/admin";
 import { ApiFootball, type AfFixture } from "../src/lib/api-football/client";
 
-const LEAGUES = [39, 140, 135, 78, 61];
+const arg = process.argv.find((a) => a.startsWith("--ligues="));
+const LEAGUES = arg ? arg.slice(9).split(",").map(Number).filter(Boolean) : [39, 140, 135, 78, 61];
 const stat = (f: AfFixture, teamId: number, type: string) => {
   const v = f.statistics?.find((s) => s.team.id === teamId)?.statistics.find((x) => x.type === type)?.value;
   return v === null || v === undefined || v === "" ? null : Number(v);
@@ -16,7 +19,7 @@ const stat = (f: AfFixture, teamId: number, type: string) => {
 async function main() {
   const db = createAdminClient();
   const api = new ApiFootball(process.env.API_FOOTBALL_KEY ?? "");
-  const seasons = process.argv.slice(2).map(Number).filter(Boolean);
+  const seasons = process.argv.slice(2).filter((a) => !a.startsWith("--")).map(Number).filter(Boolean);
   for (const season of seasons.length ? seasons : [2024, 2025, 2026]) for (const league of LEAGUES) {
     const all = await api.season(league, season);
     const done = new Set<number>();
