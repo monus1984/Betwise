@@ -27,10 +27,9 @@ jobs:
             n=$(basename $v); curl -sSfL -o $n.onnx "$r/$v.onnx"; curl -sSfL -o $n.onnx.json "$r/$v.onnx.json"
           done
           ls -la
-      - name: Fabriquer les extraits
-        run: python3 scripts/voix/essai_variantes.py sortie
-      - name: Déposer les extraits sur la branche d'essai
+      - name: Déposer le modèle Pierre sur la branche d'essai
         run: |
-          mkdir -p essais && mv sortie/*.wav essais/
+          mkdir -p modele && cp voix/fr_FR-upmc-medium.onnx voix/fr_FR-upmc-medium.onnx.json modele/
+          sha256sum modele/*
           git config user.name "betwise-essai" && git config user.email "actions@users.noreply.github.com"
-          git add essais && git commit -m "Variantes de voix" && git push
+          git add modele && git commit -m "Modèle de voix Pierre (Piper upmc medium)" && git push
