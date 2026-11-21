@@ -152,15 +152,76 @@ export type NormalizedSelection = {
 };
 
 /** Déduit code marché + sélection normalisée à partir des libellés bruts et des noms d'équipes. */
+/** Tournures anglaises courantes chez les tipsters, ramenées au français que le reste du parseur comprend. */
+export function anglais(x: string): string {
+  return x
+    .replace(/\b(1st|first) half\b|\bhalf[- ]?time\b/g, "1ère mi-temps")
+    .replace(/\b(2nd|second) half\b/g, "2e mi-temps")
+    .replace(/\bboth teams to score\b/g, "btts")
+    .replace(/\bdouble chance\b/g, "double chance")
+    .replace(/\s+/g, " ").trim();
+}
+
 export function normalizePick(marketText: string, pickText: string, home: string | null, away: string | null, team?: string | null, alias?: { home?: string[]; away?: string[] }): NormalizedSelection {
   // 1xBet et beaucoup de tipsters écrivent tout le pari sur une seule ligne : le modèle la recopie alors dans les deux champs.
   // Un libellé de marché identique au choix n'apprend rien : il est traité comme absent.
   const plat = (x: string) => x.toLowerCase().replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ").replace(/\s+/g, " ").trim();
-  const mOrig = marketText.toLowerCase();
+  const mOrig = anglais(marketText.toLowerCase());
   const m = plat(marketText) === plat(pickText) ? "" : mOrig;
   // ✅ = « oui, cette option » ; ❌ = « non ». Les autres emojis sont de la décoration.
   const oui = /[✅✔☑]/u.test(pickText) || /[✅✔☑]/u.test(marketText), non = /[❌✖🚫]/u.test(pickText);
-  const p = pickText.toLowerCase().replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ").replace(/\s+/g, " ").trim().replace(/^[–—-](?!\s*(?:de\b|\d))\s*|\s*[–—-]$/g, "").trim();
+  const p = anglais(pickText.toLowerCase().replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ").replace(/\s+/g, " ").trim().replace(/^[–—-](?!\s*(?:de\b|\d))\s*|\s*[–—-]$/g, "").trim());
+  // « Arsenal ou les deux marquent », « Away or GG » : gagne si l'un OU l'autre arrive. Aucun marché suivi ne le règle ;
+  // le lire comme « les deux marquent » le ferait perdre à tort. Gardé tel quel, à confirmer.
+  if (/\b(ou|or)\b/.test(p) && /\bgg\b|btts|(les )?(2|deux) (équipes )?marquent/.test(p) && !/&|\bet\b/.test(p))
+    return { market_code: "LIBRE", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "« Résultat ou les deux marquent » : pari « l’un ou l’autre », pas suivi automatiquement. Gardé tel quel, à confirmer et régler à la main." };
+  // Options de paiement anticipé (« 1up », « 2up » : payé dès que l'équipe mène d'un ou deux buts) : le pari de base est lu,
+  // mais le paiement anticipé n'est pas suivi ; l'utilisateur confirme.
+  { const up = p.match(/^(.*?)\s*\(?\b([12])\s*up\)?$/);
+    if (up) {
+      const base = up[1].trim() ? normalizePick(marketText.replace(/\(?\b[12]\s*up\b\)?/i, ""), pickText.replace(/\(?\b[12]\s*up\b\)?/i, "").trim(), home, away, team, alias) : null;
+      return { ...(base && base.ok ? base : { market_code: "LIBRE", market_param: null, selection: pickText }), label_pick: pickText, ok: false,
+        reason: `Option « ${up[2]}up » (payé dès que l’équipe mène de ${up[2]} but${up[2] === "2" ? "s" : ""}) : ${base?.ok ? "lu comme le pari de base, sans le paiement anticipé" : "pari de base non reconnu"}. Vérifie si le bookmaker a payé plus tôt.` };
+    } }
+  if (/\bexcl\.?\s*\d/.test(p)) return { market_code: "LIBRE", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Mention « excl. » (but exclu) : règle propre au bookmaker, pas suivie. Gardé tel quel, à confirmer." };
+  // Écritures anglaises de tipsters, côté désigné par home / away / 1 / 2
+  { const cote = (x: string): "1" | "2" | null => (/^(home|1|domicile)$/.test(x) ? "1" : /^(away|2|extérieur|exterieur)$/.test(x) ? "2" : null);
+    const ok = (market_code: string, market_param: number | null, selection: string): NormalizedSelection => ({ market_code, market_param, selection, label_pick: pickText, ok: true });
+    // « Home over 1.5 », « Away team under 0.5 » : buts de l'équipe
+    let e = p.match(/^(home|away)(?: team)?\s+(over|under|plus de|moins de)\s*(\d+(?:[.,]\d+)?)(?: goals?)?$/);
+    if (e) return ok(`TT${cote(e[1])}`, Number(e[3].replace(",", ".")), /over|plus/.test(e[2]) ? "Plus" : "Moins");
+    // « Home -1 », « Away +1.5 » : handicap asiatique
+    e = p.match(/^(home|away)\s*([+\-]\s*\d+(?:[.,]\d+)?)$/);
+    if (e) { const v = Number(e[2].replace(/\s/g, "").replace(",", ".")); if ((v * 4) % 1 === 0) return ok("AH", v, cote(e[1])!); }
+    // « Draw no bet 1 », « DNB away »
+    e = p.match(/^(?:draw no bet|dnb|rembours[ée]e? si nul)\s*[:\-–]?\s*(home|away|1|2)$/) ?? p.match(/^(home|away|1|2)\s*(?:draw no bet|dnb)$/);
+    if (e) return ok("DNB", null, cote(e[1])!);
+    // « Win either half 1 », « 1 to win both halves », « Win to nil 2 »
+    e = p.match(/^(?:win either half|to win either half)\s*(home|away|1|2)$/) ?? p.match(/^(home|away|1|2)\s*(?:to )?win either half$/);
+    if (e) return ok("WEH", null, cote(e[1])!);
+    e = p.match(/^(?:win both halves|to win both halves)\s*(home|away|1|2)$/) ?? p.match(/^(home|away|1|2)\s*(?:to )?win both halves$/);
+    if (e) return ok("WBH", null, cote(e[1])!);
+    e = p.match(/^(?:win to nil)\s*(home|away|1|2)$/) ?? p.match(/^(home|away|1|2)\s*(?:to )?win to nil$/);
+    if (e) return ok("WTN", null, cote(e[1])!);
+    // « Clean sheet home » : l'adversaire ne marque pas ; « Home team to score » : au moins un but
+    e = p.match(/^clean sheet\s*(home|away|1|2)$/) ?? p.match(/^(home|away|1|2)(?: team)? clean sheet$/);
+    if (e) return ok(`TT${cote(e[1]) === "1" ? "2" : "1"}`, 0.5, "Moins");
+    e = p.match(/^(home|away)(?: team)? to score$/);
+    if (e) return ok(`TT${cote(e[1])}`, 0.5, "Plus");
+    // « Exact score 2-1 », « Correct score 1:1 »
+    e = p.match(/^(?:exact score|correct score|score exact|cs)\s*:?\s*(\d+)\s*[-:]\s*(\d+)$/);
+    if (e && !/mi[- ]?temps|\b(ht|mt)\b/.test(m)) return ok("CS", null, `${e[1]}-${e[2]}`);
+    // « 1 HT », « X HT », « HT 2 », « Mi-temps | 1 » : résultat à la mi-temps
+    e = p.match(/^([12xn])\s+(?:ht|mt|à la mi-temps|1ère mi-temps)$/) ?? p.match(/^(?:ht|mt)\s+([12xn])$/) ?? (/^(?:mi[- ]?temps|1(?:ère|ere|re) mi[- ]?temps|half[- ]?time|résultat à la mi[- ]?temps)$/.test(m.trim()) ? p.match(/^([12xn])$/) : null);
+    if (e) return ok("HT_1X2", null, /[xn]/.test(e[1]) ? "N" : e[1]);
+    // « Mbappé anytime », « Haaland to score », « anytime scorer : Kane »
+    e = p.match(/^(.+?)\s+(?:anytime(?: scorer| goalscorer)?|to score(?: anytime)?)$/) ?? p.match(/^anytime (?:scorer|goalscorer)\s*:?\s*(.+)$/);
+    if (e && !cote(e[1].trim())) {
+      const x = e[1].trim(), simH = home ? teamSimilarity(x, home) : 0, simA = away ? teamSimilarity(x, away) : 0;
+      if (Math.max(simH, simA) >= 0.5) return ok(`TT${simH >= simA ? "1" : "2"}`, 0.5, "Plus"); // une équipe « to score » : au moins un but
+      const n = nomJoueur(x).replace(/(^|[\s'’-])(\p{L})/gu, (_, a: string, b: string) => a + b.toUpperCase()); if (n.length >= 3) return ok("BUT", null, n);
+    }
+  }
   if (!p && oui && team) { const sd = (home && Math.max(teamSimilarity(team, home), ...(alias?.home ?? []).map((x) => teamSimilarity(team, x))) >= (away ? Math.max(teamSimilarity(team, away), ...(alias?.away ?? []).map((x) => teamSimilarity(team, x))) : 0)) ? "1" : "2"; if (home || away) return { market_code: "1X2", market_param: null, selection: sd, label_pick: `${team} gagne`, ok: true }; }
   if (!p) return { market_code: "1X2", market_param: null, selection: "", label_pick: "Choix non visible", ok: false, reason: "Le choix n'est pas écrit (prono dit à l'oral ?) : choisis-le." };
   // 1xBet : « Handicap 2 (-1) » = handicap asiatique sur l'équipe 2. Sur une ligne entière, un écart exactement égal
@@ -233,7 +294,7 @@ export function normalizePick(marketText: string, pickText: string, home: string
       return { market_code: "1X2", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Pari composé de 1xBet pas reconnu : gardé tel quel, à régler à la main." };
     } }
   // Codes courts des tipsters, écrits entre les deux équipes ou après le match : V1, V2, 1X, 2X, 12, GG, NG
-  if (!team && (!m.trim() || /résultat|resultat|1x2|double chance|vainqueur|prono/.test(m)) && !/mi[- ]?temps|&/.test(m)) {
+  if (!team && (!m.trim() || /résultat|resultat|1x2|double chance|vainqueur|prono/.test(m)) && !/mi[- ]?temps|&|corner|carton|card/.test(m)) {
     const c = p.replace(/[\s.]/g, "");
     const short = (market_code: string, selection: string): NormalizedSelection => ({ market_code, market_param: null, selection, label_pick: pickText, ok: true });
     if (/^(v1|1|victoire1)$/.test(c)) return short("1X2", "1");
@@ -285,6 +346,9 @@ export function normalizePick(marketText: string, pickText: string, home: string
       return sd && v !== null && (v * 2) % 1 === 0 ? { market_code: "CORN_AH", market_param: v, selection: sd, label_pick: pickText, ok: true }
         : { market_code: "CORN_AH", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Handicap sur les corners : équipe ou ligne non reconnue. La ligne est gardée telle quelle, à régler à la main." };
     }
+    // « Corners 1X2 : 1 », « Cartons – vainqueur : X » : l'équipe qui en a le plus
+    { const fin = (p.split(/[:|]/).pop() ?? "").trim();
+      if ((stat === "CORN" || stat === "CARD") && /1x2|résultat|resultat|vainqueur|winner/.test(all) && /^(1|2|x|n|nul|draw)$/.test(fin)) return { market_code: `${stat}_1X2`, market_param: null, selection: /^(x|n|nul|draw)$/.test(fin) ? "N" : fin, label_pick: pickText, ok: true }; }
     if (stat === "CORN" && parite()) return { market_code: "CORN_OE", market_param: null, selection: parite()!, label_pick: pickText, ok: true };
     if (o) return { market_code: t ? `${stat}${t}` : stat, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
     if (stat === "CORN" && /le plus|plus de corners|most/.test(all)) { const r = isDraw(p) || /égalité|autant/.test(p) ? "N" : t; if (r) return { market_code: "CORN_1X2", market_param: null, selection: r, label_pick: pickText, ok: true }; }
@@ -414,6 +478,9 @@ export function normalizePick(marketText: string, pickText: string, home: string
     if (ti && o) return { market_code: `TT${ti[1]}`, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
     const tm = !ti ? all.trim().match(/^total\s+((?:plus|moins|over|under)\b.*)$/) : null; const o2 = tm ? ouLine(tm[1]) : null;
     if (o2) return { market_code: "OU", market_param: o2.line, selection: o2.dir, label_pick: pickText, ok: true }; }
+  // « Total équipe 1 », « Team total 2 », « Total buts de l'équipe 1 » dans le nom du marché : buts de cette équipe
+  { const te = m.match(/(?:total|buts?)[^0-9]*?(?:[ée]quipe|team)\s*([12])\b|team total\s*([12])\b|(home|away) team total/); const o = te ? ouLine(p) : null;
+    if (te && o) return { market_code: `TT${te[1] ?? te[2] ?? (te[3] === "home" ? "1" : "2")}`, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true }; }
   // Total de buts d'une seule équipe : « Total de buts (t. rég) - Sierra Leone » / « - de 1,5 »
   { const mt = m.match(/(?:total|nombre)[^–—-]*buts?[^–—-]*\s[–—-]\s*(.+)$/); const ts = mt ? side(mt[1].trim()) : null; const o = ts ? ouLine(p) : null;
     if (ts && o) return { market_code: `TT${ts}`, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true }; }
