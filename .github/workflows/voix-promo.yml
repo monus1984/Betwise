@@ -1,0 +1,21 @@
+name: Voix off de la vidéo (voix Google)
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  voix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx tsx scripts/voix-promo.ts
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git checkout -B voix-promo
+          git add -f voix-promo && git commit -qm "Voix off de la vidéo (voix Google)" && git push -f origin voix-promo || echo "rien à pousser"
