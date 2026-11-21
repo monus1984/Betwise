@@ -5,6 +5,7 @@ import { vraisemblance } from "@/lib/extract/plausibility";
 import { MarketOptions } from "@/components/market-options";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { Dictee } from "@/components/dictee";
 import { placeImportedBet } from "@/lib/bets/import-actions";
 import { SourceChooser } from "@/components/source-chooser";
 import { Button, Chip, Field, Input, Notice, RISK_CLASS, RISK_LABEL, fcfa, riskFromOdds } from "@/components/ui";
@@ -182,6 +183,15 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
     const fd = new FormData(); fd.set("text", text.trim());
     run(fd);
   }
+  const [dit, setDit] = useState("");
+  /** Pari dicté : relu par le même lecteur que les tickets, puis affiché pour vérification avant tout enregistrement. */
+  function onDictee() {
+    const t = dit.trim();
+    if (t.length < 5) return;
+    if (/\b(test|tester|sans miser)\b/i.test(t)) { setTest(true); if (!toNum(mise)) setMise("1000"); }
+    const fd = new FormData(); fd.set("text", `[dictée] ${t}`);
+    run(fd);
+  }
 
   function update(key: number, patch: Partial<Line>) { setLines((ls) => ls.map((l) => (l.key === key ? { ...l, ...patch } : l))); }
 
@@ -280,6 +290,15 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
           <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={(e) => { const f = Array.from(e.target.files ?? []); e.target.value = ""; void onFiles(f); }} />
           <Button variant="ghost" onClick={() => fileRef.current?.click()} disabled={busy}>{busy ? stage ?? "Lecture en cours…" : "Choisir des captures ou une vidéo"}</Button>
           <p className="mt-2 text-[11px] text-slate-400">Betclic ne partage pas ses tickets : la capture d’écran est le seul moyen. Sur iPhone : Photos. Sur Android : Galerie ou Fichiers.</p>
+        </section>
+        <section className="rounded-xl border border-slate-200 bg-surface p-4">
+          <h2 className="mb-1 text-sm font-semibold">Dire ton pari</h2>
+          <p className="mb-2 text-xs text-slate-500">Par exemple : « Pari test, victoire de Lens contre Lyon en Ligue 1, cote deux dix ». Tu relis ensuite chaque ligne avant d’enregistrer ; une cote que tu ne dis pas reste à remplir.</p>
+          <textarea value={dit} onChange={(e) => setDit(e.target.value)} rows={2} placeholder="Ton pari, dicté ou écrit" className="mb-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          <div className="grid grid-cols-2 gap-2">
+            <Dictee onTexte={setDit} disabled={busy} />
+            <Button onClick={onDictee} disabled={busy || dit.trim().length < 5}>{busy ? "Lecture…" : "Lire mon pari"}</Button>
+          </div>
         </section>
         <section className="rounded-xl border border-slate-200 bg-surface p-4">
           <h2 className="mb-2 text-sm font-semibold">Texte partagé ou lien</h2>
