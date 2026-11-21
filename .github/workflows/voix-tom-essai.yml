@@ -23,10 +23,5 @@ jobs:
           ls -la
       - name: Fabriquer les extraits
         run: python3 scripts/voix/essai_tom.py voix/fr_FR-tom-medium.onnx sortie
-      - name: Convertir en MP3
-        run: |
-          cd sortie
-          for f in *.wav; do ffmpeg -loglevel error -y -i "$f" -ac 1 -b:a 48k "${f%.wav}.mp3"; done
-          ls -la
       - uses: actions/upload-artifact@v4
-        with: { name: voix-tom, path: "sortie/*.mp3", retention-days: 7 }
+        with: { name: voix-tom, path: "sortie/*.wav", retention-days: 7 }
