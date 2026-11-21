@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { spoken } from "@/lib/coach/voice";
 import { synthesize } from "@/lib/tts/gemini";
 import { wavToMp3 } from "@/lib/tts/mp3";
+import { synthesizeAzure } from "@/lib/tts/azure";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -10,16 +11,17 @@ export const maxDuration = 30;
 const MAX_CHARS = 1200;      // une étape d'analyse ou une réponse du Coach ; au-delà, le navigateur découpe
 
 /**
- * Lit un texte avec la voix du Coach. Renvoie un MP3 (douze fois plus léger que le WAV d'origine), ou le WAV si la compression échoue.
- * Sans clé ou en cas de panne : 503 avec { fallback: true } — le téléphone lit alors avec sa propre voix.
+ * Lit un texte avec la voix de Betster. Azure d'abord (offre gratuite, choix du 21/11), Gemini en second si sa clé existe.
+ * Renvoie un MP3. Sans clé ou si les deux refusent : 503 avec { fallback: true } — l'écran garde alors le texte.
  */
 export async function POST(req: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "non connecté" }, { status: 401 });
 
+  const azure = process.env.AZURE_SPEECH_KEY && process.env.AZURE_SPEECH_REGION ? { key: process.env.AZURE_SPEECH_KEY, region: process.env.AZURE_SPEECH_REGION } : null;
   const key = process.env.GEMINI_API_KEY;
-  if (!key) return NextResponse.json({ fallback: true, error: "voix non configurée" }, { status: 503 });
+  if (!azure && !key) return NextResponse.json({ fallback: true, error: "voix non configurée" }, { status: 503 });
 
   const body = (await req.json().catch(() => null)) as { text?: unknown } | null;
   const text = spoken(typeof body?.text === "string" ? body.text : "").slice(0, MAX_CHARS);
@@ -29,7 +31,16 @@ export async function POST(req: Request) {
   await supabase.rpc("tts_take", { p_max: 1000000 });
 
   const debut = Date.now();
-  const r = await synthesize(text, key);
+  if (azure) {
+    const a = await synthesizeAzure(text, azure.key, azure.region);
+    if (a.ok) {
+      console.log("[tts] ok azure", `${Date.now() - debut} ms`, `${text.length} caractères`, `${a.mp3.length} octets`);
+      return new NextResponse(new Uint8Array(a.mp3), { status: 200, headers: { "Content-Type": "audio/mpeg", "Cache-Control": "private, no-store", "Content-Length": String(a.mp3.length) } });
+    }
+    console.warn("[tts] azure", a.status, a.error.slice(0, 200));
+    if (!key) return NextResponse.json({ fallback: true, error: "voix indisponible" }, { status: 503 });
+  }
+  const r = await synthesize(text, key!);
   if (!r.ok) {
     console.warn("[tts]", r.status, r.error.slice(0, 200));
     return NextResponse.json({ fallback: true, error: "voix indisponible" }, { status: 503 });
