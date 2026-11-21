@@ -5,7 +5,7 @@ import { APP_NAME } from "@/lib/app-name";
  */
 import type { createClient } from "@/lib/supabase/server";
 import { loadSignals, pickLabel, probOfSignal } from "../probs/signals";
-import { categorieFromOdds, categorieOf, type Categorie } from "./categories";
+import { categorieFromOdds, categorieOf, profilDe, type Categorie } from "./categories";
 import { jourAbidjan } from "./daily";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
@@ -56,9 +56,10 @@ export async function loadToday(db: Db, userId: string) {
   const soutiens = new Map<string, string[]>();
   for (const r of theirsRaw) { const k = key(r.m.id, r.market_code, r.market_param, r.selection); soutiens.set(k, [...(soutiens.get(k) ?? []), r.qui]); }
 
-  const todayPicks: TodayPick[] = pickRows.map((p) => {
+  // Profil recalculé à la lecture (bornes de cote du 21/11) ; un coup du jour sous 1,10 n'est plus proposé
+  const todayPicks: TodayPick[] = pickRows.filter((p) => profilDe(Number(p.probabilite), p.cote_ref === null ? null : Number(p.cote_ref))).map((p) => {
     const m = one(p.match)!; const { h, a } = names(m);
-    return { id: p.id, categorie: p.categorie, match_id: m.id, match: `${h} – ${a}`, home: h, away: a, market: p.market_code, param: p.market_param === null ? null : Number(p.market_param), sel: p.selection, kickoff: m.kickoff_at, comp: one(m.competition)?.code_externe ?? null, statut: m.statut,
+    return { id: p.id, categorie: profilDe(Number(p.probabilite), p.cote_ref === null ? null : Number(p.cote_ref))!, match_id: m.id, match: `${h} – ${a}`, home: h, away: a, market: p.market_code, param: p.market_param === null ? null : Number(p.market_param), sel: p.selection, kickoff: m.kickoff_at, comp: one(m.competition)?.code_externe ?? null, statut: m.statut,
       selection: pickLabel(p.market_code, p.market_param === null ? null : Number(p.market_param), p.selection, h, a), p: Number(p.probabilite), cote: p.cote_ref === null ? null : Number(p.cote_ref), coteJuste: Number(p.cote_juste), pModele: p.p_modele === null ? null : Number(p.p_modele),
       soutiens: soutiens.get(key(m.id, p.market_code, p.market_param, p.selection)) ?? [] };
   });

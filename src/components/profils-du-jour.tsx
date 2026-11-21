@@ -8,9 +8,9 @@ import type { Proposition } from "@/lib/accueil/load";
 
 const ORDRE: Categorie[] = ["sur", "audacieux", "risque"];
 const AIDE: Record<Categorie, string> = {
-  sur: "Les plus probables, à petite cote.",
-  audacieux: "Le compromis entre chance et cote.",
-  risque: "Moins probables, cote plus haute.",
+  sur: "Cotes de 1,10 à 1,29 : les plus probables.",
+  audacieux: "Cotes de 1,30 à 1,54 : le compromis entre chance et cote.",
+  risque: "Cotes de 1,55 et plus : moins probables, mieux payées.",
 };
 
 export function ProfilsDuJour({ profils, titre }: { profils: Record<Categorie, Proposition[]>; titre: string }) {

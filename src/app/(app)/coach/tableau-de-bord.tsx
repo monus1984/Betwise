@@ -42,7 +42,7 @@ export async function TableauDeBord({ db, userId }: { db: Db; userId: string }) 
 
   return (
     <>
-      <PageHeader aide="coach" title="Coach" subtitle="Ta situation en un coup d’œil. Pour une question, touche Betster en bas de l’écran." />
+      <PageHeader ajout aide="coach" title="Coach" subtitle="Ta situation en un coup d’œil. Pour une question, touche Betster en bas de l’écran." />
       <CoachNav current="tableau" />
 
       {vide ? (

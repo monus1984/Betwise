@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { AddToSlip } from "@/components/slip";
 import { legFrom } from "@/lib/slip/leg";
-import { CAT_LABEL, CAT_CONSTATE, type Categorie } from "@/lib/coach/categories";
+import { CAT_COTES, CAT_LABEL, type Categorie } from "@/lib/coach/categories";
 import { COUVERTURE_FR } from "@/lib/accueil/regles";
 import type { Proposition } from "@/lib/accueil/load";
 
@@ -69,7 +69,7 @@ export function CarteProposition({ x }: { x: Proposition }) {
         </span>
       </div>
       <LigneCote x={x} />
-      <p className="text-[11.5px] leading-snug text-ink-soft">Perd {100 - Math.round(x.p * 100)} fois sur 100. Niveau {CAT_LABEL[x.profil]} : {pct(CAT_CONSTATE[x.profil])} de réussite constatée sur 4 004 matchs.</p>
+      <p className="text-[11.5px] leading-snug text-ink-soft">Perd {100 - Math.round(x.p * 100)} fois sur 100. Niveau {CAT_LABEL[x.profil]} ({CAT_COTES[x.profil]}).</p>
       <div className="mt-auto flex items-center gap-2">
         <Link href={`/matchs/${x.matchId}`} className="flex h-10 flex-1 items-center justify-center rounded-xl bg-brand text-[13px] font-bold text-on-fill active:opacity-90">Voir l’analyse</Link>
         <AddToSlip leg={legDe(x)} />

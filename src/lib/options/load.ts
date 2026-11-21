@@ -17,7 +17,7 @@ export async function loadOptions(db: Db, periode: Periode): Promise<{ options: 
   const { data } = await db.from("matches")
     .select("id, kickoff_at, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe)")
     .eq("statut", "programme").gte("kickoff_at", new Date(Math.max(from, now)).toISOString()).lt("kickoff_at", new Date(to).toISOString())
-    .order("kickoff_at").limit(150);
+    .order("kickoff_at").limit(400);
   const rows = (data ?? []) as unknown as { id: string; kickoff_at: string; home: Named; away: Named; competition: { code_externe: string | null } | { code_externe: string | null }[] | null }[];
   const signals = await loadSignals(db, rows.map((r) => r.id));
   const options: Option[] = [];

@@ -6,7 +6,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../supabase/database.types";
 import { loadSignals, picksOf } from "../probs/signals";
-import { categorieOf, type Categorie } from "./categories";
+import { profilDe, type Categorie } from "./categories";
 
 type Db = SupabaseClient<Database, "betwise">;
 export const PICKS_SOURCE = "Coups du jour BETWISE";
@@ -37,8 +37,8 @@ export async function generateDailyPicks(db: Db, parCategorie = 3, refaire = fal
   for (const [match_id, sg] of signals) {
     if (sg.source !== "marche") continue; // jamais sans cote de référence
     for (const pk of picksOf(sg)) {
-      const cat = categorieOf(pk.p);
-      if (!cat || cat === "hors") continue;
+      const cat = profilDe(pk.p, pk.cote);
+      if (!cat) continue;
       // l'avis du modèle départage : accord = bonus, fort désaccord = pénalité
       const accord = pk.pModele === null ? 0 : pk.pModele >= pk.p - 0.03 ? 0.03 : pk.pModele < pk.p - 0.1 ? -0.06 : 0;
       // une cote de référence vérifiable vaut mieux qu'une probabilité calculée ; les amicaux sont moins fiables

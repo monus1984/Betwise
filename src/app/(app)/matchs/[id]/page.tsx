@@ -15,6 +15,7 @@ import { loadSignals, pickLabel, picksOf } from "@/lib/probs/signals";
 import { MatchMarkets } from "./markets";
 import { CotesParBookmaker } from "./cotes-bookmaker";
 import { Aide } from "@/components/aide";
+import { logoEquipe } from "@/lib/logos";
 import { BETCLIC_FR } from "@/lib/odds-api/betclic-ci";
 import { AddToSlip } from "@/components/slip";
 import { FollowStar } from "@/components/follow-star";
@@ -48,7 +49,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
   const { data } = await supabase
     .from("matches")
-    .select("id, kickoff_at, statut, score_home, score_away, minute, af_fixture_id, details, home_team_id, away_team_id, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe)")
+    .select("id, kickoff_at, statut, score_home, score_away, minute, af_fixture_id, af_home_id, af_away_id, details, home_team_id, away_team_id, home:teams!matches_home_team_id_fkey(nom, code_externe), away:teams!matches_away_team_id_fkey(nom, code_externe), competition:competitions(nom, code_externe)")
     .eq("id", id).maybeSingle();
   if (!data) notFound();
   const m = data as unknown as { id: string; kickoff_at: string; statut: string; score_home: number | null; score_away: number | null; minute: number | null; af_fixture_id: number | null; details: { evts?: Evt[] } | null; home_team_id: string; away_team_id: string; home: Named; away: Named; competition: { nom: string; code_externe: string | null } | { nom: string; code_externe: string | null }[] | null };
@@ -106,13 +107,13 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
       <header className="pitch mb-3 rounded-3xl px-4 pb-4 pt-3">
         <p className="mb-3 text-center text-[11px] text-white/60">{COMP_FLAG[comp?.code_externe ?? ""] ?? "⚽"} {COMP_SHORT[comp?.code_externe ?? ""] ?? comp?.nom} · {new Date(m.kickoff_at).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: TZ })}</p>
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-          <div className="flex flex-col items-center gap-1.5 text-center"><TeamBadge name={home} size={44} /><span className="flex items-center gap-0.5 text-sm font-medium leading-tight">{shortName(home)}<FollowStar teamId={m.home_team_id} initial={teamOn.has(m.home_team_id)} light small /></span></div>
+          <div className="flex flex-col items-center gap-1.5 text-center"><TeamBadge name={home} size={44} logo={logoEquipe({ af: (m as { af_home_id?: number | null }).af_home_id, code: (one(m.home as never) as { code_externe?: string } | null)?.code_externe })} /><span className="flex items-center gap-0.5 text-sm font-medium leading-tight">{shortName(home)}<FollowStar teamId={m.home_team_id} initial={teamOn.has(m.home_team_id)} light small /></span></div>
           <div className="text-center">
             {m.statut === "termine" ? <p className="font-display text-5xl font-bold tabular-nums">{m.score_home} – {m.score_away}</p>
               : m.statut === "en_cours" && m.score_home !== null ? <><p className="font-display text-5xl font-bold tabular-nums">{m.score_home} – {m.score_away}</p><p className="text-[11px] font-semibold text-band-loss">{Date.now() - Date.parse(m.kickoff_at) > 3.5 * 3600000 ? "fin du match à confirmer par la source" : `● ${m.minute ? `${m.minute}’` : "en direct"}`}</p></>
               : <><p className="font-display text-4xl font-bold tabular-nums">{new Date(m.kickoff_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: TZ })}</p><p className="text-[11px] text-white/60">{countdown(m.kickoff_at)}</p></>}
           </div>
-          <div className="flex flex-col items-center gap-1.5 text-center"><TeamBadge name={away} size={44} /><span className="flex items-center gap-0.5 text-sm font-medium leading-tight">{shortName(away)}<FollowStar teamId={m.away_team_id} initial={teamOn.has(m.away_team_id)} light small /></span></div>
+          <div className="flex flex-col items-center gap-1.5 text-center"><TeamBadge name={away} size={44} logo={logoEquipe({ af: (m as { af_away_id?: number | null }).af_away_id, code: (one(m.away as never) as { code_externe?: string } | null)?.code_externe })} /><span className="flex items-center gap-0.5 text-sm font-medium leading-tight">{shortName(away)}<FollowStar teamId={m.away_team_id} initial={teamOn.has(m.away_team_id)} light small /></span></div>
         </div>
         {(model || market) && (
           <div className="mt-4">

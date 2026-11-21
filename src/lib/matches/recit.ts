@@ -7,7 +7,7 @@
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../supabase/database.types";
-import { categorieOf, type Categorie } from "../coach/categories";
+import { profilDe, type Categorie } from "../coach/categories";
 import { familleOf, loadSignals, pickLabel, picksOf, type Pick } from "../probs/signals";
 import { latestStandings, type StandingRow } from "./standings";
 import { enjeux, fraicheur } from "./enjeux";
@@ -132,7 +132,7 @@ function etapeChiffre({ home, away, rangs, butsAttendus }: RecitInput): Etape | 
 function verdictDe({ home, away, picks }: RecitInput): { verdict: Choix | null; autres: Choix[] } {
   const utiles = picks.filter((p) => familleOf(p.market) !== "mitemps" && !["MG", "OE", "HMG", "CS"].includes(p.market));
   const de = (cat: Categorie): Choix | null => {
-    const p = utiles.filter((x) => categorieOf(x.p) === cat).sort((x, y) => Number(y.cote !== null) - Number(x.cote !== null) || y.p - x.p)[0];
+    const p = utiles.filter((x) => profilDe(x.p, x.cote) === cat).sort((x, y) => Number(y.cote !== null) - Number(x.cote !== null) || y.p - x.p)[0];
     return p ? { market: p.market, param: p.param, sel: p.sel, label: pickLabel(p.market, p.param, p.sel, home, away), p: p.p, cote: p.cote, categorie: cat } : null;
   };
   const a = de("audacieux"), s = de("sur"), r = de("risque");

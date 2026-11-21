@@ -1,6 +1,7 @@
 import { APP_NAME } from "@/lib/app-name";
 import { sansMarge } from "@/lib/probs/marge";
 import { COMPETITIONS, COMP_ORDRE } from "@/lib/competitions";
+import { Ecusson } from "./ecusson";
 /** Briques visuelles des matchs : écusson à initiales, cases 1/N/2, drapeaux de compétition. */
 
 const PALETTE = ["#1e3a8a", "#7c2d12", "#14532d", "#581c87", "#7f1d1d", "#134e4a", "#713f12", "#312e81", "#831843", "#0c4a6e"];
@@ -16,13 +17,14 @@ export function shortName(name: string) {
 }
 function hash(s: string) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return Math.abs(h); }
 
-export function TeamBadge({ name, size = 22 }: { name: string; size?: number }) {
+export function TeamBadge({ name, size = 22, logo }: { name: string; size?: number; logo?: string | null }) {
   const bg = PALETTE[hash(name) % PALETTE.length];
   const txt = initials(name);
-  return (
+  const pastille = (
     <span aria-hidden className="inline-flex shrink-0 items-center justify-center rounded-full font-semibold text-white"
       style={{ width: size, height: size, background: bg, fontSize: size * (txt.length > 2 ? 0.34 : 0.4) }}>{txt}</span>
   );
+  return logo ? <Ecusson src={logo} size={size} repli={pastille} /> : pastille;
 }
 
 export const COMP_FLAG: Record<string, string> = Object.fromEntries(Object.entries(COMPETITIONS).map(([k, v]) => [k, v.drapeau]));

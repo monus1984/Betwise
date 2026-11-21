@@ -66,13 +66,16 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <PageHeader aide="coach" title="Coach" subtitle="Les sélections du jour avec leur risque, tes points forts et ceux de tes sources." />
+      <PageHeader ajout aide="coach" title="Coach" subtitle="Les sélections du jour avec leur risque, tes points forts et ceux de tes sources." />
       <CoachNav current="outils" />
       {sp.ok === "budget" && <div className="mb-3"><Notice kind="info">Budget enregistré.</Notice></div>}
       {sp.err && <div className="mb-3"><Notice>{sp.err === "budget" ? "Indique deux montants ; la perte maximale ne peut pas dépasser le budget de mise." : "Enregistrement impossible. Réessaie."}</Notice></div>}
 
-      {/* Toujours quelque chose à proposer : les sélections du jour avec leur risque, puis les points forts */}
-      <CoupsDuJour picks={today.picks} theirs={today.theirs} mises={mises} repli={repli} />
+      {/* Les coups du jour sont sur Prédictions (21/11) ; ici, les points forts et les outils */}
+      <Link href="/" className="tile flex items-center justify-between gap-3 p-3 active:bg-surface-2">
+        <span className="min-w-0"><b className="block text-sm">Les coups du jour</b><span className="block text-[12px] text-ink-muted">Ils sont maintenant sur Prédictions, avec la recherche par probabilité.</span></span>
+        <span className="text-brand">›</span>
+      </Link>
 
       {(fortes.moi.length > 0 || fortes.sources.length > 0) && (
         <Card className="mt-3">

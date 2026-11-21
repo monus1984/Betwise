@@ -43,8 +43,8 @@ export function CarteMatchUI({ c }: { c: CarteMatch }) {
           </span>
         </div>
         <div className="flex flex-col gap-1.5">
-          {([[c.home, c.score?.[0]], [c.away, c.score?.[1]]] as const).map(([nom, sc]) => (
-            <div key={nom} className="flex items-center gap-2"><TeamBadge name={nom} size={24} /><span className="flex-1 text-[14.5px] font-semibold leading-tight">{nom}</span>{sc !== undefined && <span className="font-display text-xl font-bold tabular-nums">{sc}</span>}</div>
+          {([[c.home, c.score?.[0], c.logos?.[0]], [c.away, c.score?.[1], c.logos?.[1]]] as const).map(([nom, sc, logo]) => (
+            <div key={nom} className="flex items-center gap-2"><TeamBadge name={nom} size={24} logo={logo} /><span className="flex-1 text-[14.5px] font-semibold leading-tight">{nom}</span>{sc !== undefined && <span className="font-display text-xl font-bold tabular-nums">{sc}</span>}</div>
           ))}
         </div>
         {c.probs && <Barre p={c.probs} />}

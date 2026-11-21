@@ -9,7 +9,8 @@ import { loadToday, loadRepli, type TheirPick } from "@/lib/coach/today";
 import { issue } from "@/lib/mesure/issue";
 import { loadOptions, type Periode } from "@/lib/options/load";
 import type { Option } from "@/lib/options/build";
-import { categorieOf, type Categorie } from "@/lib/coach/categories";
+import { profilDe, type Categorie } from "@/lib/coach/categories";
+import { logoEquipe } from "@/lib/logos";
 import { avisDuJour, couverture, expression, ilYA, libelleMarche, publieAvant, type Couverture, type Expression } from "./regles";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
@@ -21,7 +22,7 @@ const jourDe = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { time
 export type Cote = { cote: number; ou: string; age: string | null; frais: boolean };
 export type CarteMatch = {
   id: string; comp: string | null; kickoff: string; statut: string; minute: number | null; home: string; away: string;
-  score: [number, number] | null; couverture: Couverture;
+  score: [number, number] | null; couverture: Couverture; logos?: [string | null, string | null];
   probs: { p1: number; pN: number; p2: number } | null;
   choix: { marche: string; label: string; p: number; market: string; param: number | null; sel: string; cote: Cote | null; book: { cote: number; bookmaker: string } | null; refCote: number | null } | null;
   verdict: "passe" | "pas_passe" | null; tonPari: boolean;
@@ -37,11 +38,14 @@ export type Proposition = {
   market: string; param: number | null; sel: string; marche: string; label: string; p: number;
   profil: Categorie; cote: Cote | null; book: { cote: number; bookmaker: string } | null; refCote: number | null; couverture: Couverture;
 };
+/** Une option du jour pour la recherche par fourchette de probabilité. */
+export type OptionRecherche = { matchId: string; home: string; away: string; kickoff: string; comp: string | null; label: string; p: number; cote: number | null; ou: string | null };
+
 export type MatchAVenir = { matchId: string; home: string; away: string; kickoff: string; comp: string | null; propositions: Proposition[]; pourquoi?: Pourquoi | null };
 export type TipsterDuJour = { qui: string; match: string; selection: string; marche: string; p: number | null; publieAvant: boolean | null; tone: TheirPick["tone"]; aussiBetwise: boolean };
 
-const MATCH = "id, kickoff_at, statut, minute, score_home, score_away, ht_home, ht_away, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe)";
-type M = { id: string; kickoff_at: string; statut: string; minute: number | null; score_home: number | null; score_away: number | null; ht_home: number | null; ht_away: number | null; home: One<{ nom: string }>; away: One<{ nom: string }>; competition: One<{ code_externe: string | null }> };
+const MATCH = "id, kickoff_at, statut, minute, score_home, score_away, ht_home, ht_away, af_home_id, af_away_id, home:teams!matches_home_team_id_fkey(nom, code_externe), away:teams!matches_away_team_id_fkey(nom, code_externe), competition:competitions(code_externe)";
+type M = { id: string; kickoff_at: string; statut: string; minute: number | null; score_home: number | null; score_away: number | null; ht_home: number | null; ht_away: number | null; af_home_id: number | null; af_away_id: number | null; home: One<{ nom: string; code_externe: string | null }>; away: One<{ nom: string; code_externe: string | null }>; competition: One<{ code_externe: string | null }> };
 
 /** Heure du dernier relevé de cote de référence par match (la médiane n'a pas d'heure à elle). */
 async function relevesRef(db: Db, ids: string[]): Promise<Map<string, string>> {
@@ -76,7 +80,8 @@ function carte(m: M, sg: Signal | undefined, releve: string | undefined, choix?:
     const r = issue(c.market, c.param, c.sel, { h: score[0], a: score[1], hth: m.ht_home, hta: m.ht_away });
     verdict = r === "gagne" ? "passe" : r === "perdu" ? "pas_passe" : null;
   }
-  return { id: m.id, comp: one(m.competition)?.code_externe ?? null, kickoff: m.kickoff_at, statut: m.statut, minute: m.minute, home, away, score, couverture: cv, probs, choix: c, verdict, tonPari: false, propositions: [] };
+  return { id: m.id, comp: one(m.competition)?.code_externe ?? null, kickoff: m.kickoff_at, statut: m.statut, minute: m.minute, home, away, score, couverture: cv,
+    logos: [logoEquipe({ af: m.af_home_id, code: one(m.home)?.code_externe }), logoEquipe({ af: m.af_away_id, code: one(m.away)?.code_externe })], probs, choix: c, verdict, tonPari: false, propositions: [] };
 }
 
 const PROFILS: Categorie[] = ["sur", "audacieux", "risque"];
@@ -98,7 +103,7 @@ function proposition(o: Option, profil: Categorie, sg: Signal | undefined, relev
 export function parProfil(options: Option[]): Map<string, { o: Option; profil: Categorie }[]> {
   const out = new Map<string, { o: Option; profil: Categorie }[]>();
   for (const o of [...options].sort((a, b) => b.p - a.p)) {
-    const profil = categorieOf(o.p); if (!profil || profil === "hors") continue;
+    const profil = profilDe(o.p, o.cote); if (!profil) continue;
     const l = out.get(o.matchId) ?? [];
     if (!l.some((x) => x.profil === profil || x.o.market === o.market)) l.push({ o, profil });
     out.set(o.matchId, l);
@@ -114,7 +119,10 @@ export async function loadAccueil(db: Db, userId: string) {
   // Matchs du jour (heure d'Abidjan) et ceux encore en cours d'hier soir
   const debut = new Date(Date.now() - 18 * 3600000).toISOString(), fin = new Date(Date.now() + 30 * 3600000).toISOString();
   const { data } = await db.from("matches").select(MATCH).gte("kickoff_at", debut).lte("kickoff_at", fin).neq("statut", "annule").order("kickoff_at").limit(200);
-  const tous = ((data ?? []) as unknown as M[]).filter((m) => jourDe(m.kickoff_at) === jour || m.statut === "en_cours");
+  // Prédictions du jour : uniquement les matchs pas encore commencés (21/11) ; le direct et les résultats sont dans Matchs
+  const pasCommence = (statut: string, kickoff: string) => statut === "programme" && Date.parse(kickoff) > Date.now();
+  const tous = ((data ?? []) as unknown as M[]).filter((m) => jourDe(m.kickoff_at) === jour && pasCommence(m.statut, m.kickoff_at));
+  today.picks = today.picks.filter((x) => pasCommence(x.statut, x.kickoff));
 
   const avisPick = avisDuJour(today.picks);
   const [optAuj, optDemain] = await Promise.all([loadOptions(db, "auj"), loadOptions(db, "demain" as Periode)]);
@@ -175,7 +183,13 @@ export async function loadAccueil(db: Db, userId: string) {
   for (const m of demain) m.pourquoi = raisons.get(m.matchId) ?? null;
 
   const nbPropositions = PROFILS.reduce((n, k) => n + profils[k].length, 0);
-  return { avis, cartes, repli, tipsters, profils, profilsDeDemain, demain, nbPropositions,
+  // Recherche par fourchette : toutes les options calculées des matchs du jour pas encore commencés
+  const recherche: OptionRecherche[] = optAuj.options.filter((o) => Date.parse(o.kickoff) > Date.now()).map((o) => {
+    const sg = signals.get(o.matchId), bk = sg?.bookOdd(o.market, o.param, o.sel);
+    const book = bk && releveFrais(bk.releveAt, o.kickoff) ? bk : null;
+    return { matchId: o.matchId, home: o.home, away: o.away, kickoff: o.kickoff, comp: o.comp || null, label: o.label, p: o.p, cote: book?.cote ?? o.cote ?? null, ou: book ? book.bookmaker : o.cote ? "médiane" : null };
+  }).slice(0, 1500);
+  return { avis, recherche, cartes, repli, tipsters, profils, profilsDeDemain, demain, nbPropositions,
     nbDemain: optDemain.nbMatchs, nbDemainAnalyses: optDemain.nbCouverts,
     nbAnalyses: cartes.filter((c) => c.probs).length, nbSans: cartes.filter((c) => !c.probs).length };
 }

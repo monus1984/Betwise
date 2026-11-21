@@ -105,16 +105,22 @@ export async function loadSignals(db: Db, ids: string[], opts: { bookmakers?: bo
   if (!ids.length) return out;
   const [{ data: est }, { data: odds }, books] = await Promise.all([
     db.from("model_estimates").select("match_id, justification").eq("market_code", "1X2").eq("selection", "1").eq("model_version", MODEL_VERSION).in("match_id", ids),
-    db.from("odds_observations").select("match_id, market_code, market_param, selection, cote, observed_at").eq("bookmaker", "ref:eu-median").in("match_id", ids).order("observed_at", { ascending: false }).limit(4000),
+    // Par paquets de 25 matchs : ~30 lignes de cotes par match et par relevé, et la base ne rend pas plus de 1 000 lignes
+    // par requête ; en un seul appel, les matchs au-delà du 30e perdaient leurs cotes (« analyse indisponible »).
+    Promise.all(Array.from({ length: Math.ceil(ids.length / 25) }, (_, i) => ids.slice(i * 25, i * 25 + 25)).map((lot) =>
+      db.from("odds_observations").select("match_id, market_code, market_param, selection, cote, observed_at").eq("bookmaker", "ref:eu-median").in("match_id", lot).order("observed_at", { ascending: false }).limit(1000),
+    )).then((rs) => ({ data: rs.flatMap((r) => r.data ?? []) })),
     opts.bookmakers ? loadBookOdds(db, [...new Set(ids)]) : Promise.resolve(new Map<string, CoteBookmaker[]>()),
   ]);
+  const parMatch = new Map<string, NonNullable<typeof odds>>();
+  for (const o of odds ?? []) { if (!o.match_id) continue; const l = parMatch.get(o.match_id); if (l) l.push(o); else parMatch.set(o.match_id, [o]); }
   for (const id of ids) {
     const bookAll = books.get(id) ?? [];
     const bookOdd = (market: string, param: number | null, sel: string): CoteReelle | null => {
       const o = bookAll.find((x) => x.market === market && x.sel === sel && x.param === param);
       return o ? { cote: o.cote, bookmaker: o.bookmaker, releveAt: o.releveAt } : null;
     };
-    const mine = (odds ?? []).filter((o) => o.match_id === id);
+    const mine = parMatch.get(id) ?? [];
     const refOdd = (market: string, param: number | null, sel: string) => {
       const o = mine.find((x) => x.market_code === market && x.selection === sel && (x.market_param === null ? param === null : Number(x.market_param) === param));
       return o ? Number(o.cote) : null;

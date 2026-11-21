@@ -64,8 +64,11 @@ export async function loadPourquoi(db: Db, matchIds: string[]): Promise<Map<stri
   const codeDe = (r: (typeof rows)[number]) => (Array.isArray(r.competition) ? r.competition[0]?.code_externe : r.competition?.code_externe) ?? null;
   const comps = [...new Set(rows.map(codeDe).filter((c): c is string => !!c))];
   const [{ data: hist }, { data: recents }, { data: st }] = await Promise.all([
-    db.from("af_history").select("fixture_id, played_at, home_id, away_id, home_goals, away_goals").gte("played_at", depuis)
-      .or(`home_id.in.(${liste}),away_id.in.(${liste})`).order("played_at", { ascending: false }).limit(5000),
+    // Par paquets de 10 équipes (≈ 80 matchs chacune sur deux ans) : la base rend au plus 1 000 lignes par requête
+    Promise.all(Array.from({ length: Math.ceil(teams.length / 10) }, (_, i) => teams.slice(i * 10, i * 10 + 10).join(",")).map((l) =>
+      db.from("af_history").select("fixture_id, played_at, home_id, away_id, home_goals, away_goals").gte("played_at", depuis)
+        .or(`home_id.in.(${l}),away_id.in.(${l})`).order("played_at", { ascending: false }).limit(1000),
+    )).then((rs) => ({ data: [...new Map(rs.flatMap((r) => r.data ?? []).map((x) => [x.fixture_id, x])).values()].sort((a, b) => Date.parse(b.played_at) - Date.parse(a.played_at)) })),
     db.from("matches").select("af_fixture_id, kickoff_at, af_home_id, af_away_id, score_home, score_away").eq("statut", "termine").gte("kickoff_at", depuis)
       .or(`af_home_id.in.(${liste}),af_away_id.in.(${liste})`).order("kickoff_at", { ascending: false }).limit(2000),
     comps.length ? db.from("standings").select("*").in("comp_code", comps).limit(3000) : Promise.resolve({ data: [] as StandingRow[] }),

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { CoachNav } from "@/components/coach-nav";
 import { COMP_FLAG, shortName } from "@/components/match-ui";
-import { CAT_LABEL, CAT_STYLE, categorieOf } from "@/lib/coach/categories";
+import { CAT_LABEL, CAT_STYLE, profilDe } from "@/lib/coach/categories";
 import { buildCombos, coteEstimee, legsParam, singlesOf, type Option } from "@/lib/options/build";
 import { loadOptions, type Periode } from "@/lib/options/load";
 import { createClient } from "@/lib/supabase/server";
@@ -160,7 +160,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
 }
 
 function SingleRow({ o, first, tester, more }: { o: Option; first: boolean; tester: string; more: string | null }) {
-  const cat = categorieOf(o.p);
+  const cat = profilDe(o.p, o.cote);
   return (
     <li className={`flex items-center gap-2.5 px-3 py-2.5 ${first ? "" : "border-t border-line"}`}>
       <Link href={`/matchs/${o.matchId}`} className="min-w-0 flex-1">

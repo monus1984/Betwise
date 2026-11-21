@@ -1,29 +1,29 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { PageHeader } from "@/components/page-header";
-import { COMP_FLAG, COMP_ORDER, COMP_SHORT, PickBadge, TeamBadge, shortName } from "@/components/match-ui";
+import { COMP_FLAG, COMP_ORDER, COMP_SHORT, TeamBadge, shortName } from "@/components/match-ui";
 import { bestPick, loadSignals, pickLabel, type Signal } from "@/lib/probs/signals";
 import { createClient } from "@/lib/supabase/server";
 import { LiveRefresh } from "@/components/live-refresh";
-import { AddToSlip } from "@/components/slip";
 import { FollowStar } from "@/components/follow-star";
 import { GoalWatcher } from "@/components/goal-watcher";
 import { CompFavori, COOKIE_FAVORIS } from "@/components/comp-favori";
 import { STANDING_COMPS } from "@/lib/matches/standings";
-import { COMPETITIONS, comparerPays } from "@/lib/competitions";
-import { legFrom } from "@/lib/slip/leg";
+import { COMPETITIONS } from "@/lib/competitions";
+import { logoEquipe } from "@/lib/logos";
 
 export const dynamic = "force-dynamic";
 
-type Named = { nom: string } | { nom: string }[] | null;
+type Named = { nom: string; code_externe?: string | null } | { nom: string; code_externe?: string | null }[] | null;
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
 type Comp = { nom: string; code_externe: string | null; pays: string | null };
 type Row = {
   id: string; kickoff_at: string; statut: "programme" | "en_cours" | "termine" | "reporte" | "annule";
   score_home: number | null; score_away: number | null; minute: number | null; home_team_id: string; away_team_id: string; home: Named; away: Named;
+  af_home_id: number | null; af_away_id: number | null;
   competition: Comp | Comp[] | null;
 };
-const SELECT = "id, kickoff_at, statut, score_home, score_away, minute, home_team_id, away_team_id, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom, code_externe, pays)";
+const SELECT = "id, kickoff_at, statut, score_home, score_away, minute, home_team_id, away_team_id, af_home_id, af_away_id, home:teams!matches_home_team_id_fkey(nom, code_externe), away:teams!matches_away_team_id_fkey(nom, code_externe), competition:competitions(nom, code_externe, pays)";
 
 const TZ = "Africa/Abidjan";
 const dayKey = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { timeZone: TZ }); // AAAA-MM-JJ
@@ -33,7 +33,7 @@ const sansAccent = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toL
 /** Match encore « en cours » plus de 3 h 30 après le coup d'envoi : la source n'a pas confirmé la fin. */
 const isStale = (kickoff: string) => Date.now() - Date.parse(kickoff) > 3.5 * 3600000;
 
-export default async function MatchsPage({ searchParams }: { searchParams: Promise<{ d?: string; c?: string; f?: string; q?: string }> }) {
+export default async function MatchsPage({ searchParams }: { searchParams: Promise<{ d?: string; c?: string; f?: string; q?: string; s?: string }> }) {
   const sp = await searchParams;
   const supabase = await createClient();
   const favoris = new Set(((await cookies()).get(COOKIE_FAVORIS)?.value ?? "").split(",").filter(Boolean));
@@ -56,6 +56,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   const comp = sp.c && COMP_ORDER.includes(sp.c) ? sp.c : null;
   const recherche = (sp.q ?? "").trim().slice(0, 40);
   const filtre = recherche.length >= 2 ? "recherche" : sp.f === "direct" || sp.f === "suivis" ? sp.f : null;
+  const etat = sp.s === "termines" || sp.s === "programmes" ? sp.s : null;
 
   // Matchs suivis (étoile) : par l'étoile du match ou parce qu'une de ses équipes est suivie
   const [{ data: fol }, { data: tfol }] = await Promise.all([supabase.from("match_follows").select("match_id"), supabase.from("team_follows").select("team_id")]);
@@ -88,7 +89,8 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
     const debut = new Date(`${day}T00:00:00Z`); // Abidjan = UTC
     const { data } = await supabase.from("matches").select(SELECT)
       .gte("kickoff_at", debut.toISOString()).lt("kickoff_at", new Date(debut.getTime() + 86400000).toISOString()).neq("statut", "annule").order("kickoff_at").limit(1000);
-    rows = ((data ?? []) as unknown as Row[]).filter((r) => !comp || one(r.competition)?.code_externe === comp);
+    rows = ((data ?? []) as unknown as Row[]).filter((r) => !comp || one(r.competition)?.code_externe === comp)
+      .filter((r) => etat === "termines" ? r.statut === "termine" : etat === "programmes" ? r.statut === "programme" || r.statut === "reporte" : true);
   }
 
   const signals = await loadSignals(supabase, rows.map((r) => r.id));
@@ -96,32 +98,33 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   const groups = new Map<string, Row[]>();
   for (const r of rows) groups.set(codeDe(r), [...(groups.get(codeDe(r)) ?? []), r]);
   const paysDe = (code: string) => COMPETITIONS[code]?.pays ?? one(groups.get(code)?.[0]?.competition ?? null)?.pays ?? "Autres";
-  const rang = (code: string) => { const i = COMP_ORDER.indexOf(code); return i === -1 ? 999 : i; };
-  const epingles = [...groups.keys()].filter((c) => favoris.has(c)).sort((a, b) => rang(a) - rang(b));
-  const parPays = new Map<string, string[]>();
-  for (const c of [...groups.keys()].filter((c) => !favoris.has(c)).sort((a, b) => rang(a) - rang(b))) parPays.set(paysDe(c), [...(parPays.get(paysDe(c)) ?? []), c]);
-  const pays = [...parPays.keys()].sort(comparerPays);
-  // Ouvertes d'office : favorites, grandes compétitions, matchs en direct, filtres ; les autres se déplient au toucher
-  const ouverte = (code: string, list: Row[]) => !!filtre || !!comp || groups.size <= 3 || favoris.has(code) || !!COMPETITIONS[code]?.majeure || list.some((m) => m.statut === "en_cours");
+  // Ordre « les plus proches d'abord » (21/11) : dans chaque compétition, le direct, puis les matchs à venir par heure,
+  // puis les terminés ; les compétitions se suivent selon leur prochain match (direct d'abord, toutes terminées en bas).
+  const rangStatut = (m: Row) => (m.statut === "en_cours" && !isStale(m.kickoff_at) ? 0 : m.statut === "programme" || m.statut === "reporte" ? 1 : 2);
+  for (const l of groups.values()) l.sort((a, b) => rangStatut(a) - rangStatut(b) || (rangStatut(a) === 2 ? Date.parse(b.kickoff_at) - Date.parse(a.kickoff_at) : Date.parse(a.kickoff_at) - Date.parse(b.kickoff_at)));
+  const cleGroupe = (code: string) => { const m = groups.get(code)![0]; return [rangStatut(m), rangStatut(m) === 2 ? -Date.parse(m.kickoff_at) : Date.parse(m.kickoff_at)] as const; };
+  const ordre = (a: string, b: string) => { const [ra, ka] = cleGroupe(a), [rb, kb] = cleGroupe(b); return ra - rb || ka - kb || (COMP_ORDER.indexOf(a) + 1 || 999) - (COMP_ORDER.indexOf(b) + 1 || 999); };
+  const epingles = [...groups.keys()].filter((c) => favoris.has(c)).sort(ordre);
+  const autres = [...groups.keys()].filter((c) => !favoris.has(c)).sort(ordre);
   const q = (d: string, c: string | null) => `/matchs?d=${d}${c ? `&c=${c}` : ""}`;
 
-  const carte = (code: string, list: Row[], avecPays: boolean) => {
+  const carte = (code: string, list: Row[]) => {
     const nom = COMP_SHORT[code] ?? one(list[0].competition)?.nom ?? code;
     const live = list.filter((m) => m.statut === "en_cours" && !isStale(m.kickoff_at)).length;
-    const prochain = list.find((m) => m.statut === "programme");
     return (
-      <details key={code} open={ouverte(code, list)} className="group mb-2.5 overflow-hidden rounded-xl border border-line bg-surface shadow-card">
-        <summary className="flex cursor-pointer list-none items-center gap-2 bg-surface-2 py-1 pl-3 pr-1 text-xs [&::-webkit-details-marker]:hidden">
+      <details key={code} open className="group mb-2 overflow-hidden rounded-xl border border-line bg-surface shadow-card">
+        <summary className="flex cursor-pointer list-none items-center gap-2 border-b border-line bg-surface-2 py-0.5 pl-3 pr-1 [&::-webkit-details-marker]:hidden">
           <span className="text-sm">{COMP_FLAG[code] ?? "⚽"}</span>
-          <span className="min-w-0 flex-1 truncate font-semibold text-ink-soft">{nom}{avecPays && <span className="font-normal text-ink-muted"> · {paysDe(code)}</span>}</span>
-          {live > 0 && <span className="shrink-0 font-semibold text-loss">● {live}</span>}
-          <span className="shrink-0 tabular-nums text-ink-muted group-open:hidden">{list.length} · {prochain ? fmtTime(prochain.kickoff_at) : "fin"}</span>
-          <span className="hidden shrink-0 tabular-nums text-ink-muted group-open:inline">{list.length}</span>
+          <span className="min-w-0 flex-1 truncate leading-tight">
+            <span className="block text-[10px] font-semibold uppercase tracking-wide text-ink-muted">{paysDe(code)}</span>
+            <span className="block truncate text-[13px] font-bold text-ink">{nom}</span>
+          </span>
+          {live > 0 && <span className="shrink-0 text-xs font-semibold text-loss">● {live}</span>}
+          {STANDING_COMPS.includes(code) && <Link href={`/matchs/classement?c=${code}`} className="shrink-0 rounded-md px-1.5 py-1 text-[11px] font-medium text-brand">Classement</Link>}
           <CompFavori code={code} initial={favoris.has(code)} nom={nom} />
           <span aria-hidden className="w-3 shrink-0 text-ink-muted transition-transform group-open:rotate-90">›</span>
         </summary>
-        <ul className="divide-y divide-line">{list.map((m) => <Ligne key={m.id} m={m} code={code} sg={signals.get(m.id) ?? null} starred={starred.has(m.id)} avecDate={filtre === "recherche" || filtre === "suivis"} />)}</ul>
-        {STANDING_COMPS.includes(code) && <Link href={`/matchs/classement?c=${code}`} className="block border-t border-line px-3 py-2 text-right text-xs font-medium text-brand">Classement {nom} ›</Link>}
+        <ul className="divide-y divide-line">{list.map((m) => <Ligne key={m.id} m={m} sg={signals.get(m.id) ?? null} starred={starred.has(m.id)} avecDate={filtre === "recherche" || filtre === "suivis"} />)}</ul>
       </details>
     );
   };
@@ -129,7 +132,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <LiveRefresh active={rows.some((r) => r.statut === "en_cours" || (r.statut === "programme" && Math.abs(Date.parse(r.kickoff_at) - Date.now()) < 15 * 60000))} />
-      <PageHeader aide="matchs" title="Matchs" subtitle="Sur chaque match, l’issue la plus probable d’après les cotes de référence ; en bleu, d’après le modèle quand il n’y a pas de cote." />
+      <PageHeader ajout aide="matchs" title="Matchs" subtitle="Sur chaque match, l’issue la plus probable d’après les cotes de référence ; en bleu, d’après le modèle quand il n’y a pas de cote." />
 
       {/* Recherche d'équipe, de compétition ou de pays */}
       <form action="/matchs" className="mb-3 flex gap-2" role="search">
@@ -161,14 +164,16 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
       <GoalWatcher scores={rows.filter((r) => r.statut === "en_cours" && r.score_home !== null).map((r) => ({ id: r.id, label: `${shortName(one(r.home)?.nom ?? "")} ${r.score_home}–${r.score_away} ${shortName(one(r.away)?.nom ?? "")}`, h: r.score_home ?? 0, a: r.score_away ?? 0 }))} />
 
       {filtre !== "recherche" && (
-        <div className="mb-3 flex gap-1.5">
-          <Link href={q(day, null)} scroll={false} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${!filtre && !comp ? "border-brand bg-brand text-on-fill" : "border-line bg-surface text-ink-soft"}`}>Tous</Link>
+        <div className="-mx-4 mb-3 overflow-x-auto px-4"><div className="flex w-max gap-1.5">
+          <Link href={q(day, comp)} scroll={false} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${!filtre && !etat ? "border-brand bg-brand text-on-fill" : "border-line bg-surface text-ink-soft"}`}>Tous</Link>
           <Link href="/matchs?f=direct" scroll={false} className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium ${filtre === "direct" ? "border-loss bg-loss text-on-fill" : "border-line bg-surface text-ink-soft"}`}>
             <span className={`h-1.5 w-1.5 rounded-full ${filtre === "direct" ? "bg-surface" : enDirect.length ? "animate-pulse bg-loss" : "bg-slate-300"}`} />En direct{enDirect.length ? ` (${enDirect.length})` : ""}
           </Link>
+          <Link href={`${q(day, comp)}&s=programmes`} scroll={false} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${etat === "programmes" && !filtre ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft"}`}>À venir</Link>
+          <Link href={`${q(day, comp)}&s=termines`} scroll={false} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${etat === "termines" && !filtre ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft"}`}>Terminés</Link>
           <Link href="/matchs?f=suivis" scroll={false} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${filtre === "suivis" ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft"}`}>★ Suivis{followed.size ? ` (${followed.size})` : ""}</Link>
           {comp && <Link href={q(day, null)} scroll={false} className="truncate rounded-full border border-inverse bg-inverse px-3 py-1.5 text-xs text-on-inverse">{COMP_FLAG[comp]} {COMP_SHORT[comp]} ✕</Link>}
-        </div>
+        </div></div>
       )}
 
       {filtre === "recherche" && <p className="mb-3 px-1 text-xs text-ink-muted">{rows.length ? `${rows.length} match${rows.length > 1 ? "s" : ""} pour « ${recherche} », d’hier aux 14 prochains jours.` : ""}</p>}
@@ -180,52 +185,69 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
         </div>
       )}
 
-      {epingles.length > 0 && (
-        <section className="mb-4">
-          <h2 className="mb-1.5 px-1 text-xs font-semibold text-ink-soft">Mes compétitions</h2>
-          {epingles.map((c) => carte(c, groups.get(c)!, true))}
-        </section>
-      )}
-      {pays.map((p) => (
-        <section key={p} className="mb-4">
-          {(parPays.get(p)!.length > 1 || COMP_SHORT[parPays.get(p)![0]] !== p) && <h2 className="mb-1.5 px-1 text-xs font-semibold text-ink-soft">{p}</h2>}
-          {parPays.get(p)!.map((c) => carte(c, groups.get(c)!, false))}
-        </section>
-      ))}
+      {epingles.length > 0 && <h2 className="mb-1.5 px-1 text-xs font-semibold text-ink-soft">Mes compétitions</h2>}
+      {epingles.map((c) => carte(c, groups.get(c)!))}
+      {epingles.length > 0 && autres.length > 0 && <h2 className="mb-1.5 mt-3 px-1 text-xs font-semibold text-ink-soft">Toutes les compétitions</h2>}
+      {autres.map((c) => carte(c, groups.get(c)!))}
       {rows.length > 0 && !epingles.length && <p className="px-1 text-[11px] text-ink-muted">Touche l’étoile d’une compétition pour l’épingler en haut de la liste.</p>}
     </>
   );
 }
 
-/** Une ligne de match : heure ou score, noms complets, issue la plus probable. */
-function Ligne({ m, code, sg, starred, avecDate }: { m: Row; code: string; sg: Signal | null; starred: boolean; avecDate: boolean }) {
-  const h = one(m.home)?.nom ?? "", a = one(m.away)?.nom ?? "";
+/** Choix en version courte pour la colonne de droite (comme les cotes d'une ligne Flashscore). */
+function court(market: string, param: number | null, sel: string): string {
+  const v = param === null ? "" : String(param).replace(".", ",");
+  if (market === "1X2" || market === "DC") return sel === "N" ? "N" : sel === "1N" ? "1N" : sel === "N2" ? "N2" : sel;
+  if (market === "OU") return `${sel === "Plus" ? "+" : "−"}${v} buts`;
+  if (market === "BTTS") return sel === "Oui" ? "2 marquent" : "Pas les 2";
+  if (market === "DNB") return `${sel} RSN`;
+  if (market === "TT1" || market === "TT2") return `${market === "TT1" ? "Dom." : "Ext."} ${sel === "Plus" ? "+" : "−"}${v}`;
+  if (market.startsWith("HT_")) return `MT ${court(market.slice(3), param, sel)}`;
+  return sel;
+}
+
+/** Une ligne de match à la manière de Flashscore : heure, deux équipes avec écusson, score, puis le choix le plus probable. */
+function Ligne({ m, sg, starred, avecDate }: { m: Row; sg: Signal | null; starred: boolean; avecDate: boolean }) {
+  const H = one(m.home), A = one(m.away);
+  const h = H?.nom ?? "", a = A?.nom ?? "";
   const done = m.statut === "termine";
   const live = m.statut === "en_cours" && m.score_home !== null;
   const homeWin = done && (m.score_home ?? 0) > (m.score_away ?? 0), awayWin = done && (m.score_away ?? 0) > (m.score_home ?? 0);
-  const p = sg ? bestPick(sg) : null;
+  const p = sg && !done && !live ? bestPick(sg) : null;
+  const equipe = (nom: string, logo: string | null, gras: boolean, score: number | null) => (
+    <span className="flex items-center gap-2">
+      <TeamBadge name={nom} size={18} logo={logo} />
+      <span className={`min-w-0 flex-1 truncate text-[13.5px] leading-tight ${gras ? "font-semibold text-ink" : "text-ink-soft"}`}>{nom}</span>
+      {(done || live) && <span className={`w-5 text-right font-display text-[15px] font-bold tabular-nums ${live ? "text-loss" : gras ? "text-ink" : "text-ink-soft"}`}>{score}</span>}
+    </span>
+  );
   return (
-    <li className="flex items-center pr-2">
-      {!done && <span className="-mr-2 pl-1"><FollowStar matchId={m.id} initial={starred} /></span>}
-      <Link href={`/matchs/${m.id}`} className={`flex min-w-0 flex-1 items-center gap-3 py-2 pr-3 active:bg-surface-2 ${done ? "pl-3" : "pl-2"}`}>
-        <span className="w-11 shrink-0 self-start pt-0.5 text-center text-[13px] leading-tight tabular-nums">
+    <li className="flex items-center">
+      <span className="w-7 shrink-0 pl-0.5">{!done && <FollowStar matchId={m.id} initial={starred} small />}</span>
+      <Link href={`/matchs/${m.id}`} className="flex min-w-0 flex-1 items-center gap-2 py-1.5 pr-2 active:bg-surface-2">
+        <span className="w-10 shrink-0 text-center text-[12px] leading-tight tabular-nums">
           {avecDate && <span className="block text-[10px] text-ink-muted">{fmtJour(m.kickoff_at)}</span>}
-          {done ? <span className="font-medium text-ink-muted">Fin</span>
-            : m.statut === "en_cours" && isStale(m.kickoff_at) ? <span className="text-[10px] leading-tight text-draw" title="La source n’a pas encore confirmé la fin du match">Fin ?</span>
-            : m.statut === "en_cours" ? <span className="font-semibold text-loss">● {m.minute ? `${m.minute}’` : "Live"}</span>
+          {done ? <span className="text-ink-muted">Fin</span>
+            : m.statut === "en_cours" && isStale(m.kickoff_at) ? <span className="text-[10px] text-draw" title="La source n’a pas encore confirmé la fin du match">Fin ?</span>
+            : m.statut === "en_cours" ? <span className="font-semibold text-loss">{m.minute ? `${m.minute}’` : "Live"}</span>
             : m.statut === "reporte" ? <span className="text-draw">Rep.</span>
-            : <span className="font-medium text-ink-soft">{fmtTime(m.kickoff_at)}</span>}
+            : <span className="text-ink-soft">{fmtTime(m.kickoff_at)}</span>}
         </span>
-        {/* Noms d'équipe en entier (19/11 : ils étaient coupés) ; l'issue la plus probable passe dessous */}
         <span className="min-w-0 flex-1 space-y-1">
-          <span className="flex items-center gap-2"><TeamBadge name={h} size={20} /><span className={`min-w-0 flex-1 text-[14px] leading-tight text-ink ${homeWin || !done ? "font-semibold" : "font-medium"}`}>{h}</span>{(done || live) && <span className={`pl-2 font-display text-base font-bold tabular-nums ${live ? "text-loss" : ""}`}>{m.score_home}</span>}</span>
-          <span className="flex items-center gap-2"><TeamBadge name={a} size={20} /><span className={`min-w-0 flex-1 text-[14px] leading-tight text-ink ${awayWin || !done ? "font-semibold" : "font-medium"}`}>{a}</span>{(done || live) && <span className={`pl-2 font-display text-base font-bold tabular-nums ${live ? "text-loss" : ""}`}>{m.score_away}</span>}</span>
-          {!done && !live && (p && sg
-            ? <span className="block"><PickBadge label={pickLabel(p.market, p.param, p.sel, shortName(h), shortName(a))} p={p.p} cote={p.cote} source={sg.source} pModele={p.pModele} /></span>
-            : <span className="block text-[11px] text-ink-muted">Analyse statistique indisponible</span>)}
+          {equipe(h, logoEquipe({ af: m.af_home_id, code: H?.code_externe }), homeWin || !done, m.score_home)}
+          {equipe(a, logoEquipe({ af: m.af_away_id, code: A?.code_externe }), awayWin || !done, m.score_away)}
         </span>
+        {!done && !live && (
+          p && sg ? (
+            <span className={`flex w-[62px] shrink-0 flex-col items-center rounded-md py-1 leading-tight ${sg.source === "modele" ? "bg-brand-soft text-brand" : p.p >= 0.75 ? "bg-inverse text-on-inverse" : "bg-surface-2 text-ink-soft"}`}
+              title={`${pickLabel(p.market, p.param, p.sel, h, a)} · ${sg.source === "modele" ? "modèle, faute de cote" : "d’après les cotes de référence"}`}>
+              <span className="max-w-full truncate px-1 text-[10px] font-semibold">{court(p.market, p.param, p.sel)}</span>
+              <span className="text-[13px] font-bold tabular-nums">{Math.round(p.p * 100)} %</span>
+              {p.cote && <span className="text-[9.5px] tabular-nums opacity-80">{p.cote.toFixed(2).replace(".", ",")}</span>}
+            </span>
+          ) : <span className="w-[62px] shrink-0 text-center text-[9.5px] leading-tight text-ink-muted">pas encore d’analyse</span>
+        )}
       </Link>
-      {m.statut === "programme" && p && <AddToSlip size="sm" leg={legFrom({ matchId: m.id, home: h, away: a, kickoff: m.kickoff_at, comp: code, market: p.market, param: p.param, sel: p.sel, p: p.p, cote: p.cote })} />}
     </li>
   );
 }

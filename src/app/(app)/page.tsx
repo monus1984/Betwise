@@ -10,9 +10,11 @@ import { Mark } from "@/components/icons";
 import { InstallButton } from "@/components/install-button";
 import { loadAccueil } from "@/lib/accueil/load";
 import { Aide } from "@/components/aide";
+import { BoutonAjout } from "@/components/bouton-ajout";
+import { RecherchePourcentage } from "@/components/recherche-pourcentage";
 import { briefing } from "@/lib/accueil/briefing";
 import type { Pourquoi } from "@/lib/matches/justification";
-import { BandeauBetster, Bienvenue, CarteMatchUI, Demain, IconeScan, ImportCarte, RaccourcisCoach, TipstersDuJour } from "@/components/accueil";
+import { BandeauBetster, Bienvenue, CarteMatchUI, Demain, ImportCarte, RaccourcisCoach, TipstersDuJour } from "@/components/accueil";
 import { ProfilsDuJour } from "@/components/profils-du-jour";
 import { heure, jourCourt, pct as pctP } from "@/components/proposition";
 import { BoutonMasque, Montant } from "@/components/montant";
@@ -95,7 +97,7 @@ export default async function Home() {
   const matchsDuJour = acc.cartes.length > 0 && (
     <section aria-label="Matchs du jour" className="mt-6 flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between gap-2">
-        <h2 className="text-[17px] font-bold">{directs ? "En ce moment" : "Matchs du jour"}</h2>
+        <h2 className="text-[17px] font-bold">Matchs du jour à venir</h2>
         <span className="text-[11.5px] text-ink-muted">{acc.nbAnalyses} analysé{acc.nbAnalyses > 1 ? "s" : ""}{acc.nbSans ? ` · ${acc.nbSans} sans analyse` : ""}</span>
       </div>
       {acc.cartes.slice(0, 6).map((c) => <CarteMatchUI key={c.id} c={c} />)}
@@ -111,7 +113,7 @@ export default async function Home() {
         <span className="flex items-center gap-2"><Mark className="h-7 w-7" /><span className="min-w-0"><span className="block text-lg font-bold leading-tight tracking-tight">{APP_NAME}</span><span className="block text-[11px] capitalize text-ink-muted">{new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Abidjan" })}</span></span></span>
         <span className="flex items-center gap-0.5">
           <Aide section="accueil" clair />
-          <Link href="/import" aria-label="Importer un ticket" className="flex h-11 w-11 items-center justify-center rounded-full text-ink-soft active:bg-surface-2"><IconeScan /></Link>
+          <BoutonAjout />
           <Link href="/notifications" aria-label={cloche ? `Notifications, ${nonLues} non lues` : "Notifications"} className="relative flex h-11 w-11 items-center justify-center rounded-full text-ink-soft active:bg-surface-2">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
             {cloche > 0 && <span className="absolute right-0.5 top-1 min-w-[18px] rounded-full bg-brand px-1 text-center text-[10px] font-bold leading-[18px] text-on-fill">{(nonLues ?? 0) > 99 ? "99+" : cloche}</span>}
@@ -126,7 +128,8 @@ export default async function Home() {
       <BandeauBetster prenom={profile?.pseudo ?? ""} synthese={synthese} maj={maj} expression={acc.avis?.expression ?? "neutre"} briefing={aDire} />
       {nouveau && <Bienvenue />}
 
-      {acc.nbPropositions > 0 && <ProfilsDuJour profils={acc.profils} titre={acc.profilsDeDemain ? "Les meilleures options de demain" : "Les meilleures options du jour"} />}
+      {acc.nbPropositions > 0 && <ProfilsDuJour profils={acc.profils} titre={acc.profilsDeDemain ? "Les coups de demain" : "Les coups du jour"} />}
+      <RecherchePourcentage options={acc.recherche} />
 
       {/* Aujourd'hui d'abord quand il y a des matchs analysés ; sinon demain remonte */}
       {jourCharge ? <>{matchsDuJour}{demain}</> : <>{demain}{matchsDuJour}</>}

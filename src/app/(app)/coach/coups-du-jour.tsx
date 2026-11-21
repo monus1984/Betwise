@@ -1,6 +1,6 @@
 import { APP_NAME } from "@/lib/app-name";
 import Link from "next/link";
-import { CAT_CONSTATE, CAT_LABEL, CAT_STYLE, type Categorie } from "@/lib/coach/categories";
+import { CAT_COTES, CAT_LABEL, CAT_STYLE, type Categorie } from "@/lib/coach/categories";
 import type { Repli, TheirPick, TodayPick } from "@/lib/coach/today";
 import { COMP_FLAG } from "@/components/match-ui";
 import { IconBolt, IconFlame, IconShield, IconTile } from "@/components/icons";
@@ -11,7 +11,7 @@ const F = (x: number) => `${Math.round(x).toLocaleString("fr-FR")} F`;
 const C = (x: number) => x.toFixed(2).replace(".", ",");
 const time = (iso: string) => new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" });
 const CATS: Categorie[] = ["sur", "audacieux", "risque"];
-const CAT_NOTE: Record<Categorie, string> = { sur: "cotes 1,10–1,20", audacieux: "cotes 1,20–1,50", risque: "cotes 1,50–1,90" };
+const CAT_NOTE: Record<Categorie, string> = CAT_COTES;
 
 export function CoupsDuJour({ picks, theirs, mises, repli = [] }: { picks: TodayPick[]; theirs: TheirPick[]; mises: Record<Categorie, number> | null; repli?: Repli[] }) {
   return (
@@ -52,7 +52,7 @@ export function CoupsDuJour({ picks, theirs, mises, repli = [] }: { picks: Today
               <div key={cat}>
                 <div className="mb-1.5 flex items-baseline justify-between gap-2">
                   <span className={`inline-flex items-center gap-1 rounded-full border py-0.5 pl-1.5 pr-2 text-[11px] font-semibold ${CAT_STYLE[cat]}`}>{cat === "sur" ? <IconShield width={14} height={14} /> : cat === "audacieux" ? <IconFlame width={14} height={14} /> : <IconBolt width={14} height={14} />}{CAT_LABEL[cat]} <span className="font-normal">· {CAT_NOTE[cat]}</span></span>
-                  <span className="text-[11px] text-ink-muted">{mises ? (mise ? `mise conseillée ${F(mise)}` : "pas de budget risque") : `passe ~${Math.round(CAT_CONSTATE[cat] * 100)} fois sur 100`}</span>
+                  <span className="text-[11px] text-ink-muted">{mises ? (mise ? `mise conseillée ${F(mise)}` : "pas de budget risque") : "mise selon ton budget"}</span>
                 </div>
                 <ul className="divide-y divide-line rounded-lg border border-line">
                   {list.map((p) => {

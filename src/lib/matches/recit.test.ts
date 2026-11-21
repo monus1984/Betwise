@@ -14,7 +14,7 @@ const base: RecitInput = {
     { date: "2026-11-12T19:45:00Z", home: "Italie", away: "France", sh: 3, sa: 1, buteurs: [{ n: "M. Retegui", e: "1" }, { n: "M. Retegui", e: "1" }, { n: "M. Olise", e: "2" }] },
     { date: "2026-10-10T18:45:00Z", home: "Italie", away: "Belgique", sh: 0, sa: 2, buteurs: [] },
   ],
-  picks: [pick("OU", 0.5, "Plus", 0.95), pick("DC", null, "1N", 0.74), pick("OU", 1.5, "Plus", 0.78, 1.25), pick("DC", null, "12", 0.86), pick("1X2", null, "1", 0.41, 2.3), pick("BTTS", null, "Oui", 0.58), pick("HT_OU", 0.5, "Plus", 0.7)],
+  picks: [pick("OU", 0.5, "Plus", 0.95), pick("DC", null, "1N", 0.74), pick("OU", 1.5, "Plus", 0.7, 1.36), pick("DC", null, "12", 0.86), pick("1X2", null, "1", 0.41, 2.3), pick("BTTS", null, "Oui", 0.58), pick("HT_OU", 0.5, "Plus", 0.7)],
   source: "marche", butsAttendus: 2.7,
 };
 
