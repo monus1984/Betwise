@@ -55,3 +55,22 @@ Bandeau des jours (jours qui ont des matchs), filtre par compétition, filtres �
 4. Cotes Betclic : test de concordance Betclic (FR) / Betclic CI par Mounir, puis décision d'affichage et d'organisation du budget The Odds API.
 
 Écritures en production nécessaires (à valider par Mounir) : nouvelles lignes dans `competitions`, import des matchs et cotes des nouvelles compétitions par les tâches planifiées existantes. Aucune migration de schéma prévue à ce stade.
+
+## Complément du 21/11 : Betclic Côte d'Ivoire contre Betclic France
+
+Captures Betclic CI de Mounir (08 h 45 à 08 h 56) comparées au relevé The Odds API (`betclic_fr` et Pinnacle, 08 h 56 à 08 h 58), 1X2 seulement.
+
+| Match | Betclic CI | Betclic France | Écart CI / France |
+| --- | --- | --- | --- |
+| Chelsea – Leeds | 2,02 / 3,48 / 3,60 | 1,93 / 3,38 / 3,48 | +4,7 / +3,0 / +3,4 % |
+| Tottenham – Ipswich | 1,50 / 4,60 / 5,75 | 1,46 / 4,35 / 5,40 | +2,7 / +5,7 / +6,5 % |
+| Nice – PSG | 5,75 / 5,10 / 1,45 | 5,60 / 4,95 / 1,39 | +2,7 / +3,0 / +4,3 % |
+| Monaco – Auxerre | 1,40 / 4,90 / 7,25 | 1,36 / 4,65 / 6,75 | +2,9 / +5,4 / +7,4 % |
+| Leverkusen – Paderborn | 1,27 / 6,60 / 8,50 | 1,20 / 6,60 / 8,50 | +5,8 / 0 / 0 % |
+| Union Berlin – Leipzig | 5,60 / 4,90 / 1,47 | 5,50 / 4,75 / 1,41 | +1,8 / +3,2 / +4,3 % |
+
+- Sur 18 cotes : médiane +3,3 %, moyenne +3,7 %, écart-type ≈ 2 %, de 0 à +7,4 %. Jamais en dessous de France.
+- Marge : Betclic CI ≈ 6 % (5,6 à 7,9 % sur les 12 matchs capturés), Betclic France ≈ 10 %, Pinnacle 2,5 à 4 %.
+- Ce matin-là, `betclic_fr` n'avait aucune cote Liga ni Serie A sur The Odds API.
+
+Décision de Mounir (21/11) : afficher 1xBet, Betclic France et une estimation Betclic CI = France × 1,033, fourchette × 1,017 à × 1,057 (médiane ± un écart-type), toujours marquée comme estimation, jamais utilisée pour préremplir un pari ni calculer une value. À recalculer avec les tickets Betclic importés. Coût : 1 crédit par compétition et par jour (PL, L1, Bundesliga, Liga, Serie A, C1), arrêté sous 100 crédits restants.
