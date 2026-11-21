@@ -86,6 +86,14 @@ class handler(BaseHTTPRequestHandler):
         self.wfile.write(corps)
 
     def do_GET(self):
+        # ESSAI TEMPORAIRE (21/11) : phrase fixe, pour vérifier la fabrication sur le serveur. À retirer après l'essai.
+        if "essai=1" in (self.path or ""):
+            t0 = time.time()
+            try:
+                son = fabriquer("Bonjour ! Je suis Betster. Voici mon point du jour.")
+            except Exception as e:
+                return self._repondre(500, json.dumps({"error": str(e)[:300]}).encode())
+            return self._repondre(200, json.dumps({"ok": True, "octets": len(son), "secondes": round(time.time() - t0, 2)}).encode())
         self._repondre(405, b'{"error":"POST seulement"}')
 
     def do_POST(self):
