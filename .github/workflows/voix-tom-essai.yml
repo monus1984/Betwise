@@ -23,7 +23,7 @@ jobs:
           curl -sSfL -o fr_FR-tom-medium.onnx "$base/fr_FR-tom-medium.onnx"
           curl -sSfL -o fr_FR-tom-medium.onnx.json "$base/fr_FR-tom-medium.onnx.json"
           r=https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR
-          for v in upmc/medium/fr_FR-upmc-medium gilles/low/fr_FR-gilles-low; do
+          for v in upmc/medium/fr_FR-upmc-medium; do
             n=$(basename $v); curl -sSfL -o $n.onnx "$r/$v.onnx"; curl -sSfL -o $n.onnx.json "$r/$v.onnx.json"
           done
           ls -la

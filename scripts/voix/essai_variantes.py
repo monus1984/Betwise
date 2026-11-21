@@ -5,7 +5,7 @@ from piper.config import SynthesisConfig
 
 dossier = sys.argv[1]
 os.makedirs(dossier, exist_ok=True)
-texte = ("Bonjour ! Aujourd’hui, j’ai analysé neuf matchs et retenu six propositions. "
+texte = ("Bonjour ! Bonne nouvelle : aujourd’hui, j’ai analysé neuf matchs et retenu six propositions. "
          "Profil prudent : Bayern Munich contre Cologne, demain à 19 h 30. Bayern gagne, probabilité 86 pour cent. "
          "Le détail est juste en dessous !")
 
@@ -22,6 +22,5 @@ def fabriquer(nom, modele, vitesse, expressif, locuteur=None):
         voix.synthesize_wav(texte, wf, syn_config=cfg)
     print(f"{nom} : fabriqué en {time.time() - t0:.2f} s")
 
-fabriquer("tom-vif-expressif", "voix/fr_FR-tom-medium.onnx", 0.88, 0.8)
-fabriquer("pierre", "voix/fr_FR-upmc-medium.onnx", 0.9, 0.75, "pierre")
-fabriquer("gilles", "voix/fr_FR-gilles-low.onnx", 0.9, 0.75)
+fabriquer("pierre-a", "voix/fr_FR-upmc-medium.onnx", 0.88, 0.85, "pierre")
+fabriquer("pierre-b", "voix/fr_FR-upmc-medium.onnx", 0.85, 0.95, "pierre")
