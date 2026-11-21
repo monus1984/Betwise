@@ -9,8 +9,9 @@ import { COMPETITIONS_V1 } from "../src/lib/football-data/client";
 import { OddsApiClient } from "../src/lib/odds-api/client";
 import { syncBetclicFr, syncReferenceOdds } from "../src/lib/odds-api/sync";
 
-/** Compétitions où Betclic France est relevé (1 crédit chacune par passage). */
-const BETCLIC_CODES = ["PL", "FL1", "BL1", "PD", "SA", "CL"];
+/** Compétitions où Betclic France est relevé (1 crédit chacune par passage). Liga et Serie A retirées le 21/11 :
+ * The Odds API n'y donne aucune cote Betclic France, l'appel coûtait un crédit pour rien. */
+const BETCLIC_CODES = ["PL", "FL1", "BL1", "CL"];
 /** En dessous de ce quota restant, on garde les crédits pour les cotes de référence. */
 const RESERVE_REFERENCE = 100;
 
