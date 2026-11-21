@@ -1,6 +1,10 @@
 name: Voix off de la vidéo (voix Google)
 on:
   workflow_dispatch:
+    inputs:
+      groupes:
+        description: "Groupes à refaire, séparés par des virgules (vide : tous)"
+        default: ""
 permissions:
   contents: write
 jobs:
@@ -15,7 +19,8 @@ jobs:
       - run: npx tsx scripts/voix-promo.ts
         env:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GROUPES: ${{ inputs.groupes }}
       - run: |
           git config user.name "github-actions"; git config user.email "actions@github.com"
-          git checkout -B voix-promo
-          git add -f voix-promo && git commit -qm "Voix off de la vidéo (voix Google)" && git push -f origin voix-promo || echo "rien à pousser"
+          git checkout -B voix-promo-2
+          git add -f voix-promo && git commit -qm "Voix off de la vidéo (voix Google)" && git push -f origin voix-promo-2 || echo "rien à pousser"
