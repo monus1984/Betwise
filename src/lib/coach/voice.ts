@@ -1,23 +1,29 @@
 /** Voix du Coach : préparation du texte à lire et choix de la voix du téléphone. */
 /** Texte prêt à être lu : sans mise en forme, chiffres et unités dits naturellement. */
-/**
- * Prépare un texte pour une voix française (21/11) : la voix lit mal les noms d'équipe étrangers, les sigles de club,
- * « 19 h 30 » et certains noms de bookmakers. On ne change que la lecture, jamais le texte affiché.
- */
 const NOMS: [RegExp, string][] = [
-  [/\bM[üu]nchen\b/g, "Munich"], [/\bK[öo]ln\b/g, "Cologne"], [/\bM[öo]nchengladbach\b/g, "Mönchengladbach"],
-  [/\bBayer 04 Leverkusen\b/g, "Leverkusen"], [/\bTSG 1899 Hoffenheim\b/g, "Hoffenheim"], [/\bInternazionale\b/g, "Inter"],
+  [/\bM[üu]nchen\b/g, "Munich"], [/\bK[öo]ln\b/g, "Cologne"], [/\bBayer 04 Leverkusen\b/g, "Leverkusen"], [/\bTSG 1899 Hoffenheim\b/g, "Hoffenheim"],
+  [/\bInternazionale\b/g, "Inter"], [/\bBologna\b/g, "Bologne"], [/\bNapoli\b/g, "Naples"], [/\bFiorentina\b/g, "Fiorentina"], [/\bSevilla\b/g, "Séville"],
   [/\bEspanyol de Barcelona\b/g, "Espanyol"], [/\bWolverhampton Wanderers\b/g, "Wolverhampton"], [/\bBrighton & Hove Albion\b/g, "Brighton"],
-  [/\bParis Saint-Germain\b/g, "Paris Saint-Germain"], [/\b1xBet\b/gi, "One X Bet"], [/\b22Bet\b/gi, "22 Bet"],
+  [/\b1xBet\b/gi, "One X Bet"], [/\b22Bet\b/gi, "22 Bet"],
 ];
+const pl = (n: string, mot: string, motPl = mot + "s") => `${n} ${Number(n) > 1 ? motPl : mot}`;
+/**
+ * Lecture à voix haute (21/11) : la voix lit mal les noms d'équipe étrangers, les sigles de club, les années dans les noms,
+ * « 19 h 30 », « 2e », la forme « 1V 1N 3D » et certains noms de bookmakers. Seule la lecture change, jamais l'affichage.
+ */
 export function prononcer(text: string) {
   let t = text;
   for (const [re, par] of NOMS) t = t.replace(re, par);
   return t
-    .replace(/\b1\.\s?(?=FC\b)/g, "")                                                     // « 1. FC Köln »
-    .replace(/\b(FC|AFC|CF|SC|AC|SSC|SV|RCD|RC|UD|VfB|VfL|TSG|SpVgg)\b\.?\s?(?=[A-ZÀ-Ý])/g, "")  // sigles devant un nom
-    .replace(/(?<=[a-zà-ÿ])\s(FC|AFC|CF|SC|AC)\b/g, "")                                   // sigles après un nom
-    .replace(/\b(\d{1,2})\s?h\s?(\d{2})\b/g, "$1 heures $2").replace(/\b(\d{1,2})\s?h\b/g, "$1 heures")
+    .replace(/\b(\d+)V (\d+)N (\d+)D\b/g, (_, v, n, d) => `${pl(v, "victoire")}, ${pl(n, "nul")}, ${pl(d, "défaite")}`)
+    .replace(/\b1\.\s?(?=FC\b)/g, "")
+    .replace(/\b(FC|AFC|CF|SC|AC|CA|SSC|SV|RCD|RC|UD|CD|VfB|VfL|TSG|SpVgg|OGC|AS|AJ)\b\.?\s?(?=[A-ZÀ-Ý])/g, "")
+    .replace(/(?<=[A-Za-zÀ-ÿ])\s(FC|AFC|CF|SC|AC|Calcio|CFC)\b/g, "")
+    .replace(/(?<=[A-Za-zÀ-ÿ])\s(18|19|20)\d{2}\b/g, "")
+    .replace(/\b1(re|ère)\b/g, "première").replace(/\b1er\b/g, "premier")
+    .replace(/\b(\d+)e\b/g, (_, n) => ({ "2": "deuxième", "3": "troisième", "4": "quatrième", "5": "cinquième" } as Record<string, string>)[n] ?? `${n}ième`)
+    .replace(/\b(\d{1,2})\s?h\s?(\d{2})\b/g, "$1 heures $2").replace(/\b1\s?h\b/g, "1 heure").replace(/\b(\d{1,2})\s?h\b/g, "$1 heures")
+    .replace(/á/g, "a").replace(/[íì]/g, "i").replace(/[óò]/g, "o").replace(/ú/g, "u").replace(/ñ/g, "gn")
     .replace(/ü/g, "u").replace(/ö/g, "eu").replace(/ä/g, "è").replace(/ß/g, "ss")
     .replace(/\s{2,}/g, " ");
 }
