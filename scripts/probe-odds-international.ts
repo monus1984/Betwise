@@ -1,35 +1,29 @@
 /**
- * Sonde : compétitions de sélections nationales couvertes par The Odds API, et leurs prochains matchs.
- * /sports et /sports/{key}/events ne consomment pas de crédit.
+ * Audit lot 1 (21/11, branche audit-lot1, lecture seule) : The Odds API sert-il les cotes Betclic, pour quelles
+ * compétitions, et lesquelles ? 2 compétitions × 2 régions × 1 marché = 4 crédits. N'écrit rien en base.
  */
-import "dotenv/config";
-const KEY = process.env.ODDS_API_KEY ?? "";
+const KEY = (process.env.ODDS_API_KEY ?? "").trim();
 const BASE = "https://api.the-odds-api.com/v4";
-
-async function get(path: string) {
-  const r = await fetch(`${BASE}${path}${path.includes("?") ? "&" : "?"}apiKey=${KEY}`);
-  return { status: r.status, used: r.headers.get("x-requests-used"), last: r.headers.get("x-requests-last"), json: await r.json() };
-}
-
 async function main() {
-  const s = await get("/sports?all=true");
-  const soccer = (s.json as { key: string; title: string; description: string; active: boolean; has_outrights: boolean }[]).filter((x) => x.key.startsWith("soccer"));
-  const intl = soccer.filter((x) => /nations|world_cup|wc_|qualif|friendl|africa|caf|afcon|euro|copa_america|asian|concacaf|gold_cup|international/i.test(`${x.key} ${x.title} ${x.description}`));
-  console.log(`Football : ${soccer.length} compétitions, dont ${soccer.filter((x) => x.active).length} actives. Coût /sports : ${s.last} crédit(s).`);
-  console.log("Compétitions internationales / sélections :");
-  for (const x of intl) console.log(`  ${x.active ? "ACTIVE " : "inactive"} ${x.key} — ${x.title} (${x.description})${x.has_outrights ? " [vainqueur final seulement]" : ""}`);
-  for (const x of intl.filter((y) => y.active && !y.has_outrights)) {
-    const e = await get(`/sports/${x.key}/events`);
-    const ev = e.json as { commence_time: string; home_team: string; away_team: string }[];
-    console.log(`\n[${x.key}] ${Array.isArray(ev) ? ev.length : 0} matchs à venir (coût ${e.last} crédit)`);
-    if (Array.isArray(ev)) for (const m of ev.slice(0, 12)) console.log(`  ${m.commence_time.slice(0, 16).replace("T", " ")} UTC  ${m.home_team} – ${m.away_team}`);
+  const sp = await fetch(`${BASE}/sports?apiKey=${KEY}`);
+  console.log(`Crédits : utilisés ${sp.headers.get("x-requests-used")} · restants ${sp.headers.get("x-requests-remaining")}`);
+  const sports = (await sp.json()) as any[];
+  console.log(`Compétitions de football disponibles : ${sports.filter((s) => s.group === "Soccer").length}`);
+  console.log(sports.filter((s) => s.group === "Soccer").map((s) => s.key).join(", "));
+  for (const sport of ["soccer_epl", "soccer_france_ligue_one"]) {
+    const r = await fetch(`${BASE}/sports/${sport}/odds?apiKey=${KEY}&regions=eu,fr&markets=h2h&oddsFormat=decimal`);
+    const ev = (await r.json()) as any[];
+    const books = new Map<string, number>();
+    for (const e of ev) for (const b of e.bookmakers ?? []) books.set(`${b.key} (${b.title})`, (books.get(`${b.key} (${b.title})`) ?? 0) + 1);
+    console.log(`\n## ${sport} : ${ev.length} matchs · crédits restants ${r.headers.get("x-requests-remaining")}`);
+    console.log([...books.entries()].sort((x, y) => y[1] - x[1]).map(([k, n]) => `${k}: ${n}`).join(" | "));
+    const e = ev.find((x) => (x.bookmakers ?? []).some((b: any) => /betclic/i.test(b.key)));
+    if (e) {
+      console.log(`Exemple ${e.home_team} – ${e.away_team} (${e.commence_time})`);
+      for (const b of e.bookmakers.filter((b: any) => /betclic|1xbet|pinnacle/i.test(b.key))) {
+        console.log(`  ${b.title} : ${b.markets[0].outcomes.map((o: any) => `${o.name} ${o.price}`).join(" / ")} (mis à jour ${b.last_update})`);
+      }
+    }
   }
-  // Scores : quelle profondeur, quel coût
-  const firstActive = intl.find((y) => y.active && !y.has_outrights);
-  if (firstActive) {
-    const sc = await get(`/sports/${firstActive.key}/scores?daysFrom=3`);
-    console.log(`\nScores ${firstActive.key} (3 derniers jours) : ${Array.isArray(sc.json) ? (sc.json as unknown[]).length : JSON.stringify(sc.json).slice(0, 200)} entrées, coût ${sc.last} crédit(s)`);
-  }
-  console.log(`\nCrédits utilisés ce mois : ${s.used}`);
 }
-main();
+main().catch((e) => { console.error(e); process.exit(1); });
