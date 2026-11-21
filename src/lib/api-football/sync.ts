@@ -36,6 +36,21 @@ export const AF_COMPETITIONS: Record<string, { league: number; season: number; n
   BL2: { league: 79, season: 2026, nom: "2. Bundesliga", pays: "Allemagne", saison: "2026-2027", nations: false },
   SB: { league: 136, season: 2026, nom: "Serie B", pays: "Italie", saison: "2026-2027", nations: false },
   SD: { league: 141, season: 2026, nom: "Liga 2 (Segunda División)", pays: "Espagne", saison: "2026-2027", nations: false },
+  // Vague 2 (21/11/2026)
+  PT1: { league: 94, season: 2026, nom: "Portugal D1 (Liga Portugal)", pays: "Portugal", saison: "2026-2027", nations: false },
+  SC1: { league: 179, season: 2026, nom: "Écosse D1 (Premiership)", pays: "Écosse", saison: "2026-2027", nations: false },
+  CH1: { league: 207, season: 2026, nom: "Suisse D1 (Super League)", pays: "Suisse", saison: "2026-2027", nations: false },
+  AT1: { league: 218, season: 2026, nom: "Autriche D1 (Bundesliga)", pays: "Autriche", saison: "2026-2027", nations: false },
+  GR1: { league: 197, season: 2026, nom: "Grèce D1 (Super League)", pays: "Grèce", saison: "2026-2027", nations: false },
+  RO1: { league: 283, season: 2026, nom: "Roumanie D1 (Liga I)", pays: "Roumanie", saison: "2026-2027", nations: false },
+  QA1: { league: 305, season: 2026, nom: "Qatar D1 (Stars League)", pays: "Qatar", saison: "2026-2027", nations: false },
+  ENG3: { league: 41, season: 2026, nom: "Angleterre D3 (League One)", pays: "Angleterre", saison: "2026-2027", nations: false },
+  UWCL: { league: 525, season: 2026, nom: "Ligue des champions féminine", pays: "Europe", saison: "2026-2027", nations: false },
+  ENGF: { league: 44, season: 2026, nom: "Angleterre D1 féminine (WSL)", pays: "Angleterre", saison: "2026-2027", nations: false },
+  FRAF: { league: 64, season: 2026, nom: "France D1 féminine (Arkema Première Ligue)", pays: "France", saison: "2026-2027", nations: false },
+  GERF: { league: 82, season: 2026, nom: "Allemagne D1 féminine (Frauen-Bundesliga)", pays: "Allemagne", saison: "2026-2027", nations: false },
+  ESPF: { league: 142, season: 2026, nom: "Espagne D1 féminine (Liga F)", pays: "Espagne", saison: "2026-2027", nations: false },
+  ITAF: { league: 139, season: 2026, nom: "Italie D1 féminine (Serie A Women)", pays: "Italie", saison: "2026-2027", nations: false },
 };
 
 // Noms API-Football → noms déjà utilisés pour les sélections (The Odds API)
@@ -319,9 +334,12 @@ export async function fillDetails(db: Db, api: ApiFootball): Promise<{ filled: n
 }
 
 /** Compétitions dont on garde le classement (championnats et phases de groupes). */
+/** Vague 2 (21/11/2026) : autres D1, League One, féminines. */
+export const VAGUE2 = ["PT1", "SC1", "CH1", "AT1", "GR1", "RO1", "QA1", "ENG3", "UWCL", "ENGF", "FRAF", "GERF", "ESPF", "ITAF"];
+
 export const AF_STANDINGS: Record<string, { league: number; season: number }> = {
   ...AF_LINKED, CIV1: { league: 386, season: 2026 }, CANQ: { league: 36, season: 2027 }, CAFCL: { league: 12, season: 2026 }, CAFCC: { league: 20, season: 2026 },
-  ...Object.fromEntries(["EL", "ECL", "BE1", "BE2", "TR1", "TR2", "NL1", "NL2", "DK1", "NO1", "KSA1", "ELC", "FL2", "BL2", "SB", "SD"].map((k) => [k, { league: AF_COMPETITIONS[k].league, season: AF_COMPETITIONS[k].season }])),
+  ...Object.fromEntries(["EL", "ECL", "BE1", "BE2", "TR1", "TR2", "NL1", "NL2", "DK1", "NO1", "KSA1", "ELC", "FL2", "BL2", "SB", "SD", ...VAGUE2].map((k) => [k, { league: AF_COMPETITIONS[k].league, season: AF_COMPETITIONS[k].season }])),
 };
 
 /** Classement d'une compétition, avec les noms d'équipes de BETWISE quand l'équipe est connue. Une requête. */

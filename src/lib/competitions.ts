@@ -16,6 +16,7 @@ export const COMPETITIONS: Record<string, CompInfo> = {
   CL: { court: "Ligue des champions", drapeau: "⭐", pays: "Europe", majeure: true },
   EL: { court: "Ligue Europa", drapeau: "🟠", pays: "Europe", majeure: true },
   ECL: { court: "Ligue Conférence", drapeau: "🟢", pays: "Europe" },
+  UWCL: { court: "Ligue des champions féminine", drapeau: "⭐", pays: "Europe" },
   CAFCL: { court: "Ligue des champions CAF", drapeau: "🏆", pays: "Afrique", majeure: true },
   CAFCC: { court: "Coupe de la confédération", drapeau: "🏆", pays: "Afrique" },
   // championnats
@@ -39,6 +40,19 @@ export const COMPETITIONS: Record<string, CompInfo> = {
   DK1: { court: "Superliga danoise", drapeau: "🇩🇰", pays: "Danemark" },
   NO1: { court: "Eliteserien", drapeau: "🇳🇴", pays: "Norvège" },
   KSA1: { court: "Saudi Pro League", drapeau: "🇸🇦", pays: "Arabie saoudite" },
+  ENG3: { court: "League One", drapeau: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", pays: "Angleterre" },
+  ENGF: { court: "WSL (féminine)", drapeau: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", pays: "Angleterre" },
+  FRAF: { court: "D1 féminine", drapeau: "🇫🇷", pays: "France" },
+  GERF: { court: "Bundesliga féminine", drapeau: "🇩🇪", pays: "Allemagne" },
+  ESPF: { court: "Liga F (féminine)", drapeau: "🇪🇸", pays: "Espagne" },
+  ITAF: { court: "Serie A féminine", drapeau: "🇮🇹", pays: "Italie" },
+  PT1: { court: "Liga Portugal", drapeau: "🇵🇹", pays: "Portugal" },
+  SC1: { court: "Premiership écossaise", drapeau: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", pays: "Écosse" },
+  CH1: { court: "Super League suisse", drapeau: "🇨🇭", pays: "Suisse" },
+  AT1: { court: "Bundesliga autrichienne", drapeau: "🇦🇹", pays: "Autriche" },
+  GR1: { court: "Super League grecque", drapeau: "🇬🇷", pays: "Grèce" },
+  RO1: { court: "Liga I roumaine", drapeau: "🇷🇴", pays: "Roumanie" },
+  QA1: { court: "Qatar Stars League", drapeau: "🇶🇦", pays: "Qatar" },
 };
 
 const rangPays = (p: string) => { const i = PAYS_ORDRE.indexOf(p); return i === -1 ? PAYS_ORDRE.length : i; };
