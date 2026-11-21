@@ -34,7 +34,7 @@ const OUTCOME: Record<MatchedSelection["outcome"], { label: string; cls: string 
 };
 const toNum = (s: string) => Number(String(s).replace(/\s/g, "").replace(",", "."));
 
-export function ImportFlow({ markets, sources, defaultOrigin, initialText, justSaved, nextTab }: { markets: { code: string; libelle_fr: string; a_parametre: boolean }[]; sources: Source[]; defaultOrigin: string | null; initialText: string; justSaved?: boolean; nextTab?: string }) {
+export function ImportFlow({ markets, sources, defaultOrigin, initialText, justSaved, nextTab, initialTest }: { markets: { code: string; libelle_fr: string; a_parametre: boolean }[]; sources: Source[]; defaultOrigin: string | null; initialText: string; justSaved?: boolean; nextTab?: string; initialTest?: boolean }) {
   const [srcList, setSrcList] = useState<{ id: string; nom: string; type?: string }[]>(sources);
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -52,7 +52,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
   const [lines, setLines] = useState<Line[]>([]);
   const [mise, setMise] = useState("");
   const [status, setStatus] = useState<"en_cours" | "gagne" | "perdu" | "rembourse">("en_cours");
-  const [test, setTest] = useState(false);
+  const [test, setTest] = useState(!!initialTest);
   const [stage, setStage] = useState<string | null>(null);
   const [videoNote, setVideoNote] = useState<string | null>(null);
   const [summaryOrigin, setSummaryOrigin] = useState<string | null>(defaultOrigin);
