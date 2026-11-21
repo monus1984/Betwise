@@ -11,6 +11,7 @@ const GROUPES = [
   "Avec les paris test, tu joues sans argent réel et tu découvres les types de paris sur lesquels tu es vraiment performant.\n\nDans Sources, charge les coupons des pronostiqueurs que tu suis : un tableau de bord te montre les paris sur lesquels ils sont performants.\n\nAjoute le lien de leur page, et rejoins-la en un clic depuis Betwise.",
   "Côté coach : ta bankroll, ton budget de la semaine, et une alerte quand tu t'emballes.\n\nCrée tes montantes, palier par palier : Betwise te propose les choix les plus probables pour les construire.",
   "Et parle à Betster, à l'écrit ou à la voix : demande-lui les paris les plus probables, un combiné, ou le bilan de ta façon de parier.\n\nBetwise. Comprends. Teste. Maîtrise.",
+  "Le compagnon du parieur, pour analyser les matchs, suivre tes paris et gérer ta bankroll.",
 ];
 async function main() {
   mkdirSync("voix-promo", { recursive: true });
