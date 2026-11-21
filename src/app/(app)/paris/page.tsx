@@ -44,7 +44,7 @@ export default async function ParisPage({ searchParams }: { searchParams: Promis
       {tests && (
         <div className="mb-3 flex gap-2">
           <Link href="/nouveau?test=1" className="flex-1 rounded-xl bg-brand px-3 py-2.5 text-center text-sm font-semibold text-on-fill">+ Tester un choix</Link>
-          <Link href="/import?test=1" className="flex-1 rounded-xl border border-line bg-surface px-3 py-2.5 text-center text-sm font-medium text-ink-soft">Tester un ticket</Link>
+          <Link href="/import?test=1" className="flex-1 rounded-xl border border-line bg-surface px-3 py-2.5 text-center text-sm font-medium text-ink-soft">Tester un ticket ou le dire</Link>
         </div>
       )}
       {tests && <TestsSummary bets={bets} periode={sp.p === "7" || sp.p === "30" ? sp.p : "tout"} />}
