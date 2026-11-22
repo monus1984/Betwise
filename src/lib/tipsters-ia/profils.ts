@@ -8,7 +8,7 @@ export type ProfilComplet = Profil & { email: string; pseudo: string; source: st
 
 const slug = (x: string) => x.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30);
 
-export const OPENROUTER_PAR_DEFAUT = "ChatGPT=openai/gpt-6.2-sol,Gemini=google/gemini-4-carbon,Grok=x-ai/grok-4.7";
+export const OPENROUTER_PAR_DEFAUT = "ChatGPT=openai/gpt-6.2-sol,Gemini=google/gemini-4-carbon,Grok=x-ai/grok-4.7,DeepSeek=deepseek/deepseek-v4.1-flash-1017";
 
 export function profilsActifs(env: NodeJS.ProcessEnv = process.env): ProfilComplet[] {
   const out: ProfilComplet[] = [];
