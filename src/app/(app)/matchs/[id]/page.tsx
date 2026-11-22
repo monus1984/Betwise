@@ -25,6 +25,7 @@ import { GoalWatcher } from "@/components/goal-watcher";
 import { legFrom } from "@/lib/slip/leg";
 import { loadRecit } from "@/lib/matches/recit";
 import { MatchRecit } from "@/components/match-recit";
+import { motifFr } from "@/lib/matches/motifs";
 
 export const dynamic = "force-dynamic";
 
@@ -142,8 +143,8 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
       <nav className="sticky top-0 z-10 -mx-4 mb-3 bg-canvas/95 px-4 py-1.5 backdrop-blur">
         <div className="grid grid-cols-4 gap-0.5 rounded-xl bg-surface-2 p-1">
           {TABS.map((t) => (
-            <Link key={t.k} href={`/matchs/${m.id}?t=${t.k}`} scroll={false} replace className={`truncate rounded-lg px-1 py-1.5 text-center text-[12.5px] ${onglet === t.k ? "bg-surface font-semibold text-ink shadow-card" : "text-ink-muted"}`}>
-              {t.t}{t.k === "sources" && preds?.length ? ` (${preds.length})` : ""}
+            <Link key={t.k} href={`/matchs/${m.id}?t=${t.k}`} scroll={false} replace className={`flex items-center justify-center gap-1 rounded-lg px-1 py-1.5 text-center text-[12.5px] ${onglet === t.k ? "bg-surface font-semibold text-ink shadow-card" : "text-ink-muted"}`}>
+              {t.t}{t.k === "sources" && preds?.length ? <span className="rounded-full bg-brand px-1.5 text-[10px] font-bold leading-4 text-on-fill">{preds.length}</span> : null}
             </Link>
           ))}
         </div>
@@ -157,9 +158,10 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
               <ul className="divide-y divide-line">
                 {picks.map((p) => (
                   <li key={`${p.market}${p.param}${p.sel}`} className="flex items-center gap-2">
-                    <Link href={upcoming ? parier(p.market, p.sel, p.book?.cote ?? p.cote ?? undefined, p.param ?? undefined) : "#"} className="flex min-w-0 flex-1 items-center justify-between gap-3 py-2 text-sm active:bg-surface-2">
-                      <span className="min-w-0 truncate">{pickLabel(p.market, p.param, p.sel, shortName(home), shortName(away))}{(p.cote === null || sg!.source === "modele") && <span className="ml-1.5 rounded-full bg-draw-soft px-1.5 py-0.5 text-[10px] font-semibold text-draw-ink">estimation</span>}</span>
-                      <span className="shrink-0 tabular-nums"><b>{Math.round(p.p * 100)} %</b> <span className="text-xs text-ink-muted">{p.book ? `${p.book.bookmaker} ${fmtCote(p.book.cote)}` : p.cote ? `médiane ${fmtCote(p.cote)}` : `cote juste ${fmtCote(1 / p.p)}`}</span>{p.pModele !== null && <span className="ml-1 text-xs text-brand">· modèle {Math.round(p.pModele * 100)} %</span>}</span>
+                    {/* Le nom de la sélection d'abord, en entier ; les chiffres dessous (22/11 : « Juven… 89 % ») */}
+                    <Link href={upcoming ? parier(p.market, p.sel, p.book?.cote ?? p.cote ?? undefined, p.param ?? undefined) : "#"} className="block min-w-0 flex-1 py-2 active:bg-surface-2">
+                      <span className="block text-sm font-semibold leading-snug">{pickLabel(p.market, p.param, p.sel, shortName(home), shortName(away))}{(p.cote === null || sg!.source === "modele") && <span className="ml-1.5 whitespace-nowrap rounded-full bg-draw-soft px-1.5 py-0.5 text-[10px] font-semibold text-draw-ink">estimation</span>}</span>
+                      <span className="mt-0.5 block text-xs tabular-nums text-ink-muted"><b className="text-[13px] text-ink">{Math.round(p.p * 100)} %</b> · {p.book ? `${p.book.bookmaker} ${fmtCote(p.book.cote)}` : p.cote ? `médiane ${fmtCote(p.cote)}` : `cote juste ${fmtCote(1 / p.p)}`}{p.pModele !== null && <span className="text-brand"> · modèle {Math.round(p.pModele * 100)} %</span>}</span>
                     </Link>
                     {m.statut === "programme" && <AddToSlip size="sm" leg={legFrom({ matchId: m.id, home, away, kickoff: m.kickoff_at, comp: comp?.code_externe ?? "", market: p.market, param: p.param, sel: p.sel, p: p.p, cote: p.cote, book: p.book })} />}
                   </li>
@@ -172,17 +174,17 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
             mk ? (
               <>
                 <Card title="Ce que disent les cotes" note="marge du bookmaker retirée">
-                  <Compare label={shortName(home)} m={probOf(mk.grid, "1X2", null, "1")!} />
-                  <Compare label="Match nul" m={probOf(mk.grid, "1X2", null, "N")!} />
-                  <Compare label={shortName(away)} m={probOf(mk.grid, "1X2", null, "2")!} />
+                  <Compare label={shortName(home)} m={market?.p1 ?? probOf(mk.grid, "1X2", null, "1")!} />
+                  <Compare label="Match nul" m={market?.pN ?? probOf(mk.grid, "1X2", null, "N")!} />
+                  <Compare label={shortName(away)} m={market?.p2 ?? probOf(mk.grid, "1X2", null, "2")!} />
                   <Compare label="+ de 1,5 but" m={probOf(mk.grid, "OU", 1.5, "Plus")!} />
                   <Compare label="+ de 2,5 buts" m={probOf(mk.grid, "OU", 2.5, "Plus")!} />
                   <Compare label="Les deux marquent" m={probOf(mk.grid, "BTTS", null, "Oui")!} />
                   <p className="mt-2 text-xs text-ink-soft">Buts attendus selon le marché <b className="tabular-nums">{fmtDec(mk.lh)} – {fmtDec(mk.la)}</b> (total {fmtDec(mk.lh + mk.la)})</p>
                 </Card>
-                <p className="px-1 text-[11px] leading-relaxed text-ink-muted">Le modèle {APP_NAME} ne couvre pas encore ce match (sélections nationales, Ligue des champions). Ces chiffres sont déduits des cotes de référence : victoire, nul et plus/moins de 2,5 buts sont repris tels quels, les autres marchés en sont calculés.</p>
+                <p className="px-1 text-[11px] leading-relaxed text-ink-muted">Le modèle {APP_NAME} ne couvre que les cinq grands championnats européens. Pour ce match, les chiffres sont déduits des cotes de référence : victoire, nul et défaite en sont repris tels quels, les autres marchés en sont calculés.</p>
               </>
-            ) : <Card><p className="text-sm text-ink-muted">Pas encore de cote ni d’estimation pour ce match. Elles arrivent chaque matin à partir de J-14.</p></Card>
+            ) : <Card><p className="text-sm text-ink-muted">Pas encore de cote ni d’estimation pour ce match. Les cotes sont relevées une fois par jour ; pour certains championnats, elles n’arrivent pas du tout.</p></Card>
           ) : (
             <>
               <Card title="Qui l’emporte ?">
@@ -206,7 +208,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
       {onglet === "marches" && (
         <div className="space-y-3">
-          {sg ? <MatchMarkets m={{ id: m.id, kickoff_at: m.kickoff_at, home, away, comp: comp?.code_externe ?? "", ouvert: m.statut === "programme" }} sg={sg} /> : <Card><p className="text-sm text-ink-muted">Pas encore de cote ni d’estimation pour ce match. Elles arrivent chaque matin à partir de J-14.</p></Card>}
+          {sg ? <MatchMarkets m={{ id: m.id, kickoff_at: m.kickoff_at, home, away, comp: comp?.code_externe ?? "", ouvert: m.statut === "programme" }} sg={sg} /> : <Card><p className="text-sm text-ink-muted">Pas encore de cote ni d’estimation pour ce match. Les cotes sont relevées une fois par jour ; pour certains championnats, elles n’arrivent pas du tout.</p></Card>}
           {m.statut !== "programme" && sg && <p className="px-1 text-[11px] text-ink-muted">Match commencé ou terminé : les cotes sont affichées pour mémoire, le coupon est fermé.</p>}
           {sg && (releve || betclicAt) ? (
             <CotesParBookmaker
@@ -220,14 +222,14 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
               <OddsRow cells={[{ sel: "1", name: shortName(home), o: ref("1X2", "1") }, { sel: "N", name: "Nul", o: ref("1X2", "N") }, { sel: "2", name: shortName(away), o: ref("1X2", "2") }]} market="1X2" upcoming={upcoming} href={parier} />
               <OddsRow cells={[{ sel: "Plus", name: "+ de 2,5", o: ref("OU", "Plus", 2.5) }, { sel: "Moins", name: "− de 2,5", o: ref("OU", "Moins", 2.5) }]} market="OU" param={2.5} upcoming={upcoming} href={parier} />
               {ref("1X2", "1") ? <p className="text-[11px] text-ink-muted">Mise à jour {fmtRel(ref("1X2", "1")!.observed_at)}. Pas de cote 1xBet relevée pour ce match : c’est la médiane qui est affichée partout. Touche une cote pour préremplir un pari.</p>
-                : <p className="text-xs text-ink-muted">Pas encore de cote de référence : elles arrivent chaque matin à partir de J-14.</p>}
+                : <p className="text-xs text-ink-muted">Pas encore de cote de référence pour ce match : elles sont relevées une fois par jour, pas pour tous les championnats.</p>}
             </Card>
           )}
           <Card title="Cotes vues sur vos tickets" note="Betclic, 1xBet et les autres">
             {userObs.length === 0 ? <p className="text-xs text-ink-muted">Aucune pour l’instant. Chaque pari saisi ou importé sur ce match ajoute sa cote ici, avec le bookmaker et l’heure. C’est la seule source pour Betclic Côte d’Ivoire, qu’aucun fournisseur de cotes ne relève.</p> : (
               <ul className="divide-y divide-line text-sm">
                 {userObs.slice(0, 12).map((o, i) => (
-                  <li key={i} className="flex justify-between gap-3 py-1.5"><span className="min-w-0 truncate">{pickLabel(o.market_code, o.market_param === null ? null : Number(o.market_param), o.selection, shortName(home), shortName(away))}{o.bookmaker ? <span className="text-ink-muted"> · {o.bookmaker}</span> : null}</span><span className="tabular-nums">{Number(o.cote).toFixed(2)} <span className="text-xs text-ink-muted">{fmtRel(o.observed_at)}</span></span></li>
+                  <li key={i} className="flex justify-between gap-3 py-1.5"><span className="min-w-0 truncate">{pickLabel(o.market_code, o.market_param === null ? null : Number(o.market_param), o.selection, shortName(home), shortName(away))}{o.bookmaker ? <span className="text-ink-muted"> · {o.bookmaker}</span> : null}</span><span className="tabular-nums">{Number(o.cote).toFixed(2).replace(".", ",")} <span className="text-xs text-ink-muted">{fmtRel(o.observed_at)}</span></span></li>
                 ))}
               </ul>
             )}
@@ -321,7 +323,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
                       <div key={t}>
                         <p className="mb-1 text-sm font-semibold">{t} <span className="font-normal text-ink-muted">· {extras.injuries!.filter((x) => x.equipe === t).length}</span></p>
                         <ul className="space-y-0.5 text-sm">
-                          {extras.injuries!.filter((x) => x.equipe === t).map((x) => <li key={x.joueur} className="flex justify-between gap-2"><span className="truncate">{x.joueur}</span><span className="shrink-0 text-xs text-ink-muted">{x.type === "Questionable" ? "incertain" : "absent"}{x.motif ? ` · ${x.motif}` : ""}</span></li>)}
+                          {extras.injuries!.filter((x) => x.equipe === t).map((x) => <li key={x.joueur} className="flex justify-between gap-2"><span className="truncate">{x.joueur}</span><span className="shrink-0 text-xs text-ink-muted">{x.type === "Questionable" ? "incertain" : "absent"}{x.motif ? ` · ${motifFr(x.motif)}` : ""}</span></li>)}
                         </ul>
                       </div>
                     ))}
@@ -423,7 +425,7 @@ function OddsRow({ cells, market, param, upcoming, href }: { cells: { sel: strin
         const cote = c.o ? Number(c.o.cote) : null;
         const inner = (<>
           <p className="truncate text-xs text-ink-muted">{c.name}</p>
-          <p className="text-lg font-semibold tabular-nums">{cote ? cote.toFixed(2) : "—"}</p>
+          <p className="text-lg font-semibold tabular-nums">{cote ? cote.toFixed(2).replace(".", ",") : "—"}</p>
           {cote && <p className="text-[11px] text-ink-muted">{Math.round(100 / cote)} % · <span className={`rounded px-1 ${RISK_CLASS[riskFromOdds(cote)]}`}>{RISK_LABEL[riskFromOdds(cote)]}</span></p>}
         </>);
         return upcoming && cote

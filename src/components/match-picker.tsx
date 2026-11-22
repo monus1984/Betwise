@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Field, Input } from "@/components/ui";
+import { COMP_SHORT } from "@/components/match-ui";
 
 export type MatchHit = { id: string; kickoff_at: string; statut: string; home: string; away: string; competition: string };
 
@@ -110,7 +111,7 @@ export function MatchPicker({ line, onChange, hint }: { line: PickerLine; onChan
         <div className="flex items-center justify-between rounded-lg border border-inverse bg-slate-50 px-3 py-2.5">
           <div className="text-sm">
             <p className="font-medium">{m.home} – {m.away}</p>
-            <p className="text-xs text-slate-500">{m.competition} · {fmtDate(m.kickoff_at)}</p>
+            <p className="text-xs text-slate-500">{COMP_SHORT[m.competition] ?? m.competition} · {fmtDate(m.kickoff_at)}</p>
           </div>
           <button type="button" className="text-xs text-slate-600 underline" onClick={() => onChange({ match: null, query: "" })}>Changer</button>
         </div>
@@ -132,7 +133,7 @@ export function MatchPicker({ line, onChange, hint }: { line: PickerLine; onChan
                   onClick={() => { onChange({ match: h, query: `${h.home} – ${h.away}` }); setOpen(false); }}
                 >
                   <span>{h.home} – {h.away}</span>
-                  <span className="ml-2 shrink-0 text-xs text-slate-500">{h.competition} · {fmtDate(h.kickoff_at)}</span>
+                  <span className="ml-2 shrink-0 text-xs text-slate-500">{COMP_SHORT[h.competition] ?? h.competition} · {fmtDate(h.kickoff_at)}</span>
                 </button>
               </li>
             ))}

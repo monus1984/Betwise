@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { createClient } from "@/lib/supabase/server";
 import { labelType, MARCHE_FR } from "../source-ui";
+import { COMPETITIONS } from "@/lib/competitions";
 import { NIVEAU, lire, niveau, raison, rendement, reussite } from "@/lib/sources/proof";
 import { FollowButton, PredictionRow, SourceLink } from "./client";
 import { linkOf } from "@/lib/sources/link";
@@ -68,7 +69,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
           <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
             <div><p className="text-[11px] text-white/60">Réussite</p><p className="font-semibold tabular-nums">{reu === null ? "—" : `${Math.round(reu * 100)} %`}</p></div>
             <div><p className="text-[11px] text-white/60">Attendu</p><p className="font-semibold tabular-nums">{proof.attendu === null ? "—" : `${Math.round(proof.attendu * 100)} %`}</p></div>
-            <div><p className="text-[11px] text-white/60">Rendement</p><p className={`font-semibold tabular-nums ${rdt === null ? "" : rdt >= 0 ? "text-band-gain" : "text-band-loss"}`}>{rdt === null ? "—" : `${rdt >= 0 ? "+" : "−"}${Math.abs(rdt * 100).toFixed(0)} %`}</p></div>
+            <div><p className="text-[11px] text-white/60">Rendement</p><p className={`font-semibold tabular-nums ${rdt === null ? "" : rdt >= 0 ? "text-band-gain" : "text-band-loss"}`}>{rdt === null ? "—" : `${rdt >= 0 ? "+" : "−"}${Math.abs(rdt * 100).toFixed(0).replace(".", ",")} %`}</p></div>
           </div>
         )}
         {nv !== "non_etabli" && proof.attendu !== null && <p className="mt-3 text-[11px] text-white/60">« Attendu » : la réussite que ces cotes laissent prévoir. Au-dessus, la source fait mieux que le marché.</p>}
@@ -90,16 +91,16 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
         <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
           <div>
             <p className="text-[11px] uppercase tracking-wide text-slate-500">Rendement moyen</p>
-            <p className="font-semibold tabular-nums">{met?.rendement !== null && met?.rendement !== undefined ? `${Number(met.rendement) >= 0 ? "+" : ""}${(Number(met.rendement) * 100).toFixed(1)} %` : "—"}</p>
+            <p className="font-semibold tabular-nums">{met?.rendement !== null && met?.rendement !== undefined ? `${Number(met.rendement) >= 0 ? "+" : ""}${(Number(met.rendement) * 100).toFixed(1).replace(".", ",")} %` : "—"}</p>
             {met?.ic_bas !== null && met?.ic_bas !== undefined && (
               <p className={`text-[11px] ${Number(met.ic_bas) > 0 ? "text-gain-ink" : Number(met.ic_haut) < 0 ? "text-loss-ink" : "text-slate-500"}`}>
-                {Number(met.ic_bas) > 0 ? "établi positif" : Number(met.ic_haut) < 0 ? "établi négatif" : "non établi"} · 90 % entre {(Number(met.ic_bas) * 100).toFixed(0)} et {(Number(met.ic_haut) * 100).toFixed(0)} %
+                {Number(met.ic_bas) > 0 ? "établi positif" : Number(met.ic_haut) < 0 ? "établi négatif" : "non établi"} · 90 % entre {(Number(met.ic_bas) * 100).toFixed(0).replace(".", ",")} et {(Number(met.ic_haut) * 100).toFixed(0).replace(".", ",")} %
               </p>
             )}
           </div>
           <div>
             <p className="text-[11px] uppercase tracking-wide text-slate-500">Pire série</p>
-            <p className="font-semibold tabular-nums">{met?.pire_serie !== null && met?.pire_serie !== undefined && Number(met.nb_regles) > 0 ? `−${Number(met.pire_serie).toFixed(1)} u` : "—"}</p>
+            <p className="font-semibold tabular-nums">{met?.pire_serie !== null && met?.pire_serie !== undefined && Number(met.nb_regles) > 0 ? `−${Number(met.pire_serie).toFixed(1).replace(".", ",")} u` : "—"}</p>
             <p className="text-[11px] text-slate-500">plus forte baisse</p>
           </div>
           <div>
@@ -115,17 +116,25 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
         <section className="mt-3 rounded-xl border border-slate-200 bg-surface p-4">
           <h2 className="mb-2 text-sm font-semibold">Par compétition et par marché</h2>
           <table className="w-full text-xs">
-            <thead><tr className="text-left text-slate-500"><th className="py-1 font-medium">Axe</th><th className="py-1 text-right font-medium">Pronos</th><th className="py-1 text-right font-medium">Gagnés</th><th className="py-1 text-right font-medium">Rendement</th></tr></thead>
-            <tbody>
-              {(axes ?? []).filter((a) => a.axe !== "risque" && Number(a.nb_declares) > 0).sort((a, b) => Number(b.nb_declares) - Number(a.nb_declares)).map((a) => (
-                <tr key={`${a.axe}-${a.valeur}`} className="border-t border-slate-100">
-                  <td className="py-1">{a.axe === "competition" ? compLabel(a.valeur) : a.valeur}</td>
-                  <td className="py-1 text-right tabular-nums">{Number(a.nb_declares)}</td>
-                  <td className="py-1 text-right tabular-nums">{Number(a.nb_gagnes)}</td>
-                  <td className={`py-1 text-right tabular-nums ${a.rendement === null ? "text-slate-400" : Number(a.rendement) >= 0 ? "text-gain-ink" : "text-loss-ink"}`}>{a.rendement === null ? "—" : `${Number(a.rendement) >= 0 ? "+" : ""}${(Number(a.rendement) * 100).toFixed(0)} %`}</td>
-                </tr>
-              ))}
-            </tbody>
+            <thead><tr className="text-left text-slate-500"><th className="py-1 font-medium"></th><th className="py-1 text-right font-medium">Pronos</th><th className="py-1 text-right font-medium">Gagnés</th><th className="py-1 text-right font-medium">Rendement</th></tr></thead>
+            {(["competition", "marche"] as const).map((axe) => {
+              const lignes = (axes ?? []).filter((a) => a.axe === axe && Number(a.nb_declares) > 0).sort((a, b) => Number(b.nb_declares) - Number(a.nb_declares));
+              if (!lignes.length) return null;
+              return (
+                <tbody key={axe}>
+                  <tr><th colSpan={4} className="pb-1 pt-3 text-left text-[11px] font-semibold text-ink-muted">{axe === "competition" ? "Par compétition" : "Par marché"}</th></tr>
+                  {lignes.map((a) => (
+                    <tr key={`${a.axe}-${a.valeur}`} className="border-t border-slate-100">
+                      <td className="py-1">{axe === "competition" ? compLabel(a.valeur) : MARCHE_FR[a.valeur] ?? a.valeur}</td>
+                      <td className="py-1 text-right tabular-nums">{Number(a.nb_declares)}</td>
+                      <td className="py-1 text-right tabular-nums">{Number(a.nb_gagnes)}</td>
+                      {/* Pas de rendement sous 5 pronos, comme le tableau « Par marché » ci-dessous */}
+                      <td className={`py-1 text-right tabular-nums ${a.rendement === null || Number(a.nb_declares) < 5 ? "text-slate-400" : Number(a.rendement) >= 0 ? "text-gain-ink" : "text-loss-ink"}`}>{a.rendement === null || Number(a.nb_declares) < 5 ? "—" : `${Number(a.rendement) >= 0 ? "+" : ""}${(Number(a.rendement) * 100).toFixed(0).replace(".", ",")} %`}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              );
+            })}
           </table>
         </section>
       )}
@@ -142,7 +151,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
                   <tr key={m.market_code}>
                     <td className="py-1.5">{MARCHE_FR[m.market_code ?? ""] ?? m.market_code}</td>
                     <td className="py-1.5 text-right tabular-nums">{Number(m.gagnes)} sur {Number(m.regles)}</td>
-                    <td className={`py-1.5 text-right tabular-nums ${r === null || Number(m.regles) < 5 ? "text-ink-muted" : r >= 0 ? "text-gain" : "text-loss"}`}>{r === null ? "—" : Number(m.regles) < 5 ? "trop peu" : `${r >= 0 ? "+" : "−"}${Math.abs(r * 100).toFixed(0)} %`}</td>
+                    <td className={`py-1.5 text-right tabular-nums ${r === null || Number(m.regles) < 5 ? "text-ink-muted" : r >= 0 ? "text-gain" : "text-loss"}`}>{r === null ? "—" : Number(m.regles) < 5 ? "trop peu" : `${r >= 0 ? "+" : "−"}${Math.abs(r * 100).toFixed(0).replace(".", ",")} %`}</td>
                   </tr>
                 );
               })}
@@ -200,5 +209,5 @@ function avgOdds(points: CumulPoint[]) {
   return odds.length ? odds.reduce((a, b) => a + b, 0) / odds.length : 1.8;
 }
 function compLabel(code: string) {
-  return ({ PL: "Premier League", PD: "Liga", SA: "Serie A", BL1: "Bundesliga", FL1: "Ligue 1", CL: "Ligue des champions", autre: "Hors référentiel" } as Record<string, string>)[code] ?? code;
+  return code === "autre" ? "Hors référentiel" : COMPETITIONS[code] ? `${COMPETITIONS[code].drapeau} ${COMPETITIONS[code].court}` : code;
 }

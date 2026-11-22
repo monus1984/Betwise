@@ -52,7 +52,7 @@ export default async function ParisPage({ searchParams }: { searchParams: Promis
       {error && <p className="text-sm text-loss-ink">{error.message}</p>}
       {bets.length === 0 && !error && (
         <div className="rounded-lg border border-dashed border-slate-300 bg-surface p-6 text-center text-sm text-slate-600">
-          {tests ? <>Aucun test pour l’instant. Un test, c’est un pari sans argent réel : la cote du moment est notée, le résultat arrive tout seul, et tu vois si tes choix tiennent. Depuis <Link href="/options" className="text-brand underline">Options du jour</Link>, une fiche match, un import de coupon ou <Link href="/nouveau?test=1" className="text-brand underline">ton propre choix</Link>, choisis « Tester sans miser ».</> : filter === "en_cours" ? "Aucun pari en cours. Le bouton + en bas permet d’en ajouter un." : "Aucun pari réglé pour l’instant."}
+          {tests ? <>Aucun test pour l’instant. Un test, c’est un pari sans argent réel : la cote du moment est notée, le résultat arrive tout seul, et tu vois si tes choix tiennent. Depuis <Link href="/options" className="text-brand underline">Options du jour</Link>, une fiche match, un import de coupon ou <Link href="/nouveau?test=1" className="text-brand underline">ton propre choix</Link>, choisis « Tester sans miser ».</> : filter === "en_cours" ? "Aucun pari en cours. Le bouton + en haut permet d’en ajouter un." : "Aucun pari réglé pour l’instant."}
         </div>
       )}
       <ul className="space-y-3">

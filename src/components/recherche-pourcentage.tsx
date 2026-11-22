@@ -46,12 +46,16 @@ export function RecherchePourcentage({ options }: { options: OptionRecherche[] }
         </div>
         {liste.length === 0 ? <p className="mt-3 text-[13px] text-ink-soft">Rien dans cette fourchette pour les matchs restants du jour. Élargis-la.</p> : (
           <ul className="mt-2 divide-y divide-line">
-            {liste.slice(0, vus).map((o) => (
+            {liste.slice(0, vus).map((o, i, l) => (
               <li key={`${o.matchId}|${o.label}`}>
+                {/* Les grands championnats passent d'abord (21/11) : on le dit par un intertitre au lieu de casser l'ordre « Par heure » sans prévenir */}
+                {(i === 0 || estTop5(l[i - 1].comp) !== estTop5(o.comp)) && liste.some((x) => estTop5(x.comp)) && liste.some((x) => !estTop5(x.comp)) && (
+                  <p className="pb-1 pt-2.5 text-[11px] font-semibold text-ink-muted">{estTop5(o.comp) ? "Grands championnats" : "Autres matchs"}</p>
+                )}
                 <Link href={`/matchs/${o.matchId}?t=marches`} className="flex items-center gap-3 py-2">
                   <span className="w-11 shrink-0 text-[12px] tabular-nums text-ink-soft">{heure(o.kickoff)}</span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13px] font-semibold">{o.label}</span>
+                    <span className="block text-[13px] font-semibold leading-snug">{o.label}</span>
                     <span className="block truncate text-[11px] text-ink-muted">{o.comp ? `${COMP_FLAG[o.comp] ?? ""} ` : ""}{o.home} – {o.away}</span>
                   </span>
                   <span className="shrink-0 text-right">

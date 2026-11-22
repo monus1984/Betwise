@@ -62,7 +62,7 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <p className="text-sm text-slate-500">
-            {bet.type === "combine" ? `Combiné × ${Number(bet.cote_totale).toFixed(2)}` : `Simple × ${Number(bet.cote_totale).toFixed(2)}`} · {fmt(bet.placed_at)}{bet.bookmaker ? ` · ${bet.bookmaker}` : ""}
+            {bet.type === "combine" ? `Combiné × ${Number(bet.cote_totale).toFixed(2).replace(".", ",")}` : `Simple × ${Number(bet.cote_totale).toFixed(2).replace(".", ",")}`} · {fmt(bet.placed_at)}{bet.bookmaker ? ` · ${bet.bookmaker}` : ""}
           </p>
           <p className="text-base font-semibold">
             Mise {fcfa(Number(bet.mise))}

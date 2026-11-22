@@ -284,26 +284,27 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
         {coupon && (
           <Notice kind="info">Lien {coupon.bookmaker} reconnu (coupon {coupon.code}). Il ne contient pas les sélections : ajoute une capture ou le texte du coupon.</Notice>
         )}
+        {test && <Notice kind="info">Mode test : ce ticket sera suivi et réglé comme un pari, sans toucher à ta bankroll.</Notice>}
         <section className="rounded-xl border border-slate-200 bg-surface p-4">
           <h2 className="mb-2 text-sm font-semibold">Capture ou vidéo d’écran</h2>
           <p className="mb-3 text-xs text-slate-500">Déplie le ticket avant la capture. Un ticket long : plusieurs captures dans l’ordre (6 max), ou une vidéo d’écran en faisant défiler sans te presser. La vidéo est découpée sur ton téléphone, elle n’est pas envoyée.</p>
           <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={(e) => { const f = Array.from(e.target.files ?? []); e.target.value = ""; void onFiles(f); }} />
-          <Button variant="ghost" onClick={() => fileRef.current?.click()} disabled={busy}>{busy ? stage ?? "Lecture en cours…" : "Choisir des captures ou une vidéo"}</Button>
+          <Button onClick={() => fileRef.current?.click()} disabled={busy}>{busy ? stage ?? "Lecture en cours…" : "Choisir des captures ou une vidéo"}</Button>
           <p className="mt-2 text-[11px] text-slate-400">Betclic ne partage pas ses tickets : la capture d’écran est le seul moyen. Sur iPhone : Photos. Sur Android : Galerie ou Fichiers.</p>
         </section>
         <section className="rounded-xl border border-slate-200 bg-surface p-4">
           <h2 className="mb-1 text-sm font-semibold">Dire ton pari</h2>
           <p className="mb-2 text-xs text-slate-500">Par exemple : « Pari test, victoire de Lens contre Lyon en Ligue 1, cote deux dix ». Tu relis ensuite chaque ligne avant d’enregistrer ; une cote que tu ne dis pas reste à remplir.</p>
-          <textarea value={dit} onChange={(e) => setDit(e.target.value)} rows={2} placeholder="Ton pari, dicté ou écrit" className="mb-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          <textarea value={dit} onChange={(e) => setDit(e.target.value)} rows={2} placeholder="Ton pari, dicté ou écrit" className="mb-2 w-full rounded-lg border border-slate-300 bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-muted" />
           <div className="grid grid-cols-2 gap-2">
             <Dictee onTexte={setDit} disabled={busy} />
-            <Button onClick={onDictee} disabled={busy || dit.trim().length < 5}>{busy ? "Lecture…" : "Lire mon pari"}</Button>
+            <Button variant="ghost" onClick={onDictee} disabled={busy || dit.trim().length < 5}>{busy ? "Lecture…" : "Lire mon pari"}</Button>
           </div>
         </section>
         <section className="rounded-xl border border-slate-200 bg-surface p-4">
           <h2 className="mb-2 text-sm font-semibold">Texte partagé ou lien</h2>
-          <textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} placeholder={"Colle ici le texte partagé par l’app de paris, ou un lien xbet://…"} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-          <Button className="mt-2" onClick={onText} disabled={busy || text.trim().length < 5}>{busy ? "Lecture en cours…" : "Lire le texte"}</Button>
+          <textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} placeholder={"Colle ici le texte partagé par l’app de paris, ou un lien xbet://…"} className="w-full rounded-lg border border-slate-300 bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-muted" />
+          <Button variant="ghost" className="mt-2" onClick={onText} disabled={busy || text.trim().length < 5}>{busy ? "Lecture en cours…" : "Lire le texte"}</Button>
         </section>
         {error && <Notice>{error}</Notice>}
       </div>
@@ -456,7 +457,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
         <p className="text-xs text-slate-500">
           {collapsed
             ? `Cote totale ${raw.total_odds ?? "—"}`
-            : `Cote totale calculée ${valides.reduce((a, l) => a * (toNum(l.coteStr) > 1 ? toNum(l.coteStr) : 1), 1).toFixed(2)}${raw.total_odds ? ` · lue sur le ticket ${raw.total_odds}` : ""}`}
+            : `Cote totale calculée ${valides.reduce((a, l) => a * (toNum(l.coteStr) > 1 ? toNum(l.coteStr) : 1), 1).toFixed(2).replace(".", ",")}${raw.total_odds ? ` · lue sur le ticket ${raw.total_odds}` : ""}`}
           {toNum(mise) > 0 && status === "gagne" && raw.total_odds ? ` · gain ${fcfa(toNum(mise) * raw.total_odds - toNum(mise))}` : ""}
         </p>
       </section>

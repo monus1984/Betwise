@@ -13,8 +13,8 @@ export const AIDES: Record<SectionAide, { titre: string; etapes: string[] }> = {
   ] },
   matchs: { titre: "L’écran Matchs", etapes: [
     "Choisis un jour dans le bandeau, ou cherche une équipe, un championnat ou un pays.",
-    "Les matchs sont rangés par pays. Touche l’étoile d’une compétition pour l’épingler en haut ; les compétitions repliées s’ouvrent d’un toucher.",
-    "Sous chaque match, l’issue la plus probable d’après les cotes. « Analyse statistique indisponible » veut dire qu’on n’a pas encore de cote ni d’estimation.",
+    "En haut, les tops matchs des grands championnats. Dessous, les championnats rangés par heure du prochain match : touche-en un pour voir ses matchs, et son étoile pour l’épingler en haut.",
+    "Sous chaque match, l’issue la plus probable d’après les cotes. « Pas encore d’analyse » veut dire qu’on n’a pas encore de cote ni d’estimation.",
     "L’étoile d’un match le suit : tu reçois ses buts en notification. Touche le match pour sa fiche complète.",
   ] },
   match: { titre: "La fiche d’un match", etapes: [

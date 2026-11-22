@@ -56,7 +56,7 @@ export function PredictionRow({ p, sourceId }: { p: PredictionView; sourceId: st
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{p.label}{p.score ? <span className="ml-2 tabular-nums text-slate-500">{p.score}</span> : null}</p>
           <p className="text-xs text-slate-600">
-            {marketLabel(p.market, p.param, p.selection)}{p.cote ? ` · cote ${Number(p.cote).toFixed(2)}` : " · sans cote"}
+            {marketLabel(p.market, p.param, p.selection)}{p.cote ? ` · cote ${Number(p.cote).toFixed(2).replace(".", ",")}` : " · sans cote"}
             {p.risque && <span className={`ml-2 rounded border px-1.5 py-0.5 text-[10px] ${RISK_CLASS[p.risque]}`}>{RISK_LABEL[p.risque]}</span>}
           </p>
           <p className="mt-0.5 text-[11px] text-slate-400">
@@ -91,7 +91,8 @@ export function PredictionRow({ p, sourceId }: { p: PredictionView; sourceId: st
   );
 }
 
-export function marketLabel(code: string, param: number | null, sel: string) {
+export function marketLabel(code: string, rawParam: number | null, sel: string) {
+  const param = rawParam === null ? null : String(rawParam).replace(".", ",");
   switch (code) {
     case "1X2": return { "1": "Victoire dom.", N: "Nul", "2": "Victoire ext." }[sel] ?? sel;
     case "DC": return `Double chance ${sel}`;

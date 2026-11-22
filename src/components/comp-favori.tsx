@@ -21,7 +21,7 @@ export function CompFavori({ code, initial, nom }: { code: string; initial: bool
   };
   return (
     <button type="button" onClick={toggle} aria-pressed={on} aria-label={on ? `Retirer ${nom} de mes compétitions` : `Épingler ${nom} en haut`}
-      className="flex h-8 w-8 shrink-0 items-center justify-center">
+      className="flex h-10 w-10 shrink-0 items-center justify-center">
       <svg width={17} height={17} viewBox="0 0 24 24" className={on ? "text-band-draw" : "text-slate-300"} fill={on ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L12 16.9 6.7 19.6l1-5.8L3.5 9.7l5.9-.9z" /></svg>
     </button>
   );

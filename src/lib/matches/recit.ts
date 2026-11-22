@@ -8,7 +8,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../supabase/database.types";
 import { profilDe, type Categorie } from "../coach/categories";
-import { familleOf, loadSignals, pickLabel, picksOf, type Pick } from "../probs/signals";
+import { familleOf, loadSignals, pickLabel, picksOf, releveFrais, type Pick } from "../probs/signals";
 import { latestStandings, type StandingRow } from "./standings";
 import { enjeux, fraicheur } from "./enjeux";
 
@@ -18,7 +18,9 @@ const one = <T,>(v: One<T>): T | null => (Array.isArray(v) ? v[0] ?? null : v);
 const TZ = "Africa/Abidjan";
 
 export type Etape = { cle: "enjeu" | "forme" | "dernier" | "face" | "joueur" | "chiffre"; titre: string; lignes: string[] };
-export type Choix = { market: string; param: number | null; sel: string; label: string; p: number; cote: number | null; categorie: Categorie };
+export type Choix = { market: string; param: number | null; sel: string; label: string; p: number; cote: number | null; categorie: Categorie;
+  /** D'où vient la cote : nom du bookmaker (1xBet) ou « médiane » des bookmakers européens ; null sans cote. */
+  ou?: string | null };
 export type Recit = { affiche: string; etapes: Etape[]; verdict: Choix | null; autres: Choix[]; source: "marche" | "modele" | null; texte: string };
 
 export type Passe = { date: string; home: string; away: string; sh: number; sa: number; buteurs: { n: string | null; e: "1" | "2" }[] };
@@ -132,8 +134,11 @@ function etapeChiffre({ home, away, rangs, butsAttendus }: RecitInput): Etape | 
 function verdictDe({ home, away, picks }: RecitInput): { verdict: Choix | null; autres: Choix[] } {
   const utiles = picks.filter((p) => familleOf(p.market) !== "mitemps" && !["MG", "OE", "HMG", "CS"].includes(p.market));
   const de = (cat: Categorie): Choix | null => {
-    const p = utiles.filter((x) => profilDe(x.p, x.cote) === cat).sort((x, y) => Number(y.cote !== null) - Number(x.cote !== null) || y.p - x.p)[0];
-    return p ? { market: p.market, param: p.param, sel: p.sel, label: pickLabel(p.market, p.param, p.sel, home, away), p: p.p, cote: p.cote, categorie: cat } : null;
+    // La cote montrée est celle du bookmaker quand elle existe (22/11 : « cote 1,36 » ici, « 1xBet 1,40 » juste dessous)
+    const vue = (x: Pick) => x.book?.cote ?? x.cote;
+    const p = utiles.filter((x) => profilDe(x.p, vue(x)) === cat).sort((x, y) => Number(vue(y) !== null) - Number(vue(x) !== null) || y.p - x.p)[0];
+    return p ? { market: p.market, param: p.param, sel: p.sel, label: pickLabel(p.market, p.param, p.sel, home, away), p: p.p, cote: vue(p), categorie: cat,
+      ou: p.book ? p.book.bookmaker : p.cote ? "médiane" : null } : null;
   };
   const a = de("audacieux"), s = de("sur"), r = de("risque");
   const verdict = a ?? s ?? r;
@@ -163,7 +168,7 @@ export async function loadRecit(db: Db, matchId: string): Promise<(Recit & { mat
     comp ? db.from("standings").select("*").eq("comp_code", comp).limit(400) : Promise.resolve({ data: [] }),
     db.from("matches").select("kickoff_at, score_home, score_away, details, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom)")
       .eq("statut", "termine").lt("kickoff_at", m.kickoff_at).or(`home_team_id.in.(${ids.join(",")}),away_team_id.in.(${ids.join(",")})`).order("kickoff_at", { ascending: false }).limit(14),
-    loadSignals(db as never, [m.id]),
+    loadSignals(db as never, [m.id], { bookmakers: true }),
   ]);
   const rows = latestStandings((st ?? []) as StandingRow[]);
   const sg = signals.get(m.id) ?? null;
@@ -173,7 +178,7 @@ export async function loadRecit(db: Db, matchId: string): Promise<(Recit & { mat
       buteurs: (p.details?.evts ?? []).filter((e) => e.t === "but" || e.t === "pen").map((e) => ({ n: e.n, e: e.e })) }));
   const recit = buildRecit({
     home, away, rangs: { home: rows.find((r) => r.team_id === m.home_team_id) ?? null, away: rows.find((r) => r.team_id === m.away_team_id) ?? null }, table: rows, comp,
-    passes, picks: sg ? picksOf(sg, "all") : [], source: sg?.source ?? null, butsAttendus: sg ? sg.lh + sg.la : null,
+    passes, picks: sg ? picksOf(sg, "all").map((p) => ({ ...p, book: p.book && releveFrais(p.book.releveAt, m.kickoff_at) ? p.book : null })) : [], source: sg?.source ?? null, butsAttendus: sg ? sg.lh + sg.la : null,
   });
   return { ...recit, matchId: m.id, home, away, kickoff: m.kickoff_at, comp, statut: m.statut };
 }

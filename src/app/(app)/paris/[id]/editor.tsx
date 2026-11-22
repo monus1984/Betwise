@@ -136,7 +136,7 @@ function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index
         <div className="grid grid-cols-3 gap-2 rounded-lg bg-surface-2 p-3 text-sm">
           <div><p className="text-[11px] text-ink-muted">Marché</p><p className="font-medium">{marketName}{s.market_param !== null ? ` ${s.market_param}` : ""}</p></div>
           <div><p className="text-[11px] text-ink-muted">Choix</p><p className="font-medium">{pickLabel(s.market_code, s.market_param, s.selection, s.match?.home ?? "Équipe 1", s.match?.away ?? "Équipe 2")}</p></div>
-          <div><p className="text-[11px] text-ink-muted">Cote</p><p className="font-medium tabular-nums">{Number(s.cote).toFixed(2)}</p></div>
+          <div><p className="text-[11px] text-ink-muted">Cote</p><p className="font-medium tabular-nums">{Number(s.cote).toFixed(2).replace(".", ",")}</p></div>
         </div>
       ) : (
         <>

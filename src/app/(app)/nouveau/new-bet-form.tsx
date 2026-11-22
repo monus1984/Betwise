@@ -184,7 +184,7 @@ export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest 
           ))}
         </div>
         <div className="flex justify-between text-sm text-slate-700">
-          <span>{lines.length > 1 ? `Combiné × ${coteTotale.toFixed(2)}` : "Pari simple"}</span>
+          <span>{lines.length > 1 ? `Combiné × ${coteTotale.toFixed(2).replace(".", ",")}` : "Pari simple"}</span>
           <span>Gain potentiel : <strong>{gainPotentiel > 0 ? fcfa(gainPotentiel) : "—"}</strong></span>
         </div>
       </section>

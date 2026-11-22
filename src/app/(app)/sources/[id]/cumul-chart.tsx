@@ -24,8 +24,8 @@ export function CumulChart({ points }: { points: CumulPoint[] }) {
       <svg viewBox={`0 0 ${W} ${H}`} className="h-48 w-full" role="img" aria-label="Rendement cumulé en unités">
         <line x1={padL} x2={W - padR} y1={y(0)} y2={y(0)} stroke="rgb(var(--c-line))" strokeDasharray="3 3" />
         <text x={padL - 6} y={y(0) + 4} textAnchor="end" fontSize="10" fill="rgb(var(--c-ink-muted))">0</text>
-        <text x={padL - 6} y={y(max) + 4} textAnchor="end" fontSize="10" fill="rgb(var(--c-ink-muted))">{max > 0 ? `+${max.toFixed(1)}` : max.toFixed(1)}</text>
-        {min < 0 && <text x={padL - 6} y={y(min) + 4} textAnchor="end" fontSize="10" fill="rgb(var(--c-ink-muted))">{min.toFixed(1)}</text>}
+        <text x={padL - 6} y={y(max) + 4} textAnchor="end" fontSize="10" fill="rgb(var(--c-ink-muted))">{max > 0 ? `+${max.toFixed(1).replace(".", ",")}` : max.toFixed(1).replace(".", ",")}</text>
+        {min < 0 && <text x={padL - 6} y={y(min) + 4} textAnchor="end" fontSize="10" fill="rgb(var(--c-ink-muted))">{min.toFixed(1).replace(".", ",")}</text>}
         <path d={path} fill="none" stroke={last >= 0 ? "rgb(var(--c-gain))" : "rgb(var(--c-loss))"} strokeWidth="2" strokeLinejoin="round" />
         {points.map((p, i) => (
           <g key={i}>
@@ -38,7 +38,7 @@ export function CumulChart({ points }: { points: CumulPoint[] }) {
       {h && (
         <div className="pointer-events-none absolute left-0 top-0 rounded-md border border-slate-200 bg-surface px-2 py-1 text-[11px] shadow">
           <p className="font-medium">{h.libelle}</p>
-          <p className="text-slate-600">{new Date(h.at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", timeZone: "Africa/Abidjan" })} · {h.resultat === "gagne" ? `+${Number(h.gain).toFixed(2)}` : h.resultat === "perdu" ? "−1" : "0"} · cumul {Number(h.cumul) >= 0 ? "+" : ""}{Number(h.cumul).toFixed(2)}</p>
+          <p className="text-slate-600">{new Date(h.at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", timeZone: "Africa/Abidjan" })} · {h.resultat === "gagne" ? `+${Number(h.gain).toFixed(2).replace(".", ",")}` : h.resultat === "perdu" ? "−1" : "0"} · cumul {Number(h.cumul) >= 0 ? "+" : ""}{Number(h.cumul).toFixed(2).replace(".", ",")}</p>
         </div>
       )}
     </div>

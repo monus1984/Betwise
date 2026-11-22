@@ -117,18 +117,20 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
     const live = list.filter((m) => m.statut === "en_cours" && !isStale(m.kickoff_at)).length;
     return (
       <details key={code} open={!!filtre || !!comp || etat === "termines"} className="group mb-2 overflow-hidden rounded-xl border border-line bg-surface shadow-card">
-        <summary className="flex cursor-pointer list-none items-center gap-2 border-b border-line bg-surface-2 py-0.5 pl-3 pr-1 [&::-webkit-details-marker]:hidden">
-          <span className="text-sm">{COMP_FLAG[code] ?? "⚽"}</span>
-          <span className="min-w-0 flex-1 truncate leading-tight">
-            <span className="block text-[10px] font-semibold uppercase tracking-wide text-ink-muted">{paysDe(code)}</span>
-            <span className="block truncate text-[13px] font-bold text-ink">{nom}</span>
+        {/* Le nom prend toute la largeur (22/11 : 22 noms sur 26 étaient coupés) ; le classement passe dans la partie dépliée */}
+        <summary className="flex min-h-[52px] cursor-pointer list-none items-center gap-2.5 border-b border-line bg-surface-2 py-1.5 pl-3 pr-1 [&::-webkit-details-marker]:hidden">
+          <span className="text-base">{COMP_FLAG[code] ?? "⚽"}</span>
+          <span className="min-w-0 flex-1 leading-tight">
+            <span className="block text-[14px] font-bold text-ink">{nom}</span>
+            <span className="block text-[11.5px] tabular-nums text-ink-muted">
+              {paysDe(code)} · {list.length} match{list.length > 1 ? "s" : ""}{list.find((x) => x.statut === "programme") ? ` · ${fmtTime(list.find((x) => x.statut === "programme")!.kickoff_at)}` : ""}
+              {live > 0 && <span className="font-semibold text-loss"> · ● {live} en direct</span>}
+            </span>
           </span>
-          {live > 0 && <span className="shrink-0 text-xs font-semibold text-loss">● {live}</span>}
-          <span className="shrink-0 text-[11px] tabular-nums text-ink-muted group-open:hidden">{list.length} match{list.length > 1 ? "s" : ""}{list.find((x) => x.statut === "programme") ? ` · ${fmtTime(list.find((x) => x.statut === "programme")!.kickoff_at)}` : ""}</span>
-          {STANDING_COMPS.includes(code) && <Link href={`/matchs/classement?c=${code}`} className="shrink-0 rounded-md px-1.5 py-1 text-[11px] font-medium text-brand">Classement</Link>}
           <CompFavori code={code} initial={favoris.has(code)} nom={nom} />
-          <span aria-hidden className="w-3 shrink-0 text-ink-muted transition-transform group-open:rotate-90">›</span>
+          <span aria-hidden className="w-4 shrink-0 text-center text-ink-muted transition-transform group-open:rotate-90">›</span>
         </summary>
+        {STANDING_COMPS.includes(code) && <Link href={`/matchs/classement?c=${code}`} className="flex items-center justify-between border-b border-line px-3 py-2.5 text-[12.5px] font-semibold text-brand">Classement · {nom}<span aria-hidden>›</span></Link>}
         <ul className="divide-y divide-line">{list.map((m) => <Ligne key={m.id} m={m} sg={signals.get(m.id) ?? null} starred={starred.has(m.id)} avecDate={filtre === "recherche" || filtre === "suivis"} />)}</ul>
       </details>
     );
@@ -158,7 +160,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
                 <Link key={d} href={q(d, null)} scroll={false} className={`flex w-[54px] flex-col items-center rounded-xl border py-1.5 ${active ? "border-inverse bg-inverse text-on-inverse" : d < today ? "border-line bg-surface-2 text-ink-muted" : "border-line bg-surface text-ink-soft"}`}>
                   <span className="text-[10px] capitalize">{label}</span>
                   <span className="text-base font-semibold leading-tight tabular-nums">{dt.getUTCDate()}</span>
-                  <span className={`text-[10px] tabular-nums ${active ? "text-white/70" : "text-ink-muted"}`}>{counts.get(d)}</span>
+                  <span className={`text-[10px] tabular-nums ${active ? "text-on-inverse opacity-75" : "text-ink-muted"}`}>{counts.get(d)}</span>
                 </Link>
               );
             })}
@@ -186,7 +188,9 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
       {rows.length === 0 && (
         <div className="rounded-xl border border-dashed border-line bg-surface p-6 text-center text-sm text-ink-muted">
           {filtre === "recherche" ? `Aucun match pour « ${recherche} » d’hier aux 14 prochains jours. Essaie un autre nom (« Galatasaray », « Belgique », « Ligue 2 »).`
-            : filtre === "direct" ? "Aucun match en direct pour l’instant." : filtre === "suivis" ? "Aucun match suivi. Touche l’étoile d’un match pour le suivre et recevoir ses buts en notification." : "Aucun match ce jour-là. Le calendrier couvre les 14 prochains jours et se met à jour plusieurs fois par jour."}
+            : filtre === "direct" ? "Aucun match en direct pour l’instant." : filtre === "suivis" ? "Aucun match suivi. Touche l’étoile d’un match pour le suivre et recevoir ses buts en notification." : etat === "termines" ? "Aucun match terminé pour l’instant ce jour-là. Les résultats arrivent au fil de la journée."
+            : etat === "programmes" ? "Plus aucun match à venir ce jour-là. Regarde le jour suivant."
+            : "Aucun match ce jour-là. Le calendrier couvre les 14 prochains jours et se met à jour plusieurs fois par jour."}
         </div>
       )}
 
