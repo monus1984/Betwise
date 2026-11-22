@@ -67,7 +67,8 @@ export async function loadToday(db: Db, userId: string) {
   const theirs: TheirPick[] = theirsRaw.map((r) => {
     const { h, a } = names(r.m); const sg = signals.get(r.m.id);
     const p = sg ? probOfSignal(sg, r.market_code, r.market_param === null ? null : Number(r.market_param), r.selection) : null;
-    const categorie = p !== null ? categorieOf(p) : r.cote ? categorieFromOdds(r.cote) : null;
+    // classé sur la cote que le parieur a vue quand elle est connue (même règle partout, 22/11)
+    const categorie = r.cote ? categorieFromOdds(r.cote) : p !== null ? categorieOf(p) : null;
     const value = p !== null && r.cote ? p * r.cote - 1 : null;
     const verdict = p === null ? (r.cote ? "pas de cote de référence : classé d’après sa cote" : "pas de données sur ce match")
       : p >= 0.667 ? `${APP_NAME} confirme : ${Math.round(p * 100)} %` : p >= 0.5 ? `${APP_NAME} est partagé : ${Math.round(p * 100)} %` : `${APP_NAME} n’y croit pas : ${Math.round(p * 100)} %`;

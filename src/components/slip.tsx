@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { CAT_LABEL, CAT_STYLE, categorieOf } from "@/lib/coach/categories";
+import { CAT_LABEL, CAT_STYLE, profilDe } from "@/lib/coach/categories";
 import { slip, slipHref, useSlip, type Leg } from "@/lib/slip/store";
 
 const C = (x: number) => x.toFixed(2).replace(".", ",");
@@ -75,7 +75,7 @@ export function SlipBar() {
             </div>
             <ul className="divide-y divide-line">
               {legs.map((l) => {
-                const cat = l.p !== null ? categorieOf(l.p) : null;
+                const cat = l.p !== null ? profilDe(l.p, l.estimee ? null : l.cote) : null;
                 return (
                   <li key={l.matchId} className="flex items-center gap-2 py-2">
                     <Link href={`/matchs/${l.matchId}`} className="min-w-0 flex-1">
@@ -96,7 +96,7 @@ export function SlipBar() {
               {p !== null && (
                 <div className="mt-1 flex items-center justify-between">
                   <span>Chance de passer</span>
-                  <span className="tabular-nums"><b>{p >= 0.1 ? Math.round(p * 100) : (p * 100).toFixed(1).replace(".", ",")} %</b>{categorieOf(p) && <span className={`ml-1.5 rounded-full border px-1.5 text-[10px] ${CAT_STYLE[categorieOf(p)!]}`}>{CAT_LABEL[categorieOf(p)!]}</span>}</span>
+                  <span className="tabular-nums"><b>{p >= 0.1 ? Math.round(p * 100) : (p * 100).toFixed(1).replace(".", ",")} %</b>{profilDe(p, cote) && <span className={`ml-1.5 rounded-full border px-1.5 text-[10px] ${CAT_STYLE[profilDe(p, cote)!]}`}>{CAT_LABEL[profilDe(p, cote)!]}</span>}</span>
                 </div>
               )}
               {legs.some((l) => l.estimee) && <p className="mt-1 text-[10px] text-ink-muted">≈ : cote estimée (pas de cote de bookmaker). Mets la cote de ton bookmaker à l’étape suivante.</p>}

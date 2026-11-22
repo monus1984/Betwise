@@ -89,12 +89,14 @@ export function Empty({ titre, children, action }: { titre: string; children?: R
 export const fcfa = (n: number) =>
   new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(Math.round(n)) + " F";
 
-export const RISK_LABEL: Record<"prudent" | "moyen" | "risque", string> = { prudent: "Prudent", moyen: "Moyen", risque: "Risqué" };
+/** Niveaux enregistrés en base (prudent, moyen, risque) affichés avec les mots des profils du 21/11. */
+export const RISK_LABEL: Record<"prudent" | "moyen" | "risque", string> = { prudent: "Prudent", moyen: "Équilibré", risque: "Audacieux" };
 export const RISK_CLASS: Record<"prudent" | "moyen" | "risque", string> = {
   prudent: "bg-gain-soft text-gain-ink border-gain/30",
   moyen: "bg-draw-soft text-draw-ink border-draw/40",
   risque: "bg-loss-soft text-loss-ink border-loss/30",
 };
-export function riskFromOdds(c: number): "prudent" | "moyen" | "risque" {
-  return c < 1.5 ? "prudent" : c <= 2.2 ? "moyen" : "risque";
+/** Niveau d'une cote affichée, mêmes bornes que les profils (1,10 / 1,30 / 1,55) ; null sous 1,10. */
+export function riskFromOdds(c: number): "prudent" | "moyen" | "risque" | null {
+  return !(c >= 1.1) ? null : c < 1.3 ? "prudent" : c < 1.55 ? "moyen" : "risque";
 }

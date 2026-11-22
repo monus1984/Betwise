@@ -426,7 +426,7 @@ function OddsRow({ cells, market, param, upcoming, href }: { cells: { sel: strin
         const inner = (<>
           <p className="truncate text-xs text-ink-muted">{c.name}</p>
           <p className="text-lg font-semibold tabular-nums">{cote ? cote.toFixed(2).replace(".", ",") : "—"}</p>
-          {cote && <p className="text-[11px] text-ink-muted">{Math.round(100 / cote)} % · <span className={`rounded px-1 ${RISK_CLASS[riskFromOdds(cote)]}`}>{RISK_LABEL[riskFromOdds(cote)]}</span></p>}
+          {cote && <p className="text-[11px] text-ink-muted">{Math.round(100 / cote)} %{riskFromOdds(cote) && <> · <span className={`rounded px-1 ${RISK_CLASS[riskFromOdds(cote)!]}`}>{RISK_LABEL[riskFromOdds(cote)!]}</span></>}</p>}
         </>);
         return upcoming && cote
           ? <Link key={c.sel} href={href(market, c.sel, cote, param)} className="rounded-lg border border-line p-2 text-center active:bg-surface-2">{inner}</Link>

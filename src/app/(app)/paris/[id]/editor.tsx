@@ -157,7 +157,7 @@ function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index
 
           <div className="flex items-end gap-3">
             <Field label="Cote"><Input inputMode="decimal" value={cote} onChange={(e) => setCote(e.target.value)} className="max-w-[7rem]" /></Field>
-            {toNum(cote) > 1 && <span className={`mb-3 rounded-full border px-2 py-1 text-[11px] ${RISK_CLASS[riskFromOdds(toNum(cote))]}`}>{RISK_LABEL[riskFromOdds(toNum(cote))]}</span>}
+            {riskFromOdds(toNum(cote)) && <span className={`mb-3 rounded-full border px-2 py-1 text-[11px] ${RISK_CLASS[riskFromOdds(toNum(cote))!]}`}>{RISK_LABEL[riskFromOdds(toNum(cote))!]}</span>}
           </div>
         </>
       )}

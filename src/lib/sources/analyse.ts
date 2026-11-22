@@ -11,7 +11,7 @@ export type Point = LigneAxe & { taux: number; libelle: string };
 export const MIN = 10; // 3 jusqu’au 22/11 : une « force » sur 3 résultats, c’est du hasard
 export const ECART = 0.1;
 
-const RISQUE_FR: Record<string, string> = { prudent: "Cotes basses", moyen: "Cotes moyennes", risque: "Cotes hautes", sur: "Prudent", audacieux: "Équilibré" };
+const RISQUE_FR: Record<string, string> = { prudent: "Prudent (cotes 1,10 à 1,29)", moyen: "Équilibré (cotes 1,30 à 1,54)", risque: "Audacieux (cotes 1,55 et plus)", sur: "Prudent", audacieux: "Équilibré" };
 export const AXE_FR: Record<Axe, string> = { competition: "Compétition", marche: "Marché", risque: "Niveau de cote" };
 
 export function libelle(l: Pick<LigneAxe, "axe" | "valeur">, comps: Record<string, string> = {}): string {

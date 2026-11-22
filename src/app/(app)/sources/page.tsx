@@ -142,7 +142,7 @@ async function Analyse({ sources }: { sources: { id: string; nom: string; type: 
   ]);
   const un = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
   const pronos: Prono[] = ((pr ?? []) as unknown as { source_id: string; market_code: string; resultat: string; cote_annoncee: number | null; risque_annonce: string | null; risque_calcule: string | null; match: { competition: { code_externe: string | null } | { code_externe: string | null }[] | null } | { competition: { code_externe: string | null } | { code_externe: string | null }[] | null }[] | null }[])
-    .map((r) => ({ source_id: r.source_id, marche: r.market_code, competition: un(un(r.match)?.competition ?? null)?.code_externe ?? null, risque: r.risque_annonce ?? r.risque_calcule, resultat: r.resultat, cote: r.cote_annoncee === null ? null : Number(r.cote_annoncee) }));
+    .map((r) => ({ source_id: r.source_id, marche: r.market_code, competition: un(un(r.match)?.competition ?? null)?.code_externe ?? null, risque: r.risque_calcule, resultat: r.resultat, cote: r.cote_annoncee === null ? null : Number(r.cote_annoncee) }));
   const lignes = sources.map((x) => {
     const b = bilanDe(pronos.filter((p) => p.source_id === x.id));
     return { ...x, b, pire: met?.find((r) => r.source_id === x.id)?.pire_serie ?? null, ...forcesEtFaiblesses(b.lignes, b.taux, COMP_SHORT) };

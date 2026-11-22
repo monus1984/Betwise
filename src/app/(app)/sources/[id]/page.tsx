@@ -187,7 +187,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
                     param: p.market_param,
                     selection: p.selection,
                     cote: p.cote_annoncee,
-                    risque: (p.risque_annonce ?? p.risque_calcule) as "prudent" | "moyen" | "risque" | null,
+                    risque: p.risque_calcule as "prudent" | "moyen" | "risque" | null,
                     statut: p.statut,
                     resultat: p.resultat,
                     loggedAt: p.logged_at,

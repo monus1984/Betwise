@@ -3,19 +3,20 @@ import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { CoachNav } from "@/components/coach-nav";
 import { COMP_FLAG, shortName } from "@/components/match-ui";
-import { CAT_LABEL, CAT_STYLE, profilDe } from "@/lib/coach/categories";
+import { CAT_COTES, CAT_LABEL, CAT_STYLE, profilDe, type Categorie } from "@/lib/coach/categories";
 import { buildCombos, coteEstimee, legsParam, singlesOf, type Option } from "@/lib/options/build";
 import { loadOptions, type Periode } from "@/lib/options/load";
 import { createClient } from "@/lib/supabase/server";
 import { AddAllToSlip, AddToSlip } from "@/components/slip";
 import { legFrom } from "@/lib/slip/leg";
 
-export type SP = { per?: string; min?: string; max?: string; fam?: string; vue?: string; cible?: string; m?: string; n?: string };
-const PRESETS = [
-  { k: "sur", label: "Prudent", min: 83, max: 91 },
-  { k: "aud", label: "Équilibré", min: 67, max: 83 },
-  { k: "ris", label: "Audacieux", min: 53, max: 67 },
-  { k: "mix", label: "Prudent + Équilibré", min: 67, max: 91 },
+export type SP = { niv?: string; per?: string; min?: string; max?: string; fam?: string; vue?: string; cible?: string; m?: string; n?: string };
+// Niveaux : mêmes bornes de cote que partout ailleurs (21/11), sur la cote affichée
+const PRESETS: { k: string; label: string; cats: Categorie[]; bornes: string }[] = [
+  { k: "sur", label: "Prudent", cats: ["sur"], bornes: "1,10–1,29" },
+  { k: "aud", label: "Équilibré", cats: ["audacieux"], bornes: "1,30–1,54" },
+  { k: "ris", label: "Audacieux", cats: ["risque"], bornes: "1,55 et +" },
+  { k: "mix", label: "Prudent + Équilibré", cats: ["sur", "audacieux"], bornes: "1,10–1,54" },
 ];
 const FAMS = [{ k: "", label: "Tout" }, { k: "resultat", label: "Résultat" }, { k: "buts", label: "Buts" }, { k: "mitemps", label: "Mi-temps" }, { k: "combo", label: "Combos même match" }];
 const CIBLES = [1.5, 2, 3, 5, 10];
@@ -36,14 +37,16 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
     loadOptions(db, per),
     db.from("sources").select("id").eq("type", "modele_betwise").limit(1).maybeSingle(),
   ]);
-  const inRange = all.filter((o) => o.p >= min / 100 && o.p <= max / 100 && (!fam || o.famille === fam));
+  const niv = PRESETS.find((p) => p.k === sp.niv) ?? null;
+  const dansNiveau = (o: Option) => { const c = profilDe(o.p, o.cote); return !!c && niv!.cats.includes(c); };
+  const inRange = all.filter((o) => (niv ? dansNiveau(o) : o.p >= min / 100 && o.p <= max / 100) && (!fam || o.famille === fam));
   const focus = sp.m ? inRange.filter((o) => o.matchId === sp.m).sort((a, b) => b.p - a.p) : null;
   const singles = focus ?? singlesOf(inRange, 2);
   const shown = Math.min(singles.length, sp.n === "all" ? 300 : 40);
   const combos = vue === "combines" ? buildCombos(inRange, cible, 3) : [];
 
   const q = (patch: Partial<Record<keyof SP, string | number | null>>) => {
-    const base: Record<string, string> = { ...(sp.m && !("m" in patch) ? { m: sp.m } : {}), per, min: String(min), max: String(max), fam, vue, cible: String(cible) };
+    const base: Record<string, string> = { ...(sp.m && !("m" in patch) ? { m: sp.m } : {}), ...(niv && !("min" in patch) ? { niv: niv.k } : {}), per, min: String(min), max: String(max), fam, vue, cible: String(cible) };
     for (const [k, v] of Object.entries(patch)) { if (v === null || v === "") delete base[k]; else base[k] = String(v); }
     if (!base.fam) delete base.fam;
     return `/options?${new URLSearchParams(base).toString()}`;
@@ -55,7 +58,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
 
   return (
     <>
-      <PageHeader title="Options du jour" subtitle={`Choisis ton taux de réussite : ${APP_NAME} te donne les paris qui y correspondent, en simple ou en combiné.`} />
+      <PageHeader title="Options du jour" subtitle={`Choisis un niveau ou ton taux de réussite : ${APP_NAME} te donne les paris qui y correspondent, en simple ou en combiné.`} />
       <CoachNav current="options" />
 
       <div className="mb-3 flex gap-1.5 overflow-x-auto">
@@ -64,9 +67,10 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
 
       {/* Réussite visée */}
       <section className="mb-3 rounded-xl border border-line bg-surface p-3 shadow-card">
-        <p className="mb-2 text-xs font-semibold text-ink-soft">Réussite visée par sélection : <span className="tabular-nums text-ink">{min} à {max} %</span> <span className="font-normal text-ink-muted">· cotes justes {C(100 / max)} à {C(100 / min)}</span></p>
+        {niv ? <p className="mb-2 text-xs font-semibold text-ink-soft">Niveau {niv.label} : <span className="font-normal text-ink-muted">{niv.cats.map((c) => CAT_COTES[c]).join(", puis ")}, sur la cote affichée</span></p>
+          : <p className="mb-2 text-xs font-semibold text-ink-soft">Réussite visée par sélection : <span className="tabular-nums text-ink">{min} à {max} %</span> <span className="font-normal text-ink-muted">· cotes justes {C(100 / max)} à {C(100 / min)}</span></p>}
         <div className="mb-2 flex flex-wrap gap-1.5">
-          {PRESETS.map((p) => <Link key={p.k} href={q({ min: p.min, max: p.max, m: null })} scroll={false} className={chip(min === p.min && max === p.max)}>{p.label} <span className="opacity-70">{p.min}–{p.max} %</span></Link>)}
+          {PRESETS.map((p) => <Link key={p.k} href={q({ niv: p.k, m: null })} scroll={false} className={chip(niv?.k === p.k)}>{p.label} <span className="opacity-70">{p.bornes}</span></Link>)}
         </div>
         <form action="/options" className="flex items-end gap-2">
           <input type="hidden" name="per" value={per} /><input type="hidden" name="vue" value={vue} /><input type="hidden" name="cible" value={cible} />{fam && <input type="hidden" name="fam" value={fam} />}
@@ -91,7 +95,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
       {nbMatchs > 0 && nbCouverts === 0 && <Empty>Les {nbMatchs} matchs de la période n’ont pas encore de cote ni d’estimation du modèle. Les cotes arrivent dans la matinée.</Empty>}
 
       {vue === "simples" && nbCouverts > 0 && (
-        singles.length === 0 ? <Empty>Aucune option entre {min} et {max} % sur cette période. Élargis la fourchette.</Empty> : (
+        singles.length === 0 ? <Empty>{niv ? `Aucune option au niveau ${niv.label} sur cette période. Essaie un autre niveau ou « Demain ».` : `Aucune option entre ${min} et ${max} % sur cette période. Élargis la fourchette.`}</Empty> : (
           <>
             {focus && <p className="mb-2 text-xs text-ink-muted">Toutes les options de {focus[0] ? `${focus[0].home} – ${focus[0].away}` : "ce match"} dans ta fourchette · <Link href={q({ m: null })} className="text-brand">revenir à la liste</Link></p>}
             <ul className="overflow-hidden rounded-xl border border-line bg-surface shadow-card">
@@ -111,7 +115,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
             <div className="flex flex-wrap items-center gap-1.5">
               {CIBLES.map((c) => <Link key={c} href={q({ cible: c })} scroll={false} className={chip(cible === c)}>{C(c)}</Link>)}
               <form action="/options" className="flex items-center gap-1.5">
-                {Object.entries({ per, min, max, vue, ...(fam ? { fam } : {}) }).map(([k, v]) => <input key={k} type="hidden" name={k} value={String(v)} />)}
+                {Object.entries({ per, min, max, vue, ...(fam ? { fam } : {}), ...(niv ? { niv: niv.k } : {}) }).map(([k, v]) => <input key={k} type="hidden" name={k} value={String(v)} />)}
                 <input name="cible" inputMode="decimal" defaultValue={CIBLES.includes(cible) ? "" : String(cible)} placeholder="autre" className="w-16 rounded-lg border border-line px-2 py-1.5 text-xs tabular-nums" />
                 <button className="rounded-lg bg-inverse px-2.5 py-1.5 text-xs font-medium text-on-inverse">OK</button>
               </form>

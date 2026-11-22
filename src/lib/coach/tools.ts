@@ -18,7 +18,7 @@ import { evaluatePlan, misesDuJour } from "./plan";
 import { loadForces, loadRepli, loadToday } from "./today";
 import { direForce } from "./forces";
 import { setObjectif } from "./actions";
-import { CAT_LABEL, categorieOf } from "./categories";
+import { CAT_LABEL, profilDe } from "./categories";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
 type One<T> = T | T[] | null;
@@ -57,7 +57,7 @@ const BET_SELECT = "id, type, mise, cote_totale, statut, gain_net, placed_at, bo
 
 const originName = (o: { nom: string; type: string } | null) => (!o ? "non renseignée" : o.type === "perso" ? "choix personnel" : o.type === "modele_betwise" ? `Modèle ${APP_NAME}` : o.nom);
 const matchName = (s: BetRow["bet_selections"][number]) => { const m = one(s.match); return m ? `${one(m.home)?.nom} – ${one(m.away)?.nom}` : s.match_libre ?? "match non identifié"; };
-const riskOf = (c: number) => (c < 1.5 ? "prudent" : c <= 2.2 ? "moyen" : "risqué");
+const riskOf = (c: number) => (c < 1.1 ? "sous 1,10" : c < 1.3 ? "prudent" : c < 1.55 ? "équilibré" : "audacieux");
 
 async function allBets(db: Db, from: string | null) {
   let q = db.from("bets").select(BET_SELECT).eq("virtuel", false).order("placed_at", { ascending: true }).limit(2000);
@@ -162,7 +162,7 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
       const list = (eq ? [...pool].sort((a, b) => b.p - a.p) : singlesOf(pool, 2)).slice(0, n);
       return {
         periode: per, fourchette_pct: [pct(min), pct(max)], matchs: nbMatchs, matchs_avec_chiffres: nbCouverts, options_dans_la_fourchette: pool.length,
-        options: list.map((o) => ({ selection: o.label, match: `${o.home} – ${o.away}`, coup_envoi: o.kickoff, probabilite_pct: pct(o.p), categorie: (() => { const c = categorieOf(o.p); return c ? CAT_LABEL[c] : null; })(), cote_reference: o.cote, cote_juste: r2(1 / o.p), origine: o.source === "modele" ? "modèle (pas de cote)" : "cotes du marché, marge retirée" })),
+        options: list.map((o) => ({ selection: o.label, match: `${o.home} – ${o.away}`, coup_envoi: o.kickoff, probabilite_pct: pct(o.p), categorie: (() => { const c = profilDe(o.p, o.cote); return c ? CAT_LABEL[c] : null; })(), cote_reference: o.cote, cote_juste: r2(1 / o.p), origine: o.source === "modele" ? "modèle (pas de cote)" : "cotes du marché, marge retirée" })),
         rappels: ["une sélection n'est une bonne affaire que si le bookmaker paie PLUS que cote_juste", "l'utilisateur peut tester une option sans miser depuis Options du jour (bouton Tester)"],
       };
     }

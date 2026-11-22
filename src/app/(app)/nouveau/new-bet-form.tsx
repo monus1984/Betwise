@@ -150,9 +150,9 @@ export function NewBetForm({ sources, markets, defaultOrigin, legs, initialTest 
           <Field label="Cote">
             <div className="flex items-center gap-3">
               <Input inputMode="decimal" value={l.cote} onChange={(e) => update(l.key, { cote: e.target.value })} placeholder="1.85" className="max-w-[9rem]" />
-              {toNum(l.cote) > 1 && (
-                <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${RISK_CLASS[riskFromOdds(toNum(l.cote))]}`}>
-                  {RISK_LABEL[riskFromOdds(toNum(l.cote))]}
+              {riskFromOdds(toNum(l.cote)) && (
+                <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${RISK_CLASS[riskFromOdds(toNum(l.cote))!]}`}>
+                  {RISK_LABEL[riskFromOdds(toNum(l.cote))!]}
                 </span>
               )}
             </div>

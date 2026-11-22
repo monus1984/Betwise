@@ -83,7 +83,7 @@ export function NewPredictionForm({ sourceId, markets }: { sourceId: string; mar
         <Field label="Cote annoncée (facultatif)" hint="Sans cote, le prono compte dans la tendance mais pas dans le rendement.">
           <div className="flex items-center gap-3">
             <Input inputMode="decimal" value={cote} onChange={(e) => setCote(e.target.value)} placeholder="1.85" className="max-w-[9rem]" />
-            {toNum(cote) > 1 && <span className={`rounded-full border px-2.5 py-1 text-xs ${RISK_CLASS[riskFromOdds(toNum(cote))]}`}>{RISK_LABEL[riskFromOdds(toNum(cote))]} (d’après la cote)</span>}
+            {riskFromOdds(toNum(cote)) && <span className={`rounded-full border px-2.5 py-1 text-xs ${RISK_CLASS[riskFromOdds(toNum(cote))!]}`}>{RISK_LABEL[riskFromOdds(toNum(cote))!]} (d’après la cote)</span>}
           </div>
         </Field>
 

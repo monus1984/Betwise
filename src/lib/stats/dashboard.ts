@@ -21,7 +21,8 @@ export type Dashboard = {
 };
 
 const MARKET_FR: Record<string, string> = { "1X2": "Victoire / nul", DC: "Double chance", DNB: "Remboursé si nul", OU: "Plus / moins de buts", BTTS: "Les deux marquent", AH: "Handicap", CS: "Score exact", DC_OU: "Double chance + buts", "1X2_OU": "Résultat + buts" };
-const riskOf = (c: number) => (c < 1.5 ? "Prudent (cote < 1,50)" : c <= 2.2 ? "Moyen (1,50 à 2,20)" : c <= 5 ? "Risqué (2,20 à 5)" : "Très risqué (> 5)");
+// mêmes bornes que les profils (21/11), sur la cote totale du ticket
+const riskOf = (c: number) => (c < 1.1 ? "Sous 1,10" : c < 1.3 ? "Prudent (1,10 à 1,29)" : c < 1.55 ? "Équilibré (1,30 à 1,54)" : "Audacieux (1,55 et plus)");
 
 function group(rows: Row[], key: (b: Row) => string): Group[] {
   const m = new Map<string, Row[]>();
