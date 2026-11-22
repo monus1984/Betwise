@@ -8,10 +8,11 @@ import type { Categorie } from "@/lib/coach/categories";
 import { BetsterAnime } from "@/components/betster-anime";
 
 /** Accueil Prédictions avec des DONNÉES FICTIVES, pour contrôler le rendu sans compte. N'existe pas en production. */
+import { estimerBetclicCI } from "@/lib/odds-api/betclic-ci";
 const H = (h: number) => new Date(Date.now() + h * 3600000).toISOString();
 const P = (home: string, away: string, h: number, marche: string, label: string, p: number, profil: Categorie, c: number | null, bk = true): Proposition => ({
   matchId: home, home, away, kickoff: H(h), comp: "PL", market: "1X2", param: null, sel: label, marche, label, p, profil,
-  cote: c ? { cote: c, ou: bk ? "Cote 1xBet" : "Cote médiane", age: "il y a 2 h", frais: true } : null, book: c && bk ? { cote: c, bookmaker: "1xBet" } : null, refCote: c, couverture: "marche_modele",
+  cote: c ? { cote: c, ou: bk ? "Cote 1xBet" : "Cote médiane", age: "il y a 2 h", frais: true } : null, book: c && bk ? { cote: c, bookmaker: "1xBet" } : null, refCote: c, couverture: "marche_modele", betclic: c && profil === "audacieux" ? { fr: c - 0.04, ci: estimerBetclicCI(c - 0.04)!, age: "il y a 5 h" } : null,
 });
 const PROFILS: Record<Categorie, Proposition[]> = {
   sur: [P("Bayern Munich", "Cologne", 4, "Résultat", "Bayern Munich gagne", 0.86, "sur", 1.17), P("Real Madrid", "Séville", 6, "Double chance", "Real Madrid ou nul", 0.88, "sur", 1.13)],

@@ -1,4 +1,5 @@
 import { APP_NAME } from "@/lib/app-name";
+import { gainPour1000 } from "@/components/proposition";
 import Link from "next/link";
 import { CAT_COTES, CAT_LABEL, CAT_STYLE, type Categorie } from "@/lib/coach/categories";
 import type { Repli, TheirPick, TodayPick } from "@/lib/coach/today";
@@ -33,7 +34,7 @@ export function CoupsDuJour({ picks, theirs, mises, repli = [] }: { picks: Today
                     </span>
                     <span className="shrink-0 text-right tabular-nums">
                       <span className="block text-sm font-bold">{Math.round(r.p * 100)} %</span>
-                      <span className="block text-[11px] text-loss">perd {100 - Math.round(r.p * 100)} fois sur 100</span>
+                      {r.cote ? <span className="block text-[11px] text-ink-muted">1 000 F → {gainPour1000(r.cote)}</span> : null}
                     </span>
                   </Link>
                 </li>

@@ -12,6 +12,7 @@ import type { Option } from "@/lib/options/build";
 import { profilDe, type Categorie } from "@/lib/coach/categories";
 import { logoEquipe } from "@/lib/logos";
 import { estTop5 } from "@/lib/competitions";
+import { BETCLIC_FR, estimerBetclicCI, type EstimationCI } from "@/lib/odds-api/betclic-ci";
 import { avisDuJour, couverture, expression, ilYA, libelleMarche, publieAvant, type Couverture, type Expression } from "./regles";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
@@ -38,6 +39,8 @@ export type Proposition = {
   matchId: string; home: string; away: string; kickoff: string; comp: string | null;
   market: string; param: number | null; sel: string; marche: string; label: string; p: number;
   profil: Categorie; cote: Cote | null; book: { cote: number; bookmaker: string } | null; refCote: number | null; couverture: Couverture;
+  /** Résultat du match seulement, grands championnats couverts par Betclic France : cote France et estimation Côte d'Ivoire. */
+  betclic: { fr: number; ci: EstimationCI; age: string } | null;
 };
 /** Une option du jour pour la recherche par fourchette de probabilité. */
 export type OptionRecherche = { matchId: string; home: string; away: string; kickoff: string; comp: string | null; label: string; p: number; cote: number | null; ou: string | null };
@@ -49,6 +52,23 @@ const MATCH = "id, kickoff_at, statut, minute, score_home, score_away, ht_home, 
 type M = { id: string; kickoff_at: string; statut: string; minute: number | null; score_home: number | null; score_away: number | null; ht_home: number | null; ht_away: number | null; af_home_id: number | null; af_away_id: number | null; home: One<{ nom: string; code_externe: string | null }>; away: One<{ nom: string; code_externe: string | null }>; competition: One<{ code_externe: string | null }> };
 
 /** Heure du dernier relevé de cote de référence par match (la médiane n'a pas d'heure à elle). */
+/** Dernière cote Betclic France de chaque issue du résultat (1, N, 2), par match. */
+type Betclic = Map<string, Map<string, { cote: number; at: string }>>;
+async function relevesBetclic(db: Db, ids: string[]): Promise<Betclic> {
+  const out: Betclic = new Map();
+  for (let i = 0; i < ids.length; i += 40) {
+    const { data } = await db.from("odds_observations").select("match_id, selection, cote, observed_at").eq("bookmaker", BETCLIC_FR).eq("market_code", "1X2")
+      .in("match_id", ids.slice(i, i + 40)).order("observed_at", { ascending: false }).limit(1000);
+    for (const r of data ?? []) {
+      if (!r.match_id || !r.observed_at) continue;
+      const m = out.get(r.match_id) ?? new Map();
+      if (!m.has(r.selection)) m.set(r.selection, { cote: Number(r.cote), at: r.observed_at });
+      out.set(r.match_id, m);
+    }
+  }
+  return out;
+}
+
 async function relevesRef(db: Db, ids: string[]): Promise<Map<string, string>> {
   const out = new Map<string, string>();
   for (let i = 0; i < ids.length; i += 20) {
@@ -88,17 +108,24 @@ function carte(m: M, sg: Signal | undefined, releve: string | undefined, choix?:
 const PROFILS: Categorie[] = ["sur", "audacieux", "risque"];
 
 /** Une option du moteur → proposition affichable, avec la cote 1xBet fraîche si le signal du match l'a. */
-function proposition(o: Option, profil: Categorie, sg: Signal | undefined, releve: string | undefined): Proposition {
+function proposition(o: Option, sg: Signal | undefined, releve: string | undefined, bc: Betclic): Proposition | null {
   const bk = sg?.bookOdd(o.market, o.param, o.sel) ?? null;
   const book = bk && releveFrais(bk.releveAt, o.kickoff) ? bk : null;
   const aff = coteAffichee({ cote: o.cote, book });
+  // Le niveau se lit sur la cote affichée (1xBet quand elle existe), pour ne jamais écrire « cote 1,29 · Équilibré »
+  const profil = profilDe(o.p, aff?.cote ?? o.cote);
+  if (!profil) return null;
+  const b = o.market === "1X2" ? bc.get(o.matchId)?.get(o.sel) : undefined;
+  const ci = b && releveFrais(b.at, o.kickoff) ? estimerBetclicCI(b.cote) : null;
   const cote: Cote | null = aff ? (aff.origine === "bookmaker"
     ? { cote: aff.cote, ou: `Cote ${aff.bookmaker}`, age: ilYA(book!.releveAt), frais: true }
     : { cote: aff.cote, ou: "Cote médiane", age: releve ? ilYA(releve) : null, frais: releve ? releveFrais(releve, o.kickoff) : false }) : null;
   return { matchId: o.matchId, home: o.home, away: o.away, kickoff: o.kickoff, comp: o.comp || null, market: o.market, param: o.param, sel: o.sel,
     marche: libelleMarche(o.market), label: o.label, p: o.p, profil, cote, book: book ? { cote: book.cote, bookmaker: book.bookmaker } : null, refCote: o.cote,
-    couverture: o.source === "modele" ? "modele" : sg?.model ? "marche_modele" : "marche" };
+    couverture: o.source === "modele" ? "modele" : sg?.model ? "marche_modele" : "marche",
+    betclic: b && ci ? { fr: b.cote, ci, age: ilYA(b.at) } : null };
 }
+const nn = <T,>(x: T | null): x is T => x !== null;
 
 /** Pour chaque match, la meilleure option de chaque niveau de risque (marchés différents), Prudent d'abord. */
 export function parProfil(options: Option[]): Map<string, { o: Option; profil: Categorie }[]> {
@@ -128,12 +155,12 @@ export async function loadAccueil(db: Db, userId: string) {
   const avisPick = avisDuJour(today.picks);
   const [optAuj, optDemain] = await Promise.all([loadOptions(db, "auj"), loadOptions(db, "demain" as Periode)]);
   const ids = [...new Set([...tous.map((m) => m.id), ...today.picks.map((p) => p.match_id), ...optDemain.options.map((o) => o.matchId)])];
-  const [signals, releves] = await Promise.all([loadSignals(db, ids, { bookmakers: true }), relevesRef(db, ids)]);
+  const [signals, releves, bc] = await Promise.all([loadSignals(db, ids, { bookmakers: true }), relevesRef(db, ids), relevesBetclic(db, ids)]);
 
   const mesMatchs = new Set(today.theirs.filter((t) => t.type === "pari").map((t) => t.match_id));
   const profilsAuj = parProfil(optAuj.options);
   const cartes = tous.map((m) => ({ ...carte(m, signals.get(m.id), releves.get(m.id)), tonPari: mesMatchs.has(m.id),
-    propositions: (profilsAuj.get(m.id) ?? []).map(({ o, profil }) => proposition(o, profil, signals.get(m.id), releves.get(m.id))) }));
+    propositions: (profilsAuj.get(m.id) ?? []).map(({ o }) => proposition(o, signals.get(m.id), releves.get(m.id), bc)).filter(nn) }));
   // En direct d'abord, puis à venir, puis terminés ; à heure égale, les matchs analysés avant les autres
   const rang = (c: CarteMatch) => (c.statut === "en_cours" ? 0 : c.statut === "programme" ? 1 : 2);
   // Les 5 grands championnats d'abord (21/11), puis les autres ; dans chaque groupe, du plus proche au plus lointain
@@ -161,14 +188,18 @@ export async function loadAccueil(db: Db, userId: string) {
   // Meilleures options du jour par profil : les coups du jour (3 par niveau), sinon les meilleures options de demain
   const profils: Record<Categorie, Proposition[]> = { sur: [], audacieux: [], risque: [] };
   const optionDe = (pk: (typeof today.picks)[number]): Option => ({ matchId: pk.match_id, kickoff: pk.kickoff, home: pk.home, away: pk.away, comp: pk.comp ?? "", market: pk.market, param: pk.param, sel: pk.sel, label: pk.selection, famille: "resultat", p: pk.p, cote: pk.cote, source: "marche" });
-  for (const pk of today.picks.filter((x) => x.statut === "programme")) profils[pk.categorie].push(proposition(optionDe(pk), pk.categorie, signals.get(pk.match_id), releves.get(pk.match_id)));
+  for (const pk of today.picks.filter((x) => x.statut === "programme")) {
+    const x = proposition(optionDe(pk), signals.get(pk.match_id), releves.get(pk.match_id), bc);
+    if (x) profils[x.profil].push(x);
+  }
   for (const k of PROFILS) profils[k].sort((a, b) => Number(!estTop5(a.comp)) - Number(!estTop5(b.comp)));
   const profilsDeDemain = !today.picks.some((x) => x.statut === "programme");
   if (profilsDeDemain) {
     const vus = new Set<string>();
     for (const [, l] of [...parProfil(optDemain.options).entries()].sort(([, a], [, b]) => Number(!estTop5(a[0].o.comp)) - Number(!estTop5(b[0].o.comp)))) for (const { o, profil } of l) {
-      if (profils[profil].length >= 3 || vus.has(`${o.matchId}|${profil}`)) continue;
-      vus.add(`${o.matchId}|${profil}`); profils[profil].push(proposition(o, profil, signals.get(o.matchId), releves.get(o.matchId)));
+      const x = proposition(o, signals.get(o.matchId), releves.get(o.matchId), bc);
+      if (!x || profils[x.profil].length >= 3 || vus.has(`${o.matchId}|${x.profil}`)) continue;
+      vus.add(`${o.matchId}|${x.profil}`); profils[x.profil].push(x);
     }
     for (const k of PROFILS) profils[k].sort((a, b) => Number(!estTop5(a.comp)) - Number(!estTop5(b.comp)) || b.p - a.p);
   }
@@ -176,7 +207,7 @@ export async function loadAccueil(db: Db, userId: string) {
   // Demain : les matchs analysés, deux propositions chacun
   const demain: MatchAVenir[] = [...parProfil(optDemain.options).entries()].map(([matchId, l]) => {
     const o = l[0].o;
-    return { matchId, home: o.home, away: o.away, kickoff: o.kickoff, comp: o.comp || null, propositions: l.slice(0, 2).map(({ o: x, profil }) => proposition(x, profil, signals.get(matchId), releves.get(matchId))) };
+    return { matchId, home: o.home, away: o.away, kickoff: o.kickoff, comp: o.comp || null, propositions: l.slice(0, 2).map(({ o: x }) => proposition(x, signals.get(matchId), releves.get(matchId), bc)).filter(nn) };
   }).sort((a, b) => Number(!estTop5(a.comp)) - Number(!estTop5(b.comp)) || Date.parse(a.kickoff) - Date.parse(b.kickoff));
 
   // Justification (forme, face-à-face) pour les matchs à venir affichés

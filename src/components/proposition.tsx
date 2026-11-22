@@ -53,6 +53,18 @@ export function LigneCote({ x }: { x: Proposition }) {
   );
 }
 
+/** Gain pour une mise de 1 000 F à la cote affichée : remplace « perd N fois sur 100 » (22/11). */
+export const gainPour1000 = (c: number) => `${Math.round(c * 1000).toLocaleString("fr-FR").replace(/\u202f|\u00a0/g, " ")} F`;
+
+/** Betclic France et estimation Betclic Côte d'Ivoire (×1,033, fourchette ×1,017 à ×1,057, mesure du 21/11). */
+export function LigneBetclic({ x, court = false }: { x: Proposition; court?: boolean }) {
+  if (!x.betclic) return null;
+  const { fr, ci, age } = x.betclic;
+  return court
+    ? <span className="block text-[10.5px] text-ink-muted">Betclic CI ≈ <b className="text-ink">{cote(ci.cote)}</b> · France {cote(fr)}</span>
+    : <span className="text-[11px] text-ink-muted">Betclic France <b className="text-ink">{cote(fr)}</b> · Betclic CI ≈ <b className="text-ink">{cote(ci.cote)}</b> ({cote(ci.bas)} à {cote(ci.haut)}) · {age}</span>;
+}
+
 /** Carte d'une proposition mise en avant (meilleures options du jour). */
 export function CarteProposition({ x }: { x: Proposition }) {
   return (
@@ -69,7 +81,8 @@ export function CarteProposition({ x }: { x: Proposition }) {
         </span>
       </div>
       <LigneCote x={x} />
-      <p className="text-[11.5px] leading-snug text-ink-soft">Perd {100 - Math.round(x.p * 100)} fois sur 100. Niveau {CAT_LABEL[x.profil]} ({CAT_COTES[x.profil]}).</p>
+      <LigneBetclic x={x} />
+      <p className="text-[11.5px] leading-snug text-ink-soft">{x.cote ? <>1 000 F misés, <b className="text-ink">{gainPour1000(x.cote.cote)}</b> si ça passe. </> : null}Niveau {CAT_LABEL[x.profil]} ({CAT_COTES[x.profil]}).</p>
       <div className="mt-auto flex items-center gap-2">
         <Link href={`/matchs/${x.matchId}`} className="flex h-10 flex-1 items-center justify-center rounded-xl bg-brand text-[13px] font-bold text-on-fill active:opacity-90">Voir l’analyse</Link>
         <AddToSlip leg={legDe(x)} />
@@ -86,6 +99,7 @@ export function LigneProposition({ x }: { x: Proposition }) {
       <span className="min-w-0 flex-1">
         <span className="block text-[13px] font-semibold leading-snug">{x.label}</span>
         <span className="block text-[10.5px] text-ink-muted">{x.marche}{x.cote ? ` · ${x.cote.ou.replace(/^Cote/, "cote")} ${cote(x.cote.cote)}` : " · estimation"}</span>
+        <LigneBetclic x={x} court />
       </span>
       <span className="shrink-0 font-display text-lg font-bold">{pct(x.p)}</span>
       <AddToSlip leg={legDe(x)} size="sm" />

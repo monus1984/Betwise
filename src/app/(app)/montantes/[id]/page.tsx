@@ -79,7 +79,7 @@ export default async function MontantePage({ params }: { params: Promise<{ id: s
                   <Link href={`/matchs/${o.matchId}`} className="min-w-0 flex-1">
                     <span className="block text-[11px] text-ink-muted">{jourCourt(o.kickoff)} {heure(o.kickoff)} · {o.home} – {o.away}</span>
                     <span className="block text-[14px] font-semibold">{o.label}</span>
-                    <span className="block text-[11.5px] text-ink-soft">{pct(o.p)} · cote {fc(o.cote!)} · perd {Math.round((1 - o.p) * 100)} fois sur 100</span>
+                    <span className="block text-[11.5px] text-ink-soft">{pct(o.p)} · cote {fc(o.cote!)}</span>
                   </Link>
                   <AddToSlip size="sm" leg={legFrom({ matchId: o.matchId, home: o.home, away: o.away, kickoff: o.kickoff, comp: o.comp, market: o.market, param: o.param, sel: o.sel, p: o.p, cote: o.cote, label: o.label })} />
                 </li>
