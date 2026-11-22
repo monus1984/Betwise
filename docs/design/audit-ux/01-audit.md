@@ -163,7 +163,7 @@ Effort : **S** moins d'une heure, **M** une demi-journée, **L** un à deux jour
 | Écran | Texte affiché | Ce qui est vrai | Fichier |
 | --- | --- | --- | --- |
 | Mes paris, vide | « Le bouton + en bas permet d'en ajouter un. » | le « + » est en haut, dans le bandeau | `paris/page.tsx` ligne 55 |
-| Matchs, filtre Terminés, à 10 h | « Aucun match ce jour-là. » | la journée compte 86 matchs, aucun n'est encore fini | `matchs/page.tsx` |
+| Matchs, filtre Terminés, à 10 h | « Aucun match ce jour-là. » | la journée compte 86 matchs, aucun n'est encore fini | `matchs/page.tsx` ligne 189 |
 | Fiche sans cote, le jour du match | « Elles arrivent chaque matin à partir de J-14. » | on est à J-0, et elles arrivent l'après-midi ; deux cartes de suite répètent le message | `matchs/[id]/page.tsx` ligne 185 |
 | Fiche d'un match de Süper Lig ([capture](captures/clair/03k-match-hors-modele-3.jpg)) | « Le modèle ne couvre pas encore ce match (sélections nationales, Ligue des champions). » | c'est un match de championnat turc | `matchs/[id]/page.tsx` ligne 183 |
 | Aide de l'écran Matchs | « Les matchs sont rangés par pays », « Analyse statistique indisponible » | ils sont rangés par heure ; l'écran dit « pas encore d'analyse » | `src/lib/aide/contenu.ts` |

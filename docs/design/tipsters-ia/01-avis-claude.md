@@ -35,7 +35,7 @@ Les points où je m'écarte du brief de ChatGPT sont regroupés au point 12, pou
 - trois paris test enregistrés à 09 h 04 : Go Ahead Eagles −1,5 à 2,81 ; victoire de Göztepe à 2,68 ; Sivasspor moins de 0,5 but en 2e mi-temps à 1,41 ;
 - règles dans `src/lib/tipster-virtuel/strategie.ts` : parier seulement quand 1xBet paie au-dessus de la cote juste, au plus 6 paris par jour.
 
-### Deux choses à dire franchement sur ce pilote
+### Deux réserves sur ce pilote
 
 **Ce n'est pas « Claude qui réfléchit chaque jour ».** C'est une règle que j'ai écrite une fois et qu'un robot applique. Pour l'expérience demandée, il faut choisir entre les deux (point 3).
 
