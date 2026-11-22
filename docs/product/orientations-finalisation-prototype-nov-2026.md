@@ -504,3 +504,35 @@ Pour chaque modèle candidat :
 
 Les classements de prédiction publics ou les taux de réussite promotionnels ne suffisent pas à sélectionner un modèle. BETWISE doit produire son propre historique prospectif, sans sélectionner seulement les bons résultats ni modifier les tickets après coup.
 
+
+
+## 21. Audit UX/UI coordonné entre Claude et ChatGPT
+
+Mounir demande à Claude de coordonner avec ChatGPT une revue UX/UI approfondie de BETWISE. Claude dispose ou doit disposer d'un accès permettant d'observer l'application et ses écrans ; ChatGPT ne doit pas prétendre avoir une vue directe des écrans si ceux-ci ne lui sont pas transmis.
+
+### Méthode de travail
+1. Claude réalise un audit factuel de l'application : écrans, parcours, interactions, états de chargement/erreur/vide, responsive mobile, hiérarchie visuelle, alignements, densité, lisibilité et cohérence.
+2. Claude fournit à ChatGPT les captures d'écran pertinentes, le parcours concerné, le contexte d'utilisation et les défauts observés. Si possible, fournir aussi le nom de la page/composant et les contraintes du code existant.
+3. ChatGPT réalise une revue indépendante des éléments transmis et propose des améliorations UX/UI concrètes, priorisées par impact utilisateur et effort.
+4. Claude et ChatGPT confrontent leurs recommandations ; les désaccords sont explicités et une proposition consolidée est soumise à Mounir.
+5. Mounir valide le périmètre avant toute modification importante. Ne pas modifier, fusionner ni déployer sans autorisation explicite.
+
+### Format de restitution
+Pour chaque problème :
+- écran/parcours et élément concerné ;
+- constat observable (séparé de l'interprétation) ;
+- impact utilisateur ;
+- recommandation précise ;
+- priorité P0/P1/P2 ;
+- effort estimé et dépendances ;
+- capture annotée ou référence au composant si disponible.
+
+La revue doit notamment vérifier le match center : ordre chronologique, écussons, alignement des équipes et scores, proportions des lignes, densité et lisibilité mobile. Éviter les redesigns arbitraires : conserver les éléments déjà efficaces et justifier les changements par le parcours utilisateur.
+
+## 22. Meta AI comme modèle candidat
+
+Mounir indique disposer également d'un compte Meta AI. Ajouter Meta AI à la liste des candidats à examiner dans la revue indépendante de Claude.
+
+Ne pas présumer qu'un compte grand public Meta AI peut être connecté directement à BETWISE ou utilisé comme agent autonome via API. Claude doit vérifier les possibilités d'accès réellement disponibles (API officielle, modèle compatible, conditions d'utilisation, coût, limites, données transmises et automatisation autorisée). Si l'accès n'est pas adapté, Meta AI peut rester un outil de comparaison manuelle et ne doit pas être présenté comme un tipster intégré.
+
+Toute intégration nécessite la validation explicite de Mounir ; aucun coût, compte, clé API ou fournisseur ne doit être activé sans son accord.
