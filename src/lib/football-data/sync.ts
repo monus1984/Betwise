@@ -107,6 +107,13 @@ export function mapStatus(s: FdMatch["status"]): MatchStatus {
   }
 }
 
+const RANG: Partial<Record<MatchStatus, number>> = { programme: 0, en_cours: 1, termine: 2 };
+/** Vrai si l'état déjà en base est plus avancé que celui annoncé par football-data (programmé ou en cours). */
+export function garderEtatExistant(existant: MatchStatus, nouveau: MatchStatus): boolean {
+  const a = RANG[existant], b = RANG[nouveau];
+  return a !== undefined && b !== undefined && a > b;
+}
+
 export function seasonLabel(start: string, end: string) {
   const a = start.slice(0, 4), b = end.slice(2, 4);
   return a === end.slice(0, 4) ? a : `${a}-${b}`;
@@ -173,6 +180,15 @@ export async function syncCompetition(db: Db, fd: FootballDataClient, code: stri
       updated_at: now,
     };
   });
+  // football-data.org (offre gratuite) publie les résultats avec retard : jamais de retour en arrière sur un match que
+  // le direct (API-Football) a déjà mis en cours ou terminé (22/11 : trois matchs repassés « programmés » sans score).
+  const { data: existants } = await db.from("matches").select("code_externe, statut, score_home, score_away, ht_home, ht_away, source_resultat, result_at")
+    .in("code_externe", matchRows.map((r) => r.code_externe));
+  const deja = new Map((existants ?? []).map((e) => [e.code_externe!, e]));
+  for (const r of matchRows) {
+    const e = deja.get(r.code_externe);
+    if (e && garderEtatExistant(e.statut, r.statut)) Object.assign(r, { statut: e.statut, score_home: e.score_home, score_away: e.score_away, ht_home: e.ht_home, ht_away: e.ht_away, source_resultat: e.source_resultat, result_at: e.result_at });
+  }
   const { error: matchErr } = await db.from("matches").upsert(matchRows, { onConflict: "code_externe" });
   if (matchErr) throw matchErr;
   return matchRows.length;

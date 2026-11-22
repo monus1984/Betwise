@@ -36,7 +36,14 @@ async function run(req: Request) {
     .gte("kickoff_at", new Date(Date.now() - 170 * 60000).toISOString()).lte("kickoff_at", new Date(Date.now() - 100 * 60000).toISOString());
   const missing = (due ?? []).map((m) => m.af_fixture_id!).filter((id) => !liveIds.has(id));
   const stale = (await db.from("matches").select("af_fixture_id").eq("statut", "en_cours").not("af_fixture_id", "is", null)).data?.map((m) => m.af_fixture_id!).filter((id) => !liveIds.has(id)) ?? [];
-  const ids = [...new Set([...missing, ...stale])];
+  // Matchs restés « programmés » ou « en cours » plus de 170 min après le coup d'envoi (jusqu'à 36 h) : redemandés
+  // toutes les 15 minutes, pour rattraper un résultat manqué (22/11 : trois matchs bloqués après un import en retard)
+  const bloques = new Date().getUTCMinutes() % 15 === 0
+    ? ((await db.from("matches").select("af_fixture_id").not("af_fixture_id", "is", null).in("statut", ["programme", "en_cours"])
+      .gte("kickoff_at", new Date(Date.now() - 36 * 3600000).toISOString()).lt("kickoff_at", new Date(Date.now() - 170 * 60000).toISOString()).limit(20)).data ?? [])
+      .map((m) => m.af_fixture_id!).filter((id) => !liveIds.has(id))
+    : [];
+  const ids = [...new Set([...missing, ...stale, ...bloques])];
   const b = ids.length ? await applyFixtures(db, await api.byIds(ids)) : { updated: 0, finished: 0 };
 
   // Détail des matchs terminés (corners, cartons, buteurs…) : règle les paris qui en dépendent
