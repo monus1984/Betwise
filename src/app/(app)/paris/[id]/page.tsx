@@ -9,6 +9,7 @@ import { TicketAnalysisCard } from "./ticket-analysis";
 import { Cashout, CorrectResult, NotPlayed } from "./not-played";
 import { ConfirmResult } from "../confirm-result";
 import { BetEditor, type EditableBet } from "./editor";
+import { reglableA } from "@/lib/bets/reglement";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,7 @@ export default async function BetPage({ params }: { params: Promise<{ id: string
       {b.virtuel && <p className="mb-3 rounded-lg border border-brand/30 bg-brand/5 px-3 py-2 text-xs text-ink-soft">🧪 <b>Test sans mise</b> : suivi et réglé comme un pari, sans effet sur ta bankroll.</p>}
       <PageHeader title={b.virtuel ? "Détail du test" : "Détail du pari"} subtitle={`${b.type === "combine" ? "Combiné" : "Simple"} · ${b.statut === "en_cours" ? "en cours" : "réglé"} · saisi le ${new Date(b.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", timeZone: "Africa/Abidjan" })}`} />
       {analysis && <TicketAnalysisCard a={analysis} />}
-      {b.statut === "en_cours" && <ConfirmResult betId={b.id} propose={b.resultat_propose && b.resultat_propose !== "en_attente" ? b.resultat_propose : null} gainPropose={b.gain_propose === null ? null : Number(b.gain_propose)} mise={Number(b.mise)} />}
+      {b.statut === "en_cours" && <ConfirmResult apres={reglableA(bet.selections.map((x) => ({ kickoff_at: x.match?.kickoff_at ?? null, statut: x.match?.statut ?? null })))?.toISOString() ?? null} betId={b.id} propose={b.resultat_propose && b.resultat_propose !== "en_attente" ? b.resultat_propose : null} gainPropose={b.gain_propose === null ? null : Number(b.gain_propose)} mise={Number(b.mise)} />}
       <BetEditor bet={bet} sources={sources} markets={markets ?? []} />
       {b.statut === "en_cours" && !b.virtuel && <Cashout betId={b.id} mise={Number(b.mise)} />}
       {b.cashout !== null && b.cashout !== undefined && <p className="mt-4 rounded-xl border border-info/30 bg-info-soft p-3 text-sm text-info-ink">Réglé par cashout : {Math.round(Number(b.cashout)).toLocaleString("fr-FR")} F encaissés. Les lignes dont le match n’était pas terminé restent « en attente ».</p>}

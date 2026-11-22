@@ -4,7 +4,8 @@
  * avant le coup d'envoi reste affiché comme une information, jamais comme une condition.
  * (Les champs gardent leur nom d'origine, « prouves… », et couvrent désormais tous les pronos.)
  */
-export const SEUIL = { classement: 3, tendance: 10, provisoire: 30, etabli: 100 };
+// Seuils relevés le 22/11 (audit P1-8) : à 30 pronos autour de 1,70, la marge d'erreur du rendement est de ± 30 points.
+export const SEUIL = { classement: 30, tendance: 10, provisoire: 30, etabli: 100 };
 
 export type Proof = {
   prouves: number; prouvesRegles: number; prouvesGagnes: number; avecCote: number; unites: number; attendu: number | null;
@@ -23,7 +24,7 @@ export function lire(r: Brut | null | undefined): Proof {
 
 // « non_etabli » : aucun prono réglé. Dès le premier, les chiffres s'affichent, avec leur volume.
 export const niveau = (p: Proof): Niveau => (p.prouvesRegles >= SEUIL.etabli ? "etabli" : p.prouvesRegles >= SEUIL.provisoire ? "provisoire" : p.prouvesRegles >= SEUIL.tendance ? "tendance" : p.prouvesRegles >= 1 ? "debut" : "non_etabli");
-export const NIVEAU: Record<Niveau, string> = { non_etabli: "À suivre", debut: "Premiers pronos", tendance: "Tendance", provisoire: "Confirmé", etabli: "Établi" };
+export const NIVEAU: Record<Niveau, string> = { non_etabli: "À suivre", debut: "Premiers pronos", tendance: "Tendance", provisoire: "Provisoire", etabli: "Confirmé" };
 export const reussite = (p: Proof) => (p.prouvesRegles ? p.prouvesGagnes / p.prouvesRegles : null);
 /** Gain moyen par prono, à mise fixe d'une unité. Calculé sur les seuls pronos prouvés dont la cote est connue. */
 export const rendement = (p: Proof) => (p.avecCote ? p.unites / p.avecCote : null);
@@ -40,11 +41,24 @@ export function resume(p: Proof): string {
   return `${p.prouvesGagnes} juste${p.prouvesGagnes > 1 ? "s" : ""} sur ${p.prouvesRegles}`;
 }
 
-/** Classement : les sources qui ont au moins 3 pronos réglés, par rendement puis par réussite. Les autres sont « à suivre ». */
+/**
+ * Borne basse du rendement (intervalle à 90 %, approximation normale) : ce qu'on peut dire sans trop parier sur la chance.
+ * Écart-type d'un prono à mise fixe ≈ cote moyenne des pronos gagnés × √(p(1−p)).
+ */
+export function borneBasse(p: Proof): number | null {
+  const r = rendement(p);
+  if (r === null || p.avecCote < 2) return null;
+  const n = p.avecCote, g = Math.min(p.prouvesGagnes, n);
+  const taux = g / n;
+  const coteMoy = g > 0 ? (p.unites + n) / g : 2;
+  return r - 1.645 * coteMoy * Math.sqrt((taux * (1 - taux)) / n);
+}
+
+/** Classement : les sources qui ont au moins 30 pronos réglés, par borne basse du rendement (22/11), puis réussite. */
 export function classer<T extends { proof: Proof }>(sources: T[]): { classees: T[]; nonEtablies: T[] } {
   const ok = (s: T) => s.proof.prouvesRegles >= SEUIL.classement;
   const classees = sources.filter(ok).sort((a, b) => {
-    const ra = rendement(a.proof), rb = rendement(b.proof);
+    const ra = borneBasse(a.proof), rb = borneBasse(b.proof);
     if (ra !== null && rb !== null && ra !== rb) return rb - ra;
     if ((ra === null) !== (rb === null)) return ra === null ? 1 : -1;
     return (reussite(b.proof) ?? 0) - (reussite(a.proof) ?? 0) || b.proof.prouvesRegles - a.proof.prouvesRegles;

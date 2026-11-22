@@ -7,6 +7,7 @@ import Link from "next/link";
 import { RISK_CLASS, RISK_LABEL, fcfa } from "@/components/ui";
 import { pickLabel } from "@/lib/probs/signals";
 import { OriginPicker, type SourceOpt } from "./origin-picker";
+import { reglableA } from "@/lib/bets/reglement";
 
 type Named = { nom: string } | { nom: string }[] | null;
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
@@ -36,7 +37,7 @@ export type BetRow = {
     risque_calcule: "prudent" | "moyen" | "risque" | null;
     origin_source_id: string;
     origin: Named;
-    match: { kickoff_at: string; home: Named; away: Named } | { kickoff_at: string; home: Named; away: Named }[] | null;
+    match: { kickoff_at: string; statut?: string; home: Named; away: Named } | { kickoff_at: string; statut?: string; home: Named; away: Named }[] | null;
   }[];
 };
 
@@ -99,7 +100,7 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
         })}
       </ul>
 
-      {bet.statut === "en_cours" && <ConfirmResult betId={bet.id} propose={propose} gainPropose={bet.gain_propose ?? null} mise={Number(bet.mise)} />}
+      {bet.statut === "en_cours" && <ConfirmResult apres={reglableA(bet.bet_selections.map((s) => ({ kickoff_at: one(s.match)?.kickoff_at ?? null, statut: one(s.match)?.statut ?? null })))?.toISOString() ?? null} betId={bet.id} propose={propose} gainPropose={bet.gain_propose ?? null} mise={Number(bet.mise)} />}
       {!bet.detail_complet && <p className="mt-2 text-[11px] text-draw-ink">Détail des sélections non lu (ticket replié) : compte dans la bankroll, pas dans la notation des sources.</p>}
       {recent && (
         <div className="mt-2 text-right">

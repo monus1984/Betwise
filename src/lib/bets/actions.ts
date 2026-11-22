@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { MARKETS_ALL } from "./markets";
+import { reglableA } from "./reglement";
 
 
 const selectionSchema = z.object({
@@ -47,6 +48,11 @@ export async function placeBet(input: PlaceBetInput): Promise<PlaceBetResult> {
 
 export async function settleBet(betId: string, result: "gagne" | "perdu" | "rembourse") {
   const supabase = await createClient();
+  // Pas de règlement à la main avant la fin des matchs (22/11)
+  const { data: sels } = await supabase.from("bet_selections").select("match:matches(kickoff_at, statut)").eq("bet_id", betId);
+  const ms = (sels ?? []).map((x) => (Array.isArray(x.match) ? x.match[0] : x.match) as { kickoff_at: string; statut: string } | null);
+  const a = reglableA(ms.map((m) => ({ kickoff_at: m?.kickoff_at ?? null, statut: m?.statut ?? null })));
+  if (a && a.getTime() > Date.now()) return { ok: false as const, error: `Ce pari se règle après ses matchs, à partir de ${a.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}.` };
   const { error } = await supabase.rpc("settle_bet", { p_bet_id: betId, p_result: result });
   if (error) return { ok: false as const, error: humanize(error.message) };
   revalidatePath("/");

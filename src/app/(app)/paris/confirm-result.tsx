@@ -14,7 +14,7 @@ const MOT: Record<Res, string> = { gagne: "gagné", perdu: "perdu", rembourse: "
  * Pari réel dont les matchs sont joués : BETWISE propose un résultat, l'utilisateur le confirme ticket en main —
  * rien n'entre dans la bankroll avant. Sans proposition (match non suivi, ticket replié) : règlement à la main.
  */
-export function ConfirmResult({ betId, propose, gainPropose, mise }: { betId: string; propose: Res | null; gainPropose: number | null; mise: number }) {
+export function ConfirmResult({ betId, propose, gainPropose, mise, apres = null }: { betId: string; propose: Res | null; gainPropose: number | null; mise: number; apres?: string | null }) {
   const [autre, setAutre] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -25,6 +25,10 @@ export function ConfirmResult({ betId, propose, gainPropose, mise }: { betId: st
   );
   const TROIS = [bouton("gagne", "bg-gain text-on-fill"), bouton("perdu", "bg-loss text-on-fill"), bouton("rembourse", "bg-slate-200 text-slate-800")];
 
+  // Avant la fin des matchs : pas de bouton de règlement (22/11) ; le résultat sera proposé tout seul
+  if (!propose && apres && Date.parse(apres) > Date.now()) {
+    return <p className="mt-3 rounded-lg bg-surface-2 px-3 py-2 text-[12px] text-ink-soft">En attente des matchs. Le résultat sera proposé automatiquement après le dernier, vers {new Date(apres).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}.</p>;
+  }
   if (!propose) {
     return (
       <div className="mt-4">

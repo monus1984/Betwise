@@ -8,7 +8,7 @@ import { MARCHE_FR } from "@/lib/markets-fr";
 export type Axe = "competition" | "marche" | "risque";
 export type LigneAxe = { axe: Axe; valeur: string; nb: number; gagnes: number; rendement: number | null };
 export type Point = LigneAxe & { taux: number; libelle: string };
-export const MIN = 3;
+export const MIN = 10; // 3 jusqu’au 22/11 : une « force » sur 3 résultats, c’est du hasard
 export const ECART = 0.1;
 
 const RISQUE_FR: Record<string, string> = { prudent: "Cotes basses", moyen: "Cotes moyennes", risque: "Cotes hautes", sur: "Prudent", audacieux: "Équilibré" };

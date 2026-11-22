@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { creerMontante, modifierMontante } from "@/lib/montantes/actions";
+import { niveauDeCote, paliersPourNiveau } from "@/lib/montantes/paliers";
+import type { Categorie } from "@/lib/coach/categories";
 
 const NIVEAUX = [["sur", "Prudent"], ["audacieux", "Équilibré"], ["risque", "Audacieux"]] as const;
 const fr = (x: number) => x.toFixed(2).replace(".", ",");
@@ -30,7 +32,7 @@ export function NouvelleMontante({ ouverte, edition, onFin }: { ouverte: boolean
         <label className="text-[12px] text-ink-soft">Mise de départ (F)<input inputMode="numeric" disabled={miseBloquee} className={`${champ} disabled:opacity-60`} value={mise || ""} onChange={(e) => setMise(Number(e.target.value.replace(/\D/g, "")))} />{miseBloquee && <span className="mt-0.5 block text-[10.5px] text-ink-muted">Fixée : un palier est joué.</span>}</label>
         <label className="text-[12px] text-ink-soft">Objectif (F)<input inputMode="numeric" className={champ} value={objectif || ""} onChange={(e) => setObjectif(Number(e.target.value.replace(/\D/g, "")))} /></label>
       </div>
-      <label className="block text-[12px] text-ink-soft">Nombre de paliers : <b className="text-ink">{paliers}</b><input type="range" min={Math.max(1, edition?.joues ?? 1)} max={10} value={paliers} onChange={(e) => setPaliers(Number(e.target.value))} className="mt-1 w-full accent-[var(--brand)]" /></label>
+      <label className="block text-[12px] text-ink-soft">Nombre de paliers : <b className="text-ink">{paliers}</b><input type="range" min={Math.max(1, edition?.joues ?? 1)} max={10} value={paliers} onChange={(e) => setPaliers(Number(e.target.value))} className="mt-1 w-full accent-brand" /></label>
       <fieldset><legend className="text-[12px] text-ink-soft">Niveau des paliers</legend>
         <div className="mt-1 grid grid-cols-3 gap-1.5">{NIVEAUX.map(([k, t]) => <button type="button" key={k} onClick={() => setNiveau(k)} aria-pressed={niveau === k} className={`h-10 rounded-lg border text-[13px] font-semibold ${niveau === k ? "border-brand bg-brand-soft text-brand" : "border-line text-ink-soft"}`}>{t}</button>)}</div>
       </fieldset>
@@ -40,6 +42,21 @@ export function NouvelleMontante({ ouverte, edition, onFin }: { ouverte: boolean
           Il faut une cote d’environ <b className="text-ink">{fr(cote)}</b> à chaque palier. D’après les cotes, environ <b className="text-ink">{Math.round((mise / objectif) * 100)} %</b> de chances d’aller au bout, un peu moins avec la marge du bookmaker. Si un palier perd, tu perds la mise de départ.
         </p>
       )}
+      {cote !== null && (() => {
+        // Le niveau choisi doit correspondre à la cote exigée (22/11 : « Équilibré » avec une cote de 1,78)
+        const reel = niveauDeCote(cote), choisi = niveau as Categorie;
+        if (reel === choisi) return null;
+        const nomNiv = (k: Categorie | null) => NIVEAUX.find(([x]) => x === k)?.[1] ?? "hors niveaux";
+        const n = paliersPourNiveau(mise, objectif, choisi);
+        return (
+          <div className="rounded-xl border border-draw/40 bg-draw-soft p-2.5 text-[12.5px] leading-snug text-draw-ink">
+            Une cote de {fr(cote)} est du niveau <b>{nomNiv(reel)}</b>, pas {nomNiv(choisi)}.{" "}
+            {n !== null && n !== paliers && (edition ? n >= edition.joues : true)
+              ? <button type="button" onClick={() => setPaliers(n)} className="font-semibold underline">Passer à {n} paliers (cote ≈ {fr(Math.pow(objectif / mise, 1 / n))})</button>
+              : reel ? <button type="button" onClick={() => setNiveau(reel)} className="font-semibold underline">Choisir le niveau {nomNiv(reel)}</button> : "Baisse l’objectif ou ajoute des paliers."}
+          </div>
+        );
+      })()}
       {err && <p className="text-[12.5px] text-loss">{err}</p>}
       <button disabled={!ok || pending} className="flex h-11 w-full items-center justify-center rounded-xl bg-brand text-[13.5px] font-bold text-on-fill disabled:opacity-50">{pending ? "Enregistrement…" : edition ? "Enregistrer les changements" : "Créer la montante"}</button>
       {edition && <button type="button" onClick={() => onFin?.()} className="h-10 w-full rounded-xl border border-line text-[13px] text-ink-soft">Annuler</button>}
