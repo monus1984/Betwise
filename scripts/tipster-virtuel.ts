@@ -11,7 +11,7 @@ import { createAdminClient } from "../src/lib/supabase/admin";
 import { loadSignals, picksOf, ALL_CANDIDATES, releveFrais } from "../src/lib/probs/signals";
 import { jourAbidjan } from "../src/lib/coach/daily";
 import { compteAudit, sessionAudit, clientAudit, AUDIT_PSEUDO } from "../src/lib/tipster-virtuel/compte";
-import { TIPSTER_NOM, BANKROLL_DEPART, bilan, choisir, mise, raison, type Candidat, type DejaJoue } from "../src/lib/tipster-virtuel/strategie";
+import { TIPSTER_NOM, BANKROLL_DEPART, bilan, choisir, mise, raison, relevesComparables, type Candidat, type DejaJoue } from "../src/lib/tipster-virtuel/strategie";
 import { familleOf } from "../src/lib/probs/signals";
 
 const ESSAI = process.argv.includes("--essai");
@@ -61,14 +61,23 @@ async function main() {
     .eq("statut", "programme").gte("kickoff_at", new Date(Date.now() + 20 * 60000).toISOString()).lte("kickoff_at", new Date(Date.now() + 8 * 3600000).toISOString()).limit(300);
   const info = new Map((ms ?? []).map((m) => [m.id, { kickoff: m.kickoff_at, comp: one(m.competition)?.code_externe ?? null, nom: `${one(m.home)?.nom ?? "?"} – ${one(m.away)?.nom ?? "?"}` }]));
   const signals = await loadSignals(db as never, [...info.keys()], { bookmakers: true });
+  // Heure du dernier relevé des cotes de référence, par match : les deux prix comparés doivent être contemporains
+  const refAt = new Map<string, string>();
+  const ids = [...info.keys()];
+  for (let i = 0; i < ids.length; i += 20) {
+    const { data } = await db.from("odds_observations").select("match_id, observed_at").eq("bookmaker", "ref:eu-median").in("match_id", ids.slice(i, i + 20)).order("observed_at", { ascending: false }).limit(1000);
+    for (const r of data ?? []) if (r.match_id && r.observed_at && !refAt.has(r.match_id)) refAt.set(r.match_id, r.observed_at);
+  }
   const cands: Candidat[] = [];
-  let sansCote = 0;
+  let sansCote = 0, relevesEloignes = 0;
   for (const [matchId, sg] of signals) {
     if (sg.source !== "marche") continue;
     const m = info.get(matchId)!;
     for (const pk of picksOf(sg, "all")) {
       if (!pk.book || !releveFrais(pk.book.releveAt, m.kickoff)) { sansCote++; continue; }
-      cands.push({ matchId, kickoff: m.kickoff, comp: m.comp, market: pk.market, param: pk.param, sel: pk.sel, p: pk.p, pModele: pk.pModele, cote: pk.book.cote, coteRef: pk.cote });
+      const cd: Candidat = { matchId, kickoff: m.kickoff, comp: m.comp, market: pk.market, param: pk.param, sel: pk.sel, p: pk.p, pModele: pk.pModele, cote: pk.book.cote, coteRef: pk.cote, coteAt: pk.book.releveAt, refAt: refAt.get(matchId) ?? null };
+      if (!relevesComparables(cd)) relevesEloignes++;
+      cands.push(cd);
     }
   }
   const choix = choisir(cands, deja);
@@ -79,7 +88,7 @@ async function main() {
   for (const e of choix) {
     const m = mise(etat.bankroll, e.kelly);
     if (m > bankroll) break; // jamais plus que ce qui reste
-    const ligne = { match: info.get(e.matchId)?.nom, comp: e.comp, kickoff: e.kickoff, market: e.market, param: e.param, sel: e.sel, cote: e.cote, p: Math.round(e.p * 1000) / 1000, pModele: e.pModele === null ? null : Math.round(e.pModele * 1000) / 1000, valeur: Math.round(e.valeur * 1000) / 1000, profil: e.profil, mise: m, raison: raison(e) };
+    const ligne = { match: info.get(e.matchId)?.nom, comp: e.comp, kickoff: e.kickoff, market: e.market, param: e.param, sel: e.sel, cote: e.cote, p: Math.round(e.p * 1000) / 1000, pModele: e.pModele === null ? null : Math.round(e.pModele * 1000) / 1000, valeur: Math.round(e.valeur * 1000) / 1000, profil: e.profil, mise: m, coteRelevee: e.coteAt, referenceRelevee: e.refAt, raison: raison(e) };
     faits.push(ligne);
     if (ESSAI) continue;
     const { error: e1 } = await db.from("predictions").insert({
@@ -103,7 +112,7 @@ async function main() {
   const fr = (x: number) => Math.round(x).toLocaleString("fr-FR");
   const resume = `Tipster virtuel tenu par Claude. Paris simples sur cote 1xBet, seulement quand le prix dépasse la valeur juste. Bankroll virtuelle : ${fr(apres.bankroll)} FCFA (départ ${fr(BANKROLL_DEPART)}), ${apres.regles} paris réglés dont ${apres.gagnes} gagnés${apres.roi === null ? "" : `, rendement ${(apres.roi * 100).toFixed(1).replace(".", ",")} %`}, ${fr(apres.enJeu)} FCFA en jeu. Mis à jour le ${new Date().toLocaleString("fr-FR", { timeZone: "Africa/Abidjan" })}.`;
   if (src && !ESSAI) await db.from("sources").update({ description: resume }).eq("id", src.id);
-  const rapport = { quand: new Date().toISOString(), essai: ESSAI, jour, matchs: info.size, avecCotes: signals.size, candidats: cands.length, selectionsSansCote1xBet: sansCote, dejaAujourdhui: deja.total, choix: faits, bilan: apres, resume, candidatsVus: ALL_CANDIDATES.length };
+  const rapport = { quand: new Date().toISOString(), essai: ESSAI, jour, matchs: info.size, avecCotes: signals.size, candidats: cands.length, selectionsSansCote1xBet: sansCote, relevesTropEloignes: relevesEloignes, dejaAujourdhui: deja.total, choix: faits, bilan: apres, resume, candidatsVus: ALL_CANDIDATES.length };
   mkdirSync("rapports/tipster-virtuel", { recursive: true });
   writeFileSync(`rapports/tipster-virtuel/${new Date().toISOString().slice(0, 16).replace(":", "h")}.json`, JSON.stringify(rapport, null, 2));
   console.log(JSON.stringify({ ...rapport, choix: faits.length }, null, 2));

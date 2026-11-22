@@ -7,7 +7,10 @@
  * le prix est meilleur que celui du marché. C'est ce que la simulation doit vérifier dans la durée.
  *
  * Règles fixées ici, en simple, pour qu'on puisse les relire et les contester :
- *  - paris simples uniquement, sur une cote 1xBet relevée depuis moins de 48 h, match pas encore commencé ;
+ *  - paris simples uniquement, match pas encore commencé ;
+ *  - les deux prix comparés doivent avoir été relevés à peu près au même moment (3 h d'écart au plus) et la cote 1xBet
+ *    depuis moins de 6 h : sinon l'écart mesuré peut n'être qu'un mouvement de cote entre deux relevés (défaut constaté
+ *    sur les trois premiers paris du 22/11 : référence de la veille 15 h 17, 1xBet de minuit) ;
  *  - jamais d'amical, jamais de cote au-dessus de 3,20 (au-delà, trop peu de paris pour juger un marché) ;
  *  - si le modèle est nettement moins optimiste que le marché (8 points), on s'abstient ;
  *  - écart minimum exigé : +1 % en Prudent, +2 % en Équilibré, +4 % en Audacieux (plus la cote monte, plus l'erreur
@@ -25,6 +28,8 @@ export const DESACCORD_MAX = 0.08;
 export const POIDS_MODELE = 0.2;
 export const SEUIL: Record<Categorie, number> = { sur: 0.01, audacieux: 0.02, risque: 0.04 };
 export const LIMITES = { parProfil: 2, parJour: 6, parFamille: 3 } as const;
+/** Fraîcheur exigée des deux relevés de cote, en heures. */
+export const RELEVES = { ecartMax: 3, ageMax1xBet: 6 } as const;
 export const MISE = { kelly: 0.25, min: 0.005, max: 0.03, arrondi: 100 } as const;
 
 export type Candidat = {
@@ -38,13 +43,23 @@ export type Candidat = {
   cote: number;
   /** Cote médiane de référence, si elle existe. */
   coteRef: number | null;
+  /** Heure du relevé de la cote 1xBet chez le fournisseur, et du dernier relevé des cotes de référence. */
+  coteAt: string; refAt: string | null;
 };
 export type Evalue = Candidat & { pJuste: number; valeur: number; kelly: number; profil: Categorie; famille: string };
 export type DejaJoue = { matchs: Set<string>; parProfil: Record<Categorie, number>; parFamille: Record<string, number>; total: number };
 
+/** Les deux relevés sont-ils assez récents et assez proches pour être comparés ? */
+export function relevesComparables(c: Pick<Candidat, "coteAt" | "refAt">, now = Date.now()): boolean {
+  const b = Date.parse(c.coteAt), r = c.refAt ? Date.parse(c.refAt) : NaN;
+  if (!Number.isFinite(b) || !Number.isFinite(r)) return false;
+  return Math.abs(b - r) <= RELEVES.ecartMax * 3600000 && now - b <= RELEVES.ageMax1xBet * 3600000;
+}
+
 /** Note une sélection ; null si elle ne remplit pas les règles. */
-export function evaluer(c: Candidat): Evalue | null {
+export function evaluer(c: Candidat, now = Date.now()): Evalue | null {
   if (c.comp === "AMI") return null;
+  if (!relevesComparables(c, now)) return null;
   if (!(c.cote > 1) || c.cote > COTE_MAX || !(c.p > 0 && c.p < 1)) return null;
   const profil = profilDe(c.p, c.cote);
   if (!profil) return null;
@@ -56,8 +71,8 @@ export function evaluer(c: Candidat): Evalue | null {
 }
 
 /** Choisit les paris du passage, en tenant compte de ce qui a déjà été joué dans la journée. */
-export function choisir(cands: Candidat[], deja: DejaJoue): Evalue[] {
-  const ev = cands.map(evaluer).filter((x): x is Evalue => x !== null).sort((a, b) => b.valeur - a.valeur);
+export function choisir(cands: Candidat[], deja: DejaJoue, now = Date.now()): Evalue[] {
+  const ev = cands.map((c) => evaluer(c, now)).filter((x): x is Evalue => x !== null).sort((a, b) => b.valeur - a.valeur);
   const matchs = new Set(deja.matchs), parProfil = { ...deja.parProfil }, parFamille = { ...deja.parFamille };
   let total = deja.total;
   const out: Evalue[] = [];
