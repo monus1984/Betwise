@@ -11,7 +11,7 @@ import { createAdminClient } from "../src/lib/supabase/admin";
 import { loadSignals, picksOf, ALL_CANDIDATES, releveFrais } from "../src/lib/probs/signals";
 import { jourAbidjan } from "../src/lib/coach/daily";
 import { compteAudit, sessionAudit, clientAudit, AUDIT_PSEUDO } from "../src/lib/tipster-virtuel/compte";
-import { TIPSTER_NOM, BANKROLL_DEPART, bilan, choisir, mise, raison, relevesComparables, type Candidat, type DejaJoue } from "../src/lib/tipster-virtuel/strategie";
+import { TIPSTER_NOM, BANKROLL_DEPART, ETUDE, bilan, choisir, choisirEtude, mise, raison, relevesComparables, type Candidat, type DejaJoue } from "../src/lib/tipster-virtuel/strategie";
 import { familleOf } from "../src/lib/probs/signals";
 
 const ESSAI = process.argv.includes("--essai");
@@ -80,15 +80,17 @@ async function main() {
       cands.push(cd);
     }
   }
-  const choix = choisir(cands, deja);
+  const valeur = choisir(cands, deja);
+  // aucun prix au-dessus de la valeur juste : paris d'étude à mise fixe, pour garder des données à chaque niveau
+  const choix = valeur.length ? valeur : choisirEtude(cands, deja);
 
   // 5. Enregistrement
   const faits: Record<string, unknown>[] = [];
   let bankroll = etat.bankroll - etat.enJeu;
   for (const e of choix) {
-    const m = mise(etat.bankroll, e.kelly);
+    const m = e.etude ? ETUDE.mise : mise(etat.bankroll, e.kelly);
     if (m > bankroll) break; // jamais plus que ce qui reste
-    const ligne = { match: info.get(e.matchId)?.nom, comp: e.comp, kickoff: e.kickoff, market: e.market, param: e.param, sel: e.sel, cote: e.cote, p: Math.round(e.p * 1000) / 1000, pModele: e.pModele === null ? null : Math.round(e.pModele * 1000) / 1000, valeur: Math.round(e.valeur * 1000) / 1000, profil: e.profil, mise: m, coteRelevee: e.coteAt, referenceRelevee: e.refAt, raison: raison(e) };
+    const ligne = { match: info.get(e.matchId)?.nom, comp: e.comp, kickoff: e.kickoff, market: e.market, param: e.param, sel: e.sel, cote: e.cote, p: Math.round(e.p * 1000) / 1000, pModele: e.pModele === null ? null : Math.round(e.pModele * 1000) / 1000, valeur: Math.round(e.valeur * 1000) / 1000, profil: e.profil, etude: !!e.etude, mise: m, coteRelevee: e.coteAt, referenceRelevee: e.refAt, raison: raison(e) };
     faits.push(ligne);
     if (ESSAI) continue;
     const { error: e1 } = await db.from("predictions").insert({
