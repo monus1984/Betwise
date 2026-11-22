@@ -21,7 +21,7 @@ permissions:
 jobs:
   tipster:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -29,6 +29,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Cotes 1xBet et de référence relevées ensemble juste avant le passage (22/11), pour que le tipster puisse comparer
+      - run: npx tsx scripts/cotes-fraiches.ts
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       - run: npx tsx scripts/tipster-virtuel.ts ${{ inputs.essai && '--essai' || '' }}
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}

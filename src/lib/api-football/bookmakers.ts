@@ -109,6 +109,29 @@ export function cotesBookmaker(o: AfOdds, bookmakerId: number): CoteBook[] {
  * Relevé des cotes d'un bookmaker pour les matchs à venir d'une compétition (horizon en heures).
  * Aucune requête si la compétition n'a pas de match dans l'horizon. Le relevé d'un match remplace le précédent.
  */
+const mediane = (xs: number[]) => { const t = [...xs].sort((a, b) => a - b), m = t.length >> 1; return t.length % 2 ? t[m] : (t[m - 1] + t[m]) / 2; };
+/** Bookmakers différents qu'il faut au moins pour publier une médiane. */
+export const MIN_BOOKMAKERS_REF = 4;
+/**
+ * Cote de référence (médiane des bookmakers, hors celui qu'on compare) : 1X2 et plus/moins 2,5, relevée dans la même
+ * réponse que la cote 1xBet, donc au même moment (22/11 : le tipster écartait les cotes de référence du matin).
+ */
+export function referenceMediane(o: AfOdds, exclu: number): { market_code: string; market_param: number | null; selection: string; cote: number }[] {
+  const acc: Record<string, number[]> = { "1": [], N: [], "2": [], Plus: [], Moins: [] };
+  for (const b of o.bookmakers) {
+    if (b.id === exclu) continue;
+    for (const bet of b.bets) {
+      if (bet.name === "Match Winner") for (const v of bet.values) { const k = R3[String(v.value)]; const c = Number(v.odd); if (k && c > 1) acc[k].push(c); }
+      if (bet.name === "Goals Over/Under") for (const v of bet.values) { const c = Number(v.odd); if (!(c > 1)) continue; if (v.value === "Over 2.5") acc.Plus.push(c); if (v.value === "Under 2.5") acc.Moins.push(c); }
+    }
+  }
+  const out: { market_code: string; market_param: number | null; selection: string; cote: number }[] = [];
+  // un marché n'est publié que si toutes ses issues ont assez de bookmakers
+  if (["1", "N", "2"].every((k) => acc[k].length >= MIN_BOOKMAKERS_REF)) for (const k of ["1", "N", "2"]) out.push({ market_code: "1X2", market_param: null, selection: k, cote: Math.round(mediane(acc[k]) * 1000) / 1000 });
+  if (acc.Plus.length >= MIN_BOOKMAKERS_REF && acc.Moins.length >= MIN_BOOKMAKERS_REF) for (const k of ["Plus", "Moins"]) out.push({ market_code: "OU", market_param: 2.5, selection: k, cote: Math.round(mediane(acc[k]) * 1000) / 1000 });
+  return out;
+}
+
 export async function syncBookmakerOdds(db: Db, api: ApiFootball, code: string, c: { league: number; season: number }, horizonHeures: number, bookmakerId = 11) {
   const { data: comp } = await db.from("competitions").select("id").eq("code_externe", code).maybeSingle();
   if (!comp) return { matches: 0, rows: 0, requetes: 0 };
@@ -117,13 +140,19 @@ export async function syncBookmakerOdds(db: Db, api: ApiFootball, code: string, 
   if (!ms?.length) return { matches: 0, rows: 0, requetes: 0 };
   const parFixture = new Map(ms.map((m) => [m.af_fixture_id!, m.id]));
   const avant = api.calls;
-  const odds = await api.odds(c.league, c.season, 12, bookmakerId);
+  // Tous les bookmakers dans la même réponse (même nombre de pages : la pagination porte sur les matchs)
+  const odds = await api.odds(c.league, c.season, 12);
   const payload = odds.flatMap((o) => {
     const id = parFixture.get(o.fixture.id), rows = cotesBookmaker(o, bookmakerId);
     return id && rows.length && o.update ? [{ match_id: id, releve_at: o.update, rows }] : [];
   });
-  if (!payload.length) return { matches: 0, rows: 0, requetes: api.calls - avant };
+  const refs = odds.flatMap((o) => {
+    const id = parFixture.get(o.fixture.id);
+    return id && o.update ? referenceMediane(o, bookmakerId).map((r) => ({ ...r, match_id: id, bookmaker: "ref:eu-median", origine: "api" as const, observed_at: o.update! })) : [];
+  });
+  if (refs.length) { const { error } = await db.from("odds_observations").insert(refs as never); if (error) throw error; }
+  if (!payload.length) return { matches: 0, rows: 0, refs: refs.length, requetes: api.calls - avant };
   const { data, error } = await db.rpc("replace_bookmaker_odds", { p_bookmaker: BOOKMAKERS_AF[bookmakerId], p_source: "api-football", p_matches: payload });
   if (error) throw error;
-  return { matches: payload.length, rows: Number(data ?? 0), requetes: api.calls - avant };
+  return { matches: payload.length, rows: Number(data ?? 0), refs: refs.length, requetes: api.calls - avant };
 }
