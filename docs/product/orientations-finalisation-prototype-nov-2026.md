@@ -386,3 +386,85 @@ Puis montrer le parcours : explorer les matchs → comprendre une sélection ave
 « BETWISE — Comprends les matchs. Construis tes tickets. Teste tes intuitions. Apprends de tes résultats. »
 
 Ne montrer comme déjà disponible que les fonctionnalités réellement présentes et testées dans le prototype. Les fonctionnalités en développement doivent être indiquées comme concept ou à venir. Les probabilités sont des estimations, jamais des garanties.
+
+## 19. Expérience de tipsters IA — comptes autonomes, Fusion et stratégies expérimentales
+
+Mounir souhaite transformer BETWISE en laboratoire de comparaison de stratégies et de décisions de parieurs virtuels. Cette expérience doit commencer par trois comptes/profils distincts, puis être enrichie après consultation de Claude.
+
+### Trois profils minimum demandés par Mounir
+
+#### A. ChatGPT autonome
+- Compte/profil individuel, clairement identifié comme ChatGPT et au modèle utilisé pour l'expérience.
+- Bankroll virtuelle propre, historique indépendant et stratégie documentée.
+- Prend ses décisions quotidiennes sans consulter les sélections de Claude ni de Fusion.
+- Enregistre ses sélections avant le début du match, avec horodatage, marché, sélection, cote disponible, probabilité estimée, justification et niveau de risque.
+- Peut s'abstenir de parier lorsqu'aucune sélection ne répond à ses critères.
+
+#### B. Claude autonome
+- Compte/profil individuel, clairement identifié comme Claude et au modèle utilisé.
+- Bankroll virtuelle propre, historique indépendant et stratégie documentée.
+- Prend ses décisions sans copier ChatGPT.
+- Utilise le même univers de matchs, les mêmes données, la même heure limite et les mêmes règles de mise que ChatGPT, pour permettre une comparaison équitable.
+- Enregistre chaque décision avant le coup d'envoi et peut également s'abstenir.
+
+#### C. Fusion — binôme ChatGPT + Claude
+- Profil expérimental commun avec une bankroll virtuelle distincte des deux comptes autonomes.
+- Les deux modèles analysent d'abord les matchs indépendamment.
+- Ils partagent ensuite leurs analyses, exposent les arguments, les divergences et les incertitudes, puis élaborent ensemble les choix finaux.
+- Fusion enregistre les décisions communes, leur justification et l'heure de validation.
+- Conserver la trace des deux analyses initiales et de la décision finale, afin de mesurer si la concertation améliore réellement la qualité des choix.
+- Fusion ne doit pas être une simple moyenne automatique des prédictions ou un duplicata des comptes autonomes.
+
+### Types de paris à couvrir
+
+Les comptes/profils doivent pouvoir expérimenter, dans un cadre strictement virtuel :
+
+- paris simples ;
+- paris combinés ;
+- stratégies dites « montantes » ou progressives, uniquement comme catégorie d'étude distincte et clairement identifiée.
+
+Les montantes doivent être analysées avec prudence : elles ne garantissent pas la récupération des pertes et peuvent accélérer l'épuisement de la bankroll. Aucune stratégie ne doit augmenter automatiquement les mises pour poursuivre une perte. Pour les simulations, définir avant le lancement une bankroll maximale, une mise de départ, un plafond de mise, un nombre maximal de paliers et une règle d'arrêt. Afficher les pertes et les limites sans enjoliver la stratégie. Aucun pari réel ni mise réelle.
+
+### Niveaux de risque
+
+Tous les comptes doivent pouvoir être comparés sur des niveaux de risque définis par BETWISE, par exemple :
+- prudent ;
+- équilibré ;
+- audacieux.
+
+Ces niveaux doivent être définis par des paramètres mesurables (plage de cote, probabilité estimée, exposition de bankroll, variance ou limites de mise), et non uniquement par une étiquette éditoriale. Les seuils précis restent à proposer et valider.
+
+### Protocole de comparaison
+
+Pour comparer les modèles et stratégies :
+- mêmes matchs et mêmes données disponibles au moment de la décision ;
+- mêmes bankrolls de départ ou bankrolls normalisées ;
+- règles de mise explicites et identiques lorsque la comparaison porte sur les modèles ;
+- enregistrement pré-match horodaté, non modifiable après coup ;
+- règlement automatique à partir de résultats vérifiés ;
+- mesure du ROI/yield, profit/perte virtuelle, drawdown, volatilité, taux de réussite, calibration des probabilités et performances par marché, format de ticket, niveau de risque et compétition ;
+- afficher le nombre de paris et la période observée ; ne pas tirer de conclusion forte sur un échantillon trop petit ;
+- comparer séparément les simples, combinés et montantes, car leurs profils de variance et de règlement diffèrent.
+
+### Avis de Claude demandé
+
+Claude doit répondre dans une revue distincte avant que Mounir valide le nombre final de profils. Il doit donner son avis indépendant sur :
+1. le nombre de profils IA/personas nécessaire pour obtenir une comparaison utile sans créer trop de comptes ;
+2. les types de profils/stratégies qu'il recommande et pourquoi ;
+3. la valeur ajoutée réelle du compte Fusion et la méthode de concertation ;
+4. la meilleure façon de représenter les niveaux de risque ;
+5. les formats de tickets à inclure en V1 (simples, combinés, montantes) et les limites à imposer ;
+6. les indicateurs statistiques nécessaires pour comparer les profils ;
+7. les autres modèles IA à intégrer éventuellement, avec complémentarité, coût estimé, accès API, limites et proposition de phase de test.
+
+Ne pas présumer que l'avis de Claude a déjà été recueilli : cette section formule une demande de revue. Mounir coordonnera la réponse de Claude avant toute implémentation.
+
+### Garde-fous de l'expérience
+- Paris test uniquement, aucun argent réel.
+- Pas de récupération des pertes, de mise progressive automatique ni de recommandation d'augmenter les mises.
+- Chaque sélection est verrouillée avant le match ; aucune suppression ou modification rétroactive.
+- Distinguer les performances du modèle, de la stratégie de mise et du format de ticket.
+- Les statistiques de bankroll et les résultats sont calculés par le système à partir des tickets enregistrés et des résultats vérifiés.
+- Les modèles ne doivent pas inventer les données sportives, les cotes, les marchés ou les résultats.
+- Aucun fournisseur IA ou API payante ne doit être activé sans validation explicite de Mounir.
+
