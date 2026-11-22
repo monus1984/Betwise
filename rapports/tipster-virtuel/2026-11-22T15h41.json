@@ -1,0 +1,40 @@
+{
+  "quand": "2026-11-22T15:41:28.568Z",
+  "essai": true,
+  "jour": "2026-11-22",
+  "matchs": 23,
+  "avecCotes": 23,
+  "candidats": 2191,
+  "selectionsSansCote1xBet": 2478,
+  "relevesTropEloignes": 368,
+  "dejaAujourdhui": 3,
+  "choix": [
+    {
+      "match": "Barcelona W – Athletic Club W",
+      "comp": "ESPF",
+      "kickoff": "2026-11-22T18:00:00+00:00",
+      "market": "AH",
+      "param": -1.5,
+      "sel": "1",
+      "cote": 1.15,
+      "p": 0.879,
+      "pModele": null,
+      "valeur": 0.011,
+      "profil": "sur",
+      "mise": 1900,
+      "coteRelevee": "2026-11-22T13:11:14+00:00",
+      "referenceRelevee": "2026-11-22T15:14:47.38+00:00",
+      "raison": "Probabilité 88 % selon les cotes de référence. 1xBet paie 1,15 pour une cote juste de 1,14 : écart de +1,1 %."
+    }
+  ],
+  "bilan": {
+    "bankroll": 101344,
+    "net": 1344,
+    "enJeu": 2800,
+    "regles": 1,
+    "gagnes": 1,
+    "roi": 1.68
+  },
+  "resume": "Tipster virtuel tenu par Claude. Paris simples sur cote 1xBet, seulement quand le prix dépasse la valeur juste. Bankroll virtuelle : 101 344 FCFA (départ 100 000), 1 paris réglés dont 1 gagnés, rendement 168,0 %, 2 800 FCFA en jeu. Mis à jour le 22/11/2026 15:41:28.",
+  "candidatsVus": 203
+}
