@@ -8,6 +8,8 @@ export type ProfilComplet = Profil & { email: string; pseudo: string; source: st
 
 const slug = (x: string) => x.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30);
 
+export const OPENROUTER_PAR_DEFAUT = "ChatGPT=openai/gpt-6.2-sol,Gemini=google/gemini-4-carbon,Grok=x-ai/grok-4.7";
+
 export function profilsActifs(env: NodeJS.ProcessEnv = process.env): ProfilComplet[] {
   const out: ProfilComplet[] = [];
   if (env.ANTHROPIC_API_KEY) out.push({ id: "claude", nom: "Claude", fournisseur: "anthropic", modele: env.CLAUDE_TIPSTER_MODEL || "claude-sonnet-5-5", cle: env.ANTHROPIC_API_KEY,
@@ -17,7 +19,9 @@ export function profilsActifs(env: NodeJS.ProcessEnv = process.env): ProfilCompl
   if (env.GEMINI_API_KEY && env.GEMINI_TIPSTER_MODEL) out.push({ id: "gemini", nom: "Gemini", fournisseur: "openai-compatible", baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai", modele: env.GEMINI_TIPSTER_MODEL, cle: env.GEMINI_API_KEY,
     email: "gemini-tipster@betwise.invalid", pseudo: "Gemini (tipster IA)", source: "Gemini · tipster IA" });
   // OpenRouter : une entrée par modèle, « nom=identifiant » séparés par des virgules (ex. « Grok=x-ai/grok-… »)
-  if (env.OPENROUTER_API_KEY && env.OPENROUTER_TIPSTER_MODELS) for (const e of env.OPENROUTER_TIPSTER_MODELS.split(",").map((x) => x.trim()).filter(Boolean)) {
+  // Sans variable, les trois modèles choisis le 22/11 (tarifs proches de Claude Sonnet, appels d'outils pris en charge)
+  const orModeles = env.OPENROUTER_TIPSTER_MODELS || OPENROUTER_PAR_DEFAUT;
+  if (env.OPENROUTER_API_KEY) for (const e of orModeles.split(",").map((x) => x.trim()).filter(Boolean)) {
     const [nom, modele] = e.includes("=") ? e.split("=").map((x) => x.trim()) : [e.split("/").pop()!, e];
     const id = `or-${slug(nom)}`;
     out.push({ id, nom, fournisseur: "openai-compatible", baseUrl: "https://openrouter.ai/api/v1", modele, cle: env.OPENROUTER_API_KEY,
