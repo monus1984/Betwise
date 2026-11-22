@@ -73,13 +73,13 @@ jobs:
           BETWISE_ADMIN_ID: a20c0945-ce54-4902-a842-bb50cfea6450
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          CLAUDE_TIPSTER_MODEL: ${{ vars.CLAUDE_TIPSTER_MODEL }}
+          CLAUDE_TIPSTER_MODEL: ${{ vars.CLAUDE_TIPSTER_MODEL || secrets.CLAUDE_TIPSTER_MODEL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_TIPSTER_MODEL: ${{ vars.OPENAI_TIPSTER_MODEL }}
+          OPENAI_TIPSTER_MODEL: ${{ vars.OPENAI_TIPSTER_MODEL || secrets.OPENAI_TIPSTER_MODEL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_TIPSTER_MODEL: ${{ vars.GEMINI_TIPSTER_MODEL }}
+          GEMINI_TIPSTER_MODEL: ${{ vars.GEMINI_TIPSTER_MODEL || secrets.GEMINI_TIPSTER_MODEL }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          OPENROUTER_TIPSTER_MODELS: ${{ vars.OPENROUTER_TIPSTER_MODELS }}
+          OPENROUTER_TIPSTER_MODELS: ${{ vars.OPENROUTER_TIPSTER_MODELS || secrets.OPENROUTER_TIPSTER_MODELS }}
       - name: Rapports et carnets sur la branche rapports-tipsters-ia
         if: always()
         run: |
