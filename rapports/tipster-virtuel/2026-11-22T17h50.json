@@ -1,0 +1,22 @@
+{
+  "quand": "2026-11-22T17:50:24.119Z",
+  "essai": false,
+  "jour": "2026-11-22",
+  "matchs": 9,
+  "avecCotes": 9,
+  "candidats": 872,
+  "selectionsSansCote1xBet": 955,
+  "relevesTropEloignes": 100,
+  "dejaAujourdhui": 3,
+  "choix": [],
+  "bilan": {
+    "bankroll": 100544,
+    "net": 544,
+    "enJeu": 2000,
+    "regles": 2,
+    "gagnes": 1,
+    "roi": 0.34
+  },
+  "resume": "Tipster virtuel tenu par Claude. Paris simples sur cote 1xBet, seulement quand le prix dépasse la valeur juste. Bankroll virtuelle : 100 544 FCFA (départ 100 000), 2 paris réglés dont 1 gagnés, rendement 34,0 %, 2 000 FCFA en jeu. Mis à jour le 22/11/2026 17:50:23.",
+  "candidatsVus": 203
+}
