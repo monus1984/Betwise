@@ -26,7 +26,7 @@ const MODEL = process.env.OPENAI_TIPSTER_MODEL;
 const TIPSTER_NOM = "ChatGPT · tipster virtuel";
 const MAX_CANDIDATS = 120;
 const RISK = { sur: "prudent", audacieux: "moyen", risque: "risque" } as const;
-const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
+const one = <T,>(v: T |T[] |null): T |null => (Array.isArray(v) ? v[0] ?? null : v);
 
 type CandidateApi = Candidat & {
   candidateId: string; match: string; bookmaker: string; edgeMarche: number;
@@ -83,7 +83,7 @@ async function decide(candidates: CandidateApi[]): Promise<ModelResult> {
   if (!response.ok) throw new Error(`OpenAI API ${response.status}: ${body.error?.message ?? "erreur sans détail"}`);
   if (!body.output_text) throw new Error("Réponse OpenAI sans output_text exploitable.");
   const parsed = JSON.parse(body.output_text) as ModelResult;
-  if (!Array.isArray(parsed.picks) || parsed.picks.length > 6 || typeof parsed.abstention_reason !== "string") {
+  if (!Array.isArray(parsed.picks) ||parsed.picks.length > 6 ||typeof parsed.abstention_reason !== "string") {
     throw new Error("Format de décision ChatGPT invalide.");
   }
   return parsed;
@@ -91,7 +91,7 @@ async function decide(candidates: CandidateApi[]): Promise<ModelResult> {
 
 async function main() {
   if (!ADMIN_ID) throw new Error("BETWISE_ADMIN_ID manquant");
-  if (!API_KEY || !MODEL) {
+  if (!API_KEY ||!MODEL) {
     console.log("SKIP: OPENAI_API_KEY ou OPENAI_TIPSTER_MODEL absent. Aucun appel API, aucune écriture.");
     return;
   }
@@ -148,7 +148,7 @@ async function main() {
     if (signal.source !== "marche") continue;
     const m = info.get(matchId)!;
     for (const pk of picksOf(signal, "all")) {
-      if (!pk.book || !pk.book.bookmaker.toLowerCase().replace(/\s/g, "").includes("1xbet") || !releveFrais(pk.book.releveAt, m.kickoff)) {
+      if (!pk.book ||!pk.book.bookmaker.toLowerCase().replace(/\s/g, "").includes("1xbet") ||!releveFrais(pk.book.releveAt, m.kickoff)) {
         sansCote++; continue;
       }
       const candidate: Candidat = {
@@ -156,7 +156,7 @@ async function main() {
         p: pk.p, pModele: null, cote: pk.book.cote, coteRef: pk.cote,
         coteAt: pk.book.releveAt, refAt: refAt.get(matchId) ?? null,
       };
-      if (!relevesComparables(candidate) || candidate.cote > 3.2 || candidate.cote <= 1 || !profilDe(candidate.p, candidate.cote)) {
+      if (!relevesComparables(candidate) ||candidate.cote > 3.2 ||candidate.cote <= 1 ||!profilDe(candidate.p, candidate.cote)) {
         relevesEloignes++; continue;
       }
       raw.push({
@@ -167,7 +167,7 @@ async function main() {
   }
 
   // Dossier borné et reproductible : classement mécanique par écart marché, puis match/market/selection.
-  const ranked = raw.sort((a, b) => b.edgeMarche - a.edgeMarche || a.matchId.localeCompare(b.matchId) || a.market.localeCompare(b.market) || a.sel.localeCompare(b.sel)).slice(0, MAX_CANDIDATS);
+  const ranked = raw.sort((a, b) => b.edgeMarche - a.edgeMarche ||a.matchId.localeCompare(b.matchId) ||a.market.localeCompare(b.market) ||a.sel.localeCompare(b.sel)).slice(0, MAX_CANDIDATS);
   const candidates: CandidateApi[] = ranked.map((c, i) => ({ ...c, candidateId: `C${String(i + 1).padStart(3, "0")}` }));
   const decision = candidates.length ? await decide(candidates) : { picks: [], abstention_reason: "Aucun candidat avec cote 1xBet fraîche et relevé de référence comparable." };
   const byId = new Map(candidates.map((c) => [c.candidateId, c]));
@@ -175,17 +175,17 @@ async function main() {
   const seen = new Set<string>();
   for (const pick of decision.picks) {
     const c = byId.get(pick.candidate_id);
-    if (!c || seen.has(pick.candidate_id) || !Number.isFinite(pick.probability) || pick.probability < 0.01 || pick.probability > 0.99) continue;
+    if (!c ||seen.has(pick.candidate_id) ||!Number.isFinite(pick.probability) ||pick.probability < 0.01 ||pick.probability > 0.99) continue;
     seen.add(pick.candidate_id);
     modelPicks.push({ candidate: c, probability: pick.probability, rationale: pick.rationale.slice(0, 600) });
   }
   const withModel: Candidat[] = modelPicks.map(({ candidate, probability }) => ({ ...candidate, pModele: probability }));
   const choices = choisir(withModel, deja);
-  const pickByKey = new Map(modelPicks.map((p) => [`${p.candidate.matchId}| ${p.candidate.market}|${p.candidate.param ?? ""}|${p.candidate.sel}`, p]));
+  const pickByKey = new Map(modelPicks.map((p) => [`${p.candidate.matchId}|${p.candidate.market}|${p.candidate.param ?? ""}|${p.candidate.sel}`, p]));
   const faits: Record<string, unknown>[] = [];
   let bankroll = etat.bankroll - etat.enJeu;
   for (const e of choices) {
-    const key = `${e.matchId}| ${e.market}|${e.param ?? ""}|${e.sel}`;
+    const key = `${e.matchId}|${e.market}|${e.param ?? ""}|${e.sel}`;
     const modelPick = pickByKey.get(key);
     if (!modelPick) continue;
     const m = mise(etat.bankroll, e.kelly);
