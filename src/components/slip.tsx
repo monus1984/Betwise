@@ -44,7 +44,7 @@ export function OddButton({ leg, name, disabled, wide, note }: { leg: Leg; name:
       onClick={() => slip.toggle(leg)}
       className={`min-w-0 rounded-lg border transition active:scale-[0.98] disabled:opacity-50 ${on ? "border-brand bg-brand text-on-fill" : "border-line bg-surface"} ${wide ? "flex w-full items-center gap-2 px-3 py-2 text-left" : "flex flex-col items-center px-1.5 py-1.5 text-center"}`}
     >
-      <span className={wide ? "min-w-0 flex-1 text-[13px] leading-snug" : `w-full truncate text-[11px] leading-tight ${tone}`}>{name}</span>
+      <span className={wide ? "min-w-0 flex-1 text-[13px] leading-snug" : `w-full text-[11px] leading-tight [overflow-wrap:anywhere] ${tone}`}>{name}</span>
       {wide && leg.p !== null && <span className={`shrink-0 text-[11px] tabular-nums ${tone}`}>{Math.round(leg.p * 100)} %</span>}
       <span className={`shrink-0 font-semibold tabular-nums ${wide ? "min-w-12 text-right text-sm" : "text-[15px]"}`}>{leg.estimee ? "≈" : ""}{C(leg.cote)}{note && <span className={`ml-0.5 text-[9px] font-normal ${tone}`}>{note}</span>}</span>
       {!wide && leg.p !== null && <span className={`text-[10px] tabular-nums ${tone}`}>{Math.round(leg.p * 100)} %</span>}
@@ -79,7 +79,7 @@ export function SlipBar() {
                 return (
                   <li key={l.matchId} className="flex items-center gap-2 py-2">
                     <Link href={`/matchs/${l.matchId}`} className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium">{l.label}</span>
+                      <span className="block text-sm font-medium leading-snug">{l.label}</span>
                       <span className="block text-[11px] leading-snug text-ink-muted">{l.home} – {l.away} · {new Date(l.kickoff).toLocaleString("fr-FR", { weekday: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}</span>
                     </Link>
                     <span className="shrink-0 text-right tabular-nums">
