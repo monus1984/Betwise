@@ -38,8 +38,11 @@ function cookies(session: object, url: string) {
   return value.match(/.{1,3180}/g)!.map((v, i) => ({ ...base, name: `${name}.${i}`, value: v }));
 }
 
+/** tsx (esbuild) entoure les fonctions nommées d'un appel à __name : la page doit le connaître, sinon tout evaluate échoue. */
+export const PREPARER = "globalThis.__name = globalThis.__name || ((f) => f);";
+
 /** Remplace les noms de sources par des alias dans tout le texte de la page. */
-async function masquer(page: Page, noms: string[]) {
+export async function masquer(page: Page, noms: string[]) {
   if (!noms.length) return;
   await page.evaluate((ns) => {
     const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -56,7 +59,7 @@ async function masquer(page: Page, noms: string[]) {
 }
 
 /** Fait défiler toute la page pour charger les images différées, puis revient en haut. */
-async function derouler(page: Page) {
+export async function derouler(page: Page) {
   await page.evaluate(async () => {
     const h = document.documentElement.scrollHeight;
     for (let y = 0; y < h; y += 600) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 110)); }
@@ -66,7 +69,7 @@ async function derouler(page: Page) {
   await page.waitForTimeout(350);
 }
 
-async function mesurer(page: Page) {
+export async function mesurer(page: Page) {
   return page.evaluate(() => {
     const de = document.documentElement, w = de.clientWidth;
     const visible = (el: Element) => { const r = el.getBoundingClientRect(); const s = getComputedStyle(el); return r.width > 0 && r.height > 0 && s.visibility !== "hidden" && s.display !== "none"; };
@@ -123,7 +126,7 @@ async function mesurer(page: Page) {
 }
 
 type Violation = { id: string; impact: string; help: string; nodes: { html: string; any: { data?: { fgColor?: string; bgColor?: string; contrastRatio?: number } }[] }[] };
-async function axe(page: Page) {
+export async function axe(page: Page) {
   try {
     await page.addScriptTag({ path: AXE });
     return await page.evaluate(async () => {
@@ -246,6 +249,7 @@ async function main() {
     mkdirSync(`${OUT}/${ps.passe}`, { recursive: true });
     const ctx = async (auth: boolean): Promise<BrowserContext> => {
       const c = await browser.newContext({ viewport: { width: ps.w, height: ps.h }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: "fr-FR", timezoneId: "Africa/Abidjan", colorScheme: ps.sombre ? "dark" : "light" });
+      await c.addInitScript({ content: PREPARER });
       if (auth) await c.addCookies(cookies(session, process.env.NEXT_PUBLIC_SUPABASE_URL!));
       return c;
     };
@@ -300,4 +304,4 @@ async function main() {
   console.log(`${index.length} captures, ${hydratation.filter((h) => (h.erreurs as number) > 0).length}/${hydratation.length} chargements de l'accueil avec erreur de console`);
 }
 
-main().catch((e) => { console.error(e instanceof Error ? e.message : JSON.stringify(e)); process.exit(1); });
+if (process.argv[1]?.endsWith("audit-ecrans.ts")) main().catch((e) => { console.error(e instanceof Error ? e.message : JSON.stringify(e)); process.exit(1); });
