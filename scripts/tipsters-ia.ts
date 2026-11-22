@@ -133,6 +133,9 @@ async function passage(p: ProfilComplet, d: Dossier, empreinte: string) {
 async function main() {
   if (!ADMIN_ID) throw new Error("BETWISE_ADMIN_ID manquant");
   const profils = profilsActifs();
+  // Diagnostic sans valeur : seulement la présence des clés et variables
+  const oui = (k: string) => (process.env[k] ? "oui" : "non");
+  console.log(`Configuration : ANTHROPIC_API_KEY ${oui("ANTHROPIC_API_KEY")}, OPENROUTER_API_KEY ${oui("OPENROUTER_API_KEY")}, OPENROUTER_TIPSTER_MODELS ${oui("OPENROUTER_TIPSTER_MODELS")}, OPENAI_API_KEY ${oui("OPENAI_API_KEY")}, GEMINI_API_KEY ${oui("GEMINI_API_KEY")}.`);
   if (!profils.length) { console.log("Aucun tipster IA actif : aucune clé configurée. Aucun appel, aucune écriture."); return; }
   const d = await construireDossier(db as never, 10);
   const empreinte = createHash("sha256").update(JSON.stringify([...d.options.values()].map((o) => [o.id, o.matchId, o.market, o.param, o.sel, o.cote, o.releveAt]))).digest("hex").slice(0, 16);
