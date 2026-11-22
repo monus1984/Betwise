@@ -1,5 +1,5 @@
 /**
- * Tipster virtuel tenu par Claude : à chaque passage, regarde les matchs des 8 prochaines heures, choisit selon
+ * Tipster à règles fixes (témoin sans IA) : à chaque passage, regarde les matchs des 8 prochaines heures, choisit selon
  * src/lib/tipster-virtuel/strategie.ts, et enregistre chaque choix deux fois :
  *  - un prono dans la source privée de l'administrateur « Claude · tipster virtuel » (bilan par marché et par risque) ;
  *  - un pari test sur le compte d'audit (bankroll virtuelle de 100 000 FCFA, sans mouvement d'argent).
@@ -11,7 +11,7 @@ import { createAdminClient } from "../src/lib/supabase/admin";
 import { loadSignals, picksOf, ALL_CANDIDATES, releveFrais } from "../src/lib/probs/signals";
 import { jourAbidjan } from "../src/lib/coach/daily";
 import { compteAudit, sessionAudit, clientAudit, AUDIT_PSEUDO } from "../src/lib/tipster-virtuel/compte";
-import { TIPSTER_NOM, BANKROLL_DEPART, bilan, choisir, mise, raison, relevesComparables, type Candidat, type DejaJoue } from "../src/lib/tipster-virtuel/strategie";
+import { TIPSTER_NOM, ANCIEN_NOM, BANKROLL_DEPART, bilan, choisir, mise, raison, relevesComparables, type Candidat, type DejaJoue } from "../src/lib/tipster-virtuel/strategie";
 import { familleOf } from "../src/lib/probs/signals";
 
 const ESSAI = process.argv.includes("--essai");
@@ -33,11 +33,13 @@ async function main() {
   if (!perso) throw new Error("source perso du compte d'audit introuvable");
 
   // 2. Source privée de l'administrateur, suivie par lui
+  // Renommage (22/11) : ce robot n'est pas Claude qui décide, c'est un jeu de règles fixes
+  if (!ESSAI) await db.from("sources").update({ nom: TIPSTER_NOM }).eq("nom", ANCIEN_NOM).eq("created_by", ADMIN_ID);
   let { data: src } = await db.from("sources").select("id").eq("nom", TIPSTER_NOM).eq("created_by", ADMIN_ID).maybeSingle();
   if (!src && !ESSAI) {
     ({ data: src } = await db.from("sources").insert({
       type: "tipster", nom: TIPSTER_NOM, visibilite: "privee", created_by: ADMIN_ID,
-      description: `Tipster virtuel tenu par Claude. Paris simples sur cote 1xBet, seulement quand le prix dépasse la valeur juste. Bankroll virtuelle de départ : ${BANKROLL_DEPART.toLocaleString("fr-FR")} FCFA.`,
+      description: `Tipster à règles fixes (témoin sans IA). Paris simples sur cote 1xBet, seulement quand le prix dépasse la valeur juste. Bankroll virtuelle de départ : ${BANKROLL_DEPART.toLocaleString("fr-FR")} FCFA.`,
     }).select("id").single());
     await db.from("source_follows").upsert({ user_id: ADMIN_ID, source_id: src!.id });
   }
@@ -110,7 +112,7 @@ async function main() {
   // 6. Bilan dans la description de la source et rapport du passage
   const apres = bilan((await moi.from("bets").select("mise, gain_net, statut").eq("virtuel", true)).data ?? []);
   const fr = (x: number) => Math.round(x).toLocaleString("fr-FR");
-  const resume = `Tipster virtuel tenu par Claude. Paris simples sur cote 1xBet, seulement quand le prix dépasse la valeur juste. Bankroll virtuelle : ${fr(apres.bankroll)} FCFA (départ ${fr(BANKROLL_DEPART)}), ${apres.regles} paris réglés dont ${apres.gagnes} gagnés${apres.roi === null ? "" : `, rendement ${(apres.roi * 100).toFixed(1).replace(".", ",")} %`}, ${fr(apres.enJeu)} FCFA en jeu. Mis à jour le ${new Date().toLocaleString("fr-FR", { timeZone: "Africa/Abidjan" })}.`;
+  const resume = `Tipster à règles fixes (témoin sans IA). Paris simples sur cote 1xBet, seulement quand le prix dépasse la valeur juste. Bankroll virtuelle : ${fr(apres.bankroll)} FCFA (départ ${fr(BANKROLL_DEPART)}), ${apres.regles} paris réglés dont ${apres.gagnes} gagnés${apres.roi === null ? "" : `, rendement ${(apres.roi * 100).toFixed(1).replace(".", ",")} %`}, ${fr(apres.enJeu)} FCFA en jeu. Mis à jour le ${new Date().toLocaleString("fr-FR", { timeZone: "Africa/Abidjan" })}.`;
   if (src && !ESSAI) await db.from("sources").update({ description: resume }).eq("id", src.id);
   const rapport = { quand: new Date().toISOString(), essai: ESSAI, jour, matchs: info.size, avecCotes: signals.size, candidats: cands.length, selectionsSansCote1xBet: sansCote, relevesTropEloignes: relevesEloignes, dejaAujourdhui: deja.total, choix: faits, bilan: apres, resume, candidatsVus: ALL_CANDIDATES.length };
   mkdirSync("rapports/tipster-virtuel", { recursive: true });

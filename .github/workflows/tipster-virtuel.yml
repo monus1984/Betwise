@@ -48,3 +48,46 @@ jobs:
           git rm -rqf --cached . >/dev/null 2>&1 || true
           mkdir -p rapports && cp -r /tmp/rapports/* rapports/
           git add -f rapports && git commit -qm "Tipster virtuel : passage du $(date -u +%d/%m\ %Hh%M)" && git push origin rapports-tipster || echo "rien à pousser"
+
+  # Tipsters IA (22/11) : même horloge, juste après le relevé des cotes du job précédent. Un profil sans clé ne fait aucun appel.
+  tipsters-ia:
+    needs: tipster
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Carnets des tipsters (branche rapports-tipsters-ia)
+        run: |
+          git fetch origin rapports-tipsters-ia 2>/dev/null && git show origin/rapports-tipsters-ia:carnets >/dev/null 2>&1 && \
+            git archive origin/rapports-tipsters-ia carnets | tar -x || mkdir -p carnets
+      - run: npx tsx scripts/tipsters-ia.ts ${{ inputs.essai && '--essai' || '' }}
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BETWISE_ADMIN_ID: a20c0945-ce54-4902-a842-bb50cfea6450
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_TIPSTER_MODEL: ${{ vars.CLAUDE_TIPSTER_MODEL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_TIPSTER_MODEL: ${{ vars.OPENAI_TIPSTER_MODEL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_TIPSTER_MODEL: ${{ vars.GEMINI_TIPSTER_MODEL }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_TIPSTER_MODELS: ${{ vars.OPENROUTER_TIPSTER_MODELS }}
+      - name: Rapports et carnets sur la branche rapports-tipsters-ia
+        if: always()
+        run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          mkdir -p /tmp/sortie && cp -r rapports /tmp/sortie/ 2>/dev/null || true; cp -r carnets /tmp/sortie/ 2>/dev/null || true
+          rm -rf rapports carnets
+          git fetch origin rapports-tipsters-ia && git checkout -B rapports-tipsters-ia origin/rapports-tipsters-ia || git checkout --orphan rapports-tipsters-ia
+          git rm -rqf --cached . >/dev/null 2>&1 || true
+          cp -r /tmp/sortie/* . 2>/dev/null || true
+          git add -f rapports carnets 2>/dev/null || true
+          git commit -qm "Tipsters IA : passage du $(date -u +%d/%m\ %Hh%M)" && git push origin rapports-tipsters-ia || echo "rien à pousser"

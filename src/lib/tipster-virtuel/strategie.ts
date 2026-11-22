@@ -1,5 +1,5 @@
 /**
- * Tipster virtuel tenu par Claude (demande de Mounir, 22/11/2026).
+ * Tipster à règles fixes, témoin sans IA (créé le 22/11/2026 sous le nom « Claude · tipster virtuel »).
  *
  * Le principe : parier seulement quand 1xBet paie une sélection plus cher que sa valeur juste. La valeur juste vient
  * des cotes de référence (médiane des bookmakers européens, marge retirée), corrigée un peu par le modèle BETWISE
@@ -21,7 +21,9 @@
 import { profilDe, type Categorie } from "../coach/categories";
 import { familleOf } from "../probs/signals";
 
-export const TIPSTER_NOM = "Claude · tipster virtuel";
+/** Témoin sans IA (22/11) : des règles fixes écrites dans ce fichier, à comparer aux tipsters IA. */
+export const TIPSTER_NOM = "Tipster BETWISE (règles)";
+export const ANCIEN_NOM = "Claude · tipster virtuel";
 export const BANKROLL_DEPART = 100_000;
 export const COTE_MAX = 3.2;
 export const DESACCORD_MAX = 0.08;
