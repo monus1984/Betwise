@@ -1,0 +1,44 @@
+name: Tipster virtuel (Claude)
+
+on:
+  schedule:
+    # après l'import des cotes 1xBet (07:10 UTC) ; chaque passage regarde les matchs des 8 heures suivantes
+    - cron: "50 7,13,17 * * *"
+  workflow_dispatch:
+    inputs:
+      essai:
+        description: "Essai : rien n'est écrit"
+        type: boolean
+        default: false
+
+concurrency:
+  group: tipster-virtuel
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  tipster:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsx scripts/tipster-virtuel.ts ${{ inputs.essai && '--essai' || '' }}
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BETWISE_ADMIN_ID: a20c0945-ce54-4902-a842-bb50cfea6450
+      - name: Rapport du passage sur la branche rapports-tipster
+        run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          mv rapports /tmp/rapports
+          git fetch origin rapports-tipster && git checkout -B rapports-tipster origin/rapports-tipster || git checkout --orphan rapports-tipster
+          git rm -rqf --cached . >/dev/null 2>&1 || true
+          mkdir -p rapports && cp -r /tmp/rapports/* rapports/
+          git add -f rapports && git commit -qm "Tipster virtuel : passage du $(date -u +%d/%m\ %Hh%M)" && git push origin rapports-tipster || echo "rien à pousser"
