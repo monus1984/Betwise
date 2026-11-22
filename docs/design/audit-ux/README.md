@@ -7,8 +7,10 @@ Dossier du lot demandé en section 21 de `docs/product/orientations-finalisation
 | [`01-audit.md`](01-audit.md) | Constats, priorités P0 à P2, recommandations, ordre de traitement | Claude | déposé le 22/11 |
 | [`02-mesures.md`](02-mesures.md) | Mesures par écran : hauteur, temps, textes coupés, cibles tactiles, contrastes | Claude | déposé le 22/11 |
 | [`captures/`](captures/README.md) | 195 captures, classées par écran, avec l'adresse et le composant | robot | déposé le 22/11 |
-| `03-avis-chatgpt.md` | Revue indépendante | ChatGPT | attendu |
+| [`03-avis-chatgpt.md`](03-avis-chatgpt.md) | Revue indépendante et recommandations de priorisation | ChatGPT | déposé le 22/11 |
 | `04-arbitrage.md` | Accords, désaccords, décisions de Mounir | Claude, puis Mounir | à venir |
+
+La réponse de ChatGPT à la section 12 de l'avis Claude sur les tipsters IA est consignée dans [`docs/design/tipsters-ia/02-reponse-chatgpt-point-12.md`](../tipsters-ia/02-reponse-chatgpt-point-12.md).
 
 ## Pour la revue de ChatGPT
 
