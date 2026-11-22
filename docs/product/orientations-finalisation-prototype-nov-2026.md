@@ -468,3 +468,39 @@ Ne pas présumer que l'avis de Claude a déjà été recueilli : cette section f
 - Les modèles ne doivent pas inventer les données sportives, les cotes, les marchés ou les résultats.
 - Aucun fournisseur IA ou API payante ne doit être activé sans validation explicite de Mounir.
 
+
+
+## 20. Modèles IA complémentaires — première shortlist à valider
+
+Cette shortlist est une proposition préliminaire de ChatGPT à soumettre à la revue indépendante de Claude. Elle ne constitue pas une décision d'intégration. Le choix doit se faire par test comparatif sur les mêmes matchs et le même brief, avec un budget plafond approuvé.
+
+### Candidats à évaluer
+
+- **Google Gemini** : candidat à tester pour une troisième intelligence généraliste, notamment pour les tâches multimodales et l'analyse de données/contexte. L'API Gemini propose une offre gratuite limitée pour certains modèles et des offres payantes ; vérifier le modèle exact, les limites et les conditions de traitement des données avant usage. Référence officielle : https://ai.google.dev/gemini-api/docs/pricing
+- **DeepSeek** : candidat pour un benchmark de raisonnement à coût API potentiellement bas, notamment pour tester une alternative économique sur les mêmes données. L'API officielle publie ses modèles et tarifs ; ceux-ci évoluent et doivent être revérifiés avant activation. Référence officielle : https://api-docs.deepseek.com/quick_start/pricing/
+- **Grok (xAI)** : candidat secondaire si BETWISE veut tester une intelligence avec recherche web/X pour le contexte récent, notamment informations d'équipe ou actualités. Les données en temps réel nécessitent les outils de recherche appropriés ; elles ne sont pas garanties par le modèle seul. Vérifier le coût des appels et la disponibilité des sources. Références : https://docs.x.ai/developers/models et https://docs.x.ai/developers/pricing
+- **Mistral** : candidat optionnel pour un benchmark supplémentaire et une piste de modèle européen/open-weight selon les modèles et conditions disponibles. Référence officielle : https://docs.mistral.ai/inference/pricing
+
+### Recommandation provisoire
+
+Ne pas ajouter toutes ces IA immédiatement. Pour la première phase :
+1. conserver ChatGPT autonome, Claude autonome et Fusion ;
+2. ajouter **Gemini** comme premier modèle tiers à comparer, si l'accès API et les conditions de données conviennent ;
+3. tester **DeepSeek** comme candidat économique sur un échantillon identique ;
+4. réserver Grok et Mistral à une deuxième vague, sauf si Claude identifie une raison produit forte de les intégrer plus tôt.
+
+Le nombre de modèles ne doit pas être confondu avec le nombre de personas. Un modèle peut participer à un benchmark technique, tandis qu'un profil de parieur représente une stratégie de mise. BETWISE doit garder ces deux dimensions séparées.
+
+### Méthode d'évaluation des modèles
+
+Pour chaque modèle candidat :
+- mêmes matchs, données sportives, cotes et moment de décision ;
+- même prompt de base et même schéma de sortie ;
+- pas d'accès aux choix des autres modèles avant verrouillage ;
+- conserver le nom/version exacte du modèle, date, paramètres et coût ;
+- noter la qualité des données utilisées, la validité des marchés et la calibration des probabilités ;
+- calculer les résultats sur les tickets enregistrés avant match, avec échantillon et période visibles ;
+- évaluer le coût par analyse et le coût par pari test effectivement enregistré.
+
+Les classements de prédiction publics ou les taux de réussite promotionnels ne suffisent pas à sélectionner un modèle. BETWISE doit produire son propre historique prospectif, sans sélectionner seulement les bons résultats ni modifier les tickets après coup.
+
