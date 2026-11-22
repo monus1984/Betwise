@@ -1,4 +1,5 @@
 import type { StandingRow } from "@/lib/matches/standings";
+import { shortName } from "@/components/match-ui";
 
 const FORME: Record<string, string> = { W: "bg-gain", D: "bg-draw", L: "bg-loss" };
 /** Couleur de la zone (qualification, barrage, relégation) d'après le libellé du classement. */
@@ -28,7 +29,7 @@ export function StandingsTable({ rows, highlight = [], only }: { rows: StandingR
           return (
             <tr key={`${r.groupe}${r.af_team_id}`} className={`border-t border-line ${on ? "bg-brand-soft font-semibold" : ""}`}>
               <td className="relative py-1.5 pl-2"><span className={`absolute inset-y-1 left-0 w-[3px] rounded-full ${zoneColor(r.zone)}`} />{r.rang}</td>
-              <td className="max-w-0 truncate pr-1">{r.team_nom}</td>
+              <td className="max-w-0 truncate pr-1" title={r.team_nom}>{shortName(r.team_nom)}</td>
               <td className="text-center text-ink-muted">{r.joues}</td>
               <td className="text-center text-ink-muted">{r.diff > 0 ? `+${r.diff}` : r.diff}</td>
               <td className="text-center font-bold">{r.points}</td>

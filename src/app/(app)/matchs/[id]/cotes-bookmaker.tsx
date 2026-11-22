@@ -48,7 +48,7 @@ export function CotesParBookmaker({ bookmaker, releveAt, betclicAt, medianeAt, l
           const ci = betclic ? estimerBetclicCI(l.betclicFr) : null;
           return (
             <tr key={`${l.market}${l.param}${l.sel}`} className="align-top">
-              <td className={betclic ? "py-1.5 pr-2 text-[13px] leading-snug [overflow-wrap:anywhere]" : "truncate py-1.5 pr-2"}>{l.label}</td>
+              <td className="py-1.5 pr-2 text-[13px] leading-snug [overflow-wrap:anywhere]">{l.label}</td>
               {bookmaker && <td className="py-1.5 text-right font-semibold tabular-nums">{cell(l, l.book)}</td>}
               {betclic && <td className="py-1.5 text-right font-semibold tabular-nums">{cell(l, l.betclicFr ?? null)}</td>}
               {betclic && (

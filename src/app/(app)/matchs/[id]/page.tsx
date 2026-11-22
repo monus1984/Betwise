@@ -262,9 +262,9 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
                   const left = h.dom === "home" ? shortName(home) : shortName(away), right = h.dom === "home" ? shortName(away) : shortName(home);
                   return (
                     <li key={i} className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 py-2 text-sm">
-                      <span className="truncate text-right">{left}</span>
+                      <span className="text-right leading-snug">{left}</span>
                       <span className="rounded-md bg-surface-2 px-2 py-0.5 font-semibold tabular-nums">{a} – {b}</span>
-                      <span className="truncate">{right}</span>
+                      <span className="leading-snug">{right}</span>
                       <span className="col-span-3 -mt-1 text-center text-[10px] text-ink-muted">{fmtDate(h.date)}</span>
                     </li>
                   );
@@ -302,7 +302,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
                 <div className="grid grid-cols-2 gap-4">
                   {extras.lineups.slice(0, 2).map((l) => (
                     <div key={l.equipe} className="min-w-0">
-                      <p className="truncate text-sm font-semibold">{l.equipe}</p>
+                      <p className="text-sm font-semibold leading-snug">{l.equipe}</p>
                       <p className="mb-2 text-[11px] text-ink-muted">{l.schema ?? "schéma ?"}{l.entraineur ? ` · ${l.entraineur}` : ""}</p>
                       <ol className="space-y-1 text-sm">
                         {l.titulaires.map((p) => <li key={p.nom} className="flex gap-2"><span className="w-5 shrink-0 text-right text-xs tabular-nums text-ink-muted">{p.numero ?? ""}</span><span className="truncate">{p.nom}</span></li>)}
