@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AIDES, type SectionAide } from "@/lib/aide/contenu";
+import { DemoVideo } from "./demo-video";
 import { speakBlocks, stopSpeaking, unlockAudio, type EtatSon } from "@/lib/coach/speak";
 
 /**
@@ -48,6 +49,7 @@ export function Aide({ section, clair }: { section: SectionAide; clair?: boolean
               <button type="button" onClick={fermer} className="rounded-xl border border-line px-4 py-2.5 text-sm text-ink-soft">Fermer</button>
             </div>
             {etat === "echec" && <p className="mt-2 text-[11px] text-ink-muted">La voix n’est pas disponible pour le moment : le texte reste ici.</p>}
+            {section === "accueil" && <div className="mt-3 text-center"><DemoVideo clair onOuvre={() => { stopSpeaking(); setLue(null); setEtat(null); }} /></div>}
           </div>
         </div>
       )}

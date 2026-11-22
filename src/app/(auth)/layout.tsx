@@ -1,5 +1,6 @@
 import { APP_NAME } from "@/lib/app-name";
 import { Mark } from "@/components/icons";
+import { DemoVideo } from "@/components/demo-video";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,6 +9,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <Mark className="h-12 w-12" />
         <h1 className="mt-4 text-4xl font-bold leading-none tracking-tight">{APP_NAME}</h1>
         <p className="mt-2 max-w-[26ch] text-sm text-white/75">Comprends, mesure et maîtrise tes décisions de pari.</p>
+        <div className="mt-4"><DemoVideo /></div>
       </div>
       <div className="flex-1 px-5 py-7">{children}</div>
     </main>
