@@ -1,0 +1,37 @@
+{
+  "profil": "or-chatgpt",
+  "nom": "ChatGPT",
+  "modele": "openai/gpt-6.2-sol",
+  "promptVersion": "tipster-ia-v1",
+  "essai": true,
+  "dossier": "4f53cda18c2baa0c",
+  "duree_s": 9,
+  "tours": 2,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 0
+    }
+  ],
+  "jetons": {
+    "entree": 3613,
+    "sortie": 452,
+    "cacheLu": 2346,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 0,
+  "propositions": [],
+  "abstention": "Aucun match dans ce passage, confirmé par la liste des matchs à venir. L’historique ne contient aucun pari réglé. Bankroll : 100 000 FCFA, dont 0 FCFA en jeu.",
+  "carnetReecrit": true,
+  "retenus": [],
+  "rejets": [],
+  "enregistres": []
+}
