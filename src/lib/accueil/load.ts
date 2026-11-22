@@ -8,6 +8,8 @@ import { coteAffichee, loadSignals, pickLabel, probOfSignal, releveFrais, bestPi
 import { loadToday, loadRepli, type TheirPick } from "@/lib/coach/today";
 import { issue } from "@/lib/mesure/issue";
 import { loadOptions, type Periode } from "@/lib/options/load";
+import { unstable_cache } from "next/cache";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Option } from "@/lib/options/build";
 import { profilDe, type Categorie } from "@/lib/coach/categories";
 import { logoEquipe } from "@/lib/logos";
@@ -140,20 +142,31 @@ export function parProfil(options: Option[]): Map<string, { o: Option; profil: C
   return out;
 }
 
-export async function loadAccueil(db: Db, userId: string) {
-  const today = await loadToday(db, userId);
-  const jour = jourDe(new Date().toISOString());
+/**
+ * Options du jour et de demain : les mêmes pour tous les utilisateurs (matchs et cotes publics), longues à calculer.
+ * Gardées une minute en mémoire (P1-10, 22/11) ; lues avec le client serveur, sans aucune donnée personnelle.
+ */
+const optionsCommunes = unstable_cache(
+  async (periode: Periode) => loadOptions(createAdminClient() as never, periode),
+  ["accueil-options"], { revalidate: 60 },
+);
 
+export async function loadAccueil(db: Db, userId: string) {
+  const jour = jourDe(new Date().toISOString());
   // Matchs du jour (heure d'Abidjan) et ceux encore en cours d'hier soir
   const debut = new Date(Date.now() - 18 * 3600000).toISOString(), fin = new Date(Date.now() + 30 * 3600000).toISOString();
-  const { data } = await db.from("matches").select(MATCH).gte("kickoff_at", debut).lte("kickoff_at", fin).neq("statut", "annule").order("kickoff_at").limit(200);
+  // Indépendants les uns des autres : lancés ensemble (P1-10, 22/11)
+  const [today, { data }, [optAuj, optDemain]] = await Promise.all([
+    loadToday(db, userId),
+    db.from("matches").select(MATCH).gte("kickoff_at", debut).lte("kickoff_at", fin).neq("statut", "annule").order("kickoff_at").limit(200),
+    Promise.all([optionsCommunes("auj"), optionsCommunes("demain")]),
+  ]);
   // Prédictions du jour : uniquement les matchs pas encore commencés (21/11) ; le direct et les résultats sont dans Matchs
   const pasCommence = (statut: string, kickoff: string) => statut === "programme" && Date.parse(kickoff) > Date.now();
   const tous = ((data ?? []) as unknown as M[]).filter((m) => jourDe(m.kickoff_at) === jour && pasCommence(m.statut, m.kickoff_at));
   today.picks = today.picks.filter((x) => pasCommence(x.statut, x.kickoff));
 
   const avisPick = avisDuJour(today.picks);
-  const [optAuj, optDemain] = await Promise.all([loadOptions(db, "auj"), loadOptions(db, "demain" as Periode)]);
   const ids = [...new Set([...tous.map((m) => m.id), ...today.picks.map((p) => p.match_id), ...optDemain.options.map((o) => o.matchId)])];
   const [signals, releves, bc] = await Promise.all([loadSignals(db, ids, { bookmakers: true }), relevesRef(db, ids), relevesBetclic(db, ids)]);
 

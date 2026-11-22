@@ -39,7 +39,8 @@ export default async function Home() {
   // Profil (créé au besoin : couvre un compte Kehiwa qui ouvre BETWISE pour la première fois)
   const { data: profile } = await supabase.rpc("ensure_profile");
 
-  const [{ data: summary }, d, { data: follows }, { data: k }, { data: enCours }, { data: pend }, { data: recents }, { count: nonLues }, { data: bud }] = await Promise.all([
+  // Tout en parallèle, y compris les données des matchs du jour (avant le 22/11, elles attendaient la fin du reste)
+  const [{ data: summary }, d, { data: follows }, { data: k }, { data: enCours }, { data: pend }, { data: recents }, { count: nonLues }, { data: bud }, acc] = await Promise.all([
     supabase.from("my_bankroll_summary").select("*").maybeSingle(),
     loadDashboard(supabase, null),
     supabase.from("source_follows").select("source_id, source:sources(id, nom, type)").eq("user_id", user!.id),
@@ -50,8 +51,8 @@ export default async function Home() {
     supabase.from("bets").select("mise, statut, gain_net, placed_at, settled_at, nb_selections").eq("virtuel", false).neq("statut", "annule").order("placed_at", { ascending: false }).limit(40),
     supabase.from("notifications").select("id", { count: "exact", head: true }).is("lu_at", null),
     supabase.from("budgets").select("mise_semaine, perte_max_semaine").maybeSingle(),
+    loadAccueil(supabase, user!.id),
   ]);
-  const acc = await loadAccueil(supabase, user!.id);
 
   const proposes = new Set((enCours ?? []).filter((b) => b.resultat_propose && b.resultat_propose !== "en_attente").map((b) => b.id));
   type Pend = { bet_id: string; match_id: string | null; bets: { placed_at: string } | { placed_at: string }[]; match: { statut: string; result_at: string | null } | { statut: string; result_at: string | null }[] | null };
