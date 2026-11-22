@@ -29,7 +29,7 @@ const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? nul
 type Ecran = { nom: string; chemin: string; auth?: boolean; action?: (p: Page) => Promise<void>; ecranSeul?: boolean; note?: string };
 
 /** Cookie de session au format de @supabase/ssr : « base64- » + JSON en base64url, découpé en morceaux de 3 180. */
-function cookies(session: object, url: string) {
+export function cookies(session: object, url: string) {
   const ref = new URL(url).hostname.split(".")[0];
   const name = `sb-${ref}-auth-token`;
   const value = "base64-" + Buffer.from(JSON.stringify(session)).toString("base64url");
