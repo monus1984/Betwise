@@ -59,21 +59,3 @@ describe("tipster virtuel", () => {
     expect(b.roi).toBeCloseTo(-0.25, 5);
   });
 });
-
-import { choisirEtude, ETUDE } from "./strategie";
-describe("paris d'étude", () => {
-  const now = Date.parse("2026-11-22T17:50:00Z");
-  const base = { kickoff: "2026-11-22T19:00:00Z", comp: "TR1", param: null, pModele: null, coteRef: null, coteAt: "2026-11-22T17:45:00Z", refAt: "2026-11-22T17:45:00Z" };
-  const vide = { matchs: new Set<string>(), parProfil: { sur: 0, audacieux: 0, risque: 0 }, parFamille: {}, total: 0 };
-  it("un par niveau, sous la valeur juste mais pas trop", () => {
-    const c = [
-      { ...base, matchId: "a", market: "1X2", sel: "1", p: 0.78, cote: 1.24 }, // prudent, -3,3 %
-      { ...base, matchId: "b", market: "OU", sel: "Plus", p: 0.68, cote: 1.42 }, // équilibré, -3,4 %
-      { ...base, matchId: "c", market: "BTTS", sel: "Oui", p: 0.5, cote: 1.8 }, // audacieux, -10 % : écarté
-      { ...base, matchId: "d", market: "1X2", sel: "2", p: 0.79, cote: 1.25 }, // prudent, -1,25 % : meilleur prudent
-    ];
-    const r = choisirEtude(c, vide, now);
-    expect(r.map((x) => x.matchId).sort()).toEqual(["b", "d"]);
-    expect(r.every((x) => x.etude && x.valeur >= ETUDE.valeurMin)).toBe(true);
-  });
-});

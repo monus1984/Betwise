@@ -31,12 +31,6 @@ export const LIMITES = { parProfil: 2, parJour: 6, parFamille: 3 } as const;
 /** Fraîcheur exigée des deux relevés de cote, en heures. */
 export const RELEVES = { ecartMax: 3, ageMax1xBet: 6 } as const;
 export const MISE = { kelly: 0.25, min: 0.005, max: 0.03, arrondi: 100 } as const;
-/**
- * Paris d'étude (22/11) : quand un passage ne trouve aucun prix au-dessus de la valeur juste, le tipster joue quand même
- * le meilleur choix de chaque niveau, tant que 1xBet ne paie pas plus de 4 % sous la cote juste. Mise fixe de 1 000 F,
- * pour mesurer quels marchés passent à quel niveau sans miser plus quand l'avantage n'est pas là.
- */
-export const ETUDE = { valeurMin: -0.04, mise: 1000 } as const;
 
 export type Candidat = {
   matchId: string; kickoff: string; comp: string | null;
@@ -52,7 +46,7 @@ export type Candidat = {
   /** Heure du relevé de la cote 1xBet chez le fournisseur, et du dernier relevé des cotes de référence. */
   coteAt: string; refAt: string | null;
 };
-export type Evalue = Candidat & { pJuste: number; valeur: number; kelly: number; profil: Categorie; famille: string; etude?: boolean };
+export type Evalue = Candidat & { pJuste: number; valeur: number; kelly: number; profil: Categorie; famille: string };
 export type DejaJoue = { matchs: Set<string>; parProfil: Record<Categorie, number>; parFamille: Record<string, number>; total: number };
 
 /** Les deux relevés sont-ils assez récents et assez proches pour être comparés ? */
@@ -62,8 +56,8 @@ export function relevesComparables(c: Pick<Candidat, "coteAt" | "refAt">, now = 
   return Math.abs(b - r) <= RELEVES.ecartMax * 3600000 && now - b <= RELEVES.ageMax1xBet * 3600000;
 }
 
-/** Note une sélection ; null si elle ne remplit pas les règles (seuil de valeur compris, sauf pour un pari d'étude). */
-export function evaluer(c: Candidat, now = Date.now(), seuil: (p: Categorie) => number = (p) => SEUIL[p]): Evalue | null {
+/** Note une sélection ; null si elle ne remplit pas les règles. */
+export function evaluer(c: Candidat, now = Date.now()): Evalue | null {
   if (c.comp === "AMI") return null;
   if (!relevesComparables(c, now)) return null;
   if (!(c.cote > 1) || c.cote > COTE_MAX || !(c.p > 0 && c.p < 1)) return null;
@@ -72,7 +66,7 @@ export function evaluer(c: Candidat, now = Date.now(), seuil: (p: Categorie) => 
   if (c.pModele !== null && c.pModele < c.p - DESACCORD_MAX) return null;
   const pJuste = c.pModele === null ? c.p : (1 - POIDS_MODELE) * c.p + POIDS_MODELE * c.pModele;
   const valeur = pJuste * c.cote - 1;
-  if (valeur < seuil(profil)) return null;
+  if (valeur < SEUIL[profil]) return null;
   return { ...c, pJuste, valeur, kelly: valeur / (c.cote - 1), profil, famille: familleOf(c.market) };
 }
 
@@ -90,20 +84,6 @@ export function choisir(cands: Candidat[], deja: DejaJoue, now = Date.now()): Ev
   return out;
 }
 
-/** Sans valeur trouvée : le meilleur pari d'étude de chaque niveau, dans les mêmes limites de journée. */
-export function choisirEtude(cands: Candidat[], deja: DejaJoue, now = Date.now()): Evalue[] {
-  const ev = cands.map((c) => evaluer(c, now, () => ETUDE.valeurMin)).filter((x): x is Evalue => x !== null).sort((a, b) => b.valeur - a.valeur);
-  const matchs = new Set(deja.matchs), parProfil = { ...deja.parProfil }, parFamille = { ...deja.parFamille }, ici = new Set<Categorie>();
-  let total = deja.total;
-  const out: Evalue[] = [];
-  for (const e of ev) {
-    if (total >= LIMITES.parJour) break;
-    if (ici.has(e.profil) || matchs.has(e.matchId) || parProfil[e.profil] >= LIMITES.parProfil || (parFamille[e.famille] ?? 0) >= LIMITES.parFamille) continue;
-    out.push({ ...e, etude: true }); ici.add(e.profil); matchs.add(e.matchId); parProfil[e.profil]++; parFamille[e.famille] = (parFamille[e.famille] ?? 0) + 1; total++;
-  }
-  return out;
-}
-
 /** Mise en FCFA pour une bankroll donnée. */
 export function mise(bankroll: number, kelly: number): number {
   const f = Math.min(MISE.max, Math.max(MISE.min, kelly * MISE.kelly));
@@ -116,8 +96,7 @@ const cote2 = (x: number) => x.toFixed(2).replace(".", ",");
 export function raison(e: Evalue): string {
   const avis = e.pModele === null ? `${pct(e.p)} selon les cotes de référence` : `${pct(e.p)} selon les cotes de référence, ${pct(e.pModele)} selon le modèle`;
   const ecart = Math.round(e.valeur * 1000) / 10;
-  const texte = `Probabilité ${avis}. 1xBet paie ${cote2(e.cote)} pour une cote juste de ${cote2(1 / e.pJuste)} : écart de ${ecart >= 0 ? "+" : ""}${String(ecart).replace(".", ",")} %.`;
-  return e.etude ? `Pari d'étude, mise fixe (aucun prix au-dessus de la valeur juste ce passage). ${texte}` : texte;
+  return `Probabilité ${avis}. 1xBet paie ${cote2(e.cote)} pour une cote juste de ${cote2(1 / e.pJuste)} : écart de +${String(ecart).replace(".", ",")} %.`;
 }
 
 /** Bilan de la bankroll virtuelle à partir des paris réglés. */
