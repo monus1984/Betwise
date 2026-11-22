@@ -1,6 +1,6 @@
 /**
  * Coups du jour : chaque matin, trois sélections par catégorie (Prudent, Équilibré, Audacieux) sur les matchs des
- * prochaines 24 h, uniquement là où une vraie cote de référence existe. Un match ne sert qu'une fois.
+ * matchs du jour (heure d'Abidjan) qui n'ont pas encore commencé, uniquement là où une vraie cote de référence existe. Un match ne sert qu'une fois.
  * Les sélections sont enregistrées comme pronos de la source « Coups du jour BETWISE » : leur bilan est public.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -13,6 +13,17 @@ type Db = SupabaseClient<Database, "betwise">;
 export const PICKS_SOURCE = "Coups du jour BETWISE";
 const RISK: Record<Categorie, Database["betwise"]["Enums"]["risk_category"]> = { sur: "prudent", audacieux: "moyen", risque: "risque" };
 export const jourAbidjan = (d = new Date()) => d.toLocaleDateString("en-CA", { timeZone: "Africa/Abidjan" });
+/** Un coup du jour appartient au jour de son match (heure d'Abidjan), pas au jour où il a été calculé (22/11). */
+export const memeJour = (kickoff: string, jour: string) => jourAbidjan(new Date(kickoff)) === jour;
+/**
+ * Coups à montrer pour `jour` : ceux rangés à ce jour et ceux rangés la veille dont le match tombe ce jour-là
+ * (calculés l'après-midi avant le 22/11). Un match ne sert qu'une fois ; le rangement du jour passe devant.
+ */
+export function coupsDuJour<T extends { jour: string; kickoff: string | null; match_id: string | null }>(rows: T[], jour: string): T[] {
+  const vus = new Set<string>();
+  return [...rows].sort((a, b) => Number(a.jour !== jour) - Number(b.jour !== jour))
+    .filter((r) => r.kickoff && r.match_id && memeJour(r.kickoff, jour) && !vus.has(r.match_id) && !!vus.add(r.match_id));
+}
 
 export async function generateDailyPicks(db: Db, parCategorie = 3, refaire = false) {
   const jour = jourAbidjan();
@@ -30,7 +41,9 @@ export async function generateDailyPicks(db: Db, parCategorie = 3, refaire = fal
 
   const { data: ms } = await db.from("matches").select("id, kickoff_at, competition:competitions(code_externe)").eq("statut", "programme")
     .gte("kickoff_at", new Date(Date.now() + 20 * 60000).toISOString()).lte("kickoff_at", new Date(Date.now() + 24 * 3600000).toISOString()).limit(300);
-  const signals = await loadSignals(db as never, (ms ?? []).map((m) => m.id));
+  // seulement les matchs de ce jour : ceux du lendemain seront choisis le lendemain matin
+  const duJour = (ms ?? []).filter((m) => memeJour(m.kickoff_at, jour));
+  const signals = await loadSignals(db as never, duJour.map((m) => m.id));
   const compOf = new Map((ms ?? []).map((m) => [m.id, (Array.isArray(m.competition) ? m.competition[0] : m.competition)?.code_externe ?? ""]));
 
   type Cand = { match_id: string; market: string; param: number | null; sel: string; p: number; cote: number | null; pModele: number | null; cat: Categorie; score: number };

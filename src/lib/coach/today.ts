@@ -6,7 +6,7 @@ import { APP_NAME } from "@/lib/app-name";
 import type { createClient } from "@/lib/supabase/server";
 import { loadSignals, pickLabel, probOfSignal } from "../probs/signals";
 import { categorieFromOdds, categorieOf, profilDe, type Categorie } from "./categories";
-import { jourAbidjan } from "./daily";
+import { coupsDuJour, jourAbidjan } from "./daily";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
 type One<T> = T | T[] | null;
@@ -24,7 +24,7 @@ export async function loadToday(db: Db, userId: string) {
   const from = new Date(Date.now() - 3 * 3600000).toISOString(), to = new Date(Date.now() + 30 * 3600000).toISOString();
 
   const [{ data: picks }, { data: follows }, { data: perso }] = await Promise.all([
-    db.from("daily_picks").select(`id, categorie, rang, market_code, market_param, selection, probabilite, cote_ref, cote_juste, p_modele, match:matches(${MATCH})`).eq("jour", jour).order("rang"),
+    db.from("daily_picks").select(`id, jour, categorie, rang, market_code, market_param, selection, probabilite, cote_ref, cote_juste, p_modele, match:matches(${MATCH})`).in("jour", [jourAbidjan(new Date(Date.now() - 86400000)), jour]).order("rang"),
     db.from("source_follows").select("source_id").eq("user_id", userId),
     db.from("sources").select("id").eq("type", "perso").eq("created_by", userId).maybeSingle(),
   ]);
@@ -46,8 +46,8 @@ export async function loadToday(db: Db, userId: string) {
       .map((p) => ({ market_code: p.market_code, market_param: p.market_param, selection: p.selection, cote: p.cote_annoncee === null ? null : Number(p.cote_annoncee), qui: one(p.source)?.type === "perso" ? "Ton prono" : one(p.source)?.nom ?? "?", type: "prono" as const, publie: p.published_at, m: one(p.match)! })),
   ].filter((r) => r.m);
 
-  type P = { id: string; categorie: Categorie; rang: number; market_code: string; market_param: number | null; selection: string; probabilite: number; cote_ref: number | null; cote_juste: number; p_modele: number | null; match: One<M> };
-  const pickRows = (picks ?? []) as unknown as P[];
+  type P = { id: string; jour: string; categorie: Categorie; rang: number; market_code: string; market_param: number | null; selection: string; probabilite: number; cote_ref: number | null; cote_juste: number; p_modele: number | null; match: One<M> };
+  const pickRows = coupsDuJour(((picks ?? []) as unknown as P[]).map((p) => ({ ...p, kickoff: one(p.match)?.kickoff_at ?? null, match_id: one(p.match)?.id ?? null })), jour);
   const ids = [...new Set([...theirsRaw.map((r) => r.m.id), ...pickRows.map((p) => one(p.match)?.id).filter(Boolean) as string[]])];
   const signals = await loadSignals(db, ids);
   const names = (m: M) => ({ h: one(m.home)?.nom ?? "", a: one(m.away)?.nom ?? "" });
