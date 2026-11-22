@@ -1,0 +1,119 @@
+{
+  "profil": "claude",
+  "nom": "Claude",
+  "modele": "claude-sonnet-5-5",
+  "promptVersion": "tipster-ia-v1",
+  "essai": true,
+  "dossier": "16cfd28c425bf1d7",
+  "duree_s": 18,
+  "tours": 3,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 770
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 574
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 603
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 584
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M2",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M1",
+        "famille": "buts"
+      },
+      "ms": 3
+    }
+  ],
+  "jetons": {
+    "entree": 26356,
+    "sortie": 1883,
+    "cacheLu": 6297,
+    "cacheEcrit": 2099
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M2.217",
+      "mise": 2500,
+      "probabilite": 0.68,
+      "raison": "Marseille en grande forme (5 victoires sur 5, 2,2 buts marqués par match) face à un Le Mans 16e qui encaisse 1,9 but par match. Les cotes annoncent environ 3,3 buts, et le modèle voit plus de buts que le marché (xG 2,87-1,32). Je reste prudent sur la probabilité : le relevé de cote date de 12h40."
+    },
+    {
+      "option": "M3.216",
+      "mise": 2500,
+      "probabilite": 0.8,
+      "raison": "Getafe marque 0,7 but par match et l'Atlético encaisse 0,8. Le marché attend environ 2,4 buts et le modèle environ 2,1. Moins de 3,5 buts a une bonne marge de sécurité, mais la cote est basse, donc la mise reste petite."
+    }
+  ],
+  "abstention": "M1 : cotes cohérentes avec mon estimation, je n'y vois aucun avantage. M4 : match de Liga 2 sans modèle ni compositions, je ne le joue pas.",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M2.217",
+      "pari": "Plus de 2,5 buts",
+      "cote": 1.51,
+      "mise": 2500,
+      "probabilite": 0.68,
+      "raison": "Marseille en grande forme (5 victoires sur 5, 2,2 buts marqués par match) face à un Le Mans 16e qui encaisse 1,9 but par match. Les cotes annoncent environ 3,3 buts, et le modèle voit plus de buts que le marché (xG 2,87-1,32). Je reste prudent sur la probabilité : le relevé de cote date de 12h40."
+    },
+    {
+      "id": "M3.216",
+      "pari": "Moins de 3,5 buts",
+      "cote": 1.26,
+      "mise": 2500,
+      "probabilite": 0.8,
+      "raison": "Getafe marque 0,7 but par match et l'Atlético encaisse 0,8. Le marché attend environ 2,4 buts et le modèle environ 2,1. Moins de 3,5 buts a une bonne marge de sécurité, mais la cote est basse, donc la mise reste petite."
+    }
+  ],
+  "rejets": [],
+  "enregistres": []
+}
