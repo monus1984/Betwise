@@ -103,11 +103,20 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
   const rangStatut = (m: Row) => (m.statut === "en_cours" && !isStale(m.kickoff_at) ? 0 : m.statut === "programme" || m.statut === "reporte" ? 1 : 2);
   for (const l of groups.values()) l.sort((a, b) => rangStatut(a) - rangStatut(b) || (rangStatut(a) === 2 ? Date.parse(b.kickoff_at) - Date.parse(a.kickoff_at) : Date.parse(a.kickoff_at) - Date.parse(b.kickoff_at)));
   const cleGroupe = (code: string) => { const m = groups.get(code)![0]; return [rangStatut(m), rangStatut(m) === 2 ? -Date.parse(m.kickoff_at) : Date.parse(m.kickoff_at)] as const; };
-  const ordre = (a: string, b: string) => { const [ra, ka] = cleGroupe(a), [rb, kb] = cleGroupe(b); return ra - rb || ka - kb || (COMP_ORDER.indexOf(a) + 1 || 999) - (COMP_ORDER.indexOf(b) + 1 || 999); };
+  const rangComp = (c: string) => (COMPETITIONS[c]?.majeure ? 0 : 1) * 1000 + (COMP_ORDER.indexOf(c) + 1 || 999);
+  // Jour passé (P1-15) : tout est joué, l'heure ne veut plus rien dire ; les grandes compétitions d'abord
+  const jourPasse = !filtre && day < today;
+  const ordre = (a: string, b: string) => {
+    if (jourPasse) return rangComp(a) - rangComp(b);
+    const [ra, ka] = cleGroupe(a), [rb, kb] = cleGroupe(b); return ra - rb || ka - kb || (COMP_ORDER.indexOf(a) + 1 || 999) - (COMP_ORDER.indexOf(b) + 1 || 999);
+  };
   const epingles = [...groups.keys()].filter((c) => favoris.has(c)).sort(ordre);
   const autres = [...groups.keys()].filter((c) => !favoris.has(c)).sort(ordre);
   // Tops matchs (21/11) : le direct et les prochains matchs des grandes compétitions et de celles épinglées, 8 au plus
-  const tops = filtre || comp || etat === "termines" ? [] : rows
+  // Jour passé : les résultats des grandes compétitions et de celles épinglées
+  const tops = filtre || comp || etat === "termines" ? [] : jourPasse ? rows
+    .filter((m) => m.statut === "termine" && (COMPETITIONS[codeDe(m)]?.majeure || favoris.has(codeDe(m))))
+    .sort((a, b) => Number(!favoris.has(codeDe(a))) - Number(!favoris.has(codeDe(b))) || rangComp(codeDe(a)) - rangComp(codeDe(b)) || Date.parse(a.kickoff_at) - Date.parse(b.kickoff_at)).slice(0, 8) : rows
     .filter((m) => (m.statut === "programme" || (m.statut === "en_cours" && !isStale(m.kickoff_at))) && (COMPETITIONS[codeDe(m)]?.majeure || favoris.has(codeDe(m))))
     .sort((a, b) => rangStatut(a) - rangStatut(b) || Date.parse(a.kickoff_at) - Date.parse(b.kickoff_at)).slice(0, 8);
   const q = (d: string, c: string | null) => `/matchs?d=${d}${c ? `&c=${c}` : ""}`;
@@ -196,7 +205,7 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
 
       {tops.length > 0 && (
         <section aria-label="Tops matchs" className="mb-4">
-          <h2 className="mb-1.5 px-1 text-[15px] font-bold">Tops matchs</h2>
+          <h2 className="mb-1.5 px-1 text-[15px] font-bold">{jourPasse ? "Résultats des grands matchs" : "Tops matchs"}</h2>
           <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface shadow-card">
             {tops.map((m) => (
               <li key={m.id}>
@@ -241,7 +250,7 @@ function Ligne({ m, sg, starred, avecDate }: { m: Row; sg: Signal | null; starre
   const equipe = (nom: string, logo: string | null, gras: boolean, score: number | null) => (
     <span className="flex items-center gap-2">
       <TeamBadge name={nom} size={18} logo={logo} />
-      <span className={`min-w-0 flex-1 truncate text-[13.5px] leading-tight ${gras ? "font-semibold text-ink" : "text-ink-soft"}`}>{nom}</span>
+      <span className={`min-w-0 flex-1 line-clamp-2 text-[13.5px] leading-tight ${gras ? "font-semibold text-ink" : "text-ink-soft"}`}>{nom}</span>
       {(done || live) && <span className={`w-5 text-right font-display text-[15px] font-bold tabular-nums ${live ? "text-loss" : gras ? "text-ink" : "text-ink-soft"}`}>{score}</span>}
     </span>
   );

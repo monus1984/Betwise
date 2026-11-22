@@ -35,7 +35,7 @@ export function CarteMatchUI({ c }: { c: CarteMatch }) {
     <article className="tile flex flex-col gap-2.5 p-3">
       <Link href={`/matchs/${c.id}`} className="flex flex-col gap-2.5">
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-[11px] text-ink-muted">{COMP_SHORT[c.comp ?? ""] ?? c.comp} · {heure(c.kickoff)}</span>
+          <span className="min-w-0 text-[11px] leading-snug text-ink-muted">{COMP_SHORT[c.comp ?? ""] ?? c.comp} · {heure(c.kickoff)}</span>
           <span className="flex shrink-0 gap-1.5">
             {c.tonPari && <span className="rounded-md bg-brand-soft px-1.5 py-0.5 text-[10.5px] font-bold text-brand">Ton pari</span>}
             {direct && <span className="rounded-md bg-draw-soft px-1.5 py-0.5 text-[10.5px] font-bold text-draw-ink">En direct{c.minute ? ` · ${c.minute}e` : ""}</span>}

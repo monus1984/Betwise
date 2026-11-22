@@ -391,7 +391,7 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
                 <p className="flex items-center gap-2 text-xs font-medium text-slate-500">{raw.kind === "pronos" ? "Prono" : "Sélection"} {i + 1}
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${!l.include ? "bg-surface-2 text-ink-soft" : alerteDe(l) ? "bg-draw-soft text-draw-ink" : manque(l) ? "bg-loss-soft text-loss-ink" : !l.ok ? "bg-draw-soft text-draw-ink" : "bg-gain-soft text-gain-ink"}`}>{!l.include ? "Retirée" : alerteDe(l) ? "À vérifier" : manque(l) ? "Incomplète" : !l.ok ? "Gardée telle quelle" : "Lue"}</span>
                 </p>
-                <p className="truncate text-sm font-medium">{l.match ? `${l.match.home} – ${l.match.away}` : `${l.home_team ?? "?"} – ${l.away_team ?? "?"}`}</p>
+                <p className="text-sm font-medium leading-snug">{l.match ? `${l.match.home} – ${l.match.away}` : `${l.home_team ?? "?"} – ${l.away_team ?? "?"}`}</p>
                 <p className="text-xs text-slate-600">{l.ok ? pickLabel(l.market_code, l.market_param, l.selection, homeN, awayN) : l.libelle}</p>
                 {l.match
                   ? <p className="text-[11px] text-gain-ink">Match reconnu · {l.match.competition} · {new Date(l.match.kickoff_at).toLocaleString("fr-FR", { weekday: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}{l.match.score ? ` · score en base ${l.match.score}` : ""}{l.score_consistent === false ? " · ⚠ diffère du ticket" : ""}</p>

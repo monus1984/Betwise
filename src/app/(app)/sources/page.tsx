@@ -116,7 +116,7 @@ function Rang({ rang, id, nom, type, proof }: { rang: number; id: string; nom: s
       <Link href={`/sources/${id}`} className="tile flex items-center gap-3 p-3 active:bg-surface-2">
         <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold tabular-nums ${rang === 1 ? "bg-draw text-on-fill" : "bg-surface-2 text-ink-soft"}`}>{rang}</span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-semibold">{nom}</span>
+          <span className="block text-sm font-semibold leading-snug">{nom}</span>
           <span className="block text-[11px] text-ink-muted">{type} · {proof.prouvesGagnes} sur {proof.prouvesRegles} · {NIVEAU[niveau(proof)]}</span>
           <span className="mt-0.5 block text-[12px] text-ink-soft">Réussite {pc(reussite(proof))}{proof.attendu !== null ? ` · attendu ${pc(proof.attendu)}` : ""}</span>
         </span>

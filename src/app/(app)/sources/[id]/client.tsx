@@ -54,7 +54,7 @@ export function PredictionRow({ p, sourceId }: { p: PredictionView; sourceId: st
     <li className="rounded-xl border border-slate-200 bg-surface p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium">{p.label}{p.score ? <span className="ml-2 tabular-nums text-slate-500">{p.score}</span> : null}</p>
+          <p className="text-sm font-medium leading-snug">{p.label}{p.score ? <span className="ml-2 whitespace-nowrap tabular-nums text-slate-500">{p.score}</span> : null}</p>
           <p className="text-xs text-slate-600">
             {marketLabel(p.market, p.param, p.selection)}{p.cote ? ` · cote ${Number(p.cote).toFixed(2).replace(".", ",")}` : " · sans cote"}
             {p.risque && <span className={`ml-2 rounded border px-1.5 py-0.5 text-[10px] ${RISK_CLASS[p.risque]}`}>{RISK_LABEL[p.risque]}</span>}

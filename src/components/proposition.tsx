@@ -70,7 +70,7 @@ export function CarteProposition({ x }: { x: Proposition }) {
   return (
     <article className="tile flex h-full flex-col gap-2.5 p-3.5">
       <div className="flex items-center justify-between gap-2">
-        <span className="min-w-0 truncate text-[11px] text-ink-muted">{x.home} – {x.away}</span>
+        <span className="min-w-0 text-[11px] leading-snug text-ink-muted">{x.home} – {x.away}</span>
         <span className="shrink-0 text-[11px] text-ink-muted">{jourCourt(x.kickoff)} · {heure(x.kickoff)}</span>
       </div>
       <div className="flex items-center gap-3">

@@ -22,7 +22,7 @@ export function TicketAnalysisCard({ a }: { a: TicketAnalysis }) {
         {a.lignes.map((l, i) => (
           <li key={i} className="py-2">
             <div className="flex items-baseline justify-between gap-2 text-sm"><span className="truncate">{l.label}</span><span className="shrink-0 tabular-nums"><b>{pct(l.p)}</b> <span className="text-xs text-ink-muted">cote {fr(l.cote)}</span></span></div>
-            <p className="flex items-center gap-1.5 truncate text-[11px] text-ink-muted">{(() => { const c = profilDe(l.p, l.cote); return c ? <span className={`rounded-full border px-1.5 text-[10px] font-semibold ${CAT_STYLE[c]}`}>{CAT_LABEL[c]}</span> : null; })()}<span className="truncate">{l.match} · {ORIG[l.origine]}</span></p>
+            <p className="flex flex-wrap items-center gap-1.5 text-[11px] leading-snug text-ink-muted">{(() => { const c = profilDe(l.p, l.cote); return c ? <span className={`rounded-full border px-1.5 text-[10px] font-semibold ${CAT_STYLE[c]}`}>{CAT_LABEL[c]}</span> : null; })()}<span>{l.match} · {ORIG[l.origine]}</span></p>
             <div className="mt-1 h-1.5 rounded-full bg-surface-2"><div className={`h-1.5 rounded-full ${l.p >= 0.75 ? "bg-gain" : l.p >= 0.55 ? "bg-draw" : "bg-loss"}`} style={{ width: `${l.p * 100}%` }} /></div>
           </li>
         ))}

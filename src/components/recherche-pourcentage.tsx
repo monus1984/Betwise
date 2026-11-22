@@ -56,7 +56,7 @@ export function RecherchePourcentage({ options }: { options: OptionRecherche[] }
                   <span className="w-11 shrink-0 text-[12px] tabular-nums text-ink-soft">{heure(o.kickoff)}</span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-[13px] font-semibold leading-snug">{o.label}</span>
-                    <span className="block truncate text-[11px] text-ink-muted">{o.comp ? `${COMP_FLAG[o.comp] ?? ""} ` : ""}{o.home} – {o.away}</span>
+                    <span className="block leading-snug text-[11px] text-ink-muted">{o.comp ? `${COMP_FLAG[o.comp] ?? ""} ` : ""}{o.home} – {o.away}</span>
                   </span>
                   <span className="shrink-0 text-right">
                     <span className="block font-display text-base font-bold tabular-nums">{Math.round(o.p * 100)} %</span>

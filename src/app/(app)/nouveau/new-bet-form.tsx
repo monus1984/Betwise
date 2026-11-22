@@ -238,7 +238,7 @@ function UpcomingList({ matches, chosen, onSingle, onAdd, defaultOpen }: { match
               <li key={m.id} className={`flex items-center ${on ? "bg-brand/5" : ""}`}>
                 <button type="button" onClick={() => onSingle(m)} className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2 text-left active:bg-surface-2">
                   <span className="w-10 shrink-0 text-xs tabular-nums text-ink-muted">{new Date(m.kickoff_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: TZ })}</span>
-                  <span className="min-w-0 flex-1 truncate text-sm">{COMP_FLAG[m.competition] ?? "⚽"} {m.home} – {m.away}</span>
+                  <span className="min-w-0 flex-1 text-sm leading-snug">{COMP_FLAG[m.competition] ?? "⚽"} {m.home} – {m.away}</span>
                 </button>
                 <button type="button" aria-label={on ? "Déjà dans le pari" : "Ajouter au combiné"} onClick={() => onAdd(m)} className={`mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-sm font-semibold ${on ? "border-brand bg-brand text-on-fill" : "border-brand/40 text-brand"}`}>{on ? "✓" : "+"}</button>
               </li>

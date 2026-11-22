@@ -135,7 +135,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
                   <li key={o.matchId} className="flex items-center gap-3 px-3 py-2">
                     <Link href={`/matchs/${o.matchId}`} className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-medium">{o.label}</span>
-                      <span className="block truncate text-[11px] text-ink-muted">{COMP_FLAG[o.comp] ?? "⚽"} {shortName(o.home)} – {shortName(o.away)} · {time(o.kickoff)}</span>
+                      <span className="block text-[11px] leading-snug text-ink-muted">{COMP_FLAG[o.comp] ?? "⚽"} {shortName(o.home)} – {shortName(o.away)} · {time(o.kickoff)}</span>
                     </Link>
                     <span className="shrink-0 text-right tabular-nums"><span className="block text-sm font-semibold">{pct(o.p)}</span><span className="block text-[11px] text-ink-muted">{o.cote ? C(o.cote) : `≈ ${C(coteEstimee(o))}`}</span></span>
                   </li>
@@ -169,7 +169,7 @@ function SingleRow({ o, first, tester, more }: { o: Option; first: boolean; test
     <li className={`flex items-center gap-2.5 px-3 py-2.5 ${first ? "" : "border-t border-line"}`}>
       <Link href={`/matchs/${o.matchId}`} className="min-w-0 flex-1">
         <span className="line-clamp-2 text-sm font-medium leading-snug">{o.label}</span>
-        <span className="mt-0.5 block truncate text-[11px] text-ink-muted">{COMP_FLAG[o.comp] ?? "⚽"} {shortName(o.home)} – {shortName(o.away)} · {time(o.kickoff)}{o.source === "modele" ? " · modèle" : ""}{o.famille === "mitemps" ? " · % indicatif" : ""}</span>
+        <span className="mt-0.5 block text-[11px] leading-snug text-ink-muted">{COMP_FLAG[o.comp] ?? "⚽"} {shortName(o.home)} – {shortName(o.away)} · {time(o.kickoff)}{o.source === "modele" ? " · modèle" : ""}{o.famille === "mitemps" ? " · % indicatif" : ""}</span>
       </Link>
       <span className="w-[68px] shrink-0 text-right tabular-nums">
         <span className="block text-sm font-bold">{pct(o.p)}</span>

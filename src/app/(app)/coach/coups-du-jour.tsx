@@ -29,8 +29,8 @@ export function CoupsDuJour({ picks, theirs, mises, repli = [] }: { picks: Today
                 <li key={`${r.matchId}${r.selection}`}>
                   <Link href={`/matchs/${r.matchId}`} className="flex items-center gap-3 px-3 py-2 active:bg-surface-2">
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium">{r.selection}</span>
-                      <span className="block truncate text-[11px] text-ink-muted">{r.match} · {time(r.kickoff)}{r.estimation ? " · estimation" : r.cote ? ` · cote ${C(r.cote)}` : ""}</span>
+                      <span className="block leading-snug text-sm font-medium">{r.selection}</span>
+                      <span className="block leading-snug text-[11px] text-ink-muted">{r.match} · {time(r.kickoff)}{r.estimation ? " · estimation" : r.cote ? ` · cote ${C(r.cote)}` : ""}</span>
                     </span>
                     <span className="shrink-0 text-right tabular-nums">
                       <span className="block text-sm font-bold">{Math.round(r.p * 100)} %</span>
@@ -62,9 +62,9 @@ export function CoupsDuJour({ picks, theirs, mises, repli = [] }: { picks: Today
                       <li key={p.id} className="flex items-center pr-2">
                         <Link href={`/matchs/${p.match_id}`} className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2 active:bg-surface-2">
                           <span className="min-w-0 flex-1">
-                            <span className="block truncate text-sm font-medium">{p.selection}</span>
-                            <span className="block truncate text-[11px] text-ink-muted">{COMP_FLAG[p.comp ?? ""] ?? "⚽"} {p.match} · {p.statut === "termine" ? "terminé" : time(p.kickoff)}</span>
-                            {p.soutiens.length > 0 && <span className="block truncate text-[11px] font-medium text-gain">✓ aussi chez {p.soutiens.join(", ")}</span>}
+                            <span className="block leading-snug text-sm font-medium">{p.selection}</span>
+                            <span className="block leading-snug text-[11px] text-ink-muted">{COMP_FLAG[p.comp ?? ""] ?? "⚽"} {p.match} · {p.statut === "termine" ? "terminé" : time(p.kickoff)}</span>
+                            {p.soutiens.length > 0 && <span className="block leading-snug text-[11px] font-medium text-gain">✓ aussi chez {p.soutiens.join(", ")}</span>}
                           </span>
                           <span className="shrink-0 text-right tabular-nums">
                             <span className="block text-sm font-bold">{Math.round(p.p * 100)} %</span>
@@ -92,8 +92,8 @@ export function CoupsDuJour({ picks, theirs, mises, repli = [] }: { picks: Today
               <li key={i} className="rounded-lg bg-surface-2 p-2.5">
                 <div className="flex items-start justify-between gap-2">
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium">{t.selection}{t.cote ? <span className="font-normal text-ink-muted"> · {C(t.cote)}</span> : null}</span>
-                    <span className="block truncate text-[11px] text-ink-muted">{t.qui} · {t.match} · {time(t.kickoff)}</span>
+                    <span className="block leading-snug text-sm font-medium">{t.selection}{t.cote ? <span className="font-normal text-ink-muted"> · {C(t.cote)}</span> : null}</span>
+                    <span className="block leading-snug text-[11px] text-ink-muted">{t.qui} · {t.match} · {time(t.kickoff)}</span>
                   </span>
                   {t.categorie && <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${CAT_STYLE[t.categorie]}`}>{CAT_LABEL[t.categorie]}</span>}
                 </div>

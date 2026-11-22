@@ -374,7 +374,7 @@ function ProbBar({ p, light }: { p: { p1: number; pN: number; p2: number }; ligh
 function Compare({ label, m, k }: { label: string; m: number; k?: number }) {
   return (
     <div className="mb-2.5">
-      <div className="mb-1 flex justify-between text-sm"><span className="truncate">{label}</span><span className="tabular-nums"><b>{Math.round(m * 100)} %</b>{k !== undefined && <span className="ml-1.5 text-xs text-ink-muted">marché {Math.round(k * 100)} %</span>}</span></div>
+      <div className="mb-1 flex justify-between gap-2 text-sm"><span className="min-w-0 leading-snug">{label}</span><span className="tabular-nums"><b>{Math.round(m * 100)} %</b>{k !== undefined && <span className="ml-1.5 text-xs text-ink-muted">marché {Math.round(k * 100)} %</span>}</span></div>
       <div className="relative h-2 rounded-full bg-surface-2">
         <div className="h-2 rounded-full bg-brand" style={{ width: `${m * 100}%` }} />
         {k !== undefined && <div className="absolute -top-1 h-4 w-0.5 rounded bg-inverse" style={{ left: `calc(${k * 100}% - 1px)` }} />}
@@ -424,7 +424,7 @@ function OddsRow({ cells, market, param, upcoming, href }: { cells: { sel: strin
       {cells.map((c) => {
         const cote = c.o ? Number(c.o.cote) : null;
         const inner = (<>
-          <p className="truncate text-xs text-ink-muted">{c.name}</p>
+          <p className="min-h-[2lh] text-xs leading-snug text-ink-muted [overflow-wrap:anywhere]">{c.name}</p>
           <p className="text-lg font-semibold tabular-nums">{cote ? cote.toFixed(2).replace(".", ",") : "—"}</p>
           {cote && <p className="text-[11px] text-ink-muted">{Math.round(100 / cote)} %{riskFromOdds(cote) && <> · <span className={`rounded px-1 ${RISK_CLASS[riskFromOdds(cote)!]}`}>{RISK_LABEL[riskFromOdds(cote)!]}</span></>}</p>}
         </>);
