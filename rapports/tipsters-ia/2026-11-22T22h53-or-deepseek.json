@@ -1,0 +1,37 @@
+{
+  "profil": "or-deepseek",
+  "nom": "DeepSeek",
+  "modele": "deepseek/deepseek-v4.1-flash-1017",
+  "promptVersion": "tipster-ia-v1",
+  "essai": false,
+  "dossier": "4f53cda18c2baa0c",
+  "duree_s": 10,
+  "tours": 1,
+  "outils": [
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 1
+    }
+  ],
+  "jetons": {
+    "entree": 3495,
+    "sortie": 1198,
+    "cacheLu": 0,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 0,
+  "propositions": [],
+  "abstention": "Aucun match dans ce passage (liste vide) : rien à analyser, aucune cote 1xBet disponible, donc aucun pari possible ni souhaitable. Premier passage = moment de cadrage, pas d'obligation de miser.",
+  "carnetReecrit": true,
+  "retenus": [],
+  "rejets": [],
+  "enregistres": []
+}

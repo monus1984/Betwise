@@ -1,0 +1,37 @@
+{
+  "profil": "or-gemini",
+  "nom": "Gemini",
+  "modele": "google/gemini-4-carbon",
+  "promptVersion": "tipster-ia-v1",
+  "essai": false,
+  "dossier": "4f53cda18c2baa0c",
+  "duree_s": 26,
+  "tours": 1,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 0
+    }
+  ],
+  "jetons": {
+    "entree": 2988,
+    "sortie": 665,
+    "cacheLu": 0,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 0,
+  "propositions": [],
+  "abstention": "Aucun match disponible lors de ce premier passage (0 match à venir).",
+  "carnetReecrit": true,
+  "retenus": [],
+  "rejets": [],
+  "enregistres": []
+}

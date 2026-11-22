@@ -1,0 +1,37 @@
+{
+  "profil": "or-grok",
+  "nom": "Grok",
+  "modele": "x-ai/grok-4.7",
+  "promptVersion": "tipster-ia-v1",
+  "essai": false,
+  "dossier": "4f53cda18c2baa0c",
+  "duree_s": 20,
+  "tours": 1,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 0
+    }
+  ],
+  "jetons": {
+    "entree": 5345,
+    "sortie": 959,
+    "cacheLu": 3712,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 0,
+  "propositions": [],
+  "abstention": "Aucun match dans ce passage (liste vide). Rien à analyser, donc aucun pari.",
+  "carnetReecrit": true,
+  "retenus": [],
+  "rejets": [],
+  "enregistres": []
+}
