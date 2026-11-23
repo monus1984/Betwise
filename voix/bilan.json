@@ -1,0 +1,312 @@
+[
+ {
+  "voix": "ash",
+  "phrase": 1,
+  "ms": 2506,
+  "secondes": 6.3,
+  "octets": 300000,
+  "transcription": "Salut, c'est Betster. Aujourd'hui, j'ai repéré trois matchs qui valent le coup d'œil. On regarde ça ensemble ?",
+  "usage": {
+   "prompt_tokens": 99,
+   "completion_tokens": 168,
+   "total_tokens": 267,
+   "cost": 0.0004626,
+   "is_byok": false,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "audio_tokens": 0,
+    "video_tokens": 0
+   },
+   "cost_details": {
+    "upstream_inference_cost": 0.0004626,
+    "upstream_inference_prompt_cost": 0.0000594,
+    "upstream_inference_completions_cost": 0.0004032
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 0,
+    "image_tokens": 0,
+    "audio_tokens": 125
+   }
+  }
+ },
+ {
+  "voix": "ash",
+  "phrase": 2,
+  "ms": 2084,
+  "secondes": 9.8,
+  "octets": 468000,
+  "transcription": "Marseille reçoit Le Mans. Cote 1,51 pour plus de 2,5 buts. Marseille a gagné ses cinq derniers matchs, avec 2,2 buts par match.",
+  "usage": {
+   "prompt_tokens": 108,
+   "completion_tokens": 249,
+   "total_tokens": 357,
+   "cost": 0.0006624,
+   "is_byok": false,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "audio_tokens": 0,
+    "video_tokens": 0
+   },
+   "cost_details": {
+    "upstream_inference_cost": 0.0006624,
+    "upstream_inference_prompt_cost": 0.0000648,
+    "upstream_inference_completions_cost": 0.0005976
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 0,
+    "image_tokens": 0,
+    "audio_tokens": 195
+   }
+  }
+ },
+ {
+  "voix": "ash",
+  "phrase": 3,
+  "ms": 1697,
+  "secondes": 7.9,
+  "octets": 376800,
+  "transcription": "Attention : tu as déjà misé 2 500 francs cette semaine, sur un budget de 3 000. Il te reste 500 francs.",
+  "usage": {
+   "prompt_tokens": 101,
+   "completion_tokens": 202,
+   "total_tokens": 303,
+   "cost": 0.0005454,
+   "is_byok": false,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "audio_tokens": 0,
+    "video_tokens": 0
+   },
+   "cost_details": {
+    "upstream_inference_cost": 0.0005454,
+    "upstream_inference_prompt_cost": 0.0000606,
+    "upstream_inference_completions_cost": 0.0004848
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 0,
+    "image_tokens": 0,
+    "audio_tokens": 157
+   }
+  }
+ },
+ {
+  "voix": "ash",
+  "phrase": 4,
+  "ms": 2578,
+  "secondes": 6.7,
+  "octets": 319200,
+  "transcription": "Ce pari n'est pas sûr. Il a environ 68 chances sur 100 de passer, et ça veut dire qu'il peut perdre.",
+  "usage": {
+   "prompt_tokens": 98,
+   "completion_tokens": 176,
+   "total_tokens": 274,
+   "cost": 0.0004812,
+   "is_byok": false,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "audio_tokens": 0,
+    "video_tokens": 0
+   },
+   "cost_details": {
+    "upstream_inference_cost": 0.0004812,
+    "upstream_inference_prompt_cost": 0.0000588,
+    "upstream_inference_completions_cost": 0.0004224
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 0,
+    "image_tokens": 0,
+    "audio_tokens": 133
+   }
+  }
+ },
+ {
+  "voix": "ash",
+  "phrase": 5,
+  "ms": 1832,
+  "secondes": 6.4,
+  "octets": 304800,
+  "transcription": "Bravo ! Ton pari sur Ajax est gagné : 1 000 francs misés, 1 160 francs récupérés.",
+  "usage": {
+   "prompt_tokens": 95,
+   "completion_tokens": 166,
+   "total_tokens": 261,
+   "cost": 0.0004554,
+   "is_byok": false,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "audio_tokens": 0,
+    "video_tokens": 0
+   },
+   "cost_details": {
+    "upstream_inference_cost": 0.0004554,
+    "upstream_inference_prompt_cost": 0.000057,
+    "upstream_inference_completions_cost": 0.0003984
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 0,
+    "image_tokens": 0,
+    "audio_tokens": 127
+   }
+  }
+ },
+ {
+  "voix": "echo",
+  "phrase": 1,
+  "ms": 1712,
+  "secondes": 6.4,
+  "octets": 304800,
+  "transcription": "Salut, c'est Betster. Aujourd'hui, j'ai repéré trois matchs qui valent le coup d'œil. On regarde ça ensemble ?",
+  "usage": {
+   "prompt_tokens": 99,
+   "completion_tokens": 169,
+   "total_tokens": 268,
+   "cost": 0.000465,
+   "is_byok": false,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "audio_tokens": 0,
+    "video_tokens": 0
+   },
+   "cost_details": {
+    "upstream_inference_cost": 0.000465,
+    "upstream_inference_prompt_cost": 0.0000594,
+    "upstream_inference_completions_cost": 0.0004056
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 0,
+    "image_tokens": 0,
+    "audio_tokens": 127
+   }
+  }
+ },
+ {
+  "voix": "echo",
+  "phrase": 2,
+  "ms": 1983,
+  "secondes": 9.7,
+  "octets": 463200,
+  "transcription": "Marseille reçoit Le Mans. Cote 1,51 pour plus de 2,5 buts. Marseille a gagné ses cinq derniers matchs, avec 2,2 buts par match.",
+  "usage": {
+   "prompt_tokens": 108,
+   "completion_tokens": 245,
+   "total_tokens": 353,
+   "cost": 0.0006528,
+   "is_byok": false,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "audio_tokens": 0,
+    "video_tokens": 0
+   },
+   "cost_details": {
+    "upstream_inference_cost": 0.0006528,
+    "upstream_inference_prompt_cost": 0.0000648,
+    "upstream_inference_completions_cost": 0.000588
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 0,
+    "image_tokens": 0,
+    "audio_tokens": 193
+   }
+  }
+ },
+ {
+  "voix": "echo",
+  "phrase": 3,
+  "ms": 1822,
+  "secondes": 7.7,
+  "octets": 367200,
+  "transcription": "Attention : tu as déjà misé 2 500 francs cette semaine, sur un budget de 3 000. Il te reste 500 francs.",
+  "usage": {
+   "prompt_tokens": 101,
+   "completion_tokens": 198,
+   "total_tokens": 299,
+   "cost": 0.0005358,
+   "is_byok": false,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "audio_tokens": 0,
+    "video_tokens": 0
+   },
+   "cost_details": {
+    "upstream_inference_cost": 0.0005358,
+    "upstream_inference_prompt_cost": 0.0000606,
+    "upstream_inference_completions_cost": 0.0004752
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 0,
+    "image_tokens": 0,
+    "audio_tokens": 153
+   }
+  }
+ },
+ {
+  "voix": "echo",
+  "phrase": 4,
+  "ms": 1659,
+  "secondes": 6.2,
+  "octets": 297600,
+  "transcription": "Ce pari n'est pas sûr. Il a environ 68 chances sur 100 de passer, et ça veut dire qu'il peut perdre.",
+  "usage": {
+   "prompt_tokens": 98,
+   "completion_tokens": 164,
+   "total_tokens": 262,
+   "cost": 0.0004524,
+   "is_byok": false,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "audio_tokens": 0,
+    "video_tokens": 0
+   },
+   "cost_details": {
+    "upstream_inference_cost": 0.0004524,
+    "upstream_inference_prompt_cost": 0.0000588,
+    "upstream_inference_completions_cost": 0.0003936
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 0,
+    "image_tokens": 0,
+    "audio_tokens": 124
+   }
+  }
+ },
+ {
+  "voix": "echo",
+  "phrase": 5,
+  "ms": 1480,
+  "secondes": 5.7,
+  "octets": 271200,
+  "transcription": "Bravo ! Ton pari sur Ajax est gagné : 1 000 francs misés, 1 160 francs récupérés.",
+  "usage": {
+   "prompt_tokens": 95,
+   "completion_tokens": 150,
+   "total_tokens": 245,
+   "cost": 0.000417,
+   "is_byok": false,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "audio_tokens": 0,
+    "video_tokens": 0
+   },
+   "cost_details": {
+    "upstream_inference_cost": 0.000417,
+    "upstream_inference_prompt_cost": 0.000057,
+    "upstream_inference_completions_cost": 0.00036
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 0,
+    "image_tokens": 0,
+    "audio_tokens": 113
+   }
+  }
+ }
+]
