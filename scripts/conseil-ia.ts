@@ -14,7 +14,8 @@ import Anthropic from "@anthropic-ai/sdk";
 
 export const PANELS: Record<string, Record<string, string>> = {
   grands: { ChatGPT: "openai/gpt-6.2-sol", Gemini: "google/gemini-4-carbon", Grok: "x-ai/grok-4.7", DeepSeek: "deepseek/deepseek-v4.1-flash-1017" },
-  gratuit: { Gemma: "google/gemma-4-31b-it:free", Nemotron: "nvidia/nemotron-3-ultra-550b-a55b:free", "Routeur gratuit": "openrouter/free" },
+  // Gemma 4 gratuit renvoyait « Provider returned error » le 23/11 : retiré
+  gratuit: { Nemotron: "nvidia/nemotron-3-ultra-550b-a55b:free", "Routeur gratuit": "openrouter/free" },
 };
 const TOUS = { ...PANELS.grands, ...PANELS.gratuit } as Record<string, string>;
 const MAX_SORTIE = 6000; // les modèles qui réfléchissent avant de répondre ont besoin de marge (23/11)
@@ -102,7 +103,7 @@ async function main() {
   if (process.env.ANTHROPIC_API_KEY && valides.length) {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const res = await client.messages.create({ model: process.env.CLAUDE_TIPSTER_MODEL || "claude-sonnet-5-5", max_tokens: 1500,
-      messages: [{ role: "user", content: `Voici la question et les avis de plusieurs IA. Fais-en la synthèse pour Mounir, en français, 12 lignes au plus : points d'accord, désaccords, ce qui te semble faux, et ce que tu proposes de retenir. Ne répète pas les avis.\n\nQuestion : ${question || issue.title}\n\n${valides.map((r) => `### ${r.nom}\n${r.texte}`).join("\n\n")}` }] });
+      messages: [{ role: "user", content: `Voici la question et les avis de plusieurs IA. Les IA ont lu le fil et, s'il y en a, ces fichiers : ${fichiers.map((f) => f.chemin).join(", ") || "aucun"} (tu ne les as pas sous les yeux). Fais-en la synthèse pour Mounir, en français, 12 lignes au plus : points d'accord, désaccords, ce qui te semble faux, et ce que tu proposes de retenir. Ne répète pas les avis.\n\nQuestion : ${question || issue.title}\n\n${valides.map((r) => `### ${r.nom}\n${r.texte}`).join("\n\n")}` }] });
     synthese = res.content.filter((c): c is Anthropic.TextBlock => c.type === "text").map((c) => c.text).join("\n").trim();
     coutSynthese = Math.round((res.usage.input_tokens * 2e-6 + res.usage.output_tokens * 1e-5) * 10000) / 10000;
   }
