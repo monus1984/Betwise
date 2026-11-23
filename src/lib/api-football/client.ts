@@ -3,7 +3,7 @@ const BASE = "https://v3.football.api-sports.io";
 
 export type AfFixture = {
   fixture: { id: number; date: string; status: { short: string; elapsed: number | null } };
-  league: { id: number; season: number; round?: string };
+  league: { id: number; season: number; round?: string; name?: string; country?: string };
   teams: { home: { id: number; name: string; winner?: boolean | null }; away: { id: number; name: string; winner?: boolean | null } };
   /** Présents seulement quand le match est demandé par identifiant (byIds). */
   events?: { time: { elapsed: number | null; extra: number | null }; team: { id: number }; player: { name: string | null }; type: string; detail: string; comments: string | null }[];
@@ -53,6 +53,15 @@ export class ApiFootball {
   standings(league: number, season: number) {
     return this.get<{ league: { standings: AfStanding[][] } }>(`/standings?league=${league}&season=${season}`).then((j) => j.response[0]?.league.standings ?? []);
   }
+
+  /** Recherche d'équipe par nom (3 lettres au moins, sans accents ni ponctuation). */
+  searchTeams(nom: string) {
+    return this.get<{ team: { id: number; name: string; country: string | null; national: boolean } }>(`/teams?search=${encodeURIComponent(nom)}`).then((j) => j.response.map((x) => x.team));
+  }
+  /** Prochains ou derniers matchs d'une équipe, toutes compétitions. */
+  teamFixtures(team: number, sens: "next" | "last", n = 3) { return this.get<AfFixture>(`/fixtures?team=${team}&${sens}=${n}`).then((j) => j.response); }
+  /** Cotes d'avant-match d'un seul match, tous bookmakers. */
+  oddsFixture(fixture: number) { return this.get<AfOdds>(`/odds?fixture=${fixture}`).then((j) => j.response[0] ?? null); }
 
   /** Cotes d'avant-match d'une compétition (10 matchs par page), tous bookmakers ou un seul. */
   async odds(league: number, season: number, maxPages = 12, bookmaker?: number) {

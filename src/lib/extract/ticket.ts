@@ -11,6 +11,9 @@ import { normalizeTeam, teamSimilarity } from "../odds-api/client";
 import { loadSignals, probOfSignal } from "../probs/signals";
 import { coteEstimee } from "../options/build";
 import { selectionCombo } from "../bets/combo";
+import { ApiFootball } from "../api-football/client";
+import { completerMatchs } from "../api-football/a-la-demande";
+import { createAdminClient } from "../supabase/admin";
 
 type Db = SupabaseClient<Database, "betwise">;
 
@@ -724,6 +727,7 @@ export async function extractTickets(db: Db, input: { images?: LlmImage[]; text?
   const res = await llm.extract({ system: SYSTEM, user, images: input.images, schema: SCHEMA_MULTI as unknown as Record<string, unknown>, maxTokens: 12000 });
   const raws = rawMulti.parse(res.json).tickets.slice(0, 12);
 
+  const construire = async () => {
   // Fenêtre de recherche des matchs : ±10 jours autour d'aujourd'hui (les tickets importés sont récents)
   const from = new Date(Date.now() - 10 * 86400000).toISOString();
   const to = new Date(Date.now() + 10 * 86400000).toISOString();
@@ -760,6 +764,26 @@ export async function extractTickets(db: Db, input: { images?: LlmImage[]; text?
     // Coût de l'appel compté une fois, sur le premier ticket
     return { raw, selections, checks, placed_at_iso: parseFrDate(raw.placed_at) ?? parsePublished(raw.source?.published_at ?? null), usage: { tokensIn: k ? 0 : res.tokensIn, tokensOut: k ? 0 : res.tokensOut, model: res.model } };
   });
+  return out;
+  };
+  let out = await construire();
+
+  // Équipes introuvables (championnats que BETWISE ne suit pas) : on va chercher leur match chez API-Football,
+  // on l'ajoute avec ses cotes, puis on refait le rapprochement (23/11).
+  const manquants: { equipe: string; adversaire: string | null; ref: string }[] = [];
+  for (const t of out) {
+    const ref = parseFrDate(t.raw.placed_at) ?? parsePublished(t.raw.source?.published_at ?? null) ?? new Date().toISOString();
+    t.selections.forEach((x, j) => {
+      if (x.match) return;
+      const s = t.raw.selections[j], equipe = s?.team_only ?? s?.home_team ?? null;
+      if (equipe) manquants.push({ equipe, adversaire: s.team_only ? null : s.away_team ?? null, ref });
+    });
+  }
+  if (manquants.length && process.env.API_FOOTBALL_KEY) {
+    const api = new ApiFootball(process.env.API_FOOTBALL_KEY);
+    const r = await completerMatchs(createAdminClient(), api, manquants).catch(() => ({ ajoutes: 0, requetes: 0 }));
+    if (r.ajoutes) out = await construire();
+  }
 
   // Chance estimée de chaque ligne reconnue (contrôle de vraisemblance à l'écran), et pour les pronos sans cote :
   // cote de référence quand elle existe, sinon cote estimée à partir des probabilités (marquée comme telle)
