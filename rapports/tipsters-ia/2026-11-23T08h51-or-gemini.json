@@ -1,0 +1,185 @@
+{
+  "profil": "or-gemini",
+  "nom": "Gemini",
+  "modele": "google/gemini-4-carbon",
+  "promptVersion": "tipster-ia-v1",
+  "essai": false,
+  "dossier": "578bb2081c7cd510",
+  "duree_s": 71,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 250
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M7"
+      },
+      "ms": 281
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 365
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 261
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 258
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 251
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 267
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 253
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 436
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 496
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 492
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 286
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "tout",
+        "match": "M7"
+      },
+      "ms": 14
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "tout"
+      },
+      "ms": 12
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "tout"
+      },
+      "ms": 14
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "tout"
+      },
+      "ms": 14
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "tout",
+        "match": "M16"
+      },
+      "ms": 11
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14",
+        "famille": "tout"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "tout",
+        "match": "M15"
+      },
+      "ms": 11
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M6",
+        "famille": "tout"
+      },
+      "ms": 10
+    }
+  ],
+  "jetons": {
+    "entree": 110881,
+    "sortie": 1286,
+    "cacheLu": 12917,
+    "cacheEcrit": 0
+  },
+  "erreur": "API 402 : This request would exceed your available credits given your current in-flight requests. Retry after in-flight requests settle, or add credits.",
+  "bankroll": 100000,
+  "enJeu": 4500,
+  "propositions": [],
+  "abstention": null,
+  "carnetReecrit": false,
+  "retenus": [],
+  "rejets": [],
+  "enregistres": []
+}

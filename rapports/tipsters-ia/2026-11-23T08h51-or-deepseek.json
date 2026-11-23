@@ -1,0 +1,182 @@
+{
+  "profil": "or-deepseek",
+  "nom": "DeepSeek",
+  "modele": "deepseek/deepseek-v4.1-flash-1017",
+  "promptVersion": "tipster-ia-v1",
+  "essai": false,
+  "dossier": "578bb2081c7cd510",
+  "duree_s": 53,
+  "tours": 5,
+  "outils": [
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 2
+    },
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 287
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 492
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 966
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 469
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 364
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 455
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 275
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M7"
+      },
+      "ms": 454
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 266
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 444
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 11
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 13
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 19
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 21
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 12
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M7"
+      },
+      "ms": 10
+    }
+  ],
+  "jetons": {
+    "entree": 235879,
+    "sortie": 6361,
+    "cacheLu": 19456,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "mise": 5000,
+      "option": "M12.2",
+      "probabilite": 0.55,
+      "raison": "Ceuta est dernière (22e, 5 pts en 14 matchs) et vient d'enchaîner 5 défaites de suite, avec 0,7 but marqué pour 2,3 encaissé par match ; elle a encaissé 32 buts en 14 journées. Almeria est 2e (32 pts), invaincue sur ses 5 derniers (3 v., 1,9 marqué / 0,8 encaissé) et joue la tête du championnat (1 point de Castellon). La cote de 1,95 sur l'équipe visiteuse est généreuse pour cet écart de niveau et de forme ; j'estime la victoire d'Almeria à ~55 %, au-dessus des 50,4 % implicites du marché."
+    },
+    {
+      "mise": 3000,
+      "option": "M16.15",
+      "probabilite": 0.6,
+      "raison": "Brentford est privé de plusieurs titulaires (Collins, Hickey, Henry, Dasilva, Furo, et Thiago suspendu) et reste sur un 0-2 à Brighton ; Everton est solide (2 v. / 2 d. sur 5, seulement 1,0 but encaissé par match) et joue une place européenne. Les deux équipes marquent est proposé à 1,64 alors que le marché le chiffre à 56,6 % : avec la fébrilité défensive de Brentford et le besoin de points d'Everton, je le vois plutôt à ~60 %."
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": false,
+  "retenus": [
+    {
+      "id": "M12.2",
+      "pari": "Almeria",
+      "cote": 1.95,
+      "mise": 5000,
+      "probabilite": 0.55,
+      "raison": "Ceuta est dernière (22e, 5 pts en 14 matchs) et vient d'enchaîner 5 défaites de suite, avec 0,7 but marqué pour 2,3 encaissé par match ; elle a encaissé 32 buts en 14 journées. Almeria est 2e (32 pts), invaincue sur ses 5 derniers (3 v., 1,9 marqué / 0,8 encaissé) et joue la tête du championnat (1 point de Castellon). La cote de 1,95 sur l'équipe visiteuse est généreuse pour cet écart de niveau et de forme ; j'estime la victoire d'Almeria à ~55 %, au-dessus des 50,4 % implicites du marché."
+    },
+    {
+      "id": "M16.15",
+      "pari": "Les deux marquent",
+      "cote": 1.64,
+      "mise": 3000,
+      "probabilite": 0.6,
+      "raison": "Brentford est privé de plusieurs titulaires (Collins, Hickey, Henry, Dasilva, Furo, et Thiago suspendu) et reste sur un 0-2 à Brighton ; Everton est solide (2 v. / 2 d. sur 5, seulement 1,0 but encaissé par match) et joue une place européenne. Les deux équipes marquent est proposé à 1,64 alors que le marché le chiffre à 56,6 % : avec la fébrilité défensive de Brentford et le besoin de points d'Everton, je le vois plutôt à ~60 %."
+    }
+  ],
+  "rejets": [],
+  "enregistres": [
+    "M12.2",
+    "M16.15"
+  ]
+}

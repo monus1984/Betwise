@@ -1,0 +1,74 @@
+{
+  "profil": "claude",
+  "nom": "Claude",
+  "modele": "claude-sonnet-5-5",
+  "promptVersion": "tipster-ia-v1",
+  "essai": false,
+  "dossier": "578bb2081c7cd510",
+  "duree_s": 10,
+  "tours": 3,
+  "outils": [
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 3
+    },
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 572
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 487
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 476
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14",
+        "famille": "buts"
+      },
+      "ms": 2
+    }
+  ],
+  "jetons": {
+    "entree": 25502,
+    "sortie": 965,
+    "cacheLu": 6333,
+    "cacheEcrit": 2111
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 2000,
+  "propositions": [],
+  "abstention": "J'ai analysé M13 (Monza–Fiorentina), M14 (Nantes–Grenoble) et M16 (Brentford–Everton). Les probabilités du marché et du modèle BETWISE y sont presque identiques, et je n'ai trouvé aucun avantage net. Nantes n'est que 14e avec 12 points et reste très modeste en forme pour une cote de 1,44. Les compositions ne sont pas publiées. Je n'ai pas regardé les autres matchs, des ligues secondaires sans modèle ni compositions. Je garde le seul pari déjà joué aujourd'hui (M5) et je m'abstiens.",
+  "carnetReecrit": false,
+  "retenus": [],
+  "rejets": [],
+  "enregistres": []
+}

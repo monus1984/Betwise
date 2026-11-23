@@ -1,0 +1,141 @@
+{
+  "profil": "or-chatgpt",
+  "nom": "ChatGPT",
+  "modele": "openai/gpt-6.2-sol",
+  "promptVersion": "tipster-ia-v1",
+  "essai": false,
+  "dossier": "578bb2081c7cd510",
+  "duree_s": 13,
+  "tours": 3,
+  "outils": [
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 2
+    },
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 475
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 1068
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 461
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 483
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 256
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 264
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 251
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M9"
+      },
+      "ms": 373
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5",
+        "famille": "buts"
+      },
+      "ms": 2
+    }
+  ],
+  "jetons": {
+    "entree": 47779,
+    "sortie": 711,
+    "cacheLu": 10729,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 0,
+  "propositions": [],
+  "abstention": "Aucun pari à 08 h 50. Le plus de 2,5 buts sur Levante–Elche à 1,73 est l’option la plus proche : 56,7 % côté marché, 61,9 % côté modèle, estimation prudente autour de 59 % pour un seuil de 57,8 %. L’écart est trop mince avant les compositions. Almeria à 1,95 demande 51,3 % contre 50,4 % côté marché ; le classement et la forme expliquent son statut de favori, mais sans modèle ni information nouvelle, je ne relève pas assez cette estimation pour miser. Sur Brentford à 2,36, le modèle est plus optimiste que le marché (45,1 % contre 41,3 %), mais les absences signalées et les compositions non publiées rendent l’écart trop fragile. Aucun pari réglé : carnet inchangé.",
+  "carnetReecrit": false,
+  "retenus": [],
+  "rejets": [],
+  "enregistres": []
+}

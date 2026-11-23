@@ -1,0 +1,257 @@
+{
+  "profil": "or-grok",
+  "nom": "Grok",
+  "modele": "x-ai/grok-4.7",
+  "promptVersion": "tipster-ia-v1",
+  "essai": false,
+  "dossier": "578bb2081c7cd510",
+  "duree_s": 58,
+  "tours": 6,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 2
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 254
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M7"
+      },
+      "ms": 362
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 286
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 267
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 468
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 256
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 286
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M9"
+      },
+      "ms": 254
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 544
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 348
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 248
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 357
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "buts"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M10",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M9",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M15",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "mitemps"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M8",
+        "famille": "buts"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M6",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M7",
+        "famille": "buts"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M10",
+        "famille": "resultat"
+      },
+      "ms": 3
+    }
+  ],
+  "jetons": {
+    "entree": 238626,
+    "sortie": 4147,
+    "cacheLu": 134144,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 0,
+  "propositions": [],
+  "abstention": "Aucun pari ne franchit le seuil cote × proba ≥ 1,08. M1–M5 déjà écartés ce matin, lecture inchangée. Sur M6–M16, formes, enjeux et buts attendus reproduisent les probabilités du marché (modèle absent hors grands championnats, ou collé au marché sur M13 et M16). Seul écart notable : M17 Levante–Elche, modèle 3,22 buts contre 2,96 marché — plus de 2,5 à 1,73 (marché 56,7 %, modèle 61,9 %, ma proba ~60 %, EV ~1,04), plus de 3 à 2,13 (44,2 % / 51,3 %, ma proba ~48 %, EV ~1,02), BTTS 1,55 (58,9 % / 63,8 %, ~62 %, EV ~0,96). Sous le seuil, et les deux sont en zone de relégation (1–2 pts de Getafe), ce qui peut fermer le match. Compositions non publiées partout, absents Brentford nombreux (M16) : incertitude, pas un edge. Mieux vaut ne rien engager.",
+  "carnetReecrit": true,
+  "retenus": [],
+  "rejets": [],
+  "enregistres": []
+}
