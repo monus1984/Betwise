@@ -3,19 +3,43 @@ import { pickLabel } from "@/lib/probs/signals";
 import { desaccords } from "@/lib/sources/desaccord";
 import { resume, type Proof } from "@/lib/sources/proof";
 import { Empty } from "@/components/ui";
+import { consensus, estIA } from "@/lib/sources/consensus";
 
-type Prono = { id: string; sourceId: string; source: string; market: string; param: number | null; sel: string; cote: number | null; prouve: boolean; resultat: string };
+type Prono = { id: string; sourceId: string; source: string; type?: string; market: string; param: number | null; sel: string; cote: number | null; prouve: boolean; resultat: string };
 
 /** Ce que disent les sources sur ce match : chaque prono avec son niveau de preuve, et les contradictions entre elles. */
-export function MatchSources({ pronos, proofs, home, away, joue }: { pronos: Prono[]; proofs: Record<string, Proof>; home: string; away: string; joue: boolean }) {
+export function MatchSources({ pronos, proofs, home, away, joue, verdict }: { pronos: Prono[]; proofs: Record<string, Proof>; home: string; away: string; joue: boolean; verdict?: { market: string; param: number | null; sel: string; label: string } | null }) {
   if (pronos.length === 0) return <Empty titre="Aucun prono sur ce match">Quand une de tes sources en donne un, charge son coupon : il comptera dans sa note et nourrira tes comparaisons.</Empty>;
   const lib = (p: Prono) => pickLabel(p.market, p.param, p.sel, home, away);
   const conflits = desaccords(pronos.map((p) => ({ source: p.source, market: p.market, param: p.param, sel: p.sel })));
   const parSource = new Map<string, Prono[]>();
   for (const p of pronos) parSource.set(p.sourceId, [...(parSource.get(p.sourceId) ?? []), p]);
 
+  // Recoupements et conclusion de Betster (23/11) : avant le match seulement, sans tes propres choix ni le modèle
+  const avis = pronos.filter((p) => p.type !== "perso" && p.type !== "modele_betwise").map((p) => ({ sourceId: p.sourceId, nom: p.source, ia: estIA(p.source), regles: proofs[p.sourceId]?.prouvesRegles ?? 0, market: p.market, param: p.param, sel: p.sel, cote: p.cote }));
+  const cs = !joue && avis.length ? consensus(avis, verdict ?? null) : null;
+
   return (
     <div className="space-y-3">
+      {cs && (
+        <section className="rounded-xl border border-brand/30 bg-surface p-3" aria-label="Recoupements">
+          <h2 className="text-sm font-semibold">Ce que disent les sources</h2>
+          <ul className="mt-2 space-y-1.5 text-[13px]">
+            {cs.groupes.slice(0, 5).map((g) => {
+              const conf = g.humains.filter((h) => h.regles >= 30).length;
+              const qui = [g.betster ? "Betster" : "", conf ? `${conf} confirmée${conf > 1 ? "s" : ""}` : "", g.humains.length - conf ? `${g.humains.length - conf} autre${g.humains.length - conf > 1 ? "s" : ""}` : "", g.ia.length ? `IA ${g.ia.length} sur ${cs.iaTotal || g.ia.length}` : ""].filter(Boolean).join(" · ");
+              return (
+                <li key={`${g.market}${g.param}${g.sel}`} className="flex items-baseline justify-between gap-3">
+                  <span className={`min-w-0 ${g.betster ? "font-semibold" : ""}`}>{pickLabel(g.market, g.param, g.sel, home, away)}</span>
+                  <span className="shrink-0 text-[11px] text-ink-muted">{qui}</span>
+                </li>
+              );
+            })}
+          </ul>
+          <p className="mt-2.5 rounded-lg bg-surface-2 p-2.5 text-[13px] leading-snug"><b>Betster :</b> {cs.conclusion}</p>
+          <p className="mt-1.5 text-[11px] leading-snug text-ink-muted">Ne comptent que les sources confirmées (30 pronos réglés au moins). Les tipsters IA lisent les mêmes données : ensemble, ils valent un seul avis.</p>
+        </section>
+      )}
       {conflits.length > 0 && (
         <section className="rounded-xl border border-draw/40 bg-draw-soft p-3" aria-label="Désaccords entre sources">
           <p className="text-sm font-semibold text-draw-ink">{conflits.length > 1 ? `${conflits.length} désaccords entre tes sources` : "Tes sources ne sont pas d’accord"}</p>

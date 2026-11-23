@@ -91,7 +91,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const extras: Extras | null = onglet === "stats" ? await getExtras({ id: m.id, af_fixture_id: m.af_fixture_id, kickoff_at: m.kickoff_at, statut: m.statut }) : null;
   const srcIds = [...new Set((preds ?? []).map((p) => one(p.source as { id: string } | { id: string }[] | null)?.id).filter((x): x is string => !!x))];
   const { data: proofs } = onglet === "sources" && srcIds.length ? await supabase.from("source_proof").select("*").in("source_id", srcIds) : { data: [] };
-  const recit = onglet === "analyse" && m.statut !== "termine" ? await loadRecit(supabase as never, m.id) : null;
+  const recit = (onglet === "analyse" || onglet === "sources") && m.statut !== "termine" ? await loadRecit(supabase as never, m.id) : null;
   const picks = sg ? picksOf(sg).filter((p) => p.p >= 0.6 && p.p <= 0.95).slice(0, 4) : [];
   const parier = (market: string, sel: string, cote?: number, param?: number) => `/nouveau?match=${m.id}&market=${market}${param !== undefined ? `&param=${param}` : ""}&sel=${encodeURIComponent(sel)}${cote ? `&cote=${cote}` : ""}`;
 
@@ -336,8 +336,8 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
       )}
 
       {onglet === "sources" && (
-        <MatchSources home={shortName(home)} away={shortName(away)} joue={m.statut === "termine"}
-          pronos={(preds ?? []).map((p) => { const src = one(p.source as { id: string; nom: string; type: string } | { id: string; nom: string; type: string }[] | null); return { id: p.id, sourceId: src?.id ?? "", source: src?.nom ?? "?", market: p.market_code, param: p.market_param === null ? null : Number(p.market_param), sel: p.selection, cote: p.cote_annoncee === null ? null : Number(p.cote_annoncee), prouve: p.statut === "verifie", resultat: p.resultat }; })}
+        <MatchSources home={shortName(home)} away={shortName(away)} joue={m.statut === "termine"} verdict={recit?.verdict ? { market: recit.verdict.market, param: recit.verdict.param, sel: recit.verdict.sel, label: recit.verdict.label } : null}
+          pronos={(preds ?? []).map((p) => { const src = one(p.source as { id: string; nom: string; type: string } | { id: string; nom: string; type: string }[] | null); return { id: p.id, sourceId: src?.id ?? "", source: src?.nom ?? "?", type: src?.type ?? "", market: p.market_code, param: p.market_param === null ? null : Number(p.market_param), sel: p.selection, cote: p.cote_annoncee === null ? null : Number(p.cote_annoncee), prouve: p.statut === "verifie", resultat: p.resultat }; })}
           proofs={Object.fromEntries((proofs ?? []).map((x) => [x.source_id as string, lireProof(x)]))} />
       )}
 
