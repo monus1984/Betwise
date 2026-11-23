@@ -1,0 +1,48 @@
+name: Conseil d'IA
+
+# Une question dans une issue (commentaire « /conseil … » ou étiquette « conseil ») part à plusieurs IA par OpenRouter ;
+# Claude fait la synthèse ; le tout est publié dans l'issue. Réservé au propriétaire et aux collaborateurs du dépôt.
+on:
+  issue_comment:
+    types: [created]
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: "Numéro de l'issue"
+        required: true
+      demande:
+        description: "Ex. « /conseil », « /conseil gratuit », « /conseil chatgpt,grok Ta question »"
+        default: "/conseil"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: conseil-ia-${{ github.event.issue.number || inputs.issue }}
+  cancel-in-progress: false
+
+jobs:
+  conseil:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '/conseil') && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'issues' && github.event.label.name == 'conseil')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsx scripts/conseil-ia.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ github.event.issue.number || inputs.issue }}
+          DECLENCHEUR: ${{ github.event.comment.body || inputs.demande || '/conseil' }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
