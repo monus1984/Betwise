@@ -20,7 +20,10 @@ export const GARDE_FOUS = {
 
 export type Option = { id: string; matchId: string; market: string; param: number | null; sel: string; label: string; cote: number; releveAt: string; kickoff: string };
 export type Proposition = { option: string; mise: number; probabilite: number; raison: string };
-export type Etat = { bankroll: number; enJeu: number; parisDuJour: number; matchsJoues: Set<string> };
+export type Etat = { bankroll: number; enJeu: number; parisDuJour: number; matchsJoues: Set<string>;
+  /** Sélections déjà jouées en simple (clé match|marché|paramètre|sélection), interdites dans un combiné. */
+  simplesJoues?: Set<string> };
+export const cleSel = (o: { matchId: string; market: string; param: number | null; sel: string }) => `${o.matchId}|${o.market}|${o.param ?? ""}|${o.sel}`;
 export type Retenu = Option & { mise: number; probabilite: number; raison: string };
 export type Rejet = { option: string; motif: string };
 export type PropositionCombine = { options: string[]; mise: number; probabilite: number; raison: string };
@@ -49,7 +52,9 @@ export function valider(props: Proposition[], options: Map<string, Option>, etat
     retenus.push({ ...o, mise, probabilite: Math.round(p.probabilite * 1000) / 1000, raison: p.raison.trim().slice(0, 1200) });
     matchs.add(o.matchId); enJeu += mise; jour++;
   }
-  // Combinés : chaque sélection passe les mêmes contrôles qu'un simple ; un match déjà joué en simple peut y figurer.
+  // Combinés : chaque sélection passe les mêmes contrôles qu'un simple ; un match déjà joué en simple peut y figurer,
+  // mais pas la même sélection.
+  const simplesJoues = new Set([...(etat.simplesJoues ?? []), ...retenus.map(cleSel)]);
   for (const c of combines) {
     const ids = (Array.isArray(c.options) ? c.options : []).map((x) => String(x ?? "").trim());
     const nom = `combiné ${ids.join(" + ")}`, non = (motif: string) => rejets.push({ option: nom, motif });
@@ -60,6 +65,8 @@ export function valider(props: Proposition[], options: Map<string, Option>, etat
     if (new Set(os.map((o) => o.matchId)).size !== os.length) { non("deux sélections sur le même match"); continue; }
     if (os.some((o) => Date.parse(o.kickoff) - now < GARDE_FOUS.delaiMinMinutes * 60000)) { non("un des matchs est commencé ou trop proche du coup d'envoi"); continue; }
     if (os.some((o) => o.cote < GARDE_FOUS.coteMin)) { non(`sélection sous ${GARDE_FOUS.coteMin}`); continue; }
+    // Une sélection déjà jouée en simple ferait perdre deux fois sur le même résultat (23/11)
+    if (os.some((o) => simplesJoues.has(cleSel(o)))) { non("sélection déjà jouée en simple : elle compterait deux fois"); continue; }
     const cote = Math.round(os.reduce((x, o) => x * o.cote, 1) * 100) / 100;
     if (cote < GARDE_FOUS.coteCombineMin || cote > GARDE_FOUS.coteCombineMax) { non(`cote totale ${cote} hors de ${GARDE_FOUS.coteCombineMin} à ${GARDE_FOUS.coteCombineMax}`); continue; }
     if (jour >= GARDE_FOUS.parJour) { non(`${GARDE_FOUS.parJour} paris par jour au plus`); continue; }

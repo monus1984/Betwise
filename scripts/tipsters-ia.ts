@@ -16,12 +16,18 @@ import { compteRobot, sessionRobot, clientAudit } from "../src/lib/tipster-virtu
 import { construireDossier, executerOutil, OUTILS, type Dossier } from "../src/lib/tipsters-ia/dossier";
 import { lancerAgent } from "../src/lib/tipsters-ia/agent";
 import { profilsActifs, PROMPT_VERSION, SYSTEME, type ProfilComplet } from "../src/lib/tipsters-ia/profils";
-import { GARDE_FOUS, valider } from "../src/lib/tipsters-ia/validation";
+import { GARDE_FOUS, cleSel, valider } from "../src/lib/tipsters-ia/validation";
 import { horizonHeures } from "../src/lib/tipsters-ia/horizon";
 
 const ESSAI = process.argv.includes("--essai");
 const FORCER_CARNET = process.argv.includes("--carnet");
 const FORCER_PASSAGE = process.argv.includes("--forcer");
+/** Carnet rendu entre guillemets avec des caractères codés (Grok, 23/11) : on le décode ; et on le garde court. */
+function nettoyerCarnet(t: string): string {
+  let x = t.trim();
+  if (x.startsWith('"') && x.endsWith('"')) try { const y = JSON.parse(x); if (typeof y === "string") x = y.trim(); } catch { /* laissé tel quel */ }
+  return x.length > 4000 ? `${x.slice(0, 4000).replace(/\s+\S*$/, "")}\n[carnet coupé : 4 000 caractères au plus]` : x;
+}
 const ADMIN_ID = process.env.BETWISE_ADMIN_ID;
 const CARNETS = process.env.CARNETS_DIR || "carnets";
 const RISK = { sur: "prudent", audacieux: "moyen", risque: "risque" } as const;
@@ -110,7 +116,9 @@ async function passage(p: ProfilComplet, d: Dossier, empreinte: string) {
   const r = d.matchs.length || ecrireCarnet
     ? await lancerAgent(profil, SYSTEME, consigne, OUTILS, (nom, entree) => executerOutil(db as never, d, nom, entree, historique))
     : { decision: { paris: [], abstention: "aucun match avec cote 1xBet dans ce passage" }, modele: p.modele, tours: 0, traces: [], jetons: { entree: 0, sortie: 0, cacheLu: 0, cacheEcrit: 0 } };
-  const { retenus, rejets, combinesRetenus } = valider(r.decision?.paris ?? [], d.options, { bankroll, enJeu, parisDuJour: duJour.length, matchsJoues }, Date.now(), r.decision?.combines ?? []);
+  const simplesJoues = new Set([...duJour, ...paris.filter((b) => b.statut === "en_cours")].filter((b) => b.bet_selections.length === 1)
+    .flatMap((b) => b.bet_selections.map((x) => cleSel({ matchId: x.match_id ?? "", market: x.market_code, param: x.market_param === null ? null : Number(x.market_param), sel: x.selection }))));
+  const { retenus, rejets, combinesRetenus } = valider(r.decision?.paris ?? [], d.options, { bankroll, enJeu, parisDuJour: duJour.length, matchsJoues, simplesJoues }, Date.now(), r.decision?.combines ?? []);
 
   const enregistres: string[] = [];
   if (!ESSAI) for (const x of retenus) {
@@ -142,7 +150,7 @@ async function passage(p: ProfilComplet, d: Dossier, empreinte: string) {
   }
   if (!ESSAI && r.decision?.carnet && r.decision.carnet.trim().length > 30) {
     mkdirSync(CARNETS, { recursive: true });
-    writeFileSync(`${CARNETS}/${p.id}.md`, `<!-- jour: ${jour} version: ${PROMPT_VERSION} -->\n${r.decision.carnet.trim().slice(0, 6000)}\n`);
+    writeFileSync(`${CARNETS}/${p.id}.md`, `<!-- jour: ${jour} version: ${PROMPT_VERSION} -->\n${nettoyerCarnet(r.decision.carnet)}\n`);
   }
   const apresNet = net, resume = `Tipster IA (${p.nom}, ${r.modele}). Bankroll virtuelle : ${fr(GARDE_FOUS.bankrollDepart + apresNet)} FCFA (départ ${fr(GARDE_FOUS.bankrollDepart)}), ${regles.length} paris réglés dont ${regles.filter((b) => b.statut === "gagne").length} gagnés. Mis à jour le ${new Date().toLocaleString("fr-FR", { timeZone: "Africa/Abidjan" })}.`;
   if (src && !ESSAI) await db.from("sources").update({ description: resume }).eq("id", src.id);

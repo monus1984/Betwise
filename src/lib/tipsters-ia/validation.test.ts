@@ -31,7 +31,7 @@ describe("validation des décisions d'un tipster IA", () => {
   });
   it("combinés : calcule la cote totale et refuse même match, sélection inconnue ou cote trop haute", () => {
     const opts = new Map([...options, ...[o("M5.1", "e", 4.2), o("M6.1", "f", 4.0)].map((x) => [x.id, x] as const)]);
-    const r = valider([{ option: "M1.1", mise: 2000, probabilite: 0.7, raison }], opts, etat, NOW, [
+    const r = valider([{ option: "M6.1", mise: 2000, probabilite: 0.7, raison }], opts, etat, NOW, [
       { options: ["M1.1", "M2.1"], mise: 3000, probabilite: 0.5, raison },
       { options: ["M1.1", "M1.2"], mise: 1000, probabilite: 0.4, raison },
       { options: ["M1.1", "M9.9"], mise: 1000, probabilite: 0.4, raison },
@@ -43,5 +43,10 @@ describe("validation des décisions d'un tipster IA", () => {
     expect(r.combinesRetenus[0].cote).toBe(1.88);
     expect(r.combinesRetenus[0].mise).toBe(3000);
     expect(r.rejets).toHaveLength(4);
+  });
+  it("un combiné ne reprend pas une sélection déjà jouée en simple", () => {
+    const r = valider([{ option: "M1.1", mise: 2000, probabilite: 0.7, raison }], options, etat, NOW, [{ options: ["M1.1", "M2.1"], mise: 1000, probabilite: 0.5, raison }]);
+    expect(r.combinesRetenus).toHaveLength(0);
+    expect(r.rejets[0].motif).toContain("déjà jouée en simple");
   });
 });

@@ -69,11 +69,14 @@ async function agentOpenAI(p: Profil, systeme: string, consigne: string, outils:
   const tools = outils.map((o) => ({ type: "function", function: { name: o.name, description: o.description, parameters: o.input_schema } }));
   const messages: MsgOA[] = [{ role: "system", content: systeme }, { role: "user", content: consigne }];
   const r: Resultat = { decision: null, modele: p.modele, tours: 0, traces: [], jetons: { entree: 0, sortie: 0, cacheLu: 0, cacheEcrit: 0 } };
+  const seuleDecision = tools.filter((t) => t.function.name === "decision");
   for (const max = p.maxTours ?? MAX_TOURS; r.tours < max; r.tours++) {
-    const derniers = r.tours === max - 1;
+    // Les deux derniers tours, seul l'outil decision est proposé : certains modèles (DeepSeek, 23/11) ignorent tool_choice
+    const derniers = r.tours >= max - 2;
+    if (r.tours === max - 2) messages.push({ role: "user", content: "Fin de l'analyse : rends maintenant ta décision avec l'outil decision (tu peux ne rien jouer)." });
     const res = await fetch(`${p.baseUrl}/chat/completions`, {
       method: "POST", headers: { Authorization: `Bearer ${p.cle}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: p.modele, messages, tools, max_tokens: MAX_SORTIE, ...(derniers ? { tool_choice: { type: "function", function: { name: "decision" } } } : {}) }),
+      body: JSON.stringify({ model: p.modele, messages, tools: derniers ? seuleDecision : tools, max_tokens: MAX_SORTIE, ...(derniers ? { tool_choice: { type: "function", function: { name: "decision" } } } : {}) }),
     });
     const j = await res.json() as { model?: string; error?: { message?: string }; usage?: { prompt_tokens?: number; completion_tokens?: number; prompt_tokens_details?: { cached_tokens?: number } }; choices?: { message: MsgOA }[] };
     if (!res.ok) { r.erreur = `API ${res.status} : ${j.error?.message ?? "erreur sans détail"}`.slice(0, 300); return r; }
@@ -88,7 +91,12 @@ async function agentOpenAI(p: Profil, systeme: string, consigne: string, outils:
       try { r.decision = JSON.parse(fin.function.arguments) as Decision; } catch { r.erreur = "décision illisible (JSON invalide)"; }
       return r;
     }
-    if (!appels.length) { messages.push({ role: "user", content: "Rends maintenant ta décision avec l'outil decision (tu peux ne rien jouer)." }); continue; }
+    if (!appels.length) {
+      // Décision écrite en texte plutôt que par l'outil : on la reprend si elle est lisible
+      const brut = (msg.content ?? "").match(/\{[\s\S]*"paris"[\s\S]*\}/)?.[0];
+      if (brut) try { r.decision = JSON.parse(brut) as Decision; return r; } catch { /* pas un JSON complet */ }
+      messages.push({ role: "user", content: "Rends maintenant ta décision avec l'outil decision (tu peux ne rien jouer)." }); continue;
+    }
     for (const a of appels) {
       const t0 = Date.now();
       let entree: Record<string, unknown> = {};

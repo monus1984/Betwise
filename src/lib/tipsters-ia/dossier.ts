@@ -65,7 +65,7 @@ export const OUTILS = [
       raison: { type: "string", description: "Pourquoi ces sélections ensemble : ce qui rend chacune probable, et pourquoi elles ne dépendent pas l'une de l'autre" },
     }, required: ["options", "mise", "probabilite", "raison"] } },
     abstention: { type: "string", description: "Si tu ne joues rien ou peu : pourquoi" },
-    carnet: { type: "string", description: "Ton carnet réécrit en entier (tes règles du moment et ce que tu as appris). Obligatoire quand on te le demande, sinon facultatif." },
+    carnet: { type: "string", description: "Ton carnet réécrit en entier, en texte simple, 300 mots au plus (tes règles du moment et ce que tu as appris). Obligatoire quand on te le demande, sinon facultatif." },
   }, required: ["paris"] } },
 ] as const;
 
