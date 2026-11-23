@@ -400,7 +400,7 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
               .map(({ p, src }) => ({ sourceId: p.source_id, nom: src!.nom, ia: estIA(src!.nom), regles: regles.get(p.source_id) ?? 0, market: p.market_code, param: p.market_param === null ? null : Number(p.market_param), sel: p.selection, cote: p.cote_annoncee === null ? null : Number(p.cote_annoncee) }));
             if (!avis.length) return null;
             const c = consensus(avis, rc?.verdict ? { market: rc.verdict.market, param: rc.verdict.param, sel: rc.verdict.sel, label: rc.verdict.label } : null);
-            return { conclusion: c.conclusion, avec_toi: c.pour, contre_toi: c.contre, regle: "seules les sources confirmées (30 pronos réglés) comptent ; les tipsters IA comptent pour un seul avis" };
+            return { conclusion: c.conclusion, avec_toi: c.pour, contre_toi: c.contre, regle: "chaque source compte pour un avis (confirmée = au moins 30 pronos réglés) ; les tipsters IA comptent pour un seul avis" };
           })(),
         };
       });

@@ -37,7 +37,7 @@ export function MatchSources({ pronos, proofs, home, away, joue, verdict }: { pr
             })}
           </ul>
           <p className="mt-2.5 rounded-lg bg-surface-2 p-2.5 text-[13px] leading-snug"><b>Betster :</b> {cs.conclusion}</p>
-          <p className="mt-1.5 text-[11px] leading-snug text-ink-muted">Ne comptent que les sources confirmées (30 pronos réglés au moins). Les tipsters IA lisent les mêmes données : ensemble, ils valent un seul avis.</p>
+          <p className="mt-1.5 text-[11px] leading-snug text-ink-muted">Chaque source compte pour un avis ; « confirmée » signale celles qui ont au moins 30 pronos réglés. Les tipsters IA lisent les mêmes données : ensemble, ils valent un seul avis.</p>
         </section>
       )}
       {conflits.length > 0 && (
