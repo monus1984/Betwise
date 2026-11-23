@@ -8,6 +8,8 @@ import { NIVEAU, lire, niveau, raison, rendement, reussite } from "@/lib/sources
 import { FollowButton, PredictionRow, SourceLink } from "./client";
 import { linkOf } from "@/lib/sources/link";
 import { CumulChart, type CumulPoint } from "./cumul-chart";
+import { bilanMoi, type BilanMoi, type Ligne, type SelMoi } from "@/lib/sources/moi";
+import { SEUIL } from "@/lib/sources/proof";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +46,20 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
 
   const isSystem = s.type === "modele_betwise" || s.type === "perso";
 
+  // « Moi » (23/11) : mes propres choix notés comme une source, à partir de mes paris réels
+  let moi: { b: BilanMoi; mieux: number; classees: number } | null = null;
+  if (s.type === "perso" && s.created_by === user!.id) {
+    const [{ data: sels }, { data: tous }] = await Promise.all([
+      supabase.from("bet_selections").select("resultat, cote, market_code, bet:bets!inner(type, placed_at, virtuel, statut)").eq("origin_source_id", id).eq("bet.virtuel", false).neq("bet.statut", "annule").limit(5000),
+      supabase.from("source_proof").select("*"),
+    ]);
+    type R = { resultat: string | null; cote: number; market_code: string; bet: { type: string; placed_at: string } | { type: string; placed_at: string }[] | null };
+    const lignes: SelMoi[] = ((sels ?? []) as unknown as R[]).map((x) => { const b = one(x.bet); return { resultat: x.resultat, cote: Number(x.cote), market: x.market_code, placedAt: b?.placed_at ?? "", combine: b?.type === "combine" }; });
+    const b = bilanMoi(lignes);
+    const autres = (tous ?? []).filter((t) => t.source_id !== id).map((t) => lire(t)).filter((p) => p.prouvesRegles >= SEUIL.classement && rendement(p) !== null);
+    moi = { b, classees: autres.length, mieux: b.rendement === null ? 0 : autres.filter((p) => rendement(p)! > b.rendement!).length };
+  }
+
   return (
     <>
       <Link href="/sources" className="mb-3 inline-block text-sm text-slate-600">‹ Sources</Link>
@@ -57,6 +73,8 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
       {sp.ajout && !sp.doublon && <p className="mb-4 rounded-lg border border-gain/30 bg-gain-soft p-3 text-sm text-gain-ink">Prono enregistré.</p>}
       {sp.doublon && <p className="mb-4 rounded-lg border border-draw/40 bg-draw-soft p-3 text-sm text-draw-ink">Ce prono existait déjà pour cette source (même match, marché et sélection le même jour) : rien n’a été ajouté.</p>}
 
+      {moi && <MoiTipster {...moi} />}
+      {!moi && (<>
       <section className="rounded-2xl bg-pitch p-5 text-white">
         <div className="flex items-baseline justify-between gap-3">
           <p className="text-xs font-medium text-white/70">Ses pronos</p>
@@ -161,7 +179,9 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
         </section>
       )}
 
-      {s.type !== "modele_betwise" && (
+      </>)}
+
+      {s.type !== "modele_betwise" && !moi && (
         <Link href={`/sources/${id}/prono`} className="mt-4 block rounded-lg bg-inverse py-3 text-center text-base font-medium text-on-inverse">+ Enregistrer un prono de cette source</Link>
       )}
 
@@ -199,6 +219,60 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
           </ul>
         )}
       </section>
+    </>
+  );
+}
+
+const pct = (x: number | null) => (x === null ? "—" : `${Math.round(x * 100)} %`);
+const rdtTxt = (x: number | null) => (x === null ? "—" : `${x >= 0 ? "+" : "−"}${Math.abs(x * 100).toFixed(0)} %`);
+
+/** Mon tableau de bord de tipster : mes choix, notés comme ceux d'une source (mise fixe d'une unité par sélection). */
+function MoiTipster({ b, mieux, classees }: { b: BilanMoi; mieux: number; classees: number }) {
+  if (!b.regles) return (
+    <section className="rounded-2xl border border-line bg-surface p-5 text-sm text-ink-soft">
+      Aucun de tes choix n’est encore réglé. Quand tu indiques « Moi » comme origine d’une sélection, elle est notée ici comme le prono d’une source.
+    </section>
+  );
+  const Tab = ({ titre, l, nom }: { titre: string; l: Ligne[]; nom?: (k: string) => string }) => (
+    <section className="mt-3 rounded-xl border border-line bg-surface p-4">
+      <h2 className="mb-2 text-sm font-semibold">{titre}</h2>
+      <table className="w-full text-[13px]">
+        <thead><tr className="text-left text-[11px] text-ink-muted"><th className="py-1 font-medium"></th><th className="py-1 text-right font-medium">Justes</th><th className="py-1 text-right font-medium">Réussite</th><th className="py-1 text-right font-medium">Attendu</th><th className="py-1 text-right font-medium">Rendement</th></tr></thead>
+        <tbody className="divide-y divide-line">
+          {l.map((x) => (
+            <tr key={x.cle}>
+              <td className="py-1.5">{nom ? nom(x.cle) : x.cle}</td>
+              <td className="py-1.5 text-right tabular-nums">{x.justes} sur {x.regles}</td>
+              <td className="py-1.5 text-right tabular-nums">{pct(x.reussite)}</td>
+              <td className="py-1.5 text-right tabular-nums text-ink-muted">{pct(x.attendu)}</td>
+              <td className={`py-1.5 text-right tabular-nums ${x.regles < 5 || x.rendement === null ? "text-ink-muted" : x.rendement >= 0 ? "text-gain" : "text-loss"}`}>{x.regles < 5 ? "trop peu" : rdtTxt(x.rendement)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+  const ecart = b.reussite !== null && b.attendu !== null ? b.reussite - b.attendu : null;
+  return (
+    <>
+      <section className="rounded-2xl bg-pitch p-5 text-white">
+        <p className="text-xs font-medium text-white/70">Mes choix de tipster</p>
+        <p className="mt-1 text-3xl font-bold tabular-nums">{b.justes} juste{b.justes > 1 ? "s" : ""} sur {b.regles}</p>
+        <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
+          <div><p className="text-[11px] text-white/60">Réussite</p><p className="font-semibold tabular-nums">{pct(b.reussite)}</p></div>
+          <div><p className="text-[11px] text-white/60">Attendu</p><p className="font-semibold tabular-nums">{pct(b.attendu)}</p></div>
+          <div><p className="text-[11px] text-white/60">Rendement</p><p className={`font-semibold tabular-nums ${b.rendement === null ? "" : b.rendement >= 0 ? "text-band-gain" : "text-band-loss"}`}>{rdtTxt(b.rendement)}</p></div>
+        </div>
+        <p className="mt-3 text-[12px] leading-snug text-white/80">
+          {ecart === null ? "" : Math.abs(ecart) < 0.02 ? "Tu fais à peu près ce que les cotes annonçaient. " : ecart > 0 ? `Tu fais ${Math.round(ecart * 100)} points de mieux que ce que les cotes annonçaient. ` : `Tu fais ${Math.round(-ecart * 100)} points de moins que ce que les cotes annonçaient. `}
+          {classees > 0 && b.regles >= SEUIL.classement ? (mieux === 0 ? `Aucune de tes ${classees} sources classées ne fait mieux en rendement.` : `${mieux} de tes ${classees} sources classées font mieux en rendement.`) : b.regles < SEUIL.classement ? `Encore ${SEUIL.classement - b.regles} choix réglés pour te comparer aux sources classées.` : ""}
+        </p>
+        <p className="mt-2 text-[11px] text-white/60">Chaque sélection que tu as choisie toi-même compte comme un prono à mise égale, en simple comme dans un combiné : la même règle que pour tes sources. Paris réels seulement.{b.enCours ? ` ${b.enCours} en cours.` : ""}</p>
+      </section>
+      <Tab titre="Simples ou dans un combiné" l={[b.simples, b.dansCombines, b.trenteJours].filter((l) => l.regles > 0)} nom={(k) => (k === "simples" ? "En simple" : k === "combinés" ? "Dans un combiné" : "Ces 30 derniers jours")} />
+      {b.parNiveau.length > 0 && <Tab titre="Par niveau de cote" l={b.parNiveau} />}
+      {b.parMarche.length > 0 && <Tab titre="Par marché" l={b.parMarche} nom={(k) => MARCHE_FR[k] ?? k} />}
+      <Link href="/bilan" className="mt-3 block rounded-xl border border-brand/40 py-2.5 text-center text-sm font-medium text-brand">Mon bilan en argent (mises et gains)</Link>
     </>
   );
 }
