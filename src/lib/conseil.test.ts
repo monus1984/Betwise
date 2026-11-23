@@ -12,3 +12,10 @@ describe("conseil d'IA : lecture de la demande", () => {
     expect(fichiersCites("voir @.env.local et @../x.ts et @package.json").map((f) => f.chemin)).toEqual(["package.json"]);
   });
 });
+
+import { citations } from "../../scripts/conseil-ia";
+describe("conseil d'IA : fichiers cités", () => {
+  it("lit la branche quand elle est précisée", () => {
+    expect(citations("voir @design-accueil:docs/a.md et @package.json")).toEqual([{ branche: "design-accueil", chemin: "docs/a.md" }, { branche: null, chemin: "package.json" }]);
+  });
+});

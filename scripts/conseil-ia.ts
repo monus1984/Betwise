@@ -4,6 +4,7 @@
  * la même issue. Les modèles ne reçoivent que le fil de l'issue et les fichiers du dépôt cités avec @chemin :
  * aucune clé, aucune donnée de la base. Le dépôt est public : ne rien écrire de privé dans une consultation.
  *
+ * Fichiers : « @chemin » (branche main) ou « @branche:chemin ».
  * Panels : « /conseil » (grands modèles), « /conseil gratuit » (modèles gratuits d'OpenRouter), ou une liste,
  * ex. « /conseil chatgpt,grok ».
  * Variables : GITHUB_TOKEN, GITHUB_REPOSITORY, ISSUE, DECLENCHEUR (texte du commentaire), OPENROUTER_API_KEY, ANTHROPIC_API_KEY.
@@ -29,11 +30,29 @@ export function lireDemande(texte: string): { modeles: Record<string, string>; q
   return Object.keys(choisis).length ? { modeles: choisis, question: reste } : { modeles: PANELS.grands, question: `${m?.[1] ?? ""} ${reste}`.trim() };
 }
 
-/** Fichiers du dépôt cités avec @chemin (lecture seule, taille limitée, jamais de fichier de secrets). */
+const interdit = (c: string) => /(^|\/)\.env|secret|\.pem$|\.key$/i.test(c) || c.includes("..");
+/** Fichiers du dépôt cités avec @chemin (branche main) ou @branche:chemin (lecture seule, taille limitée, jamais de secrets). */
 export function fichiersCites(texte: string): { chemin: string; contenu: string }[] {
-  const chemins = [...new Set([...texte.matchAll(/@([\w./-]+\.\w+)/g)].map((x) => x[1]))].slice(0, 6);
-  return chemins.filter((c) => !/(^|\/)\.env|secret|\.pem$|\.key$/i.test(c) && !c.includes("..") && existsSync(c))
-    .map((chemin) => ({ chemin, contenu: readFileSync(chemin, "utf8").slice(0, MAX_FICHIER) }));
+  return citations(texte).filter((c) => !c.branche && !interdit(c.chemin) && existsSync(c.chemin))
+    .map(({ chemin }) => ({ chemin, contenu: readFileSync(chemin, "utf8").slice(0, MAX_FICHIER) }));
+}
+export function citations(texte: string): { branche: string | null; chemin: string }[] {
+  const vus = new Set<string>(), out: { branche: string | null; chemin: string }[] = [];
+  for (const x of texte.matchAll(/@(?:([\w.-]+):)?([\w./-]+\.\w+)/g)) {
+    const k = `${x[1] ?? ""}:${x[2]}`; if (vus.has(k)) continue; vus.add(k); out.push({ branche: x[1] ?? null, chemin: x[2] });
+  }
+  return out.slice(0, 6);
+}
+/** Fichiers cités sur une autre branche, lus par l'API GitHub. */
+async function fichiersAutresBranches(texte: string) {
+  const out: { chemin: string; contenu: string }[] = [];
+  for (const c of citations(texte).filter((c) => c.branche && !interdit(c.chemin))) {
+    try {
+      const j = await gh(`/contents/${c.chemin}?ref=${encodeURIComponent(c.branche!)}`) as { content?: string };
+      if (j.content) out.push({ chemin: `${c.branche}:${c.chemin}`, contenu: Buffer.from(j.content, "base64").toString("utf8").slice(0, MAX_FICHIER) });
+    } catch { /* fichier absent : ignoré */ }
+  }
+  return out;
 }
 
 const gh = async (chemin: string, init?: RequestInit) => {
@@ -66,7 +85,7 @@ async function main() {
     .filter((c) => !c.body.startsWith("<!-- conseil-ia -->")).slice(-8);
   const { modeles, question } = lireDemande(process.env.DECLENCHEUR || "/conseil");
   const fil = [`# ${issue.title}`, issue.body ?? "", ...commentaires.map((c) => `--- commentaire de ${c.user.login} ---\n${c.body}`)].join("\n\n");
-  const fichiers = fichiersCites(`${fil}\n${question}`);
+  const fichiers = [...fichiersCites(`${fil}\n${question}`), ...await fichiersAutresBranches(`${fil}\n${question}`)];
   const prompt = [
     "Tu fais partie d'un conseil de plusieurs IA consulté par Mounir, porteur de projets à Abidjan (BETWISE : application d'analyse de paris sportifs, Next.js + Supabase, une vingtaine de testeurs). Claude, qui développe le projet, fera la synthèse des avis.",
     "Donne ton avis indépendant, en français, concret et critique : ce qui est juste, ce qui est faux ou manquant, les risques, et ta recommandation n°1. 15 lignes au plus. Pas de flatterie, et dis-le quand tu n'es pas sûr.",
