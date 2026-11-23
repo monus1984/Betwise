@@ -1,0 +1,240 @@
+{
+  "profil": "or-gemini",
+  "nom": "Gemini",
+  "modele": "google/gemini-4-carbon",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "6af4943b5304265a",
+  "duree_s": 129,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 2
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 656
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 640
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 635
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 448
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 459
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 426
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 425
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 425
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3",
+        "famille": "buts"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M6",
+        "famille": "buts"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 573
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 533
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "resultat",
+        "match": "M6"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "buts",
+        "match": "M8"
+      },
+      "ms": 4
+    }
+  ],
+  "jetons": {
+    "entree": 137230,
+    "sortie": 2208,
+    "cacheLu": 63471,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 9000,
+  "propositions": [
+    {
+      "raison": "Duel direct du ventre mou de Süper Lig (Başakşehir 9e avec 17 pts, Çorum FK 11e avec 16 pts) au profil résolument ouvert : Başakşehir a inscrit 16 buts et en a concédé 7 en 6 réceptions, tandis que Çorum FK a marqué 15 buts et en a encaissé 12 en 6 déplacements (1,9 but marqué et 1,9 encaissé sur ses 5 derniers matchs). Le marché projette 3,34 buts attendus, ce qui soutient solidement le Plus de 2,5 buts à 1,47.",
+      "mise": 2000,
+      "option": "M3.219",
+      "probabilite": 0.66
+    },
+    {
+      "option": "M6.19",
+      "probabilite": 0.66,
+      "raison": "Choc danois à fort enjeu entre Brøndby (5e, 14 buts inscrits en 7 matchs à domicile) et le FC Midtjylland (2e ex aequo avec le leader, meilleure attaque du championnat avec 29 buts en 14 journées et invaincu en déplacement). Parallèlement, Midtjylland compte plusieurs absents défensifs et dans les cages (Olafsson, Bakker, Erlic). Les 3 dernières confrontations directes ont toutes vu les deux équipes marquer (4-1, 2-3, 1-2) et le marché attend plus de 3,2 buts équitablement répartis (1,62 - 1,61).",
+      "mise": 2000
+    },
+    {
+      "mise": 2000,
+      "option": "M13.17",
+      "probabilite": 0.62,
+      "raison": "Match de bas de tableau sous tension en Serie A entre Monza (18e) et la Fiorentina (15e), qui affichent exactement les mêmes failles défensives criantes : 25 buts encaissés chacune en 11 journées et 2,3 buts concédés par match sur les 5 dernières sorties, tout en marquant régulièrement (9 buts en 5 réceptions pour Monza, 10 buts en 5 déplacements pour la Viola). Les 3 derniers face-à-face ont validé le BTTS (2-1, 2-2, 2-1), en parfait accord avec le modèle BETWISE (61,5 %) et le marché (61,3 %)."
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M3.219",
+      "pari": "Plus de 2,5 buts",
+      "cote": 1.47,
+      "mise": 2000,
+      "probabilite": 0.66,
+      "raison": "Duel direct du ventre mou de Süper Lig (Başakşehir 9e avec 17 pts, Çorum FK 11e avec 16 pts) au profil résolument ouvert : Başakşehir a inscrit 16 buts et en a concédé 7 en 6 réceptions, tandis que Çorum FK a marqué 15 buts et en a encaissé 12 en 6 déplacements (1,9 but marqué et 1,9 encaissé sur ses 5 derniers matchs). Le marché projette 3,34 buts attendus, ce qui soutient solidement le Plus de 2,5 buts à 1,47."
+    },
+    {
+      "id": "M6.19",
+      "pari": "Les deux marquent",
+      "cote": 1.43,
+      "mise": 2000,
+      "probabilite": 0.66,
+      "raison": "Choc danois à fort enjeu entre Brøndby (5e, 14 buts inscrits en 7 matchs à domicile) et le FC Midtjylland (2e ex aequo avec le leader, meilleure attaque du championnat avec 29 buts en 14 journées et invaincu en déplacement). Parallèlement, Midtjylland compte plusieurs absents défensifs et dans les cages (Olafsson, Bakker, Erlic). Les 3 dernières confrontations directes ont toutes vu les deux équipes marquer (4-1, 2-3, 1-2) et le marché attend plus de 3,2 buts équitablement répartis (1,62 - 1,61)."
+    },
+    {
+      "id": "M13.17",
+      "pari": "Les deux marquent",
+      "cote": 1.5,
+      "mise": 2000,
+      "probabilite": 0.62,
+      "raison": "Match de bas de tableau sous tension en Serie A entre Monza (18e) et la Fiorentina (15e), qui affichent exactement les mêmes failles défensives criantes : 25 buts encaissés chacune en 11 journées et 2,3 buts concédés par match sur les 5 dernières sorties, tout en marquant régulièrement (9 buts en 5 réceptions pour Monza, 10 buts en 5 déplacements pour la Viola). Les 3 derniers face-à-face ont validé le BTTS (2-1, 2-2, 2-1), en parfait accord avec le modèle BETWISE (61,5 %) et le marché (61,3 %)."
+    }
+  ],
+  "combinesRetenus": [
+    {
+      "selections": [
+        "M3.17 Les deux marquent @1.43",
+        "M13.218 Plus de 2 buts @1.25"
+      ],
+      "cote": 1.79,
+      "mise": 1500,
+      "probabilite": 0.51,
+      "raison": "Combiné de deux matchs offensifs totalement indépendants (Süper Lig turque à 17h00 et Serie A italienne à 19h45, cote totale ~1,79) : d'un côté Başakşehir – Çorum FK où les deux attaques carburent (16 buts en 6 réceptions pour Başakşehir, 15 buts en 6 déplacements pour Çorum) pour le BTTS ; de l'autre Monza – Fiorentina où les deux équipes ont encaissé 25 buts chacune en 11 journées (3,16 buts attendus par le marché, 3,11 par le modèle) avec l'option Plus de 2 buts (remboursée à 2 buts exacts, probabilité de gain pur ~60 % et non-perte >77 %). Les deux rencontres n'ont aucun lien sportif ou météorologique."
+    }
+  ],
+  "rejets": [],
+  "enregistres": [
+    "M3.219",
+    "M6.19",
+    "M13.17",
+    "combiné M3.17+M13.218"
+  ]
+}

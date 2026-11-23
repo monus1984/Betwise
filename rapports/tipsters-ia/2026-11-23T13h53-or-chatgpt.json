@@ -1,0 +1,172 @@
+{
+  "profil": "or-chatgpt",
+  "nom": "ChatGPT",
+  "modele": "openai/gpt-6.2-sol",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "6af4943b5304265a",
+  "duree_s": 32,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 3
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 822
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M7"
+      },
+      "ms": 435
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 684
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M9"
+      },
+      "ms": 669
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 606
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 511
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 504
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 661
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 455
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 413
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 489
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M11",
+        "famille": "buts"
+      },
+      "ms": 2
+    }
+  ],
+  "jetons": {
+    "entree": 44829,
+    "sortie": 1408,
+    "cacheLu": 21208,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 2600,
+  "propositions": [
+    {
+      "option": "M12.101",
+      "mise": 800,
+      "probabilite": 0.77,
+      "raison": "Almería ou nul à 1,29 (relevé 12:27). Almería, 2e, est invaincu sur ses cinq dernières sorties et n’a perdu que deux de ses sept déplacements (cinq buts encaissés). Ceuta, 22e, reste sur cinq défaites. Le nul est couvert ; je remonte modestement le repère du marché (74 %) sans écarter le risque à l’extérieur. Compositions non publiées."
+    },
+    {
+      "option": "M13.216",
+      "mise": 800,
+      "probabilite": 0.82,
+      "raison": "Au moins deux buts à 1,16 (relevé 12:13). Monza et la Fiorentina ont chacun encaissé 25 buts en 11 journées. Le marché (82,3 %) et BETWISE (81,6 %) convergent sur cette ligne, qui n’exige pas que les deux équipes marquent. Le 0–1 du dernier match de Monza rappelle le risque ; trois absents sont signalés de chaque côté et les compositions ne sont pas publiées."
+    }
+  ],
+  "abstention": "Deux simples suffisent. Pas de doublon avec les trois paris du matin, ni de combiné : je préfère que les deux sélections du soir se règlent séparément. Aucun onze publié dans les fiches consultées, y compris pour Asteras–Aris. Le relevé d’Espanyol–Valencia date de 08:33 ; je ne l’ajoute pas sur ce passage.",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M12.101",
+      "pari": "Almeria ou nul",
+      "cote": 1.29,
+      "mise": 800,
+      "probabilite": 0.77,
+      "raison": "Almería ou nul à 1,29 (relevé 12:27). Almería, 2e, est invaincu sur ses cinq dernières sorties et n’a perdu que deux de ses sept déplacements (cinq buts encaissés). Ceuta, 22e, reste sur cinq défaites. Le nul est couvert ; je remonte modestement le repère du marché (74 %) sans écarter le risque à l’extérieur. Compositions non publiées."
+    },
+    {
+      "id": "M13.216",
+      "pari": "Plus de 1,5 buts",
+      "cote": 1.16,
+      "mise": 800,
+      "probabilite": 0.82,
+      "raison": "Au moins deux buts à 1,16 (relevé 12:13). Monza et la Fiorentina ont chacun encaissé 25 buts en 11 journées. Le marché (82,3 %) et BETWISE (81,6 %) convergent sur cette ligne, qui n’exige pas que les deux équipes marquent. Le 0–1 du dernier match de Monza rappelle le risque ; trois absents sont signalés de chaque côté et les compositions ne sont pas publiées."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M12.101",
+    "M13.216"
+  ]
+}

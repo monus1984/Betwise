@@ -1,0 +1,239 @@
+{
+  "profil": "or-grok",
+  "nom": "Grok",
+  "modele": "x-ai/grok-4.7",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "6af4943b5304265a",
+  "duree_s": 64,
+  "tours": 5,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 3
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 598
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 485
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 409
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 604
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 452
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M7"
+      },
+      "ms": 474
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "resultat"
+      },
+      "ms": 10
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M7",
+        "famille": "resultat"
+      },
+      "ms": 8
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M1",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 413
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 422
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 269
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "buts"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M7",
+        "famille": "buts"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 407
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 646
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M9"
+      },
+      "ms": 399
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M9",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M11",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3",
+        "famille": "resultat"
+      },
+      "ms": 7
+    }
+  ],
+  "jetons": {
+    "entree": 157484,
+    "sortie": 4170,
+    "cacheLu": 40960,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 7000,
+  "propositions": [
+    {
+      "option": "M12.103",
+      "mise": 2500,
+      "probabilite": 0.64,
+      "raison": "Ceuta est 22e, 5 pts en 14, 0 victoire et 5 défaites sur 5, 0,7 but marqué et 2,3 encaissé, 32 buts encaissés (une des deux pires défenses), 1V 1N 5D à domicile. Almería est 2e, 32 pts, 3 victoires sans défaite sur 5, 1,9 but et 0,8 encaissé, 4V 1N 2D à l'extérieur, 2e attaque (26 buts) et 3e défense (11 encaissés). Marché 1,16-1,70 buts, victoire Almería 48,9 %. Almería remboursé si nul à 1,49 : marché 65,9 %. J'annonce 64 % : l'écart de forme est net, mais les compositions ne sont pas sorties et Ceuta a déjà battu Almería 3-2 à domicile en novembre 2025. Pas de certitude."
+    },
+    {
+      "option": "M7.92",
+      "mise": 2000,
+      "probabilite": 0.68,
+      "raison": "Rapid est 3e, 31 pts en 15, 3 victoires sur 5, 1,6 but marqué et 0,9 encaissé, 3e défense (14 buts encaissés), 3V 3N 1D à l'extérieur. Sepsi est 11e, poule de relégation, 7 pts de retard sur le premier non concerné, 0,7 but marqué sur 5. Marché 0,93-1,63 buts, victoire Rapid 52,8 %. Rapid remboursé si nul à 1,35 : marché 71,5 %. J'annonce 68 % : l'écart de classement est réel, mais Sepsi a 3V 2N 2D à domicile et mène les confrontations (4-4-2), dont un 2-0 à domicile. Compositions non publiées, modèle absent : je reste un cran sous le marché."
+    }
+  ],
+  "abstention": "\"Rien de plus. M5, M10 et M13 sont d\\u00e9j\\u00e0 jou\\u00e9s. M14 Nantes : 1V/5 et 1V 2N 3D \\u00e0 domicile malgr\\u00e9 la cote 1,44, forme trop fragile. M16 Brentford : 7 absents dont Thiago suspendu, compositions non sorties. M17 : les deux en rel\\u00e9gation, le mod\\u00e8le voit plus de buts que le march\\u00e9, l'enjeu peut fermer. M1 : Aris encaiss\\u00e9 13 buts en 5 sorties, nul \\u00e0 31 %, double chance trop basse pour le risque. M3 : 1X2 ouvert et absents des deux c\\u00f4t\\u00e9s, BTTS 64 % sans mod\\u00e8le. M9 : BTTS 71,6 % et ~3,8 buts, mais les deux ont jou\\u00e9 le 20/11, 3 jours de r\\u00e9cup\\u00e9ration, compositions absentes. M11 : 6 nuls sur 10 confrontations, double chance Espanyol seulement \\u00e0 72,5 %. M2, M4, M6, M8, M15 : fiches trop minces ou 1X2 trop ouvert. 3 000 FCFA encore disponibles sous le plafond de 40 % (7 000 d\\u00e9j\\u00e0 en jeu + 6 000 ce passage = 13 000).\"",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M12.103",
+      "pari": "Almeria (remboursé si nul)",
+      "cote": 1.49,
+      "mise": 2500,
+      "probabilite": 0.64,
+      "raison": "Ceuta est 22e, 5 pts en 14, 0 victoire et 5 défaites sur 5, 0,7 but marqué et 2,3 encaissé, 32 buts encaissés (une des deux pires défenses), 1V 1N 5D à domicile. Almería est 2e, 32 pts, 3 victoires sans défaite sur 5, 1,9 but et 0,8 encaissé, 4V 1N 2D à l'extérieur, 2e attaque (26 buts) et 3e défense (11 encaissés). Marché 1,16-1,70 buts, victoire Almería 48,9 %. Almería remboursé si nul à 1,49 : marché 65,9 %. J'annonce 64 % : l'écart de forme est net, mais les compositions ne sont pas sorties et Ceuta a déjà battu Almería 3-2 à domicile en novembre 2025. Pas de certitude."
+    },
+    {
+      "id": "M7.92",
+      "pari": "Rapid (remboursé si nul)",
+      "cote": 1.35,
+      "mise": 2000,
+      "probabilite": 0.68,
+      "raison": "Rapid est 3e, 31 pts en 15, 3 victoires sur 5, 1,6 but marqué et 0,9 encaissé, 3e défense (14 buts encaissés), 3V 3N 1D à l'extérieur. Sepsi est 11e, poule de relégation, 7 pts de retard sur le premier non concerné, 0,7 but marqué sur 5. Marché 0,93-1,63 buts, victoire Rapid 52,8 %. Rapid remboursé si nul à 1,35 : marché 71,5 %. J'annonce 68 % : l'écart de classement est réel, mais Sepsi a 3V 2N 2D à domicile et mène les confrontations (4-4-2), dont un 2-0 à domicile. Compositions non publiées, modèle absent : je reste un cran sous le marché."
+    }
+  ],
+  "combinesRetenus": [
+    {
+      "selections": [
+        "M12.103 Almeria (remboursé si nul) @1.49",
+        "M7.92 Rapid (remboursé si nul) @1.35"
+      ],
+      "cote": 2.01,
+      "mise": 1500,
+      "probabilite": 0.44,
+      "raison": "Deux matchs indépendants (Liga 2 et Liga I), déjà analysés séparément. Almería remboursé si nul (1,49, proba 64 %) et Rapid remboursé si nul (1,35, proba 68 %). Cote totale 1,49 × 1,35 = 2,01, dans la fourchette 1,50-3. La chance du combiné est le produit : 0,64 × 0,68 = 0,435, arrondi à 44 %. Rien ne relie ces deux rencontres. Mise plus petite que les simples, car les deux doivent passer."
+    }
+  ],
+  "rejets": [],
+  "enregistres": [
+    "M12.103",
+    "M7.92",
+    "combiné M12.103+M7.92"
+  ]
+}

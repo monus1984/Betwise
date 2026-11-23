@@ -1,0 +1,86 @@
+{
+  "profil": "claude",
+  "nom": "Claude",
+  "modele": "claude-sonnet-5-5",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "6af4943b5304265a",
+  "duree_s": 12,
+  "tours": 3,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 3
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 1592
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 590
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "buts"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "buts"
+      },
+      "ms": 4
+    }
+  ],
+  "jetons": {
+    "entree": 29299,
+    "sortie": 1416,
+    "cacheLu": 8613,
+    "cacheEcrit": 2871
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 5500,
+  "propositions": [
+    {
+      "option": "M16.230",
+      "mise": 1500,
+      "probabilite": 0.7,
+      "raison": "Brentford – Everton : le marché et le modèle attendent environ 2,8 buts (1,54 / 1,23). Everton marque 1,2 but par match et en encaisse 1,0 sur ses 5 derniers matchs. Brentford a 7 absents. Moins de 3,5 buts à 1,38 est le scénario le plus probable, mais je n'ai pas de compositions, donc la mise reste petite."
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M16.230",
+      "pari": "Moins de 3,5 buts",
+      "cote": 1.38,
+      "mise": 1500,
+      "probabilite": 0.7,
+      "raison": "Brentford – Everton : le marché et le modèle attendent environ 2,8 buts (1,54 / 1,23). Everton marque 1,2 but par match et en encaisse 1,0 sur ses 5 derniers matchs. Brentford a 7 absents. Moins de 3,5 buts à 1,38 est le scénario le plus probable, mais je n'ai pas de compositions, donc la mise reste petite."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M16.230"
+  ]
+}
