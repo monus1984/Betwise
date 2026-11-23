@@ -6,27 +6,44 @@
  *    peut confirmer celui d'un autre »). Le bilan vérifié reste affiché pour qu'on sache qui a fait ses preuves.
  *  - Les tipsters IA lisent les mêmes données avec la même consigne : ensemble, ils valent UN avis, pas un par IA.
  */
-import { contredit } from "./desaccord";
+import { relation } from "./relation";
 import { SEUIL } from "./proof";
 
 export type Avis = { sourceId: string; nom: string; ia: boolean; regles: number; market: string; param: number | null; sel: string; cote: number | null };
 export type Pari = { market: string; param: number | null; sel: string };
 export type Groupe = Pari & { humains: Avis[]; ia: Avis[]; betster: boolean };
 export type Camp = { confirmees: number; autres: number; ia: number };
-export type Consensus = { groupes: Groupe[]; pour: Camp; contre: Camp; conclusion: string; iaTotal: number };
+export type Consensus = { groupes: Groupe[]; lignes: LigneAvis[]; pour: Camp; contre: Camp; conclusion: string; iaTotal: number };
 
 const cle = (p: Pari) => `${p.market}|${p.param ?? ""}|${p.sel.trim().toLowerCase()}`;
 const memeLigne = (a: Pari, b: Pari) => cle(a) === cle(b);
-const issues = (p: Pari) => (p.market === "1X2" ? new Set([p.sel.toUpperCase()]) : p.market === "DC" ? new Set(p.sel.toUpperCase().replace("X", "N").split("")) : null);
 
-/** Un avis va dans le sens d'un pari s'il est le même, ou plus exigeant et compatible (« victoire de A » soutient « A ou nul »). */
-export function soutient(avis: Pari, pari: Pari): boolean {
-  if (memeLigne(avis, pari)) return true;
-  const ia = issues(avis), ip = issues(pari);
-  if (ia && ip) return [...ia].every((x) => ip.has(x));
-  if (avis.market === "OU" && pari.market === "OU" && avis.param !== null && pari.param !== null && avis.sel === pari.sel)
-    return avis.sel === "Plus" ? avis.param >= pari.param : avis.param <= pari.param;
-  return false;
+/** Un avis va dans le sens d'un pari s'il est le même, ou si l'un entraîne l'autre (« les deux marquent » et « plus de 1,5 but »). */
+export const soutient = (avis: Pari, pari: Pari) => { const r = relation(avis, pari); return r === "meme" || r === "confirme"; };
+const oppose = (avis: Pari, pari: Pari) => relation(avis, pari) === "contredit";
+
+/** Un prono et ce que les autres sources en disent : combien le confirment (même pari ou pari compatible), combien le contredisent. */
+export type LigneAvis = { avis: Avis; confirment: string[]; contredisent: string[]; betster: "avec" | "contre" | null };
+
+/** Les IA forment un seul avis : on garde les noms des humains et « les tipsters IA » une fois. */
+function voix(l: Avis[], moi: Avis): string[] {
+  const humains = [...new Set(l.filter((x) => !x.ia).map((x) => x.nom))];
+  return moi.ia || !l.some((x) => x.ia) ? humains : [...humains, "IA"];
+}
+
+export function lignesAvis(avis: Avis[], verdict: Pari | null): LigneAvis[] {
+  const vus = new Map<string, Avis>();
+  for (const a of avis) vus.set(`${a.sourceId}|${cle(a)}`, a); // un même prono chargé deux fois ne compte qu'une fois
+  const l = [...vus.values()];
+  return l.map((a) => {
+    const autres = l.filter((b) => b.sourceId !== a.sourceId && !(a.ia && b.ia));
+    return {
+      avis: a,
+      confirment: voix(autres.filter((b) => soutient(b, a)), a),
+      contredisent: voix(autres.filter((b) => oppose(b, a)), a),
+      betster: (verdict ? (soutient(verdict, a) ? "avec" : oppose(verdict, a) ? "contre" : null) : null) as LigneAvis["betster"],
+    };
+  }).sort((x, y) => y.confirment.length - x.confirment.length || x.contredisent.length - y.contredisent.length);
 }
 
 export function consensus(avis: Avis[], verdict: (Pari & { label: string }) | null): Consensus {
@@ -46,11 +63,12 @@ export function consensus(avis: Avis[], verdict: (Pari & { label: string }) | nu
     return { confirmees: new Set(l.filter(confirme).map((a) => a.sourceId)).size, autres: new Set(l.filter((a) => !a.ia && !confirme(a)).map((a) => a.sourceId)).size, ia: new Set(l.filter((a) => a.ia).map((a) => a.sourceId)).size };
   };
   const vide = { confirmees: 0, autres: 0, ia: 0 };
-  if (!verdict) return { groupes: liste, pour: vide, contre: vide, iaTotal,
+  const lignes = lignesAvis(avis, verdict);
+  if (!verdict) return { groupes: liste, lignes, pour: vide, contre: vide, iaTotal,
     conclusion: avis.length ? "Betster n'a pas d'avis sur ce match (pas de cote) : les avis ci-dessous sont à titre d'information." : "Aucun avis de source sur ce match pour l'instant." };
 
   const pour = camp((a) => soutient(a, verdict));
-  const contre = camp((a) => !soutient(a, verdict) && contredit({ source: a.sourceId, ...a }, { source: "betster", ...verdict }));
+  const contre = camp((a) => oppose(a, verdict));
   // Les IA ne comptent qu'une fois, dans le camp où elles sont le plus nombreuses
   const iaPour = pour.ia > 0 && pour.ia >= contre.ia ? 1 : 0, iaContre = contre.ia > pour.ia ? 1 : 0;
   const humains = (k: Camp) => k.confirmees + k.autres;
@@ -73,7 +91,7 @@ export function consensus(avis: Avis[], verdict: (Pari & { label: string }) | nu
             : c >= 2 * p
               ? `Betster retient « ${verdict.label} », mais la majorité pense l'inverse : ${qui(contre, iaContre)} contre, ${qui(pour, iaPour)} avec lui. Signal de prudence.`
               : `Les avis sont partagés : ${qui(pour, iaPour)} avec Betster (« ${verdict.label} »), ${qui(contre, iaContre)} contre. Pas de signal net.`;
-  return { groupes: liste, pour, contre, conclusion, iaTotal };
+  return { groupes: liste, lignes, pour, contre, conclusion, iaTotal };
 }
 
 /** Une source est un tipster IA de BETWISE (nom fixé à la création, voir scripts/tipsters-ia.ts). */

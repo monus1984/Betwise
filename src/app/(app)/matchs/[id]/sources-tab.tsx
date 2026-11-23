@@ -24,20 +24,29 @@ export function MatchSources({ pronos, proofs, home, away, joue, verdict }: { pr
       {cs && (
         <section className="rounded-xl border border-brand/30 bg-surface p-3" aria-label="Recoupements">
           <h2 className="text-sm font-semibold">Ce que disent les sources</h2>
-          <ul className="mt-2 space-y-1.5 text-[13px]">
-            {cs.groupes.slice(0, 5).map((g) => {
-              const conf = g.humains.filter((h) => h.regles >= 30).length;
-              const qui = [g.betster ? "Betster" : "", conf ? `${conf} confirmée${conf > 1 ? "s" : ""}` : "", g.humains.length - conf ? `${g.humains.length - conf} autre${g.humains.length - conf > 1 ? "s" : ""}` : "", g.ia.length ? `IA ${g.ia.length} sur ${cs.iaTotal || g.ia.length}` : ""].filter(Boolean).join(" · ");
+          <ul className="mt-2 divide-y divide-line text-[13px]">
+            {cs.lignes.map((l) => {
+              const n = l.confirment.length, x = l.contredisent.length;
               return (
-                <li key={`${g.market}${g.param}${g.sel}`} className="flex items-baseline justify-between gap-3">
-                  <span className={`min-w-0 ${g.betster ? "font-semibold" : ""}`}>{pickLabel(g.market, g.param, g.sel, home, away)}</span>
-                  <span className="shrink-0 text-[11px] text-ink-muted">{qui}</span>
+                <li key={`${l.avis.sourceId}${l.avis.market}${l.avis.param}${l.avis.sel}`} className="py-2">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="min-w-0"><span className="font-medium">{pickLabel(l.avis.market, l.avis.param, l.avis.sel, home, away)}</span> <span className="text-ink-muted">· {l.avis.nom}{l.avis.regles >= 30 ? " ✓" : ""}</span></span>
+                    {/* Points : une source qui confirme = un point plein (5 au plus) */}
+                    <span className="shrink-0 tracking-[2px] text-[12px]" aria-label={`${n} confirmation${n > 1 ? "s" : ""}, ${x} contradiction${x > 1 ? "s" : ""}`}>
+                      <span className="text-gain">{"●".repeat(Math.min(n, 5))}</span><span className="text-line">{"●".repeat(Math.max(0, 5 - Math.min(n, 5)))}</span>
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
+                    {n ? `Confirmé par ${l.confirment.join(", ")}` : "Personne d'autre"}
+                    {x ? <span className="text-loss"> · contredit par {l.contredisent.join(", ")}</span> : null}
+                    {l.betster === "avec" ? " · Betster d'accord" : l.betster === "contre" ? <span className="text-loss"> · Betster pense l'inverse</span> : null}
+                  </p>
                 </li>
               );
             })}
           </ul>
           <p className="mt-2.5 rounded-lg bg-surface-2 p-2.5 text-[13px] leading-snug"><b>Betster :</b> {cs.conclusion}</p>
-          <p className="mt-1.5 text-[11px] leading-snug text-ink-muted">Chaque source compte pour un avis ; « confirmée » signale celles qui ont au moins 30 pronos réglés. Les tipsters IA lisent les mêmes données : ensemble, ils valent un seul avis.</p>
+          <p className="mt-1.5 text-[11px] leading-snug text-ink-muted">Un point par source qui confirme, sur le même pari ou un pari compatible (« les deux marquent » confirme « plus de 1,5 but »). ✓ : source confirmée (30 pronos réglés). Les tipsters IA comptent ensemble pour un seul avis.</p>
         </section>
       )}
       {conflits.length > 0 && (
