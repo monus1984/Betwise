@@ -1757,6 +1757,9 @@ export type Database = {
           apres_coup_regles: number | null
           apres_coup_gagnes: number | null
           dernier_prono: string | null
+          cs_regles: number | null
+          cs_gagnes: number | null
+          cs_unites: number | null
         }
         Relationships: []
       }

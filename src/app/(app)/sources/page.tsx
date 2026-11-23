@@ -4,20 +4,24 @@ import { PageHeader } from "@/components/page-header";
 import { Card, Empty } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 import { NIVEAU, SEUIL, classer, lire, niveau, raison, rendement, resume, reussite, type Proof } from "@/lib/sources/proof";
-import { labelType, ProofBadge } from "./source-ui";
+import { labelType } from "./source-ui";
 import { AXE_FR, bilanDe, forcesEtFaiblesses, type Prono } from "@/lib/sources/analyse";
-import { COMP_SHORT } from "@/components/match-ui";
+import { COMP_SHORT, shortName } from "@/components/match-ui";
+import { consensus, estIA } from "@/lib/sources/consensus";
+import { loadRecit } from "@/lib/matches/recit";
+import { pickLabel } from "@/lib/probs/signals";
 
 export const dynamic = "force-dynamic";
 
-const VUES = [["suivies", "Mes sources"], ["analyse", "Analyse"], ["classement", "Classement"], ["decouvrir", "Découvrir"]] as const;
+// Refonte du 23/11 (Mounir + conseil d'IA) : « Aujourd'hui » d'abord, puis mes sources ; « À découvrir » replié en bas de mes sources.
+const VUES = [["aujourdhui", "Aujourd’hui"], ["suivies", "Mes sources"], ["classement", "Classement"], ["analyse", "Analyse"]] as const;
 const pc = (x: number | null) => (x === null ? "—" : `${Math.round(x * 100)} %`);
 const unit = (x: number | null) => (x === null ? "—" : `${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x * 100).toFixed(0)} %`);
 
 /** Sources : celles que je suis, leur classement, et celles que d'autres ont partagées. */
 export default async function SourcesPage({ searchParams }: { searchParams: Promise<{ f?: string }> }) {
   const sp = await searchParams;
-  const vue = VUES.some(([k]) => k === sp.f) ? sp.f! : "suivies";
+  const vue = VUES.some(([k]) => k === sp.f) ? sp.f! : sp.f === "decouvrir" ? "suivies" : "aujourdhui";
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -32,8 +36,11 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
   const mine = all.filter((s) => s.type === "perso" && s.created_by === user!.id);
   const model = all.filter((s) => s.type === "modele_betwise");
   const others = all.filter((s) => s.type !== "perso" && s.type !== "modele_betwise");
-  const suivies = [...mine, ...others.filter((s) => followed.has(s.id) || s.created_by === user!.id), ...model];
-  const aDecouvrir = others.filter((s) => s.visibilite === "partagee" && !followed.has(s.id) && s.created_by !== user!.id);
+  const { data: admin } = await supabase.rpc("is_admin");
+  const ia = admin ? others.filter((s) => estIA(s.nom)) : [];
+  const humaines = others.filter((s) => !estIA(s.nom));
+  const suivies = [...mine, ...humaines.filter((s) => followed.has(s.id) || s.created_by === user!.id), ...model];
+  const aDecouvrir = humaines.filter((s) => s.visibilite === "partagee" && !followed.has(s.id) && s.created_by !== user!.id);
   const { classees, nonEtablies } = classer(all.filter((s) => s.type !== "perso" || s.created_by === user!.id));
 
   return (
@@ -43,39 +50,35 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
         action={<Link href="/sources/nouvelle">+ Source</Link>} />
       <nav className="mb-4 flex gap-2 overflow-x-auto" aria-label="Vues des sources">
         {VUES.map(([k, mot]) => (
-          <Link key={k} href={k === "suivies" ? "/sources" : `/sources?f=${k}`} scroll={false} aria-current={vue === k ? "page" : undefined}
+          <Link key={k} href={k === "aujourdhui" ? "/sources" : `/sources?f=${k}`} scroll={false} aria-current={vue === k ? "page" : undefined}
             className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm ${vue === k ? "border-inverse bg-inverse text-on-inverse" : "border-line bg-surface text-ink-soft"}`}>{mot}</Link>
         ))}
       </nav>
 
       {vue === "analyse" && <Analyse sources={suivies.filter((x) => x.type !== "modele_betwise")} />}
 
-      {vue !== "classement" && vue !== "analyse" && (() => {
-        const list = vue === "suivies" ? suivies : aDecouvrir;
-        if (list.length === 0) return <Empty titre={vue === "suivies" ? "Aucune source suivie" : "Rien à découvrir pour l’instant"} action={vue === "suivies" ? <Link href="/sources/nouvelle" className="rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-on-fill">Ajouter une source</Link> : undefined}>{vue === "suivies" ? "Ajoute un pronostiqueur, une page ou un canal que tu suis : ses pronos seront notés sur leurs vrais résultats." : "Les sources partagées par d’autres testeurs apparaîtront ici."}</Empty>;
-        return (
-          <Card className="!p-0">
-            <ul className="divide-y divide-line">
-              {list.map((s) => (
-                <li key={s.id} className="flex items-stretch">
-                  <Link href={`/sources/${s.id}`} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-4 py-3 active:bg-surface-2">
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium">{s.nom}</span>
-                      <span className="block text-xs text-ink-muted">{labelType(s.type)}{s.visibilite === "partagee" && s.type !== "modele_betwise" ? " · partagée" : ""}</span>
-                    </span>
-                    <ProofBadge proof={s.proof} />
-                  </Link>
-                  {linkOf(s) && (
-                    <a href={linkOf(s)!} target="_blank" rel="noopener noreferrer" aria-label={`Ouvrir la page de ${s.nom}`} className="flex w-11 shrink-0 items-center justify-center border-l border-line text-brand active:bg-surface-2">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>
-                    </a>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </Card>
-        );
-      })()}
+      {vue === "aujourdhui" && <Aujourdhui sourceIds={[...humaines.filter((x) => followed.has(x.id) || x.created_by === user!.id), ...ia].map((x) => x.id)} proofOf={proofOf} />}
+
+      {vue === "suivies" && (
+        <div className="space-y-4">
+          {mine.map((s) => (
+            <Link key={s.id} href={`/sources/${s.id}`} className="tile flex items-center justify-between gap-3 p-4 active:bg-surface-2">
+              <span className="min-w-0"><span className="block text-[15px] font-semibold">Moi</span><span className="block text-xs text-ink-muted">Mes propres choix, notés comme ceux d’une source</span></span>
+              <span className="shrink-0 text-sm text-brand">Mon bilan ›</span>
+            </Link>
+          ))}
+          {suivies.filter((x) => x.type !== "perso").length === 0
+            ? <Empty titre="Aucune source suivie" action={<Link href="/sources/nouvelle" className="rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-on-fill">Ajouter une source</Link>}>Ajoute un pronostiqueur, une page ou un canal que tu suis : ses pronos seront notés sur leurs vrais résultats.</Empty>
+            : <ListeSources titre="Sources suivies" liste={suivies.filter((x) => x.type !== "perso")} />}
+          {ia.length > 0 && <ListeSources titre="Labo IA" note="Les 5 tipsters IA : visibles par toi seul, hors classement. Leurs tickets et combinés sont sur leur fiche." liste={ia} />}
+          {aDecouvrir.length > 0 && (
+            <details className="tile p-0" open={sp.f === "decouvrir"}>
+              <summary className="cursor-pointer px-4 py-3 text-sm font-semibold">À découvrir ({aDecouvrir.length})</summary>
+              <ListeSources liste={aDecouvrir} nu />
+            </details>
+          )}
+        </div>
+      )}
 
       {vue === "classement" && (
         <div className="space-y-3">
@@ -172,6 +175,97 @@ async function Analyse({ sources }: { sources: { id: string; nom: string; type: 
           )}
         </article>
       ))}
+    </div>
+  );
+}
+
+/** Statut d'une source selon son volume de pronos réglés (hors score exact) : jamais de rendement sous 5 résultats. */
+function Statut({ proof }: { proof: Proof }) {
+  const n = proof.prouvesRegles, r = rendement(proof);
+  return (
+    <span className="shrink-0 text-right">
+      {n >= 5 && r !== null
+        ? <span className={`block text-[15px] font-bold tabular-nums ${r > 0 ? "text-gain" : r < 0 ? "text-loss" : ""}`}>{unit(r)}</span>
+        : <span className="block text-[13px] font-semibold text-ink-muted">{n ? `${n} réglé${n > 1 ? "s" : ""}` : "—"}</span>}
+      <span className="block text-[10px] text-ink-muted">{n >= SEUIL.classement ? `${n} réglés` : n >= 5 ? `provisoire ${n}/${SEUIL.classement}` : n ? "trop tôt pour juger" : "aucun réglé"}</span>
+    </span>
+  );
+}
+
+function ListeSources({ titre, note, liste, nu }: { titre?: string; note?: string; liste: { id: string; nom: string; type: string; visibilite: string; lien: string | null; identifiant_externe: string | null; proof: Proof }[]; nu?: boolean }) {
+  return (
+    <section className={nu ? "" : "tile !p-0"}>
+      {titre && <h2 className="px-4 pt-3 text-sm font-semibold">{titre}</h2>}
+      {note && <p className="px-4 text-[11px] text-ink-muted">{note}</p>}
+      <ul className="mt-1 divide-y divide-line">
+        {liste.map((s) => (
+          <li key={s.id} className="flex items-stretch">
+            <Link href={`/sources/${s.id}`} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-4 py-3 active:bg-surface-2">
+              <span className="min-w-0">
+                <span className="block text-sm font-medium">{s.nom}</span>
+                <span className="block text-xs text-ink-muted">{labelType(s.type)}{s.visibilite === "partagee" && s.type !== "modele_betwise" ? " · partagée" : ""}</span>
+              </span>
+              <Statut proof={s.proof} />
+            </Link>
+            {linkOf(s) && (
+              <a href={linkOf(s)!} target="_blank" rel="noopener noreferrer" aria-label={`Ouvrir la page de ${s.nom}`} className="flex w-11 shrink-0 items-center justify-center border-l border-line text-brand active:bg-surface-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>
+              </a>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** « Aujourd'hui » : ce que disent mes sources sur les matchs des 36 prochaines heures, match par match, et la conclusion de Betster. */
+async function Aujourdhui({ sourceIds, proofOf }: { sourceIds: string[]; proofOf: Map<string | null, Proof> }) {
+  const vide = <Empty titre="Rien de prévu par tes sources" action={<Link href="/import" className="rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-on-fill">Charger des pronos</Link>}>Charge les captures de tes tipsters : leurs pronos des prochaines 36 heures apparaîtront ici, regroupés par match.</Empty>;
+  if (!sourceIds.length) return vide;
+  const db = await createClient();
+  const { data } = await db.from("predictions")
+    .select("source_id, market_code, market_param, selection, cote_annoncee, source:sources(nom, type), match:matches!inner(id, kickoff_at, statut, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe))")
+    .in("source_id", sourceIds).neq("statut", "annule")
+    .gte("match.kickoff_at", new Date(Date.now() - 2 * 3600_000).toISOString()).lte("match.kickoff_at", new Date(Date.now() + 36 * 3600_000).toISOString()).limit(800);
+  type R = { source_id: string; market_code: string; market_param: number | null; selection: string; cote_annoncee: number | null; source: { nom: string; type: string } | null; match: { id: string; kickoff_at: string; statut: string; home: { nom: string } | null; away: { nom: string } | null; competition: { code_externe: string | null } | null } };
+  const rows = ((data ?? []) as unknown as R[]).filter((r) => r.match.statut !== "termine" && r.source && r.source.type !== "perso" && r.source.type !== "modele_betwise");
+  const parMatch = new Map<string, R[]>();
+  for (const r of rows) parMatch.set(r.match.id, [...(parMatch.get(r.match.id) ?? []), r]);
+  const matchs = [...parMatch.values()].sort((a, b) => b.length - a.length || Date.parse(a[0].match.kickoff_at) - Date.parse(b[0].match.kickoff_at)).slice(0, 12)
+    .sort((a, b) => Date.parse(a[0].match.kickoff_at) - Date.parse(b[0].match.kickoff_at));
+  if (!matchs.length) return vide;
+  const recits = await Promise.all(matchs.map((l) => loadRecit(db as never, l[0].match.id).catch(() => null)));
+  return (
+    <div className="space-y-3">
+      <p className="px-1 text-[12px] leading-relaxed text-ink-muted">Les pronos de tes sources sur les 36 prochaines heures. « Pour » : les autres sources qui jouent le même pari ou un pari qui l’entraîne. Un accord n’est pas une certitude.</p>
+      {matchs.map((l, k) => {
+        const m = l[0].match, home = shortName(m.home?.nom ?? "?"), away = shortName(m.away?.nom ?? "?"), rc = recits[k];
+        const avis = l.map((r) => ({ sourceId: r.source_id, nom: r.source!.nom.replace(/ · tipster IA$/, " (IA)"), ia: estIA(r.source!.nom), regles: proofOf.get(r.source_id)?.prouvesRegles ?? 0, market: r.market_code, param: r.market_param === null ? null : Number(r.market_param), sel: r.selection, cote: r.cote_annoncee === null ? null : Number(r.cote_annoncee) }));
+        const cs = consensus(avis, rc?.verdict ? { market: rc.verdict.market, param: rc.verdict.param, sel: rc.verdict.sel, label: rc.verdict.label } : null);
+        return (
+          <article key={m.id} className="tile p-3.5">
+            <Link href={`/matchs/${m.id}?t=sources`} className="flex items-baseline justify-between gap-2">
+              <span className="text-[15px] font-bold">{home} – {away}</span>
+              <span className="shrink-0 text-[11px] text-ink-muted">{new Date(m.kickoff_at).toLocaleString("fr-FR", { weekday: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}{m.competition?.code_externe && COMP_SHORT[m.competition.code_externe] ? ` · ${COMP_SHORT[m.competition.code_externe]}` : ""}</span>
+            </Link>
+            <ul className="mt-2 divide-y divide-line text-[13px]">
+              {cs.lignes.slice(0, 4).map((x) => (
+                <li key={`${x.avis.sourceId}${x.avis.market}${x.avis.param}${x.avis.sel}`} className="flex items-baseline justify-between gap-3 py-1.5">
+                  <span className="min-w-0"><span className="font-medium">{pickLabel(x.avis.market, x.avis.param, x.avis.sel, home, away)}</span> <span className="text-ink-muted">· {x.avis.nom}</span></span>
+                  <span className="flex shrink-0 gap-1 text-[11px] font-semibold">
+                    <span className={`rounded-full px-2 py-0.5 ${x.confirment.length ? "bg-gain-soft text-gain-ink" : "bg-surface-2 text-ink-muted"}`}>{x.confirment.length} pour</span>
+                    {x.contredisent.length > 0 && <span className="rounded-full bg-loss-soft px-2 py-0.5 text-loss-ink">{x.contredisent.length} contre</span>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {cs.lignes.length > 4 && <p className="text-[11px] text-ink-muted">+ {cs.lignes.length - 4} autre{cs.lignes.length - 4 > 1 ? "s" : ""}</p>}
+            <p className="mt-2 rounded-lg bg-surface-2 p-2.5 text-[12.5px] leading-snug"><b>Betster :</b> {cs.conclusion}</p>
+            <Link href={`/matchs/${m.id}?t=sources`} className="mt-2 block text-right text-[12px] font-medium text-brand">Tout le détail ›</Link>
+          </article>
+        );
+      })}
     </div>
   );
 }

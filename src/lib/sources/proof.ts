@@ -10,16 +10,19 @@ export const SEUIL = { classement: 30, tendance: 10, provisoire: 30, etabli: 100
 export type Proof = {
   prouves: number; prouvesRegles: number; prouvesGagnes: number; avecCote: number; unites: number; attendu: number | null;
   apresCoup: number; apresCoupRegles: number; apresCoupGagnes: number;
+  /** Score exact, compté à part depuis le 23/11 (0058) : hors réussite et rendement principaux. */
+  csRegles?: number; csGagnes?: number; csUnites?: number;
 };
 export type Niveau = "non_etabli" | "debut" | "tendance" | "provisoire" | "etabli";
-type Brut = Partial<Record<"prouves" | "prouves_regles" | "prouves_gagnes" | "prouves_avec_cote" | "prouves_unites" | "attendu" | "apres_coup" | "apres_coup_regles" | "apres_coup_gagnes", number | string | null>>;
+type Brut = Partial<Record<"prouves" | "prouves_regles" | "prouves_gagnes" | "prouves_avec_cote" | "prouves_unites" | "attendu" | "apres_coup" | "apres_coup_regles" | "apres_coup_gagnes" | "cs_regles" | "cs_gagnes" | "cs_unites", number | string | null>>;
 
 export const VIDE: Proof = { prouves: 0, prouvesRegles: 0, prouvesGagnes: 0, avecCote: 0, unites: 0, attendu: null, apresCoup: 0, apresCoupRegles: 0, apresCoupGagnes: 0 };
 export function lire(r: Brut | null | undefined): Proof {
   if (!r) return VIDE;
   const n = (v: unknown) => Number(v ?? 0);
   return { prouves: n(r.prouves), prouvesRegles: n(r.prouves_regles), prouvesGagnes: n(r.prouves_gagnes), avecCote: n(r.prouves_avec_cote), unites: n(r.prouves_unites),
-    attendu: r.attendu === null || r.attendu === undefined ? null : Number(r.attendu), apresCoup: n(r.apres_coup), apresCoupRegles: n(r.apres_coup_regles), apresCoupGagnes: n(r.apres_coup_gagnes) };
+    attendu: r.attendu === null || r.attendu === undefined ? null : Number(r.attendu), apresCoup: n(r.apres_coup), apresCoupRegles: n(r.apres_coup_regles), apresCoupGagnes: n(r.apres_coup_gagnes),
+    csRegles: n(r.cs_regles), csGagnes: n(r.cs_gagnes), csUnites: n(r.cs_unites) };
 }
 
 // « non_etabli » : aucun prono réglé. Dès le premier, les chiffres s'affichent, avec leur volume.

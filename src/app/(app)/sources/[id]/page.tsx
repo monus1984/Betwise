@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 type Named = { nom: string } | { nom: string }[] | null;
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
 
-export default async function SourcePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ existante?: string; ajout?: string; doublon?: string; p?: string }> }) {
+export default async function SourcePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ existante?: string; ajout?: string; doublon?: string; p?: string; m?: string }> }) {
   const { id } = await params;
   const sp = await searchParams;
   const supabase = await createClient();
@@ -44,6 +44,8 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
     .from("predictions")
     .select("id, match_libre, market_code, market_param, selection, cote_annoncee, risque_annonce, risque_calcule, statut, resultat, logged_at, published_at, submitted_by, match:matches(id, kickoff_at, score_home, score_away, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom))")
     .eq("source_id", id)
+    // Rubrique Score exact (23/11) : à part de l'historique principal
+    .filter("market_code", sp.m === "cs" ? "eq" : "neq", "CS")
     .order("logged_at", { ascending: false })
     .limit(60);
 
@@ -93,14 +95,16 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
           <p className="text-xs font-medium text-white/70">Ses pronos</p>
           <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px]">{NIVEAU[nv]}</span>
         </div>
-        <p className="mt-1 text-3xl font-bold tabular-nums">{nv === "non_etabli" ? (proof.prouves ? "En attente" : "À suivre") : `${proof.prouvesGagnes} juste${proof.prouvesGagnes > 1 ? "s" : ""} sur ${proof.prouvesRegles}`}</p>
+        {/* Fiche en 5 secondes (conseil d'IA, 23/11) : le rendement d'abord, avec le volume ; rien sous 5 résultats */}
+        {nv !== "non_etabli" && proof.prouvesRegles >= 5 && rdt !== null && <p className={`mt-1 text-4xl font-bold tabular-nums ${rdt >= 0 ? "text-band-gain" : "text-band-loss"}`}>{rdt >= 0 ? "+" : "−"}{Math.abs(rdt * 100).toFixed(0)} %<span className="ml-2 align-middle text-[12px] font-medium text-white/70">de rendement à mise égale</span></p>}
+        <p className={`mt-1 tabular-nums ${proof.prouvesRegles >= 5 && rdt !== null ? "text-base font-semibold" : "text-3xl font-bold"}`}>{nv === "non_etabli" ? (proof.prouves ? "En attente" : "À suivre") : `${proof.prouvesGagnes} juste${proof.prouvesGagnes > 1 ? "s" : ""} sur ${proof.prouvesRegles}${proof.prouvesRegles < 5 ? " : trop tôt pour juger" : ""}`}</p>
         {nv === "non_etabli" ? (
           <p className="mt-1 text-[13px] leading-snug text-white/75">{raison(proof)}</p>
         ) : (
           <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
             <div><p className="text-[11px] text-white/60">Réussite</p><p className="font-semibold tabular-nums">{reu === null ? "—" : `${Math.round(reu * 100)} %`}</p></div>
             <div><p className="text-[11px] text-white/60">Attendu</p><p className="font-semibold tabular-nums">{proof.attendu === null ? "—" : `${Math.round(proof.attendu * 100)} %`}</p></div>
-            <div><p className="text-[11px] text-white/60">Rendement</p><p className={`font-semibold tabular-nums ${rdt === null ? "" : rdt >= 0 ? "text-band-gain" : "text-band-loss"}`}>{rdt === null ? "—" : `${rdt >= 0 ? "+" : "−"}${Math.abs(rdt * 100).toFixed(0).replace(".", ",")} %`}</p></div>
+            <div><p className="text-[11px] text-white/60">Avant le match</p><p className="font-semibold tabular-nums">{proof.prouves ? `${Math.round(((proof.prouves - proof.apresCoup) / proof.prouves) * 100)} %` : "—"}</p></div>
           </div>
         )}
         {nv !== "non_etabli" && proof.attendu !== null && <p className="mt-3 text-[11px] text-white/60">« Attendu » : la réussite que ces cotes laissent prévoir. Au-dessus, la source fait mieux que le marché.</p>}
@@ -199,7 +203,14 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
       )}
 
       <section className="mt-5">
-        <h2 className="mb-2 text-sm font-semibold">Historique des pronos</h2>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold">{sp.m === "cs" ? "Scores exacts" : "Historique des pronos"}</h2>
+          <nav className="flex gap-1.5" aria-label="Rubriques des pronos">
+            <Link href={`/sources/${id}`} scroll={false} aria-current={sp.m !== "cs" ? "page" : undefined} className={`rounded-full px-3 py-1 text-xs ${sp.m !== "cs" ? "bg-inverse text-on-inverse" : "border border-line bg-surface text-ink-soft"}`}>Pronos</Link>
+            <Link href={`/sources/${id}?m=cs`} scroll={false} aria-current={sp.m === "cs" ? "page" : undefined} className={`rounded-full px-3 py-1 text-xs ${sp.m === "cs" ? "bg-inverse text-on-inverse" : "border border-line bg-surface text-ink-soft"}`}>Score exact{proof.csRegles ? ` · ${proof.csGagnes} sur ${proof.csRegles}` : ""}</Link>
+          </nav>
+        </div>
+        {sp.m === "cs" && <p className="mb-2 text-[11px] leading-snug text-ink-muted">Les scores exacts réussissent rarement : ils sont comptés à part et n’entrent pas dans le rendement affiché en haut.{proof.csRegles ? ` Ici : ${proof.csGagnes} juste${(proof.csGagnes ?? 0) > 1 ? "s" : ""} sur ${proof.csRegles}, ${(proof.csUnites ?? 0) >= 0 ? "+" : "−"}${Math.abs(proof.csUnites ?? 0).toFixed(1).replace(".", ",")} unité${Math.abs(proof.csUnites ?? 0) >= 2 ? "s" : ""} à mise égale.` : ""}</p>}
         {(preds ?? []).length === 0 ? (
           <p className="rounded-lg border border-dashed border-slate-300 bg-surface p-5 text-center text-sm text-slate-600">Aucun prono enregistré. Rien ne s’efface jamais ici : chaque prono garde son résultat.</p>
         ) : (
