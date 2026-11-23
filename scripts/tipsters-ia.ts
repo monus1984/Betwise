@@ -21,6 +21,7 @@ import { horizonHeures } from "../src/lib/tipsters-ia/horizon";
 
 const ESSAI = process.argv.includes("--essai");
 const FORCER_CARNET = process.argv.includes("--carnet");
+const FORCER_PASSAGE = process.argv.includes("--forcer");
 const ADMIN_ID = process.env.BETWISE_ADMIN_ID;
 const CARNETS = process.env.CARNETS_DIR || "carnets";
 const RISK = { sur: "prudent", audacieux: "moyen", risque: "risque" } as const;
@@ -61,7 +62,8 @@ async function passage(p: ProfilComplet, d: Dossier, empreinte: string) {
   const bankroll = GARDE_FOUS.bankrollDepart + net;
   const enJeu = paris.filter((b) => b.statut === "en_cours").reduce((s, b) => s + Number(b.mise), 0);
   const duJour = paris.filter((b) => jourAbidjan(new Date(b.placed_at)) === jour);
-  const matchsJoues = new Set([...duJour, ...paris.filter((b) => b.statut === "en_cours")].flatMap((b) => b.bet_selections.map((s) => s.match_id).filter(Boolean) as string[]));
+  // Un simple par match : seuls les simples bloquent un match (un combiné peut reprendre un match joué en simple)
+  const matchsJoues = new Set([...duJour, ...paris.filter((b) => b.statut === "en_cours")].filter((b) => b.bet_selections.length === 1).flatMap((b) => b.bet_selections.map((s) => s.match_id).filter(Boolean) as string[]));
 
   const historique = async () => {
     const parGroupe = (cle: (b: Bet) => string) => {
@@ -85,6 +87,13 @@ async function passage(p: ProfilComplet, d: Dossier, empreinte: string) {
   // Nouvelle consigne (version) : le carnet est réécrit au passage suivant
   const ecrireCarnet = FORCER_CARNET || carnet.jour !== jour || carnet.version !== PROMPT_VERSION;
   const manque = Math.max(0, MIN_PARIS_JOUR - duJour.length), dernierPassage = new Date().getUTCHours() >= 16;
+  // Passages de l'après-midi (23/11, Mounir : ne pas épuiser le crédit) : le matin voit toute la journée ;
+  // l'après-midi, un tipster qui a déjà ses paris du jour n'est pas appelé, et les autres ont moins de tours.
+  const apresMidi = new Date().getUTCHours() >= 12;
+  if (apresMidi && manque === 0 && !ecrireCarnet && !FORCER_PASSAGE) {
+    return { profil: p.id, nom: p.nom, modele: p.modele, promptVersion: PROMPT_VERSION, essai: ESSAI, dossier: empreinte, saute: `déjà ${duJour.length} pari(s) aujourd'hui : pas d'appel (économie)`, tours: 0, jetons: null, retenus: [], combinesRetenus: [], rejets: [], enregistres: [] };
+  }
+  const profil = apresMidi ? { ...p, maxTours: Math.min(p.maxTours ?? 14, 6) } : p;
   const consigne = [
     `Passage du ${new Date().toLocaleString("fr-FR", { timeZone: "Africa/Abidjan", dateStyle: "full", timeStyle: "short" })} (heure d'Abidjan).`,
     `Bankroll : ${fr(bankroll)} FCFA (départ ${fr(GARDE_FOUS.bankrollDepart)}), ${fr(enJeu)} FCFA en jeu, ${duJour.length} pari(s) déjà joué(s) aujourd'hui sur ${GARDE_FOUS.parJour} au plus.`,
@@ -94,15 +103,16 @@ async function passage(p: ProfilComplet, d: Dossier, empreinte: string) {
     manque === 0 ? `Tu as déjà joué tes ${MIN_PARIS_JOUR} paris du jour : tu peux en ajouter si tu en vois de bons, ou t'arrêter.`
       : dernierPassage ? `C'est le dernier passage de la journée et il te manque ${manque} pari(s) sur ${MIN_PARIS_JOUR} : choisis les ${manque} meilleur(s) parmi les matchs du passage (sauf s'il y a moins de ${manque} match(s)).`
       : `Il te reste ${manque} pari(s) à jouer aujourd'hui sur ${MIN_PARIS_JOUR} au minimum, dans ce passage ou les suivants.`,
-    carnet.version !== PROMPT_VERSION && carnet.texte ? "La consigne a changé : on ne te demande plus de battre la cote. Si ton carnet contient une règle de seuil de valeur (cote × probabilité, écart avec le marché…), retire-la en le réécrivant." : "",
+    carnet.version !== PROMPT_VERSION && carnet.texte ? "La consigne a changé : on ne te demande plus de battre la cote, il n'y a plus de quota par niveau de cote, et tu peux proposer des combinés. Si ton carnet contient une règle de seuil de valeur (cote × probabilité, écart avec le marché…) ou une répartition imposée entre niveaux, retire-la en le réécrivant." : "",
+    apresMidi ? "Passage de l'après-midi : va à l'essentiel (compositions publiées, nouvelles absences, matchs du soir)." : "Passage du matin : tu vois tous les matchs de la journée.",
     "Analyse, choisis, puis rends ta décision avec l'outil decision.",
   ].filter(Boolean).join("\n\n");
 
   const debut = Date.now();
   const r = d.matchs.length || ecrireCarnet
-    ? await lancerAgent(p, SYSTEME, consigne, OUTILS, (nom, entree) => executerOutil(db as never, d, nom, entree, historique))
+    ? await lancerAgent(profil, SYSTEME, consigne, OUTILS, (nom, entree) => executerOutil(db as never, d, nom, entree, historique))
     : { decision: { paris: [], abstention: "aucun match avec cote 1xBet dans ce passage" }, modele: p.modele, tours: 0, traces: [], jetons: { entree: 0, sortie: 0, cacheLu: 0, cacheEcrit: 0 } };
-  const { retenus, rejets } = valider(r.decision?.paris ?? [], d.options, { bankroll, enJeu, parisDuJour: duJour.length, matchsJoues });
+  const { retenus, rejets, combinesRetenus } = valider(r.decision?.paris ?? [], d.options, { bankroll, enJeu, parisDuJour: duJour.length, matchsJoues }, Date.now(), r.decision?.combines ?? []);
 
   const enregistres: string[] = [];
   if (!ESSAI) for (const x of retenus) {
@@ -122,6 +132,16 @@ async function passage(p: ProfilComplet, d: Dossier, empreinte: string) {
     if (e2) throw e2;
     enregistres.push(x.id);
   }
+  // Combinés : un ticket à plusieurs sélections dans la bankroll du robot (pas de « prédiction » de source : celles-ci restent des simples)
+  if (!ESSAI) for (const c of combinesRetenus) {
+    const { error } = await moi.rpc("place_bet", {
+      p_mise: c.mise, p_virtuel: true, p_source_import: "manuel", p_raw_text: `[tipster IA ${p.nom}] Combiné : ${c.raison}`,
+      p_selections: c.selections.map((x) => ({ match_id: x.matchId, market_code: x.market, market_param: x.param, selection: x.sel, cote: x.cote, origin_source_id: perso.id })),
+      p_summary: { bookmaker: "1xBet", type: "combine" },
+    } as never);
+    if (error) throw error;
+    enregistres.push(`combiné ${c.selections.map((x) => x.id).join("+")}`);
+  }
   if (!ESSAI && r.decision?.carnet && r.decision.carnet.trim().length > 30) {
     mkdirSync(CARNETS, { recursive: true });
     writeFileSync(`${CARNETS}/${p.id}.md`, `<!-- jour: ${jour} version: ${PROMPT_VERSION} -->\n${r.decision.carnet.trim().slice(0, 6000)}\n`);
@@ -133,7 +153,8 @@ async function passage(p: ProfilComplet, d: Dossier, empreinte: string) {
     profil: p.id, nom: p.nom, modele: r.modele, promptVersion: PROMPT_VERSION, essai: ESSAI, dossier: empreinte, duree_s: Math.round((Date.now() - debut) / 1000),
     tours: r.tours, outils: r.traces, jetons: r.jetons, erreur: r.erreur ?? null,
     bankroll, enJeu, propositions: r.decision?.paris ?? [], abstention: r.decision?.abstention ?? null, carnetReecrit: !!r.decision?.carnet,
-    retenus: retenus.map((x) => ({ id: x.id, pari: x.label, cote: x.cote, mise: x.mise, probabilite: x.probabilite, raison: x.raison })), rejets, enregistres,
+    retenus: retenus.map((x) => ({ id: x.id, pari: x.label, cote: x.cote, mise: x.mise, probabilite: x.probabilite, raison: x.raison })),
+    combinesRetenus: combinesRetenus.map((c) => ({ selections: c.selections.map((x) => `${x.id} ${x.label} @${x.cote}`), cote: c.cote, mise: c.mise, probabilite: c.probabilite, raison: c.raison })), rejets, enregistres,
   };
 }
 
@@ -156,8 +177,8 @@ async function main() {
     const rapport = x.status === "fulfilled" ? x.value : { profil: p.id, nom: p.nom, essai: ESSAI, dossier: empreinte, erreur: x.reason instanceof Error ? x.reason.message : String(x.reason) };
     if (x.status === "rejected") echecs++;
     writeFileSync(`rapports/tipsters-ia/${stamp}-${p.id}.json`, JSON.stringify(rapport, null, 2));
-    const r = rapport as { retenus?: unknown[]; rejets?: unknown[]; jetons?: unknown; tours?: number; erreur?: string | null; abstention?: string | null };
-    console.log(`[${p.nom}] ${r.erreur ? `ERREUR : ${r.erreur}` : `${r.retenus?.length ?? 0} pari(s) retenu(s), ${r.rejets?.length ?? 0} rejeté(s), ${r.tours} tour(s), jetons ${JSON.stringify(r.jetons)}${r.abstention ? ` — ${r.abstention.slice(0, 200)}` : ""}`}`);
+    const r = rapport as { retenus?: unknown[]; combinesRetenus?: unknown[]; rejets?: unknown[]; jetons?: unknown; tours?: number; erreur?: string | null; abstention?: string | null; saute?: string };
+    console.log(`[${p.nom}] ${r.erreur ? `ERREUR : ${r.erreur}` : r.saute ? `sauté — ${r.saute}` : `${r.retenus?.length ?? 0} simple(s) et ${r.combinesRetenus?.length ?? 0} combiné(s) retenu(s), ${r.rejets?.length ?? 0} rejeté(s), ${r.tours} tour(s), jetons ${JSON.stringify(r.jetons)}${r.abstention ? ` — ${r.abstention.slice(0, 200)}` : ""}`}`);
   });
   if (echecs === profils.length) process.exit(1);
 }

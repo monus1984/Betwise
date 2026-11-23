@@ -8,7 +8,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 export type Outil = { name: string; description: string; input_schema: Record<string, unknown> };
-export type Decision = { paris: { option: string; mise: number; probabilite: number; raison: string }[]; abstention?: string; carnet?: string };
+export type Decision = { paris: { option: string; mise: number; probabilite: number; raison: string }[]; combines?: { options: string[]; mise: number; probabilite: number; raison: string }[]; abstention?: string; carnet?: string };
 export type Trace = { outil: string; entree: unknown; ms: number };
 export type Resultat = { decision: Decision | null; modele: string; tours: number; traces: Trace[]; jetons: { entree: number; sortie: number; cacheLu: number; cacheEcrit: number }; erreur?: string };
 export type Profil = {

@@ -14,6 +14,8 @@ export const GARDE_FOUS = {
   coteMin: 1.1, coteMax: 10,
   /** Le match doit commencer dans plus de 10 minutes. */
   delaiMinMinutes: 10,
+  /** Combinés (23/11) : 2 à 4 sélections sur des matchs différents, cote totale de 1,50 à 15. */
+  combineMin: 2, combineMax: 4, coteCombineMin: 1.5, coteCombineMax: 15,
 } as const;
 
 export type Option = { id: string; matchId: string; market: string; param: number | null; sel: string; label: string; cote: number; releveAt: string; kickoff: string };
@@ -21,11 +23,13 @@ export type Proposition = { option: string; mise: number; probabilite: number; r
 export type Etat = { bankroll: number; enJeu: number; parisDuJour: number; matchsJoues: Set<string> };
 export type Retenu = Option & { mise: number; probabilite: number; raison: string };
 export type Rejet = { option: string; motif: string };
+export type PropositionCombine = { options: string[]; mise: number; probabilite: number; raison: string };
+export type CombineRetenu = { selections: Option[]; cote: number; mise: number; probabilite: number; raison: string };
 
 export function arrondirMise(m: number) { return Math.round(m / GARDE_FOUS.arrondi) * GARDE_FOUS.arrondi; }
 
-export function valider(props: Proposition[], options: Map<string, Option>, etat: Etat, now = Date.now()): { retenus: Retenu[]; rejets: Rejet[] } {
-  const retenus: Retenu[] = [], rejets: Rejet[] = [];
+export function valider(props: Proposition[], options: Map<string, Option>, etat: Etat, now = Date.now(), combines: PropositionCombine[] = []): { retenus: Retenu[]; rejets: Rejet[]; combinesRetenus: CombineRetenu[] } {
+  const retenus: Retenu[] = [], rejets: Rejet[] = [], combinesRetenus: CombineRetenu[] = [];
   const matchs = new Set(etat.matchsJoues);
   let enJeu = etat.enJeu, jour = etat.parisDuJour;
   for (const p of props) {
@@ -45,5 +49,28 @@ export function valider(props: Proposition[], options: Map<string, Option>, etat
     retenus.push({ ...o, mise, probabilite: Math.round(p.probabilite * 1000) / 1000, raison: p.raison.trim().slice(0, 1200) });
     matchs.add(o.matchId); enJeu += mise; jour++;
   }
-  return { retenus, rejets };
+  // Combinés : chaque sélection passe les mêmes contrôles qu'un simple ; un match déjà joué en simple peut y figurer.
+  for (const c of combines) {
+    const ids = (Array.isArray(c.options) ? c.options : []).map((x) => String(x ?? "").trim());
+    const nom = `combiné ${ids.join(" + ")}`, non = (motif: string) => rejets.push({ option: nom, motif });
+    if (ids.length < GARDE_FOUS.combineMin || ids.length > GARDE_FOUS.combineMax) { non(`un combiné a de ${GARDE_FOUS.combineMin} à ${GARDE_FOUS.combineMax} sélections`); continue; }
+    const sels = ids.map((id) => options.get(id));
+    if (sels.some((o) => !o)) { non("sélection inconnue : elle n'est pas dans les cotes relevées"); continue; }
+    const os = sels as Option[];
+    if (new Set(os.map((o) => o.matchId)).size !== os.length) { non("deux sélections sur le même match"); continue; }
+    if (os.some((o) => Date.parse(o.kickoff) - now < GARDE_FOUS.delaiMinMinutes * 60000)) { non("un des matchs est commencé ou trop proche du coup d'envoi"); continue; }
+    if (os.some((o) => o.cote < GARDE_FOUS.coteMin)) { non(`sélection sous ${GARDE_FOUS.coteMin}`); continue; }
+    const cote = Math.round(os.reduce((x, o) => x * o.cote, 1) * 100) / 100;
+    if (cote < GARDE_FOUS.coteCombineMin || cote > GARDE_FOUS.coteCombineMax) { non(`cote totale ${cote} hors de ${GARDE_FOUS.coteCombineMin} à ${GARDE_FOUS.coteCombineMax}`); continue; }
+    if (jour >= GARDE_FOUS.parJour) { non(`${GARDE_FOUS.parJour} paris par jour au plus`); continue; }
+    if (!(c.probabilite > 0 && c.probabilite < 1)) { non("probabilité absente ou hors de 0 à 1"); continue; }
+    if (!c.raison || c.raison.trim().length < 20) { non("raison absente"); continue; }
+    const disponible = etat.bankroll - enJeu;
+    const mise = Math.min(arrondirMise(Number(c.mise) || 0), arrondirMise(etat.bankroll * GARDE_FOUS.miseMaxPart));
+    if (mise < GARDE_FOUS.miseMin) { non("mise trop faible"); continue; }
+    if (mise > disponible || enJeu + mise > etat.bankroll * GARDE_FOUS.expositionMax) { non("bankroll déjà trop engagée"); continue; }
+    combinesRetenus.push({ selections: os, cote, mise, probabilite: Math.round(c.probabilite * 1000) / 1000, raison: c.raison.trim().slice(0, 1200) });
+    enJeu += mise; jour++;
+  }
+  return { retenus, rejets, combinesRetenus };
 }

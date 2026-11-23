@@ -58,6 +58,12 @@ export const OUTILS = [
       probabilite: { type: "number", description: "Ta propre estimation de la chance que le pari passe, entre 0 et 1" },
       raison: { type: "string", description: "Pourquoi ce pari, en t'appuyant sur les informations consultées" },
     }, required: ["option", "mise", "probabilite", "raison"] } },
+    combines: { type: "array", description: "Combinés (facultatif) : 2 à 4 options de matchs différents, cote totale de 1,50 à 15. Un match déjà joué en simple peut y figurer.", items: { type: "object", properties: {
+      options: { type: "array", items: { type: "string" }, description: "Identifiants des options renvoyées par cotes_match, une par match" },
+      mise: { type: "number", description: "Mise en FCFA, que tu fixes toi-même" },
+      probabilite: { type: "number", description: "Ta propre estimation de la chance que TOUT le combiné passe, entre 0 et 1" },
+      raison: { type: "string", description: "Pourquoi ces sélections ensemble : ce qui rend chacune probable, et pourquoi elles ne dépendent pas l'une de l'autre" },
+    }, required: ["options", "mise", "probabilite", "raison"] } },
     abstention: { type: "string", description: "Si tu ne joues rien ou peu : pourquoi" },
     carnet: { type: "string", description: "Ton carnet réécrit en entier (tes règles du moment et ce que tu as appris). Obligatoire quand on te le demande, sinon facultatif." },
   }, required: ["paris"] } },

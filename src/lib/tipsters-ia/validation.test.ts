@@ -29,4 +29,19 @@ describe("validation des décisions d'un tipster IA", () => {
     expect(valider([{ option: "M2.1", mise: 5000, probabilite: 0.8, raison }], options, { ...etat, enJeu: 38_000 }, NOW).retenus).toHaveLength(0);
     expect(valider([{ option: "M2.1", mise: 5000, probabilite: 0.8, raison }], options, { ...etat, parisDuJour: 8 }, NOW).retenus).toHaveLength(0);
   });
+  it("combinés : calcule la cote totale et refuse même match, sélection inconnue ou cote trop haute", () => {
+    const opts = new Map([...options, ...[o("M5.1", "e", 4.2), o("M6.1", "f", 4.0)].map((x) => [x.id, x] as const)]);
+    const r = valider([{ option: "M1.1", mise: 2000, probabilite: 0.7, raison }], opts, etat, NOW, [
+      { options: ["M1.1", "M2.1"], mise: 3000, probabilite: 0.5, raison },
+      { options: ["M1.1", "M1.2"], mise: 1000, probabilite: 0.4, raison },
+      { options: ["M1.1", "M9.9"], mise: 1000, probabilite: 0.4, raison },
+      { options: ["M1.1", "M5.1", "M6.1"], mise: 1000, probabilite: 0.1, raison },
+      { options: ["M2.1"], mise: 1000, probabilite: 0.8, raison },
+    ]);
+    expect(r.retenus).toHaveLength(1);
+    expect(r.combinesRetenus).toHaveLength(1);
+    expect(r.combinesRetenus[0].cote).toBe(1.88);
+    expect(r.combinesRetenus[0].mise).toBe(3000);
+    expect(r.rejets).toHaveLength(4);
+  });
 });
