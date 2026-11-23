@@ -15,7 +15,7 @@ import { categorieFromOdds, CAT_LABEL } from "../src/lib/coach/categories";
 import { compteRobot, sessionRobot, clientAudit } from "../src/lib/tipster-virtuel/compte";
 import { construireDossier, executerOutil, OUTILS, type Dossier } from "../src/lib/tipsters-ia/dossier";
 import { lancerAgent } from "../src/lib/tipsters-ia/agent";
-import { profilsActifs, PROMPT_VERSION, SYSTEME, MIN_PARIS_JOUR, type ProfilComplet } from "../src/lib/tipsters-ia/profils";
+import { profilsActifs, PROMPT_VERSION, SYSTEME, type ProfilComplet } from "../src/lib/tipsters-ia/profils";
 import { GARDE_FOUS, valider } from "../src/lib/tipsters-ia/validation";
 import { horizonHeures } from "../src/lib/tipsters-ia/horizon";
 
@@ -86,12 +86,12 @@ async function passage(p: ProfilComplet, d: Dossier, empreinte: string) {
   const carnet = lireCarnet(p.id);
   // Nouvelle consigne (version) : le carnet est réécrit au passage suivant
   const ecrireCarnet = FORCER_CARNET || carnet.jour !== jour || carnet.version !== PROMPT_VERSION;
-  const manque = Math.max(0, MIN_PARIS_JOUR - duJour.length), dernierPassage = new Date().getUTCHours() >= 16;
-  // Passages de l'après-midi (23/11, Mounir : ne pas épuiser le crédit) : le matin voit toute la journée ;
-  // l'après-midi, un tipster qui a déjà ses paris du jour n'est pas appelé, et les autres ont moins de tours.
+  // Passages de l'après-midi (23/11, Mounir et consensus du conseil d'IA : ne pas épuiser le crédit) : le matin voit
+  // toute la journée ; l'après-midi, un tipster déjà passé aujourd'hui (carnet du jour écrit) n'est pas appelé.
+  // Celui dont le passage du matin a échoué rattrape, avec moins de tours.
   const apresMidi = new Date().getUTCHours() >= 12;
-  if (apresMidi && manque === 0 && !ecrireCarnet && !FORCER_PASSAGE) {
-    return { profil: p.id, nom: p.nom, modele: p.modele, promptVersion: PROMPT_VERSION, essai: ESSAI, dossier: empreinte, saute: `déjà ${duJour.length} pari(s) aujourd'hui : pas d'appel (économie)`, tours: 0, jetons: null, retenus: [], combinesRetenus: [], rejets: [], enregistres: [] };
+  if (apresMidi && !ecrireCarnet && !FORCER_PASSAGE) {
+    return { profil: p.id, nom: p.nom, modele: p.modele, promptVersion: PROMPT_VERSION, essai: ESSAI, dossier: empreinte, saute: `déjà passé aujourd'hui (${duJour.length} pari(s)) : pas d'appel (économie)`, tours: 0, jetons: null, retenus: [], combinesRetenus: [], rejets: [], enregistres: [] };
   }
   const profil = apresMidi ? { ...p, maxTours: Math.min(p.maxTours ?? 14, 6) } : p;
   const consigne = [
@@ -100,10 +100,8 @@ async function passage(p: ProfilComplet, d: Dossier, empreinte: string) {
     `${d.matchs.length} match(s) dans ce passage.`,
     carnet.texte ? `Ton carnet actuel :\n---\n${carnet.texte.trim()}\n---` : "Tu n'as pas encore de carnet : c'est ton premier passage. Pose tes premières règles.",
     ecrireCarnet ? "Ce passage est le premier de la journée : regarde d'abord ton historique (mon_historique), puis réécris ton carnet en entier dans le champ carnet de ta décision." : "Tu peux compléter ton carnet si tu as appris quelque chose, sinon laisse le champ carnet vide.",
-    manque === 0 ? `Tu as déjà joué tes ${MIN_PARIS_JOUR} paris du jour : tu peux en ajouter si tu en vois de bons, ou t'arrêter.`
-      : dernierPassage ? `C'est le dernier passage de la journée et il te manque ${manque} pari(s) sur ${MIN_PARIS_JOUR} : choisis les ${manque} meilleur(s) parmi les matchs du passage (sauf s'il y a moins de ${manque} match(s)).`
-      : `Il te reste ${manque} pari(s) à jouer aujourd'hui sur ${MIN_PARIS_JOUR} au minimum, dans ce passage ou les suivants.`,
-    carnet.version !== PROMPT_VERSION && carnet.texte ? "La consigne a changé : on ne te demande plus de battre la cote, il n'y a plus de quota par niveau de cote, et tu peux proposer des combinés. Si ton carnet contient une règle de seuil de valeur (cote × probabilité, écart avec le marché…) ou une répartition imposée entre niveaux, retire-la en le réécrivant." : "",
+    duJour.length ? `Tu as déjà joué ${duJour.length} pari(s) aujourd'hui.` : "",
+    carnet.version !== PROMPT_VERSION && carnet.texte ? "La consigne a changé : on ne te demande pas de battre la cote, il n'y a plus ni quota par niveau ni nombre minimum de paris, et tu peux proposer des combinés de 2 ou 3 sélections (cote totale jusqu'à 3). Si ton carnet contient un seuil de valeur (cote × probabilité), une répartition imposée entre niveaux ou un nombre de paris à atteindre, retire-le en le réécrivant." : "",
     apresMidi ? "Passage de l'après-midi : va à l'essentiel (compositions publiées, nouvelles absences, matchs du soir)." : "Passage du matin : tu vois tous les matchs de la journée.",
     "Analyse, choisis, puis rends ta décision avec l'outil decision.",
   ].filter(Boolean).join("\n\n");

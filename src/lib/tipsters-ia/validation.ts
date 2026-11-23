@@ -14,8 +14,8 @@ export const GARDE_FOUS = {
   coteMin: 1.1, coteMax: 10,
   /** Le match doit commencer dans plus de 10 minutes. */
   delaiMinMinutes: 10,
-  /** Combinés (23/11) : 2 à 4 sélections sur des matchs différents, cote totale de 1,50 à 15. */
-  combineMin: 2, combineMax: 4, coteCombineMin: 1.5, coteCombineMax: 15,
+  /** Combinés (23/11, consensus du conseil d'IA) : 2 ou 3 sélections sur des matchs différents, cote totale de 1,50 à 3. */
+  combineMin: 2, combineMax: 3, coteCombineMin: 1.5, coteCombineMax: 3,
 } as const;
 
 export type Option = { id: string; matchId: string; market: string; param: number | null; sel: string; label: string; cote: number; releveAt: string; kickoff: string };

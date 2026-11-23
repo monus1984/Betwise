@@ -35,7 +35,7 @@ describe("validation des décisions d'un tipster IA", () => {
       { options: ["M1.1", "M2.1"], mise: 3000, probabilite: 0.5, raison },
       { options: ["M1.1", "M1.2"], mise: 1000, probabilite: 0.4, raison },
       { options: ["M1.1", "M9.9"], mise: 1000, probabilite: 0.4, raison },
-      { options: ["M1.1", "M5.1", "M6.1"], mise: 1000, probabilite: 0.1, raison },
+      { options: ["M1.1", "M5.1"], mise: 1000, probabilite: 0.1, raison },
       { options: ["M2.1"], mise: 1000, probabilite: 0.8, raison },
     ]);
     expect(r.retenus).toHaveLength(1);
