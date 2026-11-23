@@ -1,0 +1,46 @@
+[
+ {
+  "nom": "ChatGPT",
+  "modele": "openai/gpt-6.2-sol",
+  "ms": 4143,
+  "cout": 0.009516,
+  "jetons": [
+   2627,
+   295
+  ],
+  "reponse": "1. **Mal priorisé :** le Coach qui continue à suggérer des paris après épuisement du budget est un P0, avant les écarts mineurs de contraste. Une demande explicite ne rend pas le garde-fou plus efficace.\nLe recouvrement du bouton principal reste un P0 ; à l’inverse, le parcours inscription → premier pari test devrait être vérifié sur de vrais téléphones avant de raccourcir l’accueil.\n2. **Risque sous-estimé :** `auth.uid()` identifie l’appelant, mais ne prouve pas qu’il possède le pari ou le carnet visé. La revue par échantillon ne suffit pas à écarter les lectures ou modifications entre comptes via les fonctions `SECURITY DEFINER`.\n3. **Recommandation n°1 :** bloquer côté serveur toute nouvelle suggestion du Coach dès que le budget est atteint, sans dépendre du prompt, et tester le seuil ainsi que les demandes répétées avant d’élargir la bêta."
+ },
+ {
+  "nom": "Gemini",
+  "modele": "google/gemini-4-carbon",
+  "ms": 32098,
+  "cout": 0.02057,
+  "jetons": [
+   2785,
+   1500
+  ],
+  "reponse": "ERREUR 200 {\"id\":\"gen-1795413641-6JxsVwRuXwXgiF2i9JrH\",\"object\":\"chat.completion\",\"created\":1795413641,\"model\":\"google/gemini-4-carbon\",\"provider\":\"Google\",\"system_fingerprint\":null,\"service_tier\":\"default\",\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"length\",\"native_finish_reason\":\"MAX_TOKENS\",\"mess"
+ },
+ {
+  "nom": "Grok",
+  "modele": "x-ai/grok-4.7",
+  "ms": 32179,
+  "cout": 0.013988,
+  "jetons": [
+   3895,
+   1321
+  ],
+  "reponse": "1) Le P0 est cosmétique (FAB, étoile, 0,05 de contraste, 21 px) alors que le vrai risque est plus bas : budget du Coach encore contournable, règlement des matchs déjà faux, coupure API au 11/12, et sécu Supabase classée « hygiène ».\n2) Manque : RLS (pas seulement les fonctions), parcours du premier compte, âge/disclaimer jeu, flux de données vers l’IA, coût tipsters, et invariant « match passé = réglé » avant toute vitrine de performance.\n3) Risque non vu : des pronos/cotes servis sur des statuts réécrits par l’import, plus un Coach qui propose encore après budget — fausse confiance et incitation, pas un bug d’UI.\n4) Reco n°1 : geler le polish. Cette semaine : stop dur du Coach, alerte règlement >3 h, décision API, `search_path` + mots de passe divulgués + revue RLS/DEFINER. Le reste attend."
+ },
+ {
+  "nom": "DeepSeek",
+  "modele": "deepseek/deepseek-v4.1-flash-1017",
+  "ms": 9570,
+  "cout": 0.00109308,
+  "jetons": [
+   2859,
+   1500
+  ],
+  "reponse": "ERREUR 200 {\"id\":\"gen-1795413641-tDaDARM79DwxeAOIIA2O\",\"object\":\"chat.completion\",\"created\":1795413641,\"model\":\"deepseek/deepseek-v4.1-flash-1017\",\"provider\":\"Relace\",\"system_fingerprint\":null,\"service_tier\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"length\",\"native_finish_reason\":\"length\",\"me"
+ }
+]
