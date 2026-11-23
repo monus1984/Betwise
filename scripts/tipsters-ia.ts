@@ -17,6 +17,7 @@ import { construireDossier, executerOutil, OUTILS, type Dossier } from "../src/l
 import { lancerAgent } from "../src/lib/tipsters-ia/agent";
 import { profilsActifs, PROMPT_VERSION, SYSTEME, type ProfilComplet } from "../src/lib/tipsters-ia/profils";
 import { GARDE_FOUS, valider } from "../src/lib/tipsters-ia/validation";
+import { horizonHeures } from "../src/lib/tipsters-ia/horizon";
 
 const ESSAI = process.argv.includes("--essai");
 const FORCER_CARNET = process.argv.includes("--carnet");
@@ -137,7 +138,7 @@ async function main() {
   const oui = (k: string) => (process.env[k] ? "oui" : "non");
   console.log(`Configuration : ANTHROPIC_API_KEY ${oui("ANTHROPIC_API_KEY")}, OPENROUTER_API_KEY ${oui("OPENROUTER_API_KEY")}, OPENROUTER_TIPSTER_MODELS ${oui("OPENROUTER_TIPSTER_MODELS")}, OPENAI_API_KEY ${oui("OPENAI_API_KEY")}, GEMINI_API_KEY ${oui("GEMINI_API_KEY")}.`);
   if (!profils.length) { console.log("Aucun tipster IA actif : aucune clé configurée. Aucun appel, aucune écriture."); return; }
-  const d = await construireDossier(db as never, 10);
+  const d = await construireDossier(db as never, horizonHeures());
   const empreinte = createHash("sha256").update(JSON.stringify([...d.options.values()].map((o) => [o.id, o.matchId, o.market, o.param, o.sel, o.cote, o.releveAt]))).digest("hex").slice(0, 16);
   console.log(`Dossier ${empreinte} : ${d.matchs.length} match(s), ${d.options.size} option(s) 1xBet. Tipsters actifs : ${profils.map((p) => `${p.nom} (${p.modele})`).join(", ")}.`);
   const res = await Promise.allSettled(profils.map((p) => passage(p, d, empreinte)));

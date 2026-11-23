@@ -9,7 +9,9 @@ import { ApiFootball } from "../src/lib/api-football/client";
 import { AF_COMPETITIONS, AF_LINKED } from "../src/lib/api-football/sync";
 import { syncBookmakerOdds } from "../src/lib/api-football/bookmakers";
 
-const HORIZON_HEURES = 10; // le tipster regarde les matchs qui commencent dans 20 min à 8 h
+import { horizonHeures } from "../src/lib/tipsters-ia/horizon";
+
+const HORIZON_HEURES = horizonHeures(); // le même horizon que les tipsters IA (journée entière le matin)
 
 async function main() {
   if (!process.env.API_FOOTBALL_KEY) { console.error("API_FOOTBALL_KEY manquant"); process.exit(1); }

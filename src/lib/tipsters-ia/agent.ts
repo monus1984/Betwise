@@ -14,6 +14,8 @@ export type Resultat = { decision: Decision | null; modele: string; tours: numbe
 export type Profil = {
   id: string; nom: string; fournisseur: "anthropic" | "openai-compatible";
   modele: string; cle: string | undefined; baseUrl?: string;
+  /** Allers-retours maximum avec les outils (DeepSeek tournait en rond : 13 le 23/11). */
+  maxTours?: number;
 };
 
 const MAX_TOURS = 14;
@@ -29,8 +31,8 @@ async function agentAnthropic(p: Profil, systeme: string, consigne: string, outi
   const tools = outils.map((o, i) => ({ ...o, ...(i === outils.length - 1 ? { cache_control: { type: "ephemeral" as const } } : {}) })) as Anthropic.Tool[];
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: consigne }];
   const r: Resultat = { decision: null, modele: p.modele, tours: 0, traces: [], jetons: { entree: 0, sortie: 0, cacheLu: 0, cacheEcrit: 0 } };
-  for (; r.tours < MAX_TOURS; r.tours++) {
-    const derniers = r.tours === MAX_TOURS - 1;
+  for (const max = p.maxTours ?? MAX_TOURS; r.tours < max; r.tours++) {
+    const derniers = r.tours === max - 1;
     const res = await client.messages.create({
       model: p.modele, max_tokens: MAX_SORTIE,
       system: [{ type: "text", text: systeme, cache_control: { type: "ephemeral" } }],
@@ -67,8 +69,8 @@ async function agentOpenAI(p: Profil, systeme: string, consigne: string, outils:
   const tools = outils.map((o) => ({ type: "function", function: { name: o.name, description: o.description, parameters: o.input_schema } }));
   const messages: MsgOA[] = [{ role: "system", content: systeme }, { role: "user", content: consigne }];
   const r: Resultat = { decision: null, modele: p.modele, tours: 0, traces: [], jetons: { entree: 0, sortie: 0, cacheLu: 0, cacheEcrit: 0 } };
-  for (; r.tours < MAX_TOURS; r.tours++) {
-    const derniers = r.tours === MAX_TOURS - 1;
+  for (const max = p.maxTours ?? MAX_TOURS; r.tours < max; r.tours++) {
+    const derniers = r.tours === max - 1;
     const res = await fetch(`${p.baseUrl}/chat/completions`, {
       method: "POST", headers: { Authorization: `Bearer ${p.cle}`, "Content-Type": "application/json" },
       body: JSON.stringify({ model: p.modele, messages, tools, max_tokens: MAX_SORTIE, ...(derniers ? { tool_choice: { type: "function", function: { name: "decision" } } } : {}) }),

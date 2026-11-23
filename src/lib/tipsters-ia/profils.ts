@@ -24,7 +24,7 @@ export function profilsActifs(env: NodeJS.ProcessEnv = process.env): ProfilCompl
   if (env.OPENROUTER_API_KEY) for (const e of orModeles.split(",").map((x) => x.trim()).filter(Boolean)) {
     const [nom, modele] = e.includes("=") ? e.split("=").map((x) => x.trim()) : [e.split("/").pop()!, e];
     const id = `or-${slug(nom)}`;
-    out.push({ id, nom, fournisseur: "openai-compatible", baseUrl: "https://openrouter.ai/api/v1", modele, cle: env.OPENROUTER_API_KEY,
+    out.push({ id, nom, fournisseur: "openai-compatible", baseUrl: "https://openrouter.ai/api/v1", modele, cle: env.OPENROUTER_API_KEY, ...(/deepseek/i.test(modele) ? { maxTours: 6 } : {}),
       email: `${id}-tipster@betwise.invalid`, pseudo: `${nom} (tipster IA)`, source: `${nom} · tipster IA` });
   }
   return out;
