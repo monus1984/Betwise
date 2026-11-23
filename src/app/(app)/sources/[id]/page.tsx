@@ -10,6 +10,9 @@ import { linkOf } from "@/lib/sources/link";
 import { CumulChart, type CumulPoint } from "./cumul-chart";
 import { bilanMoi, type BilanMoi, type Ligne, type SelMoi } from "@/lib/sources/moi";
 import { SEUIL } from "@/lib/sources/proof";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { estIA } from "@/lib/sources/consensus";
+import { pickLabel } from "@/lib/probs/signals";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +49,15 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
 
   const isSystem = s.type === "modele_betwise" || s.type === "perso";
 
+  // Tipster IA (23/11) : ses tickets réels, simples et combinés, dans sa bankroll ; visibles par l'administrateur seul
+  let tickets: Ticket[] | null = null;
+  if (estIA(s.nom) && (await supabase.rpc("is_admin")).data) {
+    const court = s.nom.replace(/ · tipster IA$/, "");
+    const { data } = await createAdminClient().from("bets").select("id, type, statut, mise, gain_net, cote_totale, placed_at, bet_selections(market_code, market_param, selection, cote, resultat, match:matches(home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom)))")
+      .like("raw_text", `[tipster IA ${court}]%`).neq("statut", "annule").order("placed_at", { ascending: false }).limit(300);
+    tickets = (data ?? []) as unknown as Ticket[];
+  }
+
   // « Moi » (23/11) : mes propres choix notés comme une source, à partir de mes paris réels
   let moi: { b: BilanMoi; mieux: number; classees: number } | null = null;
   if (s.type === "perso" && s.created_by === user!.id) {
@@ -74,6 +86,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
       {sp.doublon && <p className="mb-4 rounded-lg border border-draw/40 bg-draw-soft p-3 text-sm text-draw-ink">Ce prono existait déjà pour cette source (même match, marché et sélection le même jour) : rien n’a été ajouté.</p>}
 
       {moi && <MoiTipster {...moi} />}
+      {tickets && <TicketsIA tickets={tickets} />}
       {!moi && (<>
       <section className="rounded-2xl bg-pitch p-5 text-white">
         <div className="flex items-baseline justify-between gap-3">
@@ -220,6 +233,49 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
         )}
       </section>
     </>
+  );
+}
+
+type Ticket = { id: string; type: string; statut: string; mise: number; gain_net: number | null; cote_totale: number | null; placed_at: string;
+  bet_selections: { market_code: string; market_param: number | null; selection: string; cote: number; resultat: string | null; match: { home: { nom: string } | null; away: { nom: string } | null } | null }[] };
+const BANKROLL_DEPART = 100_000;
+const fcfa = (x: number) => `${Math.round(x).toLocaleString("fr-FR")} F`;
+const RES: Record<string, string> = { gagne: "Gagné", perdu: "Perdu", rembourse: "Remboursé", en_cours: "En cours", cashout: "Cash-out" };
+
+/** Les tickets d'un tipster IA : simples et combinés, et sa bankroll virtuelle (départ 100 000 F). */
+function TicketsIA({ tickets }: { tickets: Ticket[] }) {
+  const regles = tickets.filter((t) => t.statut !== "en_cours" && t.gain_net !== null);
+  const net = regles.reduce((x, t) => x + Number(t.gain_net), 0);
+  const enJeu = tickets.filter((t) => t.statut === "en_cours").reduce((x, t) => x + Number(t.mise), 0);
+  const mises = regles.reduce((x, t) => x + Number(t.mise), 0);
+  const combines = tickets.filter((t) => t.type === "combine");
+  return (
+    <section className="rounded-xl border border-line bg-surface p-4">
+      <h2 className="text-sm font-semibold">Ses tickets</h2>
+      <div className="mt-2 grid grid-cols-3 gap-3 text-sm">
+        <div><p className="text-[11px] text-ink-muted">Bankroll</p><p className="font-semibold tabular-nums">{fcfa(BANKROLL_DEPART + net)}</p></div>
+        <div><p className="text-[11px] text-ink-muted">En jeu</p><p className="font-semibold tabular-nums">{fcfa(enJeu)}</p></div>
+        <div><p className="text-[11px] text-ink-muted">Rendement</p><p className={`font-semibold tabular-nums ${!mises ? "" : net >= 0 ? "text-gain" : "text-loss"}`}>{mises ? `${net >= 0 ? "+" : "−"}${Math.abs((net / mises) * 100).toFixed(0)} %` : "—"}</p></div>
+      </div>
+      <p className="mt-1.5 text-[11px] text-ink-muted">{tickets.length} ticket{tickets.length > 1 ? "s" : ""}, dont {combines.length} combiné{combines.length > 1 ? "s" : ""} ; {regles.length} réglé{regles.length > 1 ? "s" : ""}. Départ : {fcfa(BANKROLL_DEPART)} virtuels. Visible par toi seul.</p>
+      <ul className="mt-3 divide-y divide-line">
+        {tickets.slice(0, 40).map((t) => (
+          <li key={t.id} className="py-2">
+            <div className="flex items-baseline justify-between gap-3 text-[13px]">
+              <span className="font-medium">{t.type === "combine" ? `Combiné de ${t.bet_selections.length}` : "Simple"} · cote {Number(t.cote_totale ?? 0).toFixed(2).replace(".", ",")} · {fcfa(Number(t.mise))}</span>
+              <span className={`shrink-0 text-[12px] ${t.statut === "gagne" ? "text-gain" : t.statut === "perdu" ? "text-loss" : "text-ink-muted"}`}>{RES[t.statut] ?? t.statut}{t.gain_net !== null && t.statut !== "en_cours" ? ` (${Number(t.gain_net) >= 0 ? "+" : "−"}${fcfa(Math.abs(Number(t.gain_net)))})` : ""}</span>
+            </div>
+            <ul className="mt-0.5 space-y-0.5">
+              {t.bet_selections.map((x, i) => {
+                const h = x.match?.home?.nom ?? "?", a = x.match?.away?.nom ?? "?";
+                return <li key={i} className="text-[12px] text-ink-soft">{h} – {a} : {pickLabel(x.market_code, x.market_param === null ? null : Number(x.market_param), x.selection, h, a)} @ {Number(x.cote).toFixed(2).replace(".", ",")}{x.resultat && x.resultat !== "en_attente" ? ` · ${RES[x.resultat] ?? x.resultat}` : ""}</li>;
+              })}
+            </ul>
+            <p className="text-[11px] text-ink-muted">{new Date(t.placed_at).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
