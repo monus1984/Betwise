@@ -3,14 +3,16 @@
  * le +1,5 but de ChatGPT »). On ne code pas les règles marché par marché : on essaie tous les scores plausibles
  * (0 à 7 buts par équipe, avec toutes les mi-temps possibles) et on regarde quand chaque pari passe.
  *  - « même »      : le même pari ;
- *  - « confirme »  : l'un entraîne l'autre (chaque fois que A passe, B passe aussi, ou l'inverse) ;
+ *  - « entraine »  : chaque fois que A passe, B passe aussi (« les deux marquent » entraîne « plus de 1,5 but »,
+ *                    pas l'inverse : un 2-0 fait passer « plus de 1,5 » mais pas « les deux marquent ») ;
+ *  - « suit »       : l'inverse (B entraîne A) ;
  *  - « contredit » : ils ne peuvent jamais passer ensemble ;
  *  - « neutre »    : ni l'un ni l'autre (ou pari impossible à évaluer sur le score seul : buteur, corners…).
  */
 import { issue, type Score } from "../mesure/issue";
 
 export type Pari = { market: string; param: number | null; sel: string };
-export type Relation = "meme" | "confirme" | "contredit" | "neutre";
+export type Relation = "meme" | "entraine" | "suit" | "contredit" | "neutre";
 
 const SCORES: Score[] = (() => {
   const l: Score[] = [];
@@ -46,6 +48,7 @@ export function relation(a: Pari, b: Pari): Relation {
   }
   if (!evaluables || !aGagne || !bGagne) return "neutre";
   if (!ensemble) return "contredit";
-  if (!aSansB || !bSansA) return "confirme";
+  if (!aSansB) return "entraine";
+  if (!bSansA) return "suit";
   return "neutre";
 }

@@ -31,9 +31,10 @@ export function MatchSources({ pronos, proofs, home, away, joue, verdict }: { pr
                 <li key={`${l.avis.sourceId}${l.avis.market}${l.avis.param}${l.avis.sel}`} className="py-2">
                   <div className="flex items-baseline justify-between gap-3">
                     <span className="min-w-0"><span className="font-medium">{pickLabel(l.avis.market, l.avis.param, l.avis.sel, home, away)}</span> <span className="text-ink-muted">· {l.avis.nom}{l.avis.regles >= 30 ? " ✓" : ""}</span></span>
-                    {/* Points : une source qui confirme = un point plein (5 au plus) */}
-                    <span className="shrink-0 tracking-[2px] text-[12px]" aria-label={`${n} confirmation${n > 1 ? "s" : ""}, ${x} contradiction${x > 1 ? "s" : ""}`}>
-                      <span className="text-gain">{"●".repeat(Math.min(n, 5))}</span><span className="text-line">{"●".repeat(Math.max(0, 5 - Math.min(n, 5)))}</span>
+                    {/* Décompte en clair (conseil d'IA du 23/11 : pas d'étoiles, qui se liraient comme une note du tipster) */}
+                    <span className="flex shrink-0 gap-1 text-[11px] font-semibold">
+                      <span className={`rounded-full px-2 py-0.5 ${n ? "bg-gain/15 text-gain" : "bg-surface-2 text-ink-muted"}`}>{n} pour</span>
+                      {x > 0 && <span className="rounded-full bg-loss/15 px-2 py-0.5 text-loss">{x} contre</span>}
                     </span>
                   </div>
                   <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
@@ -46,7 +47,7 @@ export function MatchSources({ pronos, proofs, home, away, joue, verdict }: { pr
             })}
           </ul>
           <p className="mt-2.5 rounded-lg bg-surface-2 p-2.5 text-[13px] leading-snug"><b>Betster :</b> {cs.conclusion}</p>
-          <p className="mt-1.5 text-[11px] leading-snug text-ink-muted">Un point par source qui confirme, sur le même pari ou un pari compatible (« les deux marquent » confirme « plus de 1,5 but »). ✓ : source confirmée (30 pronos réglés). Les tipsters IA comptent ensemble pour un seul avis.</p>
+          <p className="mt-1.5 text-[11px] leading-snug text-ink-muted">« Pour » : les autres sources qui jouent le même pari ou un pari qui l'entraîne (« les deux marquent » confirme « plus de 1,5 but », pas l'inverse). ✓ : 30 pronos réglés ou plus. Les tipsters IA comptent ensemble pour un seul avis. Un accord n'est pas une probabilité : un pari confirmé n'est pas certain.</p>
         </section>
       )}
       {conflits.length > 0 && (

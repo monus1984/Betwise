@@ -9,7 +9,7 @@ describe("ce que disent les sources", () => {
     expect(soutient({ market: "1X2", param: null, sel: "1" }, verdict)).toBe(true);
     expect(soutient({ market: "1X2", param: null, sel: "2" }, verdict)).toBe(false);
     expect(soutient({ market: "OU", param: 2.5, sel: "Plus" }, { market: "OU", param: 1.5, sel: "Plus" })).toBe(true);
-    expect(soutient({ market: "OU", param: 1.5, sel: "Moins" }, { market: "OU", param: 2.5, sel: "Plus" })).toBe(false);
+    expect(soutient({ market: "OU", param: 1.5, sel: "Plus" }, { market: "OU", param: 2.5, sel: "Plus" })).toBe(false);
   });
   it("les 5 IA ne comptent qu'une fois, chaque source humaine compte", () => {
     const avis = [a("ia1", 0, "1X2", "1", null, true), a("ia2", 0, "DC", "1N", null, true), a("ia3", 0, "1X2", "1", null, true), a("petit", 4, "1X2", "2"), a("pro", 40, "DC", "1N")];
@@ -32,9 +32,9 @@ describe("ce que disent les sources", () => {
     const paul = l.find((x) => x.avis.sourceId === "Paul")!;
     expect(paul.confirment).toEqual(["IA"]);
     expect(paul.contredisent).toEqual(["Awa"]);
-    expect(paul.betster).toBe("avec");
+    expect(paul.betster).toBe("avec"); // le verdict « les deux marquent » entraîne « plus de 1,5 »
     const grok = l.find((x) => x.avis.sourceId === "Grok")!;
-    expect(grok.confirment).toEqual(["Paul"]);
+    expect(grok.confirment).toEqual([]); // « plus de 1,5 » n'entraîne pas « les deux marquent »
     expect(grok.contredisent).toEqual(["Awa"]);
   });
 });

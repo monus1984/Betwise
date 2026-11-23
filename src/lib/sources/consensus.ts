@@ -18,8 +18,9 @@ export type Consensus = { groupes: Groupe[]; lignes: LigneAvis[]; pour: Camp; co
 const cle = (p: Pari) => `${p.market}|${p.param ?? ""}|${p.sel.trim().toLowerCase()}`;
 const memeLigne = (a: Pari, b: Pari) => cle(a) === cle(b);
 
-/** Un avis va dans le sens d'un pari s'il est le même, ou si l'un entraîne l'autre (« les deux marquent » et « plus de 1,5 but »). */
-export const soutient = (avis: Pari, pari: Pari) => { const r = relation(avis, pari); return r === "meme" || r === "confirme"; };
+/** Un avis confirme un pari s'il est le même, ou s'il l'entraîne : « les deux marquent » confirme « plus de 1,5 but »,
+ *  « victoire de Milan » confirme « Milan ou nul » ; l'inverse ne confirme pas (conseil d'IA du 23/11). */
+export const soutient = (avis: Pari, pari: Pari) => { const r = relation(avis, pari); return r === "meme" || r === "entraine"; };
 const oppose = (avis: Pari, pari: Pari) => relation(avis, pari) === "contredit";
 
 /** Un prono et ce que les autres sources en disent : combien le confirment (même pari ou pari compatible), combien le contredisent. */
