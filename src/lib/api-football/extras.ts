@@ -60,3 +60,27 @@ export async function getExtras(m: { id: string; af_fixture_id: number | null; k
   }
   return out;
 }
+
+/** Une confrontation directe, gardée sous une forme compacte (identifiants API-Football des deux équipes). */
+export type Confrontation = { date: string; h: number; a: number; sh: number; sa: number };
+
+/**
+ * Confrontations directes des deux équipes sur plusieurs saisons (23/11) : une requête API-Football par match,
+ * gardée en base et rafraîchie au plus une fois par jour, seulement dans les 7 jours avant le match.
+ */
+export async function getConfrontations(m: { id: string; af_home_id: number | null; af_away_id: number | null; kickoff_at: string; statut: string }): Promise<Confrontation[] | null> {
+  const db = createAdminClient();
+  const { data: row } = await db.from("match_extras").select("h2h, h2h_at").eq("match_id", m.id).maybeSingle();
+  const garde = (row?.h2h as Confrontation[] | null) ?? null;
+  const minsToKick = (Date.parse(m.kickoff_at) - Date.now()) / 60000;
+  if (!m.af_home_id || !m.af_away_id || !process.env.API_FOOTBALL_KEY || m.statut !== "programme" || minsToKick > 7 * 1440 || age(row?.h2h_at ?? null) < 1440) return garde;
+  try {
+    type R = { fixture: { date: string; status: { short: string } }; teams: { home: { id: number }; away: { id: number } }; goals: { home: number | null; away: number | null } };
+    const l = await af<R>(`/fixtures/headtohead?h2h=${m.af_home_id}-${m.af_away_id}&last=10`);
+    const h2h: Confrontation[] = l.filter((x) => ["FT", "AET", "PEN"].includes(x.fixture.status.short) && x.goals.home !== null && x.goals.away !== null)
+      .map((x) => ({ date: x.fixture.date, h: x.teams.home.id, a: x.teams.away.id, sh: x.goals.home!, sa: x.goals.away! }))
+      .sort((x, y) => Date.parse(y.date) - Date.parse(x.date));
+    await db.from("match_extras").upsert({ match_id: m.id, h2h: h2h as unknown as Json, h2h_at: new Date().toISOString() }, { onConflict: "match_id" });
+    return h2h;
+  } catch { return garde; }
+}

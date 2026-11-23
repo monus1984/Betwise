@@ -1089,6 +1089,8 @@ export type Database = {
           injuries_at: string | null
           stats: Json | null
           stats_at: string | null
+          h2h: Json | null
+          h2h_at: string | null
         }
         Insert: {
           match_id: string
@@ -1098,6 +1100,8 @@ export type Database = {
           injuries_at?: string | null
           stats?: Json | null
           stats_at?: string | null
+          h2h?: Json | null
+          h2h_at?: string | null
         }
         Update: {
           match_id?: string
@@ -1107,6 +1111,8 @@ export type Database = {
           injuries_at?: string | null
           stats?: Json | null
           stats_at?: string | null
+          h2h?: Json | null
+          h2h_at?: string | null
         }
         Relationships: []
       }
@@ -1292,6 +1298,8 @@ export type Database = {
           forme: string | null
           zone: string | null
           updated_at: string
+          domicile: Json | null
+          exterieur: Json | null
         }
         Insert: {
           comp_code: string
@@ -1312,6 +1320,8 @@ export type Database = {
           forme?: string | null
           zone?: string | null
           updated_at?: string
+          domicile?: Json | null
+          exterieur?: Json | null
         }
         Update: {
           comp_code?: string
@@ -1332,6 +1342,8 @@ export type Database = {
           forme?: string | null
           zone?: string | null
           updated_at?: string
+          domicile?: Json | null
+          exterieur?: Json | null
         }
         Relationships: []
       }

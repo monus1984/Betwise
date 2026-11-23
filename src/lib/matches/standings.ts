@@ -1,6 +1,9 @@
 /** Compétitions qui ont un classement (championnats et phases de groupes). */
 export const STANDING_COMPS = ["PL", "PD", "SA", "BL1", "FL1", "CL", "UNL", "CIV1", "CANQ", "CAFCL", "CAFCC", "EL", "ECL", "BE1", "BE2", "TR1", "TR2", "NL1", "NL2", "DK1", "NO1", "KSA1", "ELC", "FL2", "BL2", "SB", "SD", "PT1", "SC1", "CH1", "AT1", "GR1", "RO1", "QA1", "ENG3", "UWCL", "ENGF", "FRAF", "GERF", "ESPF", "ITAF"];
-export type StandingRow = { comp_code: string; groupe: string; af_team_id: number; rang: number; team_nom: string; team_id: string | null; joues: number; gagnes: number; nuls: number; perdus: number; bp: number; bc: number; diff: number; points: number; forme: string | null; zone: string | null; updated_at: string };
+export type StandingRow = { comp_code: string; groupe: string; af_team_id: number; rang: number; team_nom: string; team_id: string | null; joues: number; gagnes: number; nuls: number; perdus: number; bp: number; bc: number; diff: number; points: number; forme: string | null; zone: string | null; updated_at: string;
+  /** Bilans de la saison à domicile et à l'extérieur (0057) ; absents des classements plus anciens. */
+  domicile?: Bilan | null; exterieur?: Bilan | null };
+export type Bilan = { j: number; g: number; n: number; p: number; bp: number; bc: number };
 
 /** Garde la dernière mise à jour de chaque équipe (une ligne d'un ancien découpage en groupes peut subsister en base). */
 export function latestStandings(rows: StandingRow[]): StandingRow[] {

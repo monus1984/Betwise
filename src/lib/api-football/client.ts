@@ -13,7 +13,8 @@ export type AfFixture = {
   players?: { team: { id: number }; players: { player: { id: number; name: string }; statistics: { games: { minutes: number | null }; shots: { total: number | null; on: number | null }; goals: { assists: number | null } }[] }[] }[];
   score: { fulltime: { home: number | null; away: number | null }; halftime?: { home: number | null; away: number | null } };
 };
-export type AfStanding = { rank: number; team: { id: number; name: string }; points: number; goalsDiff: number; group: string | null; form: string | null; description: string | null; all: { played: number; win: number; draw: number; lose: number; goals: { for: number; against: number } } };
+export type AfStanding = { rank: number; team: { id: number; name: string }; points: number; goalsDiff: number; group: string | null; form: string | null; description: string | null; all: { played: number; win: number; draw: number; lose: number; goals: { for: number; against: number } };
+  home?: { played: number; win: number; draw: number; lose: number; goals: { for: number; against: number } }; away?: { played: number; win: number; draw: number; lose: number; goals: { for: number; against: number } } };
 export type AfOdds = {
   fixture: { id: number };
   /** Heure du relevé des cotes chez le fournisseur. */

@@ -342,6 +342,9 @@ export const AF_STANDINGS: Record<string, { league: number; season: number }> = 
   ...Object.fromEntries(["EL", "ECL", "BE1", "BE2", "TR1", "TR2", "NL1", "NL2", "DK1", "NO1", "KSA1", "ELC", "FL2", "BL2", "SB", "SD", ...VAGUE2].map((k) => [k, { league: AF_COMPETITIONS[k].league, season: AF_COMPETITIONS[k].season }])),
 };
 
+type BilanAf = { played?: number | null; win?: number | null; draw?: number | null; lose?: number | null; goals?: { for?: number | null; against?: number | null } } | null | undefined;
+const bilan = (b: BilanAf) => (b && b.played ? { j: b.played, g: b.win ?? 0, n: b.draw ?? 0, p: b.lose ?? 0, bp: b.goals?.for ?? 0, bc: b.goals?.against ?? 0 } : null);
+
 /** Classement d'une compétition, avec les noms d'équipes de BETWISE quand l'équipe est connue. Une requête. */
 export async function syncStandings(db: Db, api: ApiFootball, code: string) {
   const c = AF_STANDINGS[code];
@@ -365,6 +368,8 @@ export async function syncStandings(db: Db, api: ApiFootball, code: string) {
     team_nom: local.get(r.team.id)?.nom ?? NATION_FR_EXTRA[NATION_CANON[r.team.name] ?? r.team.name] ?? r.team.name, team_id: local.get(r.team.id)?.id ?? null,
     joues: r.all.played ?? 0, gagnes: r.all.win ?? 0, nuls: r.all.draw ?? 0, perdus: r.all.lose ?? 0, bp: r.all.goals.for ?? 0, bc: r.all.goals.against ?? 0,
     diff: r.goalsDiff ?? 0, points: r.points ?? 0, forme: r.form, zone: r.description, updated_at: now,
+    // Bilans domicile / extérieur de la saison (0057), quand API-Football les donne
+    domicile: bilan(r.home), exterieur: bilan(r.away),
   })));
   const { error } = await db.from("standings").upsert(rows, { onConflict: "comp_code,groupe,af_team_id" });
   if (error) throw error;

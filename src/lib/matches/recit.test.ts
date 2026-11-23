@@ -52,4 +52,29 @@ describe("récit d'un match", () => {
     expect(zoneFr("Something new")).toBeNull();
     expect(zoneFr(null)).toBeNull();
   });
+  it("ajoute domicile/extérieur, calendrier, absents et confrontations quand les données existent (23/11)", () => {
+    const table = Array.from({ length: 10 }, (_, i) => ({ ...rang(`E${i}`, i + 4, 5, 8, 8 + i, "WLDLW"), groupe: "Ligue A - Groupe A" }));
+    const home = { ...rang("Lorient", 8, 18, 15, 9, "WWWWW"), joues: 12, domicile: { j: 6, g: 4, n: 2, p: 0, bp: 10, bc: 3 } };
+    const away = { ...rang("Rennes", 9, 15, 14, 14, "LDLLD"), joues: 12, exterieur: { j: 6, g: 1, n: 1, p: 4, bp: 5, bc: 11 } };
+    const r2 = buildRecit({ ...base, home: "Lorient", away: "Rennes", rangs: { home, away }, table: [...table, home, away], passes: [], kickoff: "2026-11-22T14:00:00Z",
+      calendrier: { home: [], away: [{ date: "2026-11-26T17:45:00Z", comp: "Ligue Europa", adversaire: "Porto", avant: false }] },
+      absents: [{ equipe: "Rennes", joueurs: ["A", "B"] }],
+      h2h: [0, 1, 2].map((i) => ({ date: `202${5 - i}-03-01T15:00:00Z`, home: "Lorient", away: "Rennes", sh: 2, sa: 1, buteurs: [] })) });
+    const cles = r2.etapes.map((e) => e.cle);
+    expect(cles).toEqual(["enjeu", "forme", "terrain", "calendrier", "absents", "face", "chiffre"]);
+    const txt = r2.texte;
+    expect(txt).toContain("Lorient à domicile cette saison : 4 victoires, 2 nuls, 0 défaite en 6 matchs (10 buts marqués, 3 encaissés) : invaincu à domicile.");
+    expect(txt).toContain("Rennes à l'extérieur cette saison : 1 victoire");
+    expect(txt).toContain("Rennes rejoue");
+    expect(txt).toContain("4 jours après");
+    expect(txt).toContain("Rennes : 2 absents annoncés, dont A, B.");
+    expect(txt).toContain("Sur les 3 dernières confrontations : 3 victoires de Lorient, 0 nul, 0 victoire de Rennes.");
+    expect(txt).toContain("Lorient a gagné les 3 dernières.");
+    expect(txt).toContain("5 victoires sur 5");
+    expect(txt).toContain("aucune victoire sur les 5 derniers");
+    expect(txt).toContain("Lorient a la meilleure défense du classement (9 buts encaissés en 12 matchs).");
+  });
+  it("sans ces données, aucune étape nouvelle n'apparaît", () => {
+    expect(buildRecit({ ...base, h2h: [], absents: [], calendrier: { home: [], away: [] }, kickoff: "2026-11-22T14:00:00Z" }).etapes.map((e) => e.cle)).toEqual(["enjeu", "forme", "dernier", "face", "joueur", "chiffre"]);
+  });
 });

@@ -10,6 +10,7 @@ import type { Database } from "../supabase/database.types";
 import { profilDe, type Categorie } from "../coach/categories";
 import { familleOf, loadSignals, pickLabel, picksOf, releveFrais, type Pick } from "../probs/signals";
 import { latestStandings, type StandingRow } from "./standings";
+import { getConfrontations } from "../api-football/extras";
 import { enjeux, fraicheur } from "./enjeux";
 
 type Db = SupabaseClient<Database, "betwise">;
@@ -17,7 +18,7 @@ type One<T> = T | T[] | null;
 const one = <T,>(v: One<T>): T | null => (Array.isArray(v) ? v[0] ?? null : v);
 const TZ = "Africa/Abidjan";
 
-export type Etape = { cle: "enjeu" | "forme" | "dernier" | "face" | "joueur" | "chiffre"; titre: string; lignes: string[] };
+export type Etape = { cle: "enjeu" | "forme" | "terrain" | "calendrier" | "absents" | "dernier" | "face" | "joueur" | "chiffre"; titre: string; lignes: string[] };
 export type Choix = { market: string; param: number | null; sel: string; label: string; p: number; cote: number | null; categorie: Categorie;
   /** D'où vient la cote : nom du bookmaker (1xBet) ou « médiane » des bookmakers européens ; null sans cote. */
   ou?: string | null };
@@ -32,7 +33,16 @@ export type RecitInput = {
   /** Matchs terminés des deux équipes, du plus récent au plus ancien. */
   passes: Passe[];
   picks: Pick[]; source: "marche" | "modele" | null; butsAttendus: number | null;
+  /** Confrontations directes sur plusieurs saisons (API-Football), noms déjà ramenés à ceux de BETWISE. */
+  h2h?: Passe[];
+  /** Matchs proches de chaque équipe, toutes compétitions : la veille (jusqu'à 3 jours avant) et le suivant (jusqu'à 4 jours après). */
+  calendrier?: { home: Proche[]; away: Proche[] };
+  /** Absents annoncés (API-Football), par équipe. */
+  absents?: { equipe: string; joueurs: string[] }[];
+  /** Coup d'envoi du match (pour situer le calendrier). */
+  kickoff?: string;
 };
+export type Proche = { date: string; comp: string; adversaire: string; avant: boolean };
 
 const dec = (x: number) => x.toFixed(1).replace(".", ",");
 const ord = (n: number) => (n === 1 ? "1er" : `${n}e`);
@@ -78,10 +88,43 @@ function etapeForme({ home, away, rangs }: RecitInput): Etape | null {
     const f = (r.forme ?? "").toUpperCase().replace(/[^WDL]/g, "");
     const v = [...f].filter((c) => c === "W").length, d = [...f].filter((c) => c === "L").length;
     const serie = f.length >= 3 ? `${pl(v, "victoire")} et ${pl(d, "défaite")} sur les ${f.length} derniers matchs` : `${pl(r.gagnes, "victoire")} en ${pl(r.joues, "match")}`;
-    return `${nom} : ${serie}, ${dec(r.bp / r.joues)} but marqué et ${dec(r.bc / r.joues)} encaissé par match.`;
+    const net = f.length >= 4 && v === f.length ? ` : ${f.length} victoires sur ${f.length}` : f.length >= 4 && v === 0 ? ` : aucune victoire sur les ${f.length} derniers` : "";
+    return `${nom} : ${serie}${net}, ${dec(r.bp / r.joues)} but marqué et ${dec(r.bc / r.joues)} encaissé par match.`;
   };
   const lignes = [dit(home, rangs.home), dit(away, rangs.away)].filter(Boolean) as string[];
   return lignes.length ? { cle: "forme", titre: "La forme", lignes } : null;
+}
+
+
+/** Domicile et extérieur : le bilan de la saison de l'équipe qui reçoit chez elle, et du visiteur hors de chez lui. */
+function etapeTerrain({ home, away, rangs }: RecitInput): Etape | null {
+  const dit = (nom: string, b: StandingRow["domicile"], ou: string) => {
+    if (!b || b.j < 3) return null;
+    const fin = b.g === 0 ? ` : aucune victoire ${ou}` : b.p === 0 ? ` : invaincu ${ou}` : "";
+    return `${nom} ${ou} cette saison : ${pl(b.g, "victoire")}, ${pl(b.n, "nul")}, ${pl(b.p, "défaite")} en ${pl(b.j, "match")} (${b.bp} buts marqués, ${b.bc} encaissés)${fin}.`;
+  };
+  const lignes = [dit(home, rangs.home?.domicile, "à domicile"), dit(away, rangs.away?.exterieur, "à l'extérieur")].filter(Boolean) as string[];
+  return lignes.length ? { cle: "terrain", titre: "Domicile et extérieur", lignes } : null;
+}
+
+/** Le calendrier : un match rapproché avant ou après peut peser (fatigue, rotation). On le signale, sans conclure. */
+function etapeCalendrier({ home, away, calendrier, kickoff }: RecitInput): Etape | null {
+  if (!calendrier || !kickoff) return null;
+  const k = Date.parse(kickoff);
+  const dit = (nom: string, l: Proche[]) => l.map((x) => {
+    const j = Math.max(1, Math.round(Math.abs(Date.parse(x.date) - k) / 86_400_000));
+    return x.avant
+      ? `${nom} a joué ${jour(x.date)} (${x.comp}, contre ${x.adversaire}) : ${pl(j, "jour")} de récupération seulement.`
+      : `${nom} rejoue ${jour(x.date)} (${x.comp}, contre ${x.adversaire}), ${pl(j, "jour")} après : des changements dans l'équipe sont possibles.`;
+  });
+  const lignes = [...dit(home, calendrier.home), ...dit(away, calendrier.away)];
+  return lignes.length ? { cle: "calendrier", titre: "Le calendrier", lignes: lignes.slice(0, 3) } : null;
+}
+
+function etapeAbsents({ absents }: RecitInput): Etape | null {
+  const lignes = (absents ?? []).filter((a) => a.joueurs.length).map((a) =>
+    `${a.equipe} : ${pl(a.joueurs.length, "absent")} annoncé${a.joueurs.length > 1 ? "s" : ""}${a.joueurs.length ? `, dont ${a.joueurs.slice(0, 3).join(", ")}` : ""}.`);
+  return lignes.length ? { cle: "absents", titre: "Les absents", lignes: [...lignes, "Source : API-Football ; la liste peut changer jusqu'aux compositions."] } : null;
 }
 
 const score = (p: Passe) => `${p.home} ${p.sh}–${p.sa} ${p.away}`;
@@ -99,7 +142,21 @@ function etapeDernier({ home, away, passes }: RecitInput): Etape | null {
   return lignes.length ? { cle: "dernier", titre: "Le dernier match", lignes } : null;
 }
 
-function etapeFace({ home, away, passes }: RecitInput): Etape | null {
+function etapeFace({ home, away, passes, h2h }: RecitInput): Etape | null {
+  if (h2h && h2h.length >= 2) {
+    const n = h2h.length;
+    const gagne = (nom: string) => h2h.filter((p) => (p.home === nom && p.sh > p.sa) || (p.away === nom && p.sa > p.sh)).length;
+    const gh = gagne(home), ga = gagne(away), nuls = n - gh - ga;
+    const lignes = [`Sur les ${n} dernières confrontations : ${pl(gh, "victoire")} de ${home}, ${pl(nuls, "nul")}, ${pl(ga, "victoire")} de ${away}.`];
+    // série en cours : les confrontations les plus récentes, gagnées par la même équipe
+    const vainqueur = (p: Passe) => (p.sh > p.sa ? p.home : p.sa > p.sh ? p.away : null);
+    const premier = vainqueur(h2h[0]);
+    let serie = 0;
+    if (premier) for (const p of h2h) { if (vainqueur(p) !== premier) break; serie++; }
+    if (premier && serie >= 3) lignes.push(`${premier} a gagné les ${serie} dernières.`);
+    lignes.push(...h2h.slice(0, 3).map((p) => `${jour(p.date)} : ${score(p)}.`));
+    return { cle: "face", titre: "Les confrontations directes", lignes };
+  }
   const faces = passes.filter((p) => joue(p, home) && joue(p, away)).slice(0, 3);
   if (!faces.length) return null;
   return { cle: "face", titre: faces.length === 1 ? "Le match aller" : "Les dernières confrontations", lignes: faces.map((p) => `${jour(p.date)} : ${score(p)}.`) };
@@ -117,17 +174,30 @@ function etapeJoueur({ home, away, passes }: RecitInput): Etape | null {
   return lignes.length ? { cle: "joueur", titre: "Le joueur du moment", lignes } : null;
 }
 
-function etapeChiffre({ home, away, rangs, butsAttendus }: RecitInput): Etape | null {
+function etapeChiffre({ home, away, rangs, butsAttendus, table }: RecitInput): Etape | null {
   const lignes: string[] = [];
+  // Rang de la défense et de l'attaque, seulement dans un classement assez fourni (8 équipes, 5 matchs joués)
+  const rangDe = (r: StandingRow | null, cle: "bp" | "bc") => {
+    if (!r || r.joues < 5 || !table?.length) return null;
+    const pairs = table.filter((x) => x.groupe === r.groupe && x.joues >= 5);
+    if (pairs.length < 8) return null;
+    const v = (x: StandingRow) => x[cle] / x.joues;
+    return { rang: pairs.filter((x) => (cle === "bc" ? v(x) < v(r) : v(x) > v(r))).length + 1, n: pairs.length };
+  };
   for (const [nom, r] of [[home, rangs.home], [away, rangs.away]] as const) {
     if (!r || r.joues < 3) continue;
-    if (r.bc / r.joues >= 2) lignes.push(`${nom} a encaissé ${r.bc} buts en ${r.joues} matchs.`);
+    const d = rangDe(r, "bc"), a = rangDe(r, "bp");
+    const meilleure = (k: number) => (k === 1 ? "meilleure" : `${ord(k)} meilleure`);
+    if (d && d.rang <= 3) lignes.push(`${nom} a la ${meilleure(d.rang)} défense du classement (${pl(r.bc, "but")} encaissé${r.bc > 1 ? "s" : ""} en ${r.joues} matchs).`);
+    else if (d && d.rang >= d.n - 1) lignes.push(`${nom} a l'une des deux défenses les plus faibles du classement (${r.bc} buts encaissés en ${r.joues} matchs).`);
+    else if (r.bc / r.joues >= 2) lignes.push(`${nom} a encaissé ${r.bc} buts en ${r.joues} matchs.`);
     else if (r.bc / r.joues <= 0.6) lignes.push(`${nom} n’a encaissé que ${pl(r.bc, "but")} en ${r.joues} matchs.`);
-    if (r.bp / r.joues <= 0.6) lignes.push(`${nom} n’a marqué que ${pl(r.bp, "but")} en ${r.joues} matchs.`);
+    if (a && a.rang <= 2) lignes.push(`${nom} a la ${meilleure(a.rang)} attaque du classement (${pl(r.bp, "but")} en ${r.joues} matchs).`);
+    else if (r.bp / r.joues <= 0.6) lignes.push(`${nom} n’a marqué que ${pl(r.bp, "but")} en ${r.joues} matchs.`);
     if (r.points === 0) lignes.push(`${nom} n’a pris aucun point.`);
   }
   if (butsAttendus !== null) lignes.push(`Les cotes annoncent environ ${dec(butsAttendus)} buts dans ce match.`);
-  return lignes.length ? { cle: "chiffre", titre: "Le chiffre qui pèse", lignes: lignes.slice(0, 3) } : null;
+  return lignes.length ? { cle: "chiffre", titre: "Le chiffre qui pèse", lignes: lignes.length > 4 ? [...lignes.slice(0, 3), lignes[lignes.length - 1]] : lignes } : null;
 }
 
 /** Le verdict : la sélection la plus probable de la catégorie Audacieux, puis une plus sûre et une plus osée. */
@@ -146,7 +216,7 @@ function verdictDe({ home, away, picks }: RecitInput): { verdict: Choix | null; 
 }
 
 export function buildRecit(input: RecitInput): Recit {
-  const etapes = [etapeEnjeu(input), etapeForme(input), etapeDernier(input), etapeFace(input), etapeJoueur(input), etapeChiffre(input)].filter((e): e is Etape => !!e);
+  const etapes = [etapeEnjeu(input), etapeForme(input), etapeTerrain(input), etapeCalendrier(input), etapeAbsents(input), etapeDernier(input), etapeFace(input), etapeJoueur(input), etapeChiffre(input)].filter((e): e is Etape => !!e);
   const { verdict, autres } = verdictDe(input);
   const affiche = `${input.home} – ${input.away}`;
   const avis = verdict
@@ -158,18 +228,39 @@ export function buildRecit(input: RecitInput): Recit {
 
 export async function loadRecit(db: Db, matchId: string): Promise<(Recit & { matchId: string; home: string; away: string; kickoff: string; comp: string; statut: string }) | null> {
   const { data } = await db.from("matches")
-    .select("id, kickoff_at, statut, home_team_id, away_team_id, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe)")
+    .select("id, kickoff_at, statut, home_team_id, away_team_id, af_home_id, af_away_id, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe)")
     .eq("id", matchId).maybeSingle();
   if (!data) return null;
-  const m = data as unknown as { id: string; kickoff_at: string; statut: string; home_team_id: string; away_team_id: string; home: One<{ nom: string }>; away: One<{ nom: string }>; competition: One<{ code_externe: string | null }> };
+  const m = data as unknown as { id: string; kickoff_at: string; statut: string; home_team_id: string; away_team_id: string; af_home_id: number | null; af_away_id: number | null; home: One<{ nom: string }>; away: One<{ nom: string }>; competition: One<{ code_externe: string | null }> };
   const home = one(m.home)?.nom ?? "", away = one(m.away)?.nom ?? "", comp = one(m.competition)?.code_externe ?? "";
   const ids = [m.home_team_id, m.away_team_id];
-  const [{ data: st }, { data: past }, signals] = await Promise.all([
+  const k = Date.parse(m.kickoff_at), J = 86_400_000;
+  const [{ data: st }, { data: past }, signals, h2hBrut, { data: proches }, { data: ex }] = await Promise.all([
     comp ? db.from("standings").select("*").eq("comp_code", comp).limit(400) : Promise.resolve({ data: [] }),
     db.from("matches").select("kickoff_at, score_home, score_away, details, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom)")
       .eq("statut", "termine").lt("kickoff_at", m.kickoff_at).or(`home_team_id.in.(${ids.join(",")}),away_team_id.in.(${ids.join(",")})`).order("kickoff_at", { ascending: false }).limit(14),
     loadSignals(db as never, [m.id], { bookmakers: true }),
+    getConfrontations(m).catch(() => null),
+    // Calendrier : matchs des deux équipes de 3 jours avant à 4 jours après, toutes compétitions suivies
+    db.from("matches").select("id, kickoff_at, home_team_id, away_team_id, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom)")
+      .neq("id", m.id).neq("statut", "annule").gte("kickoff_at", new Date(k - 3 * J).toISOString()).lte("kickoff_at", new Date(k + 4 * J).toISOString())
+      .or(`home_team_id.in.(${ids.join(",")}),away_team_id.in.(${ids.join(",")})`).limit(20),
+    db.from("match_extras").select("injuries").eq("match_id", m.id).maybeSingle(),
   ]);
+  // Confrontations : identifiants API-Football ramenés aux noms BETWISE (les autres équipes n'y figurent pas)
+  const nomAf = (id: number) => (id === m.af_home_id ? home : id === m.af_away_id ? away : null);
+  const h2h: Passe[] = (h2hBrut ?? []).filter((c) => nomAf(c.h) && nomAf(c.a)).map((c) => ({ date: c.date, home: nomAf(c.h)!, away: nomAf(c.a)!, sh: c.sh, sa: c.sa, buteurs: [] }));
+  type Pr = { kickoff_at: string; home_team_id: string; away_team_id: string; home: One<{ nom: string }>; away: One<{ nom: string }>; competition: One<{ nom: string }> };
+  const procheDe = (team: string): Proche[] => {
+    const l = ((proches ?? []) as unknown as Pr[]).filter((x) => x.home_team_id === team || x.away_team_id === team);
+    const avant = l.filter((x) => Date.parse(x.kickoff_at) < k).sort((x, y) => Date.parse(y.kickoff_at) - Date.parse(x.kickoff_at))[0];
+    const apres = l.filter((x) => Date.parse(x.kickoff_at) > k).sort((x, y) => Date.parse(x.kickoff_at) - Date.parse(y.kickoff_at))[0];
+    const vers = (x: Pr, av: boolean): Proche => ({ date: x.kickoff_at, comp: one(x.competition)?.nom ?? "autre compétition", adversaire: (x.home_team_id === team ? one(x.away)?.nom : one(x.home)?.nom) ?? "?", avant: av });
+    return [avant && vers(avant, true), apres && vers(apres, false)].filter(Boolean) as Proche[];
+  };
+  // Absents : regroupés par équipe telle qu'API-Football la nomme
+  const abs = new Map<string, string[]>();
+  for (const a of ((ex?.injuries ?? []) as { equipe: string; joueur: string }[])) abs.set(a.equipe, [...(abs.get(a.equipe) ?? []), a.joueur]);
   const rows = latestStandings((st ?? []) as StandingRow[]);
   const sg = signals.get(m.id) ?? null;
   const passes: Passe[] = ((past ?? []) as unknown as { kickoff_at: string; score_home: number | null; score_away: number | null; details: { evts?: { t: string; n: string | null; e: "1" | "2" }[] } | null; home: One<{ nom: string }>; away: One<{ nom: string }> }[])
@@ -179,6 +270,8 @@ export async function loadRecit(db: Db, matchId: string): Promise<(Recit & { mat
   const recit = buildRecit({
     home, away, rangs: { home: rows.find((r) => r.team_id === m.home_team_id) ?? null, away: rows.find((r) => r.team_id === m.away_team_id) ?? null }, table: rows, comp,
     passes, picks: sg ? picksOf(sg, "all").map((p) => ({ ...p, book: p.book && releveFrais(p.book.releveAt, m.kickoff_at) ? p.book : null })) : [], source: sg?.source ?? null, butsAttendus: sg ? sg.lh + sg.la : null,
+    h2h, calendrier: m.statut === "programme" ? { home: procheDe(m.home_team_id), away: procheDe(m.away_team_id) } : undefined, kickoff: m.kickoff_at,
+    absents: m.statut === "programme" ? [...abs].map(([equipe, joueurs]) => ({ equipe, joueurs })) : [],
   });
   return { ...recit, matchId: m.id, home, away, kickoff: m.kickoff_at, comp, statut: m.statut };
 }
