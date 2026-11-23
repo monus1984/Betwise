@@ -125,7 +125,7 @@ describe("matchSource", () => {
     expect(normalizePick("Nombre total de buts (t. rég)", "+ de 1,5", "Turquie", "Belgique")).toMatchObject({ market_code: "OU", market_param: 1.5, selection: "Plus", ok: true });
     expect(normalizePick("Résultat du match (t. rég)", "RD Congo", "RD Congo", "Sierra Leone")).toMatchObject({ market_code: "1X2", selection: "1", ok: true });
     expect(normalizePick("Double chance (t. rég)", "Cameroun ou Namibie", "Cameroun", "Namibie")).toMatchObject({ market_code: "DC", selection: "12", ok: true });
-    expect(normalizePick("Marché exotique", "Madagascar marque dans les deux périodes du match", "Madagascar", "Guinée-Bissau").ok).toBe(false);
+    expect(normalizePick("Marché exotique", "Madagascar marque dans les deux périodes du match", "Madagascar", "Guinée-Bissau")).toMatchObject({ market_code: "SBH", selection: "1", ok: true });
   });
 });
 
@@ -335,5 +335,15 @@ describe("statistiques d'un joueur (19/11)", () => {
   it("sans nom, ou une équipe : pas un joueur", () => {
     expect(n("Nombre de tirs cadrés du joueur (OPTA)", "+ de 1,5")).toMatch(/ko$/);
     expect(n("", "Espagne plus de 4,5 tirs cadrés")).toBe("SOT1 4.5 Plus ok");
+  });
+});
+
+describe("pronos de pages Facebook (23/11)", () => {
+  it("« gagne au moins une partie » = gagne au moins une mi-temps ; un score seul = score exact", () => {
+    expect(normalizePick("", "Gagne au moins une partie ✅", "Nantes", "Lyon", "Nantes", { home: ["Nantes"], away: ["Lyon"] })).toMatchObject({ market_code: "WEH", selection: "1", ok: true });
+    expect(normalizePick("", "Gagne au moins une période", "Lyon", "Al Ain", "Al Ain", { home: ["Lyon"], away: ["Al Ain"] })).toMatchObject({ market_code: "WEH", selection: "2", ok: true });
+    expect(normalizePick("", "2 - 2", "Brentford", "Everton")).toMatchObject({ market_code: "CS", selection: "2-2", ok: true });
+    expect(normalizePick("", "1 - 4", "Neftchi", "Al Hilal")).toMatchObject({ market_code: "CS", selection: "1-4", ok: true });
+    expect(normalizePick("", "Va marquer ✅", "Brentford", "Everton", "Brentford", { home: ["Brentford"], away: ["Everton"] })).toMatchObject({ market_code: "TT1", market_param: 0.5, selection: "Plus", ok: true });
   });
 });

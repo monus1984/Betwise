@@ -137,6 +137,8 @@ Pronos de tipsters (kind = pronos) : messages Telegram ou WhatsApp, posts, vidé
 - Pari sur un joueur (tirs, tirs cadrés, passes, buteur) : recopie le nom du joueur dans pick_text et garde le mot « joueur » dans market_text s'il est affiché. Ne le transforme jamais en pari sur le match.
 - Les mentions d'offres de bookmaker (« 2UP », « boost ») ne sont pas des choix : ignore-les.
 - Texte dicté à la voix (il commence par « [dictée] ») : une ou plusieurs phrases parlées qui décrivent des paris (« ajoute en pari test la victoire de Lens contre Lyon en Ligue 1 à deux dix »). kind = pronos, une sélection par pari décrit : home_team et away_team si les deux équipes sont dites (« X contre Y », « X face à Y », « X–Y »), sinon team_only ; pick_text = le pari en mots courts (« victoire Lens », « plus de 2,5 buts », « les deux marquent »). Les nombres dits en lettres se lisent en chiffres (« deux dix », « deux virgule dix » = 2.10 ; « un cinquante » = 1.50) ; la cote n'est remplie que si elle est dite, jamais devinée. Le championnat dit va dans competition. « Pari test », « tester », « sans miser » ne sont pas des choix : ignore-les.
+- Tableau de pronostics de scores (titre « Predictions », « pronos du jour », « Today's Football Predictions », mention « scores are illustrative ») : chaque ligne « équipe A score équipe B » est un prono de score exact sur un match à venir, pas un résultat. home_team, away_team, pick_text = le score recopié (« 2 - 2 »), score = null, outcome = unknown, kind = pronos, ticket_type single.
+- « Gagne au moins une partie » ou « une période » veut dire « gagne au moins une mi-temps » ; « Va marquer » après une équipe veut dire « cette équipe marque au moins un but » : recopie la ligne telle quelle.
 - Les drapeaux affichés identifient les pays : utilise-les pour nommer les équipes quand le texte est caché ou coupé.
 - Une fiche de match affichée sans choix écrit (le tipster parle) donne une sélection avec home_team, away_team, kickoff et pick_text vide.
 Si le ticket est montré dans une conversation ou une publication (Telegram, WhatsApp, Facebook, Instagram, TikTok), relève dans source le nom du canal, de la page ou du groupe, et l'heure de publication ; un filigrane ou une signature sur l'image compte aussi. Ne déduis pas : seulement ce qui est écrit.
@@ -172,6 +174,9 @@ export function normalizePick(marketText: string, pickText: string, home: string
   // ✅ = « oui, cette option » ; ❌ = « non ». Les autres emojis sont de la décoration.
   const oui = /[✅✔☑]/u.test(pickText) || /[✅✔☑]/u.test(marketText), non = /[❌✖🚫]/u.test(pickText);
   const p = anglais(pickText.toLowerCase().replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ").replace(/\s+/g, " ").trim().replace(/^[–—-](?!\s*(?:de\b|\d))\s*|\s*[–—-]$/g, "").trim());
+  // Un score seul (« 2 - 2 ») publié comme prono : score exact (tableaux « Predictions » de pages Facebook, 23/11)
+  { const cs = p.match(/^(\d{1,2})\s*[-–:]\s*(\d{1,2})$/);
+    if (cs && (!m || /score|correct|exact|prediction|prono/.test(m)) && !/mi[- ]?temps|half|\bht\b|\b2e\b|1(?:ère|re)/.test(m)) return { market_code: "CS", market_param: null, selection: `${cs[1]}-${cs[2]}`, label_pick: `Score exact ${cs[1]}-${cs[2]}`, ok: true }; }
   // « Arsenal ou les deux marquent », « Away or GG » : gagne si l'un OU l'autre arrive. Aucun marché suivi ne le règle ;
   // le lire comme « les deux marquent » le ferait perdre à tort. Gardé tel quel, à confirmer.
   if (/\b(ou|or)\b/.test(p) && /\bgg\b|btts|(les )?(2|deux) (équipes )?marquent/.test(p) && !/&|\bet\b/.test(p))
@@ -407,8 +412,9 @@ export function normalizePick(marketText: string, pickText: string, home: string
   if (/score exact/.test(all) && /mi[- ]?temps/.test(all)) { const cs = p.match(/(\d+)\s*[-:]\s*(\d+)/); return { market_code: /\b(2e|2ème|2eme|2nde|seconde|deuxième)\b/.test(all) ? "H2_CS" : "HT_CS", market_param: null, selection: cs ? `${cs[1]}-${cs[2]}` : pickText, label_pick: pickText, ok: !!cs }; }
 
   // « Gagne les deux mi-temps », « marque dans les deux mi-temps » : une équipe nommée
-  { const wb = /(?:gagne|remporte|gagner|remporter)(?:ra)? les (?:2|deux) mi[- ]?temps|win both halves/.test(all);
-    const sb = !wb && /marqu(?:e|era|ent|er) dans (?:les|chaque|chacune des) (?:2 |deux )?mi[- ]?temps|score in both halves/.test(all);
+  // « partie » et « période » sont dits pour « mi-temps » chez beaucoup de tipsters (« gagne au moins une partie », 23/11)
+  { const wb = /(?:gagne|remporte|gagner|remporter)(?:ra)? les (?:2|deux) (?:mi[- ]?temps|parties|périodes)|win both halves/.test(all);
+    const sb = !wb && /marqu(?:e|era|ent|er) dans (?:les|chaque|chacune des) (?:2 |deux )?(?:mi[- ]?temps|parties|périodes)|score in both halves/.test(all);
     if (wb || sb) {
       const nm = all.match(/^(.*?)\s*(?:va gagner|va remporter|va marquer|gagnera|remportera|marquera|gagne|remporte|marque) (?:les|dans)/);
       const sd = teamSide ?? (nm && nm[1].trim() ? side(nm[1].trim()) : null) ?? (all.match(/[ée]quipe\s*([12])/)?.[1] as "1" | "2" | undefined) ?? null;
@@ -418,7 +424,7 @@ export function normalizePick(marketText: string, pickText: string, home: string
         : { market_code: code, market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: neg ? "Pari « non » sur les deux mi-temps : pas suivi, gardé tel quel et réglé à la main." : "Pari sur les deux mi-temps : équipe non reconnue." };
     } }
   // « Gagne au moins une mi-temps » : l'une ou l'autre, pas forcément la première
-  if (/(gagne|remporte|gagner|remporter) au moins (1|une) mi[- ]?temps/.test(all)) {
+  if (/(gagne|remporte|gagner|remporter) au moins (1|une) (mi[- ]?temps|partie|période)|win(s)? (either|at least one) half/.test(all)) {
     const nm = all.match(/^(.*?)\s*(?:va gagner|va remporter|gagne|remporte) au moins/);
     const sd = teamSide ?? (nm && nm[1].trim() ? side(nm[1].trim()) : null);
     const neg = non || /^(non|no)$/.test(p) || /[-–—:]\s*non$/.test(p);
