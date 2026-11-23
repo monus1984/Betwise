@@ -1,0 +1,84 @@
+{
+  "profil": "or-deepseek",
+  "nom": "DeepSeek",
+  "modele": "deepseek/deepseek-v4.1-flash-1017",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "34e97479795e1e46",
+  "duree_s": 51,
+  "tours": 6,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 680
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 654
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M2",
+        "famille": "tout"
+      },
+      "ms": 12
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M1",
+        "famille": "buts"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "resultat",
+        "match": "M1"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "combo",
+        "match": "M2"
+      },
+      "ms": 0
+    }
+  ],
+  "jetons": {
+    "entree": 112233,
+    "sortie": 9240,
+    "cacheLu": 43904,
+    "cacheEcrit": 0
+  },
+  "erreur": "aucune décision après le nombre maximal de tours",
+  "bankroll": 100000,
+  "enJeu": 8000,
+  "propositions": [],
+  "abstention": null,
+  "carnetReecrit": false,
+  "retenus": [],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": []
+}
