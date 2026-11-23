@@ -33,8 +33,8 @@ export function MatchSources({ pronos, proofs, home, away, joue, verdict }: { pr
                     <span className="min-w-0"><span className="font-medium">{pickLabel(l.avis.market, l.avis.param, l.avis.sel, home, away)}</span> <span className="text-ink-muted">· {l.avis.nom}{l.avis.regles >= 30 ? " ✓" : ""}</span></span>
                     {/* Décompte en clair (conseil d'IA du 23/11 : pas d'étoiles, qui se liraient comme une note du tipster) */}
                     <span className="flex shrink-0 gap-1 text-[11px] font-semibold">
-                      <span className={`rounded-full px-2 py-0.5 ${n ? "bg-gain/15 text-gain" : "bg-surface-2 text-ink-muted"}`}>{n} pour</span>
-                      {x > 0 && <span className="rounded-full bg-loss/15 px-2 py-0.5 text-loss">{x} contre</span>}
+                      <span className={`rounded-full px-2 py-0.5 ${n ? "bg-gain-soft text-gain-ink" : "bg-surface-2 text-ink-muted"}`}>{n} pour</span>
+                      {x > 0 && <span className="rounded-full bg-loss-soft px-2 py-0.5 text-loss-ink">{x} contre</span>}
                     </span>
                   </div>
                   <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
