@@ -225,6 +225,7 @@ async function main() {
     { nom: "07f-options", chemin: "/options" },
     { nom: "08a-sources", chemin: "/sources" },
     { nom: "08b-sources-analyse", chemin: "/sources?f=analyse" },
+    { nom: "08d-sources-suivies", chemin: "/sources?f=suivies" },
     { nom: "08c-sources-classement", chemin: "/sources?f=classement" },
     { nom: "08d-sources-decouvrir", chemin: "/sources?f=decouvrir" },
     { nom: "08e-source-modele", chemin: modele ? `/sources/${modele.id}` : "" },
