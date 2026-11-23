@@ -13,9 +13,10 @@ export const dynamic = "force-dynamic";
 export default async function ReglagesPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const [{ data: summary }, { data: np }] = await Promise.all([
+  const [{ data: summary }, { data: np }, { data: admin }] = await Promise.all([
     supabase.from("my_bankroll_summary").select("solde").maybeSingle(),
     supabase.from("notification_prefs").select("resultats, direct, coup_envoi, coups_du_jour, sources").maybeSingle(),
+    supabase.rpc("is_admin"),
   ]);
   const solde = Number(summary?.solde ?? 0);
 
@@ -23,6 +24,12 @@ export default async function ReglagesPage() {
     <>
       <PageHeader title="Réglages" subtitle="Notifications, apparence et compte." action={<Link href="/">Accueil</Link>} />
 
+      {admin && (
+        <Link href="/console" className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-brand bg-surface p-4 active:bg-surface-2">
+          <span><b className="block text-sm">Console IA</b><span className="block text-[12px] text-ink-muted">Interroger plusieurs IA en même temps, pour tous tes projets (réservé à l’administrateur)</span></span>
+          <span aria-hidden>›</span>
+        </Link>
+      )}
       <Link href="/bankroll" className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4 active:bg-surface-2">
         <span><b className="block text-sm">Ma bankroll</b><span className="block text-[12px] text-ink-muted">Solde {fcfa(solde)} · dépôts, retraits, comparaison avec le bookmaker, journal</span></span>
         <span className="text-brand">›</span>
