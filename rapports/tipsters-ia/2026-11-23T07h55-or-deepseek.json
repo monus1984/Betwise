@@ -1,0 +1,118 @@
+{
+  "profil": "or-deepseek",
+  "nom": "DeepSeek",
+  "modele": "deepseek/deepseek-v4.1-flash-1017",
+  "promptVersion": "tipster-ia-v1",
+  "essai": false,
+  "dossier": "c10d118a016847c0",
+  "duree_s": 216,
+  "tours": 13,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 1056
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 1025
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 1223
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 14
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 12
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 398
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M1",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "buts",
+        "match": "M1"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "resultat",
+        "match": "M2"
+      },
+      "ms": 1
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 619
+    }
+  ],
+  "jetons": {
+    "entree": 607089,
+    "sortie": 41087,
+    "cacheLu": 546560,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 0,
+  "propositions": [],
+  "abstention": "Aucun des 5 matchs ne présente d'avantage identifiable pour moi, donc je ne joue rien ce matin.\n\n1) M3 Başakşehir – Çorum (1.94 / 3.96 / 3.80). Başakşehir 9e, 3V-1D sur 5, mais trois joueurs signalés (Sengezer inactif, Fayzullaev blessé incertain, Operi incertain) et compositions non publiées : c'est exactement mon critère d'évitement. Marché à 51 % pour le domicile, mon estimation ne dépasse pas 52 %. Pas de valeur.\n\n2) M4 Bodrum – Vanspor (2.21 / 3.28 / 2.87). Les deux équipes sont en forme (4V sur 5 chacune), Bodrum solide défensivement (0,9 encaissé), Vanspor 16e mais sur une bonne série. Le marché attend 2,6 buts ; en Poisson sur cette moyenne, « moins de 2,5 » (1.78, marché 51,6 %) et « plus de 2,5 » (1.89, 48,4 %) sont rigoureusement au prix. Aucun de mes trois résultats n'a d'espérance positive à ma main.\n\n3) M2 AC Douane – CR Belouizdad (5.45 / 3.65 / 1.53). Zéro contexte fourni hormis les buts attendus (0,68 – 1,68) : je ne connais ni l'enjeu réel, ni la forme, ni les compositions. Belouizdad à 1.53 (marché 61,9 %) est correctement tarifé et je n'ai aucune information pour le battre. Je m'abstiens plutôt que de parier sur une affiche que je ne sais pas lire.\n\n4) M1 Asteras – Aris (3.54 / 2.92 / 2.25). Aris en forme (4V-1D), 5e, enjeu clair (3 points de la 4e place) ; Asteras 11e, en position de relégation, 0,9 but marqué et 1,8 encaissé sur 5. Mais Aris encaisse 1,7 but/match, match à faible total attendu (2,35) : le nul est très vivant. Aris à 2.25 = 44,4 % implicite, mon estimation ~43 %. Espérance négative, je passe.\n\n5) M5 Bayern W – Hoffenheim W. Bayern intraitable (5V sur 5, 3,6 buts marqués) et le marché attend 4,8 buts. Problème : le prix intègre déjà tout (plus de 3,5 buts à 1.43 pour 69,8 % de marché, plus de 2,5 buts Bayern à 1.24 pour 79,3 %), et surtout la cote du 1 (victoire Bayern) n'est même pas proposée. Aucune marge d'erreur exploitable, et risque de rotation trois jours après un match européen.\n\nConclusion : sur ce passage, les prix 1xBet sont efficaces partout et le modèle BETWISE ne fournit aucune probabilité (null) sur ces cinq championnats. Ma propre lecture ne dépasse le marché nulle part de façon crédible. Ne pas miser est ici le choix gagnant : je conserve 100 000 FCFA intacts et j'attends un match où j'ai une vraie information (compositions, absents majeurs, enjeu lisible) que le marché n'a pas encore digérée.",
+  "carnetReecrit": true,
+  "retenus": [],
+  "rejets": [],
+  "enregistres": []
+}

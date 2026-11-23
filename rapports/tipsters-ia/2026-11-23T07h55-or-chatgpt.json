@@ -1,0 +1,112 @@
+{
+  "profil": "or-chatgpt",
+  "nom": "ChatGPT",
+  "modele": "openai/gpt-6.2-sol",
+  "promptVersion": "tipster-ia-v1",
+  "essai": false,
+  "dossier": "c10d118a016847c0",
+  "duree_s": 21,
+  "tours": 2,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 1081
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 743
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 441
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 749
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 995
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M1",
+        "famille": "buts"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M2",
+        "famille": "buts"
+      },
+      "ms": 1
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M4",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5",
+        "famille": "buts"
+      },
+      "ms": 2
+    }
+  ],
+  "jetons": {
+    "entree": 21110,
+    "sortie": 1148,
+    "cacheLu": 1499,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 0,
+  "propositions": [],
+  "abstention": "Aucun des prix examinés ne présente un avantage assez net après prise en compte de l’incertitude. M1 : la meilleure forme de l’Aris est un signal, mais ses 1,7 but encaissé par match sur les cinq derniers ne justifient pas de rehausser fortement ses chances ; à 2,25, sa victoire exige 44,4 % contre 42,2 % pour le marché. M2 : le dossier ne fournit ni forme récente ni enjeu détaillé ; à 1,53, Belouizdad exige 65,4 % contre 61,9 % pour le marché. M3 : le plus de 2,5 buts à 1,63 exige 61,3 % contre 61,0 % pour le marché ; le relevé date de la veille et les compositions ne sont pas publiées, avec deux joueurs incertains côté Başakşehir. M4 : les deux équipes ont gagné quatre de leurs cinq derniers matchs ; la meilleure tenue défensive de Bodrum ne suffit pas à justifier 45,2 % de chances de victoire à 2,21, contre 41,9 % pour le marché. M5 : malgré la domination du Bayern, le plus de 4,5 buts à 2,01 (relevé de 06:00) n’offre qu’un écart de 1,6 point entre le marché (51,4 %) et le seuil (49,8 %), trop mince sans composition publiée ni estimation BETWISE. Aucune estimation BETWISE n’est disponible sur les marchés de buts consultés. Mise totale : 0 FCFA.",
+  "carnetReecrit": true,
+  "retenus": [],
+  "rejets": [],
+  "enregistres": []
+}

@@ -1,0 +1,114 @@
+{
+  "profil": "claude",
+  "nom": "Claude",
+  "modele": "claude-sonnet-5-5",
+  "promptVersion": "tipster-ia-v1",
+  "essai": false,
+  "dossier": "c10d118a016847c0",
+  "duree_s": 20,
+  "tours": 3,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 708
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 1047
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 1080
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 1076
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 735
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M2",
+        "famille": "buts"
+      },
+      "ms": 0
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3",
+        "famille": "buts"
+      },
+      "ms": 2
+    }
+  ],
+  "jetons": {
+    "entree": 21494,
+    "sortie": 1691,
+    "cacheLu": 6297,
+    "cacheEcrit": 2099
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M5.152",
+      "mise": 2000,
+      "probabilite": 0.7,
+      "raison": "Bayern W 1er (30 pts/10 matchs), 5 victoires sur 5, 3,6 buts marqués par match, 4-0 jeudi à Vienne. Le marché attend environ 4,8 buts (Bayern 4,2). Plus de 3,5 buts à 1,43 est cohérent avec cette forme. Je ne vois pas d'écart avec le marché, donc petite mise."
+    }
+  ],
+  "abstention": "Pour les 4 autres matchs, aucune information ne me donne un avantage sur le marché : compositions absentes, cotes équilibrées, absents peu parlants. Je m'abstiens.",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M5.152",
+      "pari": "Plus de 3,5 buts",
+      "cote": 1.43,
+      "mise": 2000,
+      "probabilite": 0.7,
+      "raison": "Bayern W 1er (30 pts/10 matchs), 5 victoires sur 5, 3,6 buts marqués par match, 4-0 jeudi à Vienne. Le marché attend environ 4,8 buts (Bayern 4,2). Plus de 3,5 buts à 1,43 est cohérent avec cette forme. Je ne vois pas d'écart avec le marché, donc petite mise."
+    }
+  ],
+  "rejets": [],
+  "enregistres": [
+    "M5.152"
+  ]
+}

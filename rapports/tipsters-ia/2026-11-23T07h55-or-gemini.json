@@ -1,0 +1,140 @@
+{
+  "profil": "or-gemini",
+  "nom": "Gemini",
+  "modele": "google/gemini-4-carbon",
+  "promptVersion": "tipster-ia-v1",
+  "essai": false,
+  "dossier": "c10d118a016847c0",
+  "duree_s": 41,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 682
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 750
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 398
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 382
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 698
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 10
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 12
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 3
+    }
+  ],
+  "jetons": {
+    "entree": 164190,
+    "sortie": 1365,
+    "cacheLu": 72933,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "mise": 2000,
+      "option": "M1.98",
+      "probabilite": 0.63,
+      "raison": "Aris Thessalonikis (5e, 19 pts en 10 matchs) reste sur 4 victoires lors de ses 5 dernières rencontres et joue une entrée potentielle dans le top 4 qualificatif pour la poule du titre. En face, Asteras Tripolis est 11e (7 pts en 10 matchs, 1,8 but encaissé et 0,9 marqué sur les 5 derniers matchs). Le pari remboursé si nul (cote 1,52) couvre le risque de partage des points fréquent en Grèce (nul coté à 2,92) tout en offrant une belle valeur par rapport à la probabilité du marché sans marge (61 %)."
+    },
+    {
+      "option": "M5.3",
+      "mise": 2500,
+      "raison": "Leader invaincu de Frauen-Bundesliga (10 victoires en 10 matchs, 30 pts) avec seulement 3 points d'avance sur Wolfsburg, le Bayern Munich féminin a tout intérêt à soigner son match contre Hoffenheim (7e, 13 pts). Le Bayern reste sur un net 0-4 contre l'Austria Wien jeudi et tourne à 3,6 buts marqués par match récemment. Les attentes du marché sont très déséquilibrées (4,23 buts attendus contre 0,53) et la cote de 1,48 sur le handicap -2,5 offre un léger avantage sur la probabilité de référence du marché (69,6 %, soit ~1,44 sans marge).",
+      "probabilite": 0.7
+    }
+  ],
+  "abstention": "Je ne prends que deux paris à mise modérée ce matin (4,5 % de la bankroll engagée au total) et m'abstiens sur M2, M3 et M4 : M2 (Coupe CAF) manque d'informations de contexte (classement, forme, absences non disponibles), M3 présente des incertitudes dans l'effectif de Başakşehir (Fayzullaev et Operi incertains, Sengezer inactif) sans compositions publiées et des cotes 1xBet très justes, et M4 oppose deux équipes en pleine réussite (4 victoires sur les 5 derniers matchs chacune) où la marge du bookmaker absorbe tout avantage avant l'annonce des onze de départ.",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M1.98",
+      "pari": "Aris Thessalonikis (remboursé si nul)",
+      "cote": 1.52,
+      "mise": 2000,
+      "probabilite": 0.63,
+      "raison": "Aris Thessalonikis (5e, 19 pts en 10 matchs) reste sur 4 victoires lors de ses 5 dernières rencontres et joue une entrée potentielle dans le top 4 qualificatif pour la poule du titre. En face, Asteras Tripolis est 11e (7 pts en 10 matchs, 1,8 but encaissé et 0,9 marqué sur les 5 derniers matchs). Le pari remboursé si nul (cote 1,52) couvre le risque de partage des points fréquent en Grèce (nul coté à 2,92) tout en offrant une belle valeur par rapport à la probabilité du marché sans marge (61 %)."
+    },
+    {
+      "id": "M5.3",
+      "pari": "Bayern Munich W handicap -2,5",
+      "cote": 1.48,
+      "mise": 2500,
+      "probabilite": 0.7,
+      "raison": "Leader invaincu de Frauen-Bundesliga (10 victoires en 10 matchs, 30 pts) avec seulement 3 points d'avance sur Wolfsburg, le Bayern Munich féminin a tout intérêt à soigner son match contre Hoffenheim (7e, 13 pts). Le Bayern reste sur un net 0-4 contre l'Austria Wien jeudi et tourne à 3,6 buts marqués par match récemment. Les attentes du marché sont très déséquilibrées (4,23 buts attendus contre 0,53) et la cote de 1,48 sur le handicap -2,5 offre un léger avantage sur la probabilité de référence du marché (69,6 %, soit ~1,44 sans marge)."
+    }
+  ],
+  "rejets": [],
+  "enregistres": [
+    "M1.98",
+    "M5.3"
+  ]
+}
