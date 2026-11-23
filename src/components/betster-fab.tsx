@@ -16,10 +16,9 @@ export function BetsterFab() {
   const legs = useSlip();
   const dansLaConversation = path === "/coach" && sp.get("v") === "discussion";
   if (dansLaConversation || ["/nouveau", "/import", "/reglages"].some((p) => path.startsWith(p))) return null;
-  // Le coupon occupe une barre au-dessus des onglets ; sur la fiche d'un match, la barre « Parier sur ce match » aussi :
-  // Betster remonte d'autant pour ne rien recouvrir (audit 22/11)
-  const ficheMatch = /^\/matchs\/[^/]+$/.test(path);
-  const bas = (legs.length ? 136 : 80) + (ficheMatch ? 60 : 0);
+  // Le coupon occupe une barre au-dessus des onglets : Betster remonte d'autant. La barre « Parier sur ce match »
+  // (seulement avant le match) le fait remonter aussi, par une règle CSS (globals.css, data-barre-pari).
+  const bas = legs.length ? 136 : 80;
   return (
     <div className="betster-fab-zone pointer-events-none fixed inset-x-0 z-30 mx-auto flex max-w-xl justify-end px-4" style={{ bottom: `calc(${bas}px + env(safe-area-inset-bottom))` }}>
       <Link href="/coach?v=discussion" aria-label="Parler à Betster"

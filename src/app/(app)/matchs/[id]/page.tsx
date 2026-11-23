@@ -342,7 +342,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
       )}
 
       {upcoming && (
-        <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-10 px-4 pb-2">
+        <div data-barre-pari className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-10 px-4 pb-2">
           <Link href={`/nouveau?match=${m.id}`} className="mx-auto block max-w-xl rounded-xl bg-inverse py-3 text-center text-base font-medium text-on-inverse shadow-lg active:opacity-90">Parier sur ce match</Link>
         </div>
       )}

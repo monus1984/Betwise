@@ -199,6 +199,8 @@ input, select, textarea { color: rgb(var(--c-ink)); }
 .betster-fab { animation: betster-halo 3.2s ease-in-out infinite; }
 /* Aide ouverte : Betster flottant se retire (22/11) */
 body[data-aide="ouvert"] .betster-fab-zone { display: none; }
+/* Barre « Parier sur ce match » affichée : Betster passe au-dessus (23/11) */
+body:has([data-barre-pari]) .betster-fab-zone { transform: translateY(-60px); }
 @media (prefers-reduced-motion: reduce) { .betster-fab { animation: none; } }
 
 /* Animation du portrait de Betster : repos (respire, balance la tête), pense (tête penchée, anneau), parle (suit le niveau de la voix) */
