@@ -92,7 +92,7 @@ export async function completerMatchs(db: Db, api: ApiFootball, demandes: { equi
   const uniques = new Map<string, (typeof demandes)[number]>();
   for (const d of demandes) { const k = nomCherchable(d.equipe).toLowerCase(); if (k && !uniques.has(k) && uniques.size < max) uniques.set(k, d); }
   // En parallèle, et jamais plus de 18 s : l'import entier doit tenir dans le temps imparti au serveur
-  const une = async (d: (typeof demandes)[number]) => {
+  const une = async (d: (typeof demandes)[number]): Promise<number> => {
     try {
       const t = await chercherEquipe(api, d.equipe);
       if (!t) return 0;
