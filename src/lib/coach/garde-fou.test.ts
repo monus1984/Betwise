@@ -28,3 +28,28 @@ describe("alerte du Coach", () => {
     expect(a.raisons.join(" ")).toMatch(/6.000 F/);
   });
 });
+
+import { demandeExplicite } from "./garde-fou";
+describe("budget atteint : stop dur (23/11)", () => {
+  const atteint = etatBudget({ miseSemaine: 10000, perteMaxSemaine: 5000 }, [{ mise: 11000, statut: "perdu", gain_net: -11000, placed_at: "2026-11-17T10:00:00Z", settled_at: "2026-11-17T20:00:00Z" }], new Date("2026-11-18T12:00:00Z"));
+  it("bloque les propositions quand rien n'est demandé explicitement", () => {
+    for (const m of ["Salut", "Comment va ma semaine ?", "Analyse-moi Marseille – Lens"]) {
+      const a = alerteCoach(m, { serie: 0, budget: atteint });
+      expect(a.bloquerPropositions, m).toBe(true);
+      expect(a.consigne).toContain("ne propose AUCUN pari");
+    }
+  });
+  it("laisse proposer sur demande explicite, après le rappel", () => {
+    for (const m of ["Propose-moi un pari pour ce soir", "Quoi jouer aujourd'hui ?", "Donne-moi les coups du jour", "Fais-moi un combiné à 3"]) {
+      expect(demandeExplicite(m), m).toBe(true);
+      const a = alerteCoach(m, { serie: 0, budget: atteint });
+      expect(a.bloquerPropositions, m).toBe(false);
+      expect(a.consigne).toContain("tu proposes quand même");
+    }
+  });
+});
+describe("demande explicite : pas de faux positifs", () => {
+  it("faire le point n'est pas demander un pari", () => {
+    for (const m of ["Fais-moi le point sur ma semaine", "Où en est mon budget ?", "Analyse-moi Marseille – Lens"]) expect(demandeExplicite(m), m).toBe(false);
+  });
+});

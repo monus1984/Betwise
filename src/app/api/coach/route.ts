@@ -5,7 +5,7 @@ import { getLlm, type ChatTurn } from "@/lib/llm/provider";
 import { COACH_TOOLS, runCoachTool } from "@/lib/coach/tools";
 import { COACH_SYSTEM } from "@/lib/coach/prompt";
 import { etatBudget } from "@/lib/coach/budget";
-import { alerteCoach } from "@/lib/coach/garde-fou";
+import { alerteCoach, OUTILS_PROPOSITION, MESSAGE_BLOQUE } from "@/lib/coach/garde-fou";
 import { cartesDe } from "@/lib/coach/cartes";
 
 export const runtime = "nodejs";
@@ -48,7 +48,8 @@ export async function POST(req: Request) {
 
   await db.from("messages").insert({ conversation_id: conversationId, role: "user", contenu: message });
 
-  // Ce que le Coach doit signaler avant de proposer (série de pertes, budget, demande de « se refaire »). Il ne refuse jamais.
+  // Ce que le Coach doit signaler avant de proposer (série de pertes, budget, demande de « se refaire »).
+  // Budget atteint sans demande explicite : ses outils de propositions sont bloqués ici, pas seulement dans la consigne.
   const [{ data: recents }, { data: bud }] = await Promise.all([
     db.from("bets").select("mise, statut, gain_net, placed_at, settled_at").eq("virtuel", false).neq("statut", "annule").order("placed_at", { ascending: false }).limit(60),
     db.from("budgets").select("mise_semaine, perte_max_semaine").maybeSingle(),
@@ -60,7 +61,7 @@ export async function POST(req: Request) {
   const system = alerte.active ? `${COACH_SYSTEM}\n\n${alerte.consigne}` : COACH_SYSTEM;
 
   try {
-    const r = await getLlm().chat({ system, history, tools: COACH_TOOLS, run: (name, input) => runCoachTool(db, name, input), maxTokens: 2000 });
+    const r = await getLlm().chat({ system, history, tools: COACH_TOOLS, run: (name, input) => (alerte.bloquerPropositions && OUTILS_PROPOSITION.has(name) ? Promise.resolve(MESSAGE_BLOQUE) : runCoachTool(db, name, input)), maxTokens: 2000 });
     const fonctions = r.trace.map((t) => ({ nom: t.name, entree: t.input, sortie: t.output, ms: t.ms }));
     const cartes = cartesDe(fonctions);
     const { data: saved } = await db.from("messages").insert({
