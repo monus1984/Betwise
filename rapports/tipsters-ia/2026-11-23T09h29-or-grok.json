@@ -1,0 +1,317 @@
+{
+  "profil": "or-grok",
+  "nom": "Grok",
+  "modele": "x-ai/grok-4.7",
+  "promptVersion": "tipster-ia-v2",
+  "essai": false,
+  "dossier": "d8b3ee02e91048f8",
+  "duree_s": 58,
+  "tours": 6,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 2
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 409
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 341
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 331
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 324
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 421
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M7"
+      },
+      "ms": 307
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 316
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 316
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 335
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 310
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 297
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5",
+        "famille": "tout"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "buts"
+      },
+      "ms": 1
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "buts"
+      },
+      "ms": 1
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 559
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 315
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M7",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "resultat"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14",
+        "famille": "resultat"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M9"
+      },
+      "ms": 575
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 311
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 315
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M9",
+        "famille": "buts"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M10",
+        "famille": "buts"
+      },
+      "ms": 1
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M7",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "resultat"
+      },
+      "ms": 4
+    }
+  ],
+  "jetons": {
+    "entree": 246827,
+    "sortie": 3763,
+    "cacheLu": 152960,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M5.152",
+      "mise": 2500,
+      "probabilite": 0.68,
+      "raison": "Bayern W est 1er (30 pts/10, +3 sur Wolfsburg), 5 victoires sur 5, 3,6 buts marqués et 0,9 encaissé. Hoffenheim W est 7e (13 pts), 1,3 but et 1,6 encaissé sur 5. Dernier match Bayern : 4-0 à Austria Wien le 19/11. Aucun absent signalé. Le marché annonce 4,23 buts Bayern contre 0,53 Hoffenheim, soit ~4,8 au total. Plus de 3,5 buts est coté 1,43 (marché 69,8 %). Ma proba 68 % : un peu sous le marché, compositions pas encore publiées, mais la forme et les buts attendus vont dans le même sens. Niveau Équilibré. Rien n'est acquis."
+    },
+    {
+      "option": "M13.17",
+      "mise": 2500,
+      "probabilite": 0.6,
+      "raison": "Monza 18e (relégation, 7 pts/11) et Fiorentina 15e (9 pts, 2 pts au-dessus de la zone). Les deux ont encaissé 25 buts en 11 matchs et 2,3 buts encaissés sur les 5 derniers. Marché 1,29-1,86 buts, modèle BETWISE 1,32-1,79, ~3,1 au total. Les deux marquent à 1,50 : marché 61,1 %, modèle 61,5 %. J'annonce 60 %, un cran sous les deux, à cause des absents (Folorunsho, Maye, Ngonge côté Monza ; Parisi, Pongračić, Sottil côté Fiorentina) et des compositions non publiées. Niveau Équilibré. Le match peut rester fermé."
+    },
+    {
+      "option": "M10.19",
+      "mise": 2000,
+      "probabilite": 0.72,
+      "raison": "Jong Ajax 4e, 3 victoires sur 5, 2,2 buts marqués. Jong AZ 10e, 2,4 buts marqués et 2,1 encaissés sur 5, 31 buts encaissés en 15. Derniers matchs : Jong Ajax 2-1 à Volendam, Jong AZ 3-0 à Vitesse le 20/11. Marché 2,08-1,83 buts, ~3,9 au total, aucun absent signalé. Les deux marquent à 1,27 (marché 73,6 %). J'annonce 72 % : la forme offensive des deux équipes et le volume de buts collent, mais les compositions ne sont pas sorties et le modèle BETWISE ne couvre pas ce championnat. Niveau Prudent. Un 1-0 reste possible."
+    }
+  ],
+  "abstention": "Minimum du jour couvert (3). Abstention sur le reste : M2 fiche quasi vide ; M6 Midtjylland a 7 absents et le 1X2 est équilibré ; M14 Nantes seulement 1V/5 malgré la cote 1,44 ; M16 Brentford a 6 absents dont Thiago suspendu ; M17 les deux en relégation, le modèle voit plus de buts que le marché mais l’enjeu peut fermer le match ; M1, M4, M8, M11, M15 trop équilibrés ou forme récente non alignée. Un seul pari par match.",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M5.152",
+      "pari": "Plus de 3,5 buts",
+      "cote": 1.43,
+      "mise": 2500,
+      "probabilite": 0.68,
+      "raison": "Bayern W est 1er (30 pts/10, +3 sur Wolfsburg), 5 victoires sur 5, 3,6 buts marqués et 0,9 encaissé. Hoffenheim W est 7e (13 pts), 1,3 but et 1,6 encaissé sur 5. Dernier match Bayern : 4-0 à Austria Wien le 19/11. Aucun absent signalé. Le marché annonce 4,23 buts Bayern contre 0,53 Hoffenheim, soit ~4,8 au total. Plus de 3,5 buts est coté 1,43 (marché 69,8 %). Ma proba 68 % : un peu sous le marché, compositions pas encore publiées, mais la forme et les buts attendus vont dans le même sens. Niveau Équilibré. Rien n'est acquis."
+    },
+    {
+      "id": "M13.17",
+      "pari": "Les deux marquent",
+      "cote": 1.5,
+      "mise": 2500,
+      "probabilite": 0.6,
+      "raison": "Monza 18e (relégation, 7 pts/11) et Fiorentina 15e (9 pts, 2 pts au-dessus de la zone). Les deux ont encaissé 25 buts en 11 matchs et 2,3 buts encaissés sur les 5 derniers. Marché 1,29-1,86 buts, modèle BETWISE 1,32-1,79, ~3,1 au total. Les deux marquent à 1,50 : marché 61,1 %, modèle 61,5 %. J'annonce 60 %, un cran sous les deux, à cause des absents (Folorunsho, Maye, Ngonge côté Monza ; Parisi, Pongračić, Sottil côté Fiorentina) et des compositions non publiées. Niveau Équilibré. Le match peut rester fermé."
+    },
+    {
+      "id": "M10.19",
+      "pari": "Les deux marquent",
+      "cote": 1.27,
+      "mise": 2000,
+      "probabilite": 0.72,
+      "raison": "Jong Ajax 4e, 3 victoires sur 5, 2,2 buts marqués. Jong AZ 10e, 2,4 buts marqués et 2,1 encaissés sur 5, 31 buts encaissés en 15. Derniers matchs : Jong Ajax 2-1 à Volendam, Jong AZ 3-0 à Vitesse le 20/11. Marché 2,08-1,83 buts, ~3,9 au total, aucun absent signalé. Les deux marquent à 1,27 (marché 73,6 %). J'annonce 72 % : la forme offensive des deux équipes et le volume de buts collent, mais les compositions ne sont pas sorties et le modèle BETWISE ne couvre pas ce championnat. Niveau Prudent. Un 1-0 reste possible."
+    }
+  ],
+  "rejets": [],
+  "enregistres": [
+    "M5.152",
+    "M13.17",
+    "M10.19"
+  ]
+}

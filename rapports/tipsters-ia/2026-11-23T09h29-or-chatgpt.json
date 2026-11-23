@@ -1,0 +1,145 @@
+{
+  "profil": "or-chatgpt",
+  "nom": "ChatGPT",
+  "modele": "openai/gpt-6.2-sol",
+  "promptVersion": "tipster-ia-v2",
+  "essai": false,
+  "dossier": "d8b3ee02e91048f8",
+  "duree_s": 18,
+  "tours": 2,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 324
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 609
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 543
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 550
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M1",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M2",
+        "famille": "resultat"
+      },
+      "ms": 1
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5",
+        "famille": "buts"
+      },
+      "ms": 1
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14",
+        "famille": "resultat"
+      },
+      "ms": 2
+    }
+  ],
+  "jetons": {
+    "entree": 23725,
+    "sortie": 1389,
+    "cacheLu": 1797,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M1.234",
+      "mise": 750,
+      "probabilite": 0.73,
+      "raison": "Asteras Tripolis marque au plus un but, à 1,34 (relevé 06:00). Asteras n’a marqué que 0,9 but par match sur ses cinq dernières sorties et le marché lui en projette 1,01. Les 1,7 but encaissé par match récemment par l’Aris invitent toutefois à rester près du repère de marché de 73,1 %."
+    },
+    {
+      "option": "M5.148",
+      "mise": 1000,
+      "probabilite": 0.85,
+      "raison": "Au moins trois buts dans le match, à 1,13 (relevé 06:00). Le Bayern, leader avec 30 points en 10 matchs, a marqué 3,6 buts par match sur ses cinq dernières sorties et vient de gagner 4–0 à Vienne. Le marché projette 4,76 buts au total, dont 4,23 pour le Bayern : le pari n’exige pas qu’Hoffenheim marque. Compositions non publiées."
+    },
+    {
+      "option": "M14.11",
+      "mise": 750,
+      "probabilite": 0.79,
+      "raison": "Grenoble +2,5 buts, à 1,17 (relevé 08:18) : le pari ne perd que si Nantes gagne par au moins trois buts. Grenoble a perdu quatre de ses cinq derniers matchs, mais Nantes n’a gagné qu’une fois sur la même période et n’a marqué que 1,2 but par match. Le marché reste favorable à Nantes (1,95 but attendu contre 0,66), sans faire d’un large écart le scénario central."
+    }
+  ],
+  "abstention": "Pas de mise supplémentaire : trois simples suffisent pour ce passage. La fiche d’AC Douane–CR Belouizdad ne fournit ni forme récente ni contexte sportif détaillé ; je laisse ce match de côté.",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M1.234",
+      "pari": "Asteras Tripolis : moins de 1,5 buts",
+      "cote": 1.34,
+      "mise": 800,
+      "probabilite": 0.73,
+      "raison": "Asteras Tripolis marque au plus un but, à 1,34 (relevé 06:00). Asteras n’a marqué que 0,9 but par match sur ses cinq dernières sorties et le marché lui en projette 1,01. Les 1,7 but encaissé par match récemment par l’Aris invitent toutefois à rester près du repère de marché de 73,1 %."
+    },
+    {
+      "id": "M5.148",
+      "pari": "Plus de 2,5 buts",
+      "cote": 1.13,
+      "mise": 1000,
+      "probabilite": 0.85,
+      "raison": "Au moins trois buts dans le match, à 1,13 (relevé 06:00). Le Bayern, leader avec 30 points en 10 matchs, a marqué 3,6 buts par match sur ses cinq dernières sorties et vient de gagner 4–0 à Vienne. Le marché projette 4,76 buts au total, dont 4,23 pour le Bayern : le pari n’exige pas qu’Hoffenheim marque. Compositions non publiées."
+    },
+    {
+      "id": "M14.11",
+      "pari": "Grenoble handicap +2,5",
+      "cote": 1.17,
+      "mise": 800,
+      "probabilite": 0.79,
+      "raison": "Grenoble +2,5 buts, à 1,17 (relevé 08:18) : le pari ne perd que si Nantes gagne par au moins trois buts. Grenoble a perdu quatre de ses cinq derniers matchs, mais Nantes n’a gagné qu’une fois sur la même période et n’a marqué que 1,2 but par match. Le marché reste favorable à Nantes (1,95 but attendu contre 0,66), sans faire d’un large écart le scénario central."
+    }
+  ],
+  "rejets": [],
+  "enregistres": [
+    "M1.234",
+    "M5.148",
+    "M14.11"
+  ]
+}

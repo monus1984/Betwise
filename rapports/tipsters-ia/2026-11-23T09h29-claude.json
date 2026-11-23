@@ -1,0 +1,98 @@
+{
+  "profil": "claude",
+  "nom": "Claude",
+  "modele": "claude-sonnet-5-5",
+  "promptVersion": "tipster-ia-v2",
+  "essai": false,
+  "dossier": "d8b3ee02e91048f8",
+  "duree_s": 14,
+  "tours": 2,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 2
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 531
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 297
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 3
+    }
+  ],
+  "jetons": {
+    "entree": 40408,
+    "sortie": 1645,
+    "cacheLu": 4614,
+    "cacheEcrit": 2307
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 2000,
+  "propositions": [
+    {
+      "option": "M14.10",
+      "mise": 2000,
+      "probabilite": 0.74,
+      "raison": "Nantes (14e) et Grenoble (18e) sont proches au classement. Nantes marque 1,2 but par match sur ses 5 derniers matchs et n'a gagné qu'1 des 5. Le marché attend 2,6 buts, avec 1,95 pour Nantes et 0,66 pour Grenoble. Que Grenoble ne perde pas par 2 buts d'écart ou plus est donc probable, à 1,25."
+    },
+    {
+      "option": "M2.93",
+      "mise": 1500,
+      "probabilite": 0.72,
+      "raison": "Le marché attend environ 2,4 buts dans Douane – Belouizdad en Coupe de la Confédération. Moins de 3 buts à 1,26 est le scénario le plus probable. Je n'ai pas d'info de forme ni de compositions, donc la mise reste petite."
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M14.10",
+      "pari": "Grenoble handicap +2",
+      "cote": 1.25,
+      "mise": 2000,
+      "probabilite": 0.74,
+      "raison": "Nantes (14e) et Grenoble (18e) sont proches au classement. Nantes marque 1,2 but par match sur ses 5 derniers matchs et n'a gagné qu'1 des 5. Le marché attend 2,6 buts, avec 1,95 pour Nantes et 0,66 pour Grenoble. Que Grenoble ne perde pas par 2 buts d'écart ou plus est donc probable, à 1,25."
+    },
+    {
+      "id": "M2.93",
+      "pari": "Moins de 3 buts",
+      "cote": 1.26,
+      "mise": 1500,
+      "probabilite": 0.72,
+      "raison": "Le marché attend environ 2,4 buts dans Douane – Belouizdad en Coupe de la Confédération. Moins de 3 buts à 1,26 est le scénario le plus probable. Je n'ai pas d'info de forme ni de compositions, donc la mise reste petite."
+    }
+  ],
+  "rejets": [],
+  "enregistres": [
+    "M14.10",
+    "M2.93"
+  ]
+}

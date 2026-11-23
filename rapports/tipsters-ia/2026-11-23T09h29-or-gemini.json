@@ -1,0 +1,200 @@
+{
+  "profil": "or-gemini",
+  "nom": "Gemini",
+  "modele": "google/gemini-4-carbon",
+  "promptVersion": "tipster-ia-v2",
+  "essai": false,
+  "dossier": "d8b3ee02e91048f8",
+  "duree_s": 88,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 316
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M7"
+      },
+      "ms": 536
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 296
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 321
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 338
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 311
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 423
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 308
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 310
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M7"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 10
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "buts"
+      },
+      "ms": 1
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "buts"
+      },
+      "ms": 1
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 355
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 579
+    }
+  ],
+  "jetons": {
+    "entree": 187535,
+    "sortie": 1835,
+    "cacheLu": 84530,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100000,
+  "enJeu": 4500,
+  "propositions": [
+    {
+      "option": "M12.86",
+      "raison": "Almeria (2e de Liga 2 avec 32 pts en 14 matchs, invaincu sur ses 5 dernières sorties avec 3 victoires, 1,9 but marqué et 0,8 encaissé par match) joue la première place du classement à seulement 1 point du leader Castellón. En face, l'AD Ceuta FC est lanterne rouge (22e avec 5 pts en 14 matchs, 32 buts encaissés) et reste sur 5 défaites consécutives (0,7 but marqué et 2,3 encaissés par match). La double chance Almeria ou nul à 1,30 offre une excellente sécurité face à une équipe en grande détresse défensive.",
+      "mise": 2500,
+      "probabilite": 0.77
+    },
+    {
+      "option": "M7.96",
+      "mise": 2000,
+      "probabilite": 0.71,
+      "raison": "Le Rapid Bucarest (3e de Liga I roumaine avec 31 pts en 15 matchs) affiche une belle dynamique avec 3 victoires et 1 seule défaite sur les 5 derniers matchs (1,6 but marqué et 0,9 encaissé par match). Il se déplace chez Sepsi OSK, 11e en zone de relégation (18 pts) qui peine offensivement (0,7 but marqué par match sur les 5 derniers matchs, 1 victoire et 2 défaites). L'option Rapid remboursé si nul à 1,35 protège du partage des points à l'extérieur tout en s'appuyant sur l'écart net de forme et de solidité."
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M12.86",
+      "pari": "Almeria ou nul",
+      "cote": 1.3,
+      "mise": 2500,
+      "probabilite": 0.77,
+      "raison": "Almeria (2e de Liga 2 avec 32 pts en 14 matchs, invaincu sur ses 5 dernières sorties avec 3 victoires, 1,9 but marqué et 0,8 encaissé par match) joue la première place du classement à seulement 1 point du leader Castellón. En face, l'AD Ceuta FC est lanterne rouge (22e avec 5 pts en 14 matchs, 32 buts encaissés) et reste sur 5 défaites consécutives (0,7 but marqué et 2,3 encaissés par match). La double chance Almeria ou nul à 1,30 offre une excellente sécurité face à une équipe en grande détresse défensive."
+    },
+    {
+      "id": "M7.96",
+      "pari": "Rapid (remboursé si nul)",
+      "cote": 1.35,
+      "mise": 2000,
+      "probabilite": 0.71,
+      "raison": "Le Rapid Bucarest (3e de Liga I roumaine avec 31 pts en 15 matchs) affiche une belle dynamique avec 3 victoires et 1 seule défaite sur les 5 derniers matchs (1,6 but marqué et 0,9 encaissé par match). Il se déplace chez Sepsi OSK, 11e en zone de relégation (18 pts) qui peine offensivement (0,7 but marqué par match sur les 5 derniers matchs, 1 victoire et 2 défaites). L'option Rapid remboursé si nul à 1,35 protège du partage des points à l'extérieur tout en s'appuyant sur l'écart net de forme et de solidité."
+    }
+  ],
+  "rejets": [],
+  "enregistres": [
+    "M12.86",
+    "M7.96"
+  ]
+}
