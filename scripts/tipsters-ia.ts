@@ -15,7 +15,7 @@ import { categorieFromOdds, CAT_LABEL } from "../src/lib/coach/categories";
 import { compteRobot, sessionRobot, clientAudit } from "../src/lib/tipster-virtuel/compte";
 import { construireDossier, executerOutil, OUTILS, type Dossier } from "../src/lib/tipsters-ia/dossier";
 import { lancerAgent } from "../src/lib/tipsters-ia/agent";
-import { profilsActifs, PROMPT_VERSION, SYSTEME, type ProfilComplet } from "../src/lib/tipsters-ia/profils";
+import { profilsActifs, PROMPT_VERSION, SYSTEME, MIN_PARIS_JOUR, type ProfilComplet } from "../src/lib/tipsters-ia/profils";
 import { GARDE_FOUS, valider } from "../src/lib/tipsters-ia/validation";
 import { horizonHeures } from "../src/lib/tipsters-ia/horizon";
 
@@ -31,11 +31,11 @@ const db = createAdminClient();
 type Bet = { id: string; mise: number; gain_net: number | null; statut: string; placed_at: string; raw_text: string | null; cote_totale: number | null;
   bet_selections: { match_id: string | null; market_code: string; market_param: number | null; selection: string; cote: number; resultat: string; match: { home: { nom: string } | null; away: { nom: string } | null } | null }[] };
 
-function lireCarnet(id: string): { texte: string; jour: string | null } {
+function lireCarnet(id: string): { texte: string; jour: string | null; version: string | null } {
   const f = `${CARNETS}/${id}.md`;
-  if (!existsSync(f)) return { texte: "", jour: null };
-  const t = readFileSync(f, "utf8"), m = t.match(/^<!-- jour: (\d{4}-\d{2}-\d{2}) -->/);
-  return { texte: t.replace(/^<!--.*?-->\n?/, ""), jour: m?.[1] ?? null };
+  if (!existsSync(f)) return { texte: "", jour: null, version: null };
+  const t = readFileSync(f, "utf8"), m = t.match(/^<!-- jour: (\d{4}-\d{2}-\d{2})(?: version: ([\w-]+))? -->/);
+  return { texte: t.replace(/^<!--.*?-->\n?/, ""), jour: m?.[1] ?? null, version: m?.[2] ?? null };
 }
 
 async function passage(p: ProfilComplet, d: Dossier, empreinte: string) {
@@ -82,15 +82,21 @@ async function passage(p: ProfilComplet, d: Dossier, empreinte: string) {
   };
 
   const carnet = lireCarnet(p.id);
-  const ecrireCarnet = FORCER_CARNET || carnet.jour !== jour;
+  // Nouvelle consigne (version) : le carnet est réécrit au passage suivant
+  const ecrireCarnet = FORCER_CARNET || carnet.jour !== jour || carnet.version !== PROMPT_VERSION;
+  const manque = Math.max(0, MIN_PARIS_JOUR - duJour.length), dernierPassage = new Date().getUTCHours() >= 16;
   const consigne = [
     `Passage du ${new Date().toLocaleString("fr-FR", { timeZone: "Africa/Abidjan", dateStyle: "full", timeStyle: "short" })} (heure d'Abidjan).`,
     `Bankroll : ${fr(bankroll)} FCFA (départ ${fr(GARDE_FOUS.bankrollDepart)}), ${fr(enJeu)} FCFA en jeu, ${duJour.length} pari(s) déjà joué(s) aujourd'hui sur ${GARDE_FOUS.parJour} au plus.`,
     `${d.matchs.length} match(s) dans ce passage.`,
     carnet.texte ? `Ton carnet actuel :\n---\n${carnet.texte.trim()}\n---` : "Tu n'as pas encore de carnet : c'est ton premier passage. Pose tes premières règles.",
     ecrireCarnet ? "Ce passage est le premier de la journée : regarde d'abord ton historique (mon_historique), puis réécris ton carnet en entier dans le champ carnet de ta décision." : "Tu peux compléter ton carnet si tu as appris quelque chose, sinon laisse le champ carnet vide.",
+    manque === 0 ? `Tu as déjà joué tes ${MIN_PARIS_JOUR} paris du jour : tu peux en ajouter si tu en vois de bons, ou t'arrêter.`
+      : dernierPassage ? `C'est le dernier passage de la journée et il te manque ${manque} pari(s) sur ${MIN_PARIS_JOUR} : choisis les ${manque} meilleur(s) parmi les matchs du passage (sauf s'il y a moins de ${manque} match(s)).`
+      : `Il te reste ${manque} pari(s) à jouer aujourd'hui sur ${MIN_PARIS_JOUR} au minimum, dans ce passage ou les suivants.`,
+    carnet.version !== PROMPT_VERSION && carnet.texte ? "La consigne a changé : on ne te demande plus de battre la cote. Si ton carnet contient une règle de seuil de valeur (cote × probabilité, écart avec le marché…), retire-la en le réécrivant." : "",
     "Analyse, choisis, puis rends ta décision avec l'outil decision.",
-  ].join("\n\n");
+  ].filter(Boolean).join("\n\n");
 
   const debut = Date.now();
   const r = d.matchs.length || ecrireCarnet
@@ -118,7 +124,7 @@ async function passage(p: ProfilComplet, d: Dossier, empreinte: string) {
   }
   if (!ESSAI && r.decision?.carnet && r.decision.carnet.trim().length > 30) {
     mkdirSync(CARNETS, { recursive: true });
-    writeFileSync(`${CARNETS}/${p.id}.md`, `<!-- jour: ${jour} -->\n${r.decision.carnet.trim().slice(0, 6000)}\n`);
+    writeFileSync(`${CARNETS}/${p.id}.md`, `<!-- jour: ${jour} version: ${PROMPT_VERSION} -->\n${r.decision.carnet.trim().slice(0, 6000)}\n`);
   }
   const apresNet = net, resume = `Tipster IA (${p.nom}, ${r.modele}). Bankroll virtuelle : ${fr(GARDE_FOUS.bankrollDepart + apresNet)} FCFA (départ ${fr(GARDE_FOUS.bankrollDepart)}), ${regles.length} paris réglés dont ${regles.filter((b) => b.statut === "gagne").length} gagnés. Mis à jour le ${new Date().toLocaleString("fr-FR", { timeZone: "Africa/Abidjan" })}.`;
   if (src && !ESSAI) await db.from("sources").update({ description: resume }).eq("id", src.id);
