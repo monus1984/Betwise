@@ -11,7 +11,7 @@
 export type Categorie = "sur" | "audacieux" | "risque";
 export const CAT_LABEL: Record<Categorie | "hors", string> = { sur: "Prudent", audacieux: "Équilibré", risque: "Audacieux", hors: "Très risqué" };
 export const CAT_STYLE: Record<Categorie | "hors", string> = {
-  sur: "bg-gain-soft text-gain border-gain/30", audacieux: "bg-draw-soft text-draw border-draw/40",
+  sur: "bg-gain-soft text-gain border-gain/30", audacieux: "bg-draw-soft text-draw-ink border-draw/40",
   risque: "bg-loss-soft text-loss border-loss/30", hors: "bg-inverse text-on-inverse border-inverse",
 };
 /** Bornes lisibles des profils. */

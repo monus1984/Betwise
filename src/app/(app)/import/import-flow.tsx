@@ -364,8 +364,8 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
       {!collapsed && lines.length > 0 && (
         <div className="grid grid-cols-3 gap-2 text-center" aria-label="État de la lecture">
           <div className="tile px-2 py-2"><p className="text-lg font-bold tabular-nums text-gain">{included.filter((l) => l.ok && !alerteDe(l)).length}</p><p className="text-[11px] text-ink-muted">reconnue{included.filter((l) => l.ok && !alerteDe(l)).length > 1 ? "s" : ""}</p></div>
-          <div className="tile px-2 py-2"><p className={`text-lg font-bold tabular-nums ${included.filter((l) => alerteDe(l)).length ? "text-draw" : ""}`}>{included.filter((l) => alerteDe(l)).length}</p><p className="text-[11px] text-ink-muted">à vérifier</p></div>
-          <div className="tile px-2 py-2"><p className={`text-lg font-bold tabular-nums ${included.filter((l) => !l.ok).length ? "text-draw" : ""}`}>{included.filter((l) => !l.ok).length}</p><p className="text-[11px] text-ink-muted">à régler à la main</p></div>
+          <div className="tile px-2 py-2"><p className={`text-lg font-bold tabular-nums ${included.filter((l) => alerteDe(l)).length ? "text-draw-ink" : ""}`}>{included.filter((l) => alerteDe(l)).length}</p><p className="text-[11px] text-ink-muted">à vérifier</p></div>
+          <div className="tile px-2 py-2"><p className={`text-lg font-bold tabular-nums ${included.filter((l) => !l.ok).length ? "text-draw-ink" : ""}`}>{included.filter((l) => !l.ok).length}</p><p className="text-[11px] text-ink-muted">à régler à la main</p></div>
         </div>
       )}
       {!collapsed && raw.kind !== "pronos" && lines.some((l) => l.outcome !== "pending" && l.outcome !== "unknown") && (

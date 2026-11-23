@@ -125,9 +125,11 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
     const nom = COMP_SHORT[code] ?? one(list[0].competition)?.nom ?? code;
     const live = list.filter((m) => m.statut === "en_cours" && !isStale(m.kickoff_at)).length;
     return (
-      <details key={code} open={!!filtre || !!comp || etat === "termines"} className="group mb-2 overflow-hidden rounded-xl border border-line bg-surface shadow-card">
+      // L'étoile est posée sur la ligne, hors du <summary> : un bouton dans une zone cliquable gênait les lecteurs d'écran (audit 22/11)
+      <div key={code} className="relative mb-2">
+      <details open={!!filtre || !!comp || etat === "termines"} className="group overflow-hidden rounded-xl border border-line bg-surface shadow-card">
         {/* Le nom prend toute la largeur (22/11 : 22 noms sur 26 étaient coupés) ; le classement passe dans la partie dépliée */}
-        <summary className="flex min-h-[52px] cursor-pointer list-none items-center gap-2.5 border-b border-line bg-surface-2 py-1.5 pl-3 pr-1 [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-[52px] cursor-pointer list-none items-center gap-2.5 border-b border-line bg-surface-2 py-1.5 pl-3 pr-12 [&::-webkit-details-marker]:hidden">
           <span className="text-base">{COMP_FLAG[code] ?? "⚽"}</span>
           <span className="min-w-0 flex-1 leading-tight">
             <span className="block text-[14px] font-bold text-ink">{nom}</span>
@@ -136,12 +138,13 @@ export default async function MatchsPage({ searchParams }: { searchParams: Promi
               {live > 0 && <span className="font-semibold text-loss"> · ● {live} en direct</span>}
             </span>
           </span>
-          <CompFavori code={code} initial={favoris.has(code)} nom={nom} />
           <span aria-hidden className="w-4 shrink-0 text-center text-ink-muted transition-transform group-open:rotate-90">›</span>
         </summary>
         {STANDING_COMPS.includes(code) && <Link href={`/matchs/classement?c=${code}`} className="flex items-center justify-between border-b border-line px-3 py-2.5 text-[12.5px] font-semibold text-brand">Classement · {nom}<span aria-hidden>›</span></Link>}
         <ul className="divide-y divide-line">{list.map((m) => <Ligne key={m.id} m={m} sg={signals.get(m.id) ?? null} starred={starred.has(m.id)} avecDate={filtre === "recherche" || filtre === "suivis"} />)}</ul>
       </details>
+      <div className="absolute right-1 top-[6px]"><CompFavori code={code} initial={favoris.has(code)} nom={nom} /></div>
+      </div>
     );
   };
 
@@ -261,9 +264,9 @@ function Ligne({ m, sg, starred, avecDate }: { m: Row; sg: Signal | null; starre
         <span className="w-10 shrink-0 text-center text-[12px] leading-tight tabular-nums">
           {avecDate && <span className="block text-[10px] text-ink-muted">{fmtJour(m.kickoff_at)}</span>}
           {done ? <span className="text-ink-muted">Fin</span>
-            : m.statut === "en_cours" && isStale(m.kickoff_at) ? <span className="text-[10px] text-draw" title="La source n’a pas encore confirmé la fin du match">Fin ?</span>
+            : m.statut === "en_cours" && isStale(m.kickoff_at) ? <span className="text-[10px] text-draw-ink" title="La source n’a pas encore confirmé la fin du match">Fin ?</span>
             : m.statut === "en_cours" ? <span className="font-semibold text-loss">{m.minute ? `${m.minute}’` : "Live"}</span>
-            : m.statut === "reporte" ? <span className="text-draw">Rep.</span>
+            : m.statut === "reporte" ? <span className="text-draw-ink">Rep.</span>
             : <span className="text-ink-soft">{fmtTime(m.kickoff_at)}</span>}
         </span>
         <span className="min-w-0 flex-1 space-y-1">

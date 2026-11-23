@@ -35,9 +35,9 @@ export default function Apercu() {
         {[["En jeu", "6 000 F", "2 paris en cours"], ["Rendement", "+9 %", "+4 118 F net"], ["Paris gagnés", "4 sur 17", "24 % · attendu 18 %"]].map(([a, b, c]) => <div key={a} className="tile p-3"><p className="text-[11px] text-ink-muted">{a}</p><p className="mt-0.5 text-lg font-bold leading-tight tabular-nums">{b}</p><p className="text-[10px] text-ink-muted">{c}</p></div>)}
       </div>
       <div className="mt-3 flex items-center gap-3 rounded-2xl border border-draw/50 bg-draw-soft p-3">
-        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0 text-draw"><path d="M12 3 2.5 20h19L12 3Z" /><path d="M12 10v4.5" /><path d="M12 17.3v.2" /></svg>
-        <span className="min-w-0 flex-1"><span className="block text-[11px] font-semibold uppercase tracking-wide text-draw">Point de vigilance</span><span className="block text-sm font-semibold leading-snug text-draw-ink">Un pari en cours engage 14 % de ta bankroll</span><span className="mt-0.5 block text-[12px] leading-snug text-draw-ink">Règle : pas plus de 10 % sur un seul pari.</span></span>
-        <span aria-hidden className="text-draw">›</span>
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0 text-draw-ink"><path d="M12 3 2.5 20h19L12 3Z" /><path d="M12 10v4.5" /><path d="M12 17.3v.2" /></svg>
+        <span className="min-w-0 flex-1"><span className="block text-[11px] font-semibold uppercase tracking-wide text-draw-ink">Point de vigilance</span><span className="block text-sm font-semibold leading-snug text-draw-ink">Un pari en cours engage 14 % de ta bankroll</span><span className="mt-0.5 block text-[12px] leading-snug text-draw-ink">Règle : pas plus de 10 % sur un seul pari.</span></span>
+        <span aria-hidden className="text-draw-ink">›</span>
       </div>
       <h2 className="mt-5 text-base font-bold">Que veux-tu faire ?</h2>
       <div className="mb-6 mt-2 grid grid-cols-2 gap-2">

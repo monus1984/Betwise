@@ -16,6 +16,12 @@ export function Aide({ section, clair }: { section: SectionAide; clair?: boolean
   const [etat, setEtat] = useState<EtatSon | null>(null);
   const a = AIDES[section];
   useEffect(() => () => stopSpeaking(), []);
+  // Aide ouverte : Betster flottant se retire pour ne rien cacher (audit 22/11)
+  useEffect(() => {
+    if (!ouvert) return;
+    document.body.dataset.aide = "ouvert";
+    return () => { delete document.body.dataset.aide; };
+  }, [ouvert]);
   const fermer = () => { stopSpeaking(); setLue(null); setEtat(null); setOuvert(false); };
   const ecouter = () => {
     if (lue !== null) { stopSpeaking(); setLue(null); setEtat(null); return; }
@@ -26,7 +32,7 @@ export function Aide({ section, clair }: { section: SectionAide; clair?: boolean
     <>
       <button type="button" onClick={() => setOuvert(true)} aria-label={`Comment ça marche : ${a.titre}`}
         className={`flex h-8 items-center gap-1 rounded-full border px-2.5 text-xs font-medium ${clair ? "border-line bg-surface text-ink-soft" : "border-white/30 bg-white/10 text-white"}`}>
-        <span aria-hidden className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold ${clair ? "bg-inverse text-on-inverse" : "bg-white/90 text-pitch-deep"}`}>?</span>Aide
+        <span aria-hidden className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold ${clair ? "bg-inverse text-on-inverse" : "bg-white/90 text-pitch-deep"}`}>?</span><span className="max-[359px]:sr-only">Aide</span>
       </button>
       {/* Dessinée dans <body> : dans le bandeau (plan d'affichage isolé), elle passait sous la barre d'onglets (22/11) */}
       {ouvert && createPortal(

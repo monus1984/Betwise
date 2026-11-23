@@ -76,7 +76,7 @@ export function BetEditor({ bet, sources, markets }: { bet: EditableBet; sources
 
 const RESULT_LABEL: Record<string, { t: string; c: string }> = {
   en_attente: { t: "en attente", c: "bg-surface-2 text-ink-muted" }, gagne: { t: "gagnée", c: "bg-gain-soft text-gain" },
-  perdu: { t: "perdue", c: "bg-loss-soft text-loss" }, rembourse: { t: "remboursée", c: "bg-draw-soft text-draw" },
+  perdu: { t: "perdue", c: "bg-loss-soft text-loss" }, rembourse: { t: "remboursée", c: "bg-draw-soft text-draw-ink" },
 };
 
 function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index: number; s: EditableBet["selections"][number]; locked: boolean; sources: SourceOpt[]; markets: Market[]; onDone: () => void }) {

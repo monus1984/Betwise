@@ -54,7 +54,7 @@ export function ProbCells({ probs, compact = true }: { probs: Probs | null; comp
 }
 
 export function confidenceLabel(p: number) {
-  return p >= 0.65 ? { t: "très probable", c: "text-gain" } : p >= 0.5 ? { t: "probable", c: "text-gain" } : p >= 0.4 ? { t: "incertain", c: "text-draw" } : { t: "très ouvert", c: "text-loss" };
+  return p >= 0.65 ? { t: "très probable", c: "text-gain" } : p >= 0.5 ? { t: "probable", c: "text-gain" } : p >= 0.4 ? { t: "incertain", c: "text-draw-ink" } : { t: "très ouvert", c: "text-loss" };
 }
 
 /** Probabilités du marché sans la marge du bookmaker. */

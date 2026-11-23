@@ -70,7 +70,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
         {niv ? <p className="mb-2 text-xs font-semibold text-ink-soft">Niveau {niv.label} : <span className="font-normal text-ink-muted">{niv.cats.map((c) => CAT_COTES[c]).join(", puis ")}, sur la cote affichée</span></p>
           : <p className="mb-2 text-xs font-semibold text-ink-soft">Réussite visée par sélection : <span className="tabular-nums text-ink">{min} à {max} %</span> <span className="font-normal text-ink-muted">· cotes justes {C(100 / max)} à {C(100 / min)}</span></p>}
         <div className="mb-2 flex flex-wrap gap-1.5">
-          {PRESETS.map((p) => <Link key={p.k} href={q({ niv: p.k, m: null })} scroll={false} className={chip(niv?.k === p.k)}>{p.label} <span className="opacity-70">{p.bornes}</span></Link>)}
+          {PRESETS.map((p) => <Link key={p.k} href={q({ niv: p.k, m: null })} scroll={false} className={chip(niv?.k === p.k)}>{p.label} <span className="font-normal">{p.bornes}</span></Link>)}
         </div>
         <form action="/options" className="flex items-end gap-2">
           <input type="hidden" name="per" value={per} /><input type="hidden" name="vue" value={vue} /><input type="hidden" name="cible" value={cible} />{fam && <input type="hidden" name="fam" value={fam} />}
@@ -145,7 +145,7 @@ export async function OptionsView({ sp, db }: { sp: SP; db: Awaited<ReturnType<t
                 <span className="min-w-0 flex-1 text-xs">
                   <span className="font-semibold">Passe {pct(c.p)} du temps</span>
                   <span className="text-ink-muted"> · cote juste {C(c.coteJuste)}</span>
-                  {!c.atteint && <span className="block text-draw">Pas assez de matchs pour atteindre {C(cible)} dans cette fourchette.</span>}
+                  {!c.atteint && <span className="block text-draw-ink">Pas assez de matchs pour atteindre {C(cible)} dans cette fourchette.</span>}
                 </span>
                 <AddAllToSlip legs={c.legs.map((o) => legFrom({ ...o, cote: o.cote }))} />
                 <Link href={saisir(c.legs, true)} className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium">Tester</Link>

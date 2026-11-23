@@ -16,10 +16,12 @@ export function BetsterFab() {
   const legs = useSlip();
   const dansLaConversation = path === "/coach" && sp.get("v") === "discussion";
   if (dansLaConversation || ["/nouveau", "/import", "/reglages"].some((p) => path.startsWith(p))) return null;
-  // Le coupon ouvert occupe une barre au-dessus des onglets : Betster remonte d'autant
-  const bas = legs.length ? 136 : 80;
+  // Le coupon occupe une barre au-dessus des onglets ; sur la fiche d'un match, la barre « Parier sur ce match » aussi :
+  // Betster remonte d'autant pour ne rien recouvrir (audit 22/11)
+  const ficheMatch = /^\/matchs\/[^/]+$/.test(path);
+  const bas = (legs.length ? 136 : 80) + (ficheMatch ? 60 : 0);
   return (
-    <div className="pointer-events-none fixed inset-x-0 z-30 mx-auto flex max-w-xl justify-end px-4" style={{ bottom: `calc(${bas}px + env(safe-area-inset-bottom))` }}>
+    <div className="betster-fab-zone pointer-events-none fixed inset-x-0 z-30 mx-auto flex max-w-xl justify-end px-4" style={{ bottom: `calc(${bas}px + env(safe-area-inset-bottom))` }}>
       <Link href="/coach?v=discussion" aria-label="Parler à Betster"
         className="betster-fab pointer-events-auto relative block h-[58px] w-[58px] rounded-full shadow-lg shadow-brand/40 ring-2 ring-brand transition active:scale-95">
         <BetsterAnime etat="repos" taille={58} decoratif />

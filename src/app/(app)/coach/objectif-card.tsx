@@ -10,7 +10,7 @@ const P = (x: number) => `${Math.round(x * 100)} %`;
 const DELAIS = [7, 14, 30, 60];
 const STATUT: Record<GoalState["statut"], { t: string; c: string }> = {
   atteint: { t: "Objectif atteint 🎯", c: "text-gain" }, en_avance: { t: "En avance", c: "text-gain" }, dans_les_temps: { t: "Dans les temps", c: "text-ink-soft" },
-  en_retard: { t: "En retard : garde la même mise, ne cherche pas à rattraper", c: "text-draw" }, echu: { t: "Échéance passée", c: "text-ink-muted" },
+  en_retard: { t: "En retard : garde la même mise, ne cherche pas à rattraper", c: "text-draw-ink" }, echu: { t: "Échéance passée", c: "text-ink-muted" },
 };
 
 export function ObjectifCard({ goal, solde }: { goal: GoalState | null; solde: number }) {
@@ -44,7 +44,7 @@ function Progress({ goal: g, onEdit }: { goal: GoalState; onEdit: () => void }) 
       )}
       <div className="mt-3 grid grid-cols-3 gap-2 text-center">
         <Mise label="Prudent" v={g.mises.sur} cls="text-gain" />
-        <Mise label="Équilibré" v={g.mises.audacieux} cls="text-draw" />
+        <Mise label="Équilibré" v={g.mises.audacieux} cls="text-draw-ink" />
         <Mise label="Audacieux" v={g.mises.risque} cls="text-loss" sub={g.mises.risque ? `budget ${F(g.mises.budgetRisque)}` : "pas encore de gains"} />
       </div>
       <p className="mt-2 text-[11px] text-ink-muted">Mise conseillée par pari aujourd’hui. Le Audacieux se joue seulement avec 30 % de tes gains, pour ne jamais entamer ta bankroll de départ.</p>
@@ -99,7 +99,7 @@ function GoalForm({ solde, onCancel }: { solde: number; onCancel?: () => void })
       {loading && <p className="mt-3 text-xs text-ink-muted">Calcul…</p>}
       {!loading && prev && (
         <div className="mt-3 space-y-1.5 rounded-lg bg-surface-2 p-3 text-sm">
-          <p>Chance d’atteindre {F(c)} en {jours} j : <b className={prev.objectif.pAtteindre >= 0.4 ? "text-gain" : prev.objectif.pAtteindre >= 0.15 ? "text-draw" : "text-loss"}>{P(prev.objectif.pAtteindre)}</b> · risque de chute <b>{P(prev.objectif.pChute)}</b></p>
+          <p>Chance d’atteindre {F(c)} en {jours} j : <b className={prev.objectif.pAtteindre >= 0.4 ? "text-gain" : prev.objectif.pAtteindre >= 0.15 ? "text-draw-ink" : "text-loss"}>{P(prev.objectif.pAtteindre)}</b> · risque de chute <b>{P(prev.objectif.pChute)}</b></p>
           <p className="text-xs text-ink-muted">Il faudrait miser {P(prev.objectif.mise)} de ta bankroll par pari, {prev.objectif.mix}.</p>
           {prev.raisonnable && prev.objectif.pAtteindre < 0.4 && <p>Raisonnable en {jours} j : <b>{F(prev.raisonnable.cible)}</b> ({P(prev.raisonnable.plan.pAtteindre)} de chances, risque {P(prev.raisonnable.plan.pChute)})</p>}
         </div>

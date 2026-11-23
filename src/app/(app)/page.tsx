@@ -110,9 +110,10 @@ export default async function Home() {
   return (
     <>
       <LiveRefresh active={acc.cartes.some((c) => c.statut === "en_cours" || (c.statut === "programme" && Math.abs(Date.parse(c.kickoff) - Date.now()) < 15 * 60000))} />
-      <header className="mb-3 flex items-center justify-between gap-3">
-        <span className="flex items-center gap-2"><Mark className="h-7 w-7" /><span className="min-w-0"><span className="block text-lg font-bold leading-tight tracking-tight">{APP_NAME}</span><span className="block text-[11px] capitalize text-ink-muted">{new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Abidjan" })}</span></span></span>
-        <span className="flex items-center gap-0.5">
+      {/* 320 px de large : rien ne déborde (22/11) — le titre se réduit, « Aide » devient une icône */}
+      <header className="mb-3 flex items-center justify-between gap-2">
+        <span className="flex min-w-0 items-center gap-2"><Mark className="h-7 w-7" /><span className="min-w-0"><span className="block text-lg font-bold leading-tight tracking-tight">{APP_NAME}</span><span className="block text-[11px] capitalize text-ink-muted">{new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Abidjan" })}</span></span></span>
+        <span className="flex shrink-0 items-center gap-0.5">
           <Aide section="accueil" clair />
           <BoutonAjout />
           <Link href="/notifications" aria-label={cloche ? `Notifications, ${nonLues} non lues` : "Notifications"} className="relative flex h-11 w-11 items-center justify-center rounded-full text-ink-soft active:bg-surface-2">

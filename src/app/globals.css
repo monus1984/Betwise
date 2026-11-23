@@ -197,6 +197,8 @@ input, select, textarea { color: rgb(var(--c-ink)); }
 /* Betster flottant : un halo qui respire doucement, pour signaler qu'on peut lui parler. Coupé si l'utilisateur réduit les animations. */
 @keyframes betster-halo { 0%, 100% { box-shadow: 0 0 0 0 rgb(var(--c-brand) / .45); } 50% { box-shadow: 0 0 0 8px rgb(var(--c-brand) / 0); } }
 .betster-fab { animation: betster-halo 3.2s ease-in-out infinite; }
+/* Aide ouverte : Betster flottant se retire (22/11) */
+body[data-aide="ouvert"] .betster-fab-zone { display: none; }
 @media (prefers-reduced-motion: reduce) { .betster-fab { animation: none; } }
 
 /* Animation du portrait de Betster : repos (respire, balance la tête), pense (tête penchée, anneau), parle (suit le niveau de la voix) */

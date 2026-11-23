@@ -106,7 +106,7 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
           {suggestions.map((s) => (
             <button key={s} onClick={() => send(s)} disabled={busy} className="block w-full rounded-lg border border-slate-200 bg-surface px-3 py-2.5 text-left text-sm active:bg-slate-50">{s}</button>
           ))}
-          <p className="pt-2 text-[11px] text-slate-400">Le coach ne reçoit ni ton nom ni tes montants en F CFA : il raisonne en unités (ta mise habituelle) et en pourcentages.</p>
+          <p className="pt-2 text-[11px] text-ink-muted">Le coach ne reçoit ni ton nom ni tes montants en F CFA : il raisonne en unités (ta mise habituelle) et en pourcentages.</p>
         </div>
       )}
 
@@ -127,7 +127,7 @@ export function CoachChat({ initialId, initial, suggestions, initialText = "" }:
               )}
               {m.role === "assistant" && canSpeak && !!m.text && <button type="button" onClick={() => { unlockAudio(); setParle(true); speakText(m.text, () => setParle(false)); }} className="mt-1.5 text-[11px] font-medium text-brand">🔊 Écouter</button>}
               {m.role === "assistant" && !!m.fonctions?.length && (
-                <p className="mt-2 border-t border-slate-100 pt-1.5 text-[11px] text-slate-400">Données consultées : {[...new Set(m.fonctions)].map((f) => FN_LABEL[f] ?? f).join(", ")}</p>
+                <p className="mt-2 border-t border-slate-100 pt-1.5 text-[11px] text-ink-muted">Données consultées : {[...new Set(m.fonctions)].map((f) => FN_LABEL[f] ?? f).join(", ")}</p>
               )}
             </div>
           </div>

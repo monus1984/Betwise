@@ -97,7 +97,7 @@ export function CoupsDuJour({ picks, theirs, mises, repli = [] }: { picks: Today
                   </span>
                   {t.categorie && <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${CAT_STYLE[t.categorie]}`}>{CAT_LABEL[t.categorie]}</span>}
                 </div>
-                <p className={`mt-1 text-[11px] font-medium ${t.tone === "good" ? "text-gain" : t.tone === "mid" ? "text-draw" : t.tone === "bad" ? "text-loss" : "text-ink-muted"}`}>{t.aussiBetwise ? `✓ C’est aussi un coup du jour ${APP_NAME} · ` : ""}{t.verdict}</p>
+                <p className={`mt-1 text-[11px] font-medium ${t.tone === "good" ? "text-gain" : t.tone === "mid" ? "text-draw-ink" : t.tone === "bad" ? "text-loss" : "text-ink-muted"}`}>{t.aussiBetwise ? `✓ C’est aussi un coup du jour ${APP_NAME} · ` : ""}{t.verdict}</p>
               </li>
             ))}
           </ul>
