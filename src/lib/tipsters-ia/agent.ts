@@ -98,6 +98,9 @@ async function agentOpenAI(p: Profil, systeme: string, consigne: string, outils:
       messages.push({ role: "user", content: "Rends maintenant ta décision avec l'outil decision (tu peux ne rien jouer)." }); continue;
     }
     for (const a of appels) {
+      // Aux derniers tours, certains modèles appellent encore un outil retiré de la liste (DeepSeek, 24/11) :
+      // on ne l'exécute pas, on répond que seule la décision reste possible.
+      if (derniers) { messages.push({ role: "tool", tool_call_id: a.id, content: JSON.stringify({ erreur: "Cet outil n'est plus disponible. Rends ta décision avec l'outil decision (tu peux ne rien jouer)." }) }); continue; }
       const t0 = Date.now();
       let entree: Record<string, unknown> = {};
       try { entree = JSON.parse(a.function.arguments || "{}"); } catch { /* entrée illisible : l'outil répondra par une erreur */ }
