@@ -20,7 +20,7 @@ const M = (home: string, away: string, h: number, alias: string[] = []) => ({ id
 const POOL = [M("Uzbekistan", "Russie", 2), M("Ghana", "Somalie", 2), M("Guinée équatoriale", "Zimbabwe", 3), M("Madagascar", "Guinée-Bissau", 3), M("RD Congo", "Sierra Leone", 3), M("Guinée", "Érythrée", 3),
   M("Turquie", "Belgique", 4), M("Malte", "Eswatini", 4), M("Côte d'Ivoire", "Gambie", 6), M("Sénégal", "Soudan", 6), M("Bénin", "Centrafrique", 6), M("Cameroun", "Namibie", 6), M("Italie", "France", 7),
   M("Monténégro", "Lettonie", 7), M("Saint-Marin", "Biélorussie", 7), M("Angleterre", "Croatie", 7), M("Tchéquie", "Espagne", 7), M("Comores", "Congo", 24), M("Espagne", "Géorgie", 80)];
-const db = { from: (t: string) => { const q: Record<string, unknown> = {}; for (const k of ["select", "eq", "in", "gte", "lte", "order", "limit"]) q[k] = () => q; q.then = (r: (v: unknown) => unknown) => Promise.resolve({ data: t === "matches" ? POOL : [], error: null }).then(r); return q; } };
+const db = { from: (t: string) => { const q: Record<string, unknown> = {}; for (const k of ["select", "eq", "neq", "in", "gte", "lte", "order", "limit", "range"]) q[k] = () => q; q.then = (r: (v: unknown) => unknown) => Promise.resolve({ data: t === "matches" ? POOL : [], error: null }).then(r); return q; } };
 
 describe("pronos de tipsters, de bout en bout (lecture simulée)", async () => {
   const { extractTickets } = await import("./ticket");
