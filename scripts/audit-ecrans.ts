@@ -154,6 +154,16 @@ async function main() {
   const { data: srcs } = await moi.from("sources").select("nom, type, created_by");
   const noms = [...new Set((srcs ?? []).filter((s) => s.created_by && s.created_by !== auditId && s.type !== "perso").map((s) => s.nom.trim()).filter((n) => n.length >= 3))].sort((a, b) => b.length - a.length);
 
+  // « Sources › Aujourd'hui » ne montre que les sources suivies (24/11) : le robot suit, le temps de l'audit, les sources
+  // partagées qui ont des pronos sur les 36 prochaines heures, puis cesse de les suivre à la fin.
+  const { data: dejaSuivies } = await moi.from("source_follows").select("source_id");
+  const deja = new Set((dejaSuivies ?? []).map((f) => f.source_id));
+  const { data: actives } = await admin.from("predictions").select("source_id, source:sources!inner(visibilite, type), match:matches!inner(kickoff_at)")
+    .eq("source.visibilite", "partagee").neq("source.type", "perso").gte("match.kickoff_at", new Date().toISOString()).lte("match.kickoff_at", new Date(Date.now() + 36 * 3600000).toISOString()).limit(500);
+  const aSuivre = [...new Set((actives ?? []).map((x) => x.source_id))].filter((id) => !deja.has(id));
+  if (aSuivre.length) await moi.from("source_follows").upsert(aSuivre.map((source_id) => ({ user_id: auditId, source_id })) as never, { onConflict: "user_id,source_id" });
+  console.log(`Audit : ${aSuivre.length} source(s) partagée(s) suivie(s) le temps de l'audit`);
+
   // Matchs de référence : un grand championnat à venir, un terminé, un en direct, un sans cote
   const now = new Date();
   const jour = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: "Africa/Abidjan" });
@@ -300,6 +310,7 @@ async function main() {
     }
   }
   await browser.close();
+  if (aSuivre.length) await moi.from("source_follows").delete().eq("user_id", auditId).in("source_id", aSuivre);
   writeFileSync(`${OUT}/index.json`, JSON.stringify({ quand: new Date().toISOString(), base: BASE, sourcesMasquees: noms.length, ecrans: index }, null, 1));
   writeFileSync(`${OUT}/hydratation.json`, JSON.stringify(hydratation, null, 1));
   console.log(`${index.length} captures, ${hydratation.filter((h) => (h.erreurs as number) > 0).length}/${hydratation.length} chargements de l'accueil avec erreur de console`);
