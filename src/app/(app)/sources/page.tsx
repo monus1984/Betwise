@@ -244,19 +244,29 @@ async function Aujourdhui({ sourceIds, proofOf }: { sourceIds: string[]; proofOf
     const avis = l.map((r) => ({ sourceId: r.source_id, nom: r.source!.nom.replace(/ · tipster IA$/, " (IA)"), ia: estIA(r.source!.nom), regles: proofOf.get(r.source_id)?.prouvesRegles ?? 0, market: r.market_code, param: r.market_param === null ? null : Number(r.market_param), sel: r.selection, cote: r.cote_annoncee === null ? null : Number(r.cote_annoncee) }));
     const cs = consensus(avis, rc?.verdict ? { market: rc.verdict.market, param: rc.verdict.param, sel: rc.verdict.sel, label: rc.verdict.label } : null);
     const sg = signaux.get(m.id);
-    const lignes = cs.lignes.map((x) => {
-      const pk = sg ? pariDe(sg, x.avis.market, x.avis.param, x.avis.sel) : null;
-      const cote = pk?.book && releveFrais(pk.book.releveAt, m.kickoff_at) ? pk.book.cote : pk?.cote ?? x.avis.cote;
-      return { ...x, voix: x.confirment.length + 1, p: pk?.p ?? null, cote };
+    // Un même pari donné par plusieurs sources = une seule ligne (24/11) ; les tipsters IA comptent pour une voix
+    const voixDe = (nom: string, ia: boolean) => (ia ? "IA" : nom);
+    const groupes = new Map<string, { avis: (typeof cs.lignes)[number]["avis"]; qui: string[]; avec: Set<string>; contre: Set<string>; betster: (typeof cs.lignes)[number]["betster"] }>();
+    for (const x of cs.lignes) {
+      const k = `${x.avis.market}|${x.avis.param ?? ""}|${x.avis.sel.trim().toLowerCase()}`;
+      const g = groupes.get(k) ?? { avis: x.avis, qui: [], avec: new Set<string>(), contre: new Set<string>(), betster: x.betster };
+      g.qui.push(x.avis.nom); g.avec.add(voixDe(x.avis.nom, x.avis.ia));
+      for (const n of x.confirment) g.avec.add(n);
+      for (const n of x.contredisent) g.contre.add(n);
+      groupes.set(k, g);
+    }
+    const lignes = [...groupes.values()].map((g) => {
+      const pk = sg ? pariDe(sg, g.avis.market, g.avis.param, g.avis.sel) : null;
+      const cote = pk?.book && releveFrais(pk.book.releveAt, m.kickoff_at) ? pk.book.cote : pk?.cote ?? g.avis.cote;
+      return { ...g, label: libelle(g.avis.market, g.avis.param, g.avis.sel, home, away), voix: g.avec.size, compatibles: [...g.avec].filter((n) => !g.qui.map((q) => q.replace(/ \(IA\)$/, "")).includes(n) && !(n === "IA" && g.qui.some((q) => / \(IA\)$/.test(q)))), p: pk?.p ?? null, cote };
     }).sort((a, b) => b.voix - a.voix || (b.p ?? 0) - (a.p ?? 0));
-    return { m, home, away, cs, lignes, force: lignes[0]?.voix ?? 0, sources: new Set(l.map((x) => x.source_id)).size };
+    // Ce que les sources jouent surtout, quand Betster n'est pas sur ce pari : dit avant sa conclusion
+    const tete = lignes[0];
+    const conclusion = tete && tete.voix >= 2 && tete.betster !== "avec" ? `Tes sources jouent surtout « ${tete.label} » (${tete.voix} sources). ${cs.conclusion}` : cs.conclusion;
+    return { m, home, away, cs, conclusion, lignes, force: lignes[0]?.voix ?? 0, sources: new Set(l.map((x) => x.source_id)).size };
   }).sort((a, b) => b.force - a.force || b.sources - a.sources || Date.parse(a.m.kickoff_at) - Date.parse(b.m.kickoff_at));
   // Le point de Betster : un pari par prono distinct (le même pari de plusieurs sources ne compte qu'une fois)
-  const candidats: Candidat[] = fiches.flatMap((f) => {
-    const vus = new Set<string>();
-    return f.lignes.filter((x) => { const k = `${x.avis.market}|${x.avis.param}|${x.avis.sel}`; if (vus.has(k)) return false; vus.add(k); return true; })
-      .map((x) => ({ matchId: f.m.id, match: `${f.home} – ${f.away}`, label: pickLabel(x.avis.market, x.avis.param, x.avis.sel, f.home, f.away), voix: x.voix, qui: [x.avis.nom, ...x.confirment], p: x.p, cote: x.cote }));
-  });
+  const candidats: Candidat[] = fiches.flatMap((f) => f.lignes.map((x) => ({ matchId: f.m.id, match: `${f.home} – ${f.away}`, label: x.label, voix: x.voix, qui: [...x.qui, ...x.compatibles], p: x.p, cote: x.cote })));
   const point = pointDuJour(candidats);
   const pct = (p: number | null) => (p === null ? "" : `${Math.round(p * 100)} %`);
   const co = (c: number | null) => (c ? c.toFixed(2).replace(".", ",") : "—");
@@ -287,7 +297,7 @@ async function Aujourdhui({ sourceIds, proofOf }: { sourceIds: string[]; proofOf
           </>}
         <p className="mt-2.5 text-[11px] text-white/60">Un accord entre sources n’est pas une certitude. Les tipsters IA comptent ensemble pour une seule voix.</p>
       </section>
-      {fiches.map(({ m, home, away, cs, lignes }) => {
+      {fiches.map(({ m, home, away, conclusion, lignes }) => {
         return (
           <article key={m.id} className="tile p-3.5">
             <Link href={`/matchs/${m.id}?t=sources`} className="flex items-baseline justify-between gap-2">
@@ -296,21 +306,31 @@ async function Aujourdhui({ sourceIds, proofOf }: { sourceIds: string[]; proofOf
             </Link>
             <ul className="mt-2 divide-y divide-line text-[13px]">
               {lignes.slice(0, 4).map((x) => (
-                <li key={`${x.avis.sourceId}${x.avis.market}${x.avis.param}${x.avis.sel}`} className="flex items-baseline justify-between gap-3 py-1.5">
-                  <span className="min-w-0"><span className="font-medium">{pickLabel(x.avis.market, x.avis.param, x.avis.sel, home, away)}</span> <span className="text-ink-muted">· {x.avis.nom}</span></span>
-                  <span className="flex shrink-0 gap-1 text-[11px] font-semibold">
-                    <span className={`rounded-full px-2 py-0.5 ${x.confirment.length ? "bg-gain-soft text-gain-ink" : "bg-surface-2 text-ink-muted"}`}>{x.confirment.length} pour</span>
-                    {x.contredisent.length > 0 && <span className="rounded-full bg-loss-soft px-2 py-0.5 text-loss-ink">{x.contredisent.length} contre</span>}
-                  </span>
+                <li key={x.label} className="py-1.5">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="min-w-0 font-medium">{x.label}{x.p !== null ? <span className="ml-1.5 text-[11px] font-normal text-ink-muted">{Math.round(x.p * 100)} %</span> : null}</span>
+                    <span className="flex shrink-0 gap-1 text-[11px] font-semibold">
+                      <span className={`rounded-full px-2 py-0.5 ${x.voix >= 2 ? "bg-gain-soft text-gain-ink" : "bg-surface-2 text-ink-muted"}`}>{x.voix} source{x.voix > 1 ? "s" : ""}</span>
+                      {x.contre.size > 0 && <span className="rounded-full bg-loss-soft px-2 py-0.5 text-loss-ink">{x.contre.size} contre</span>}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">{x.qui.slice(0, 3).join(", ")}{x.qui.length > 3 ? ` et ${x.qui.length - 3} autre${x.qui.length - 3 > 1 ? "s" : ""}` : ""}{x.compatibles.length ? ` · aussi par un pari compatible : ${x.compatibles.slice(0, 3).join(", ")}` : ""}{x.betster === "avec" ? " · Betster d’accord" : x.betster === "contre" ? " · Betster pense l’inverse" : ""}</p>
                 </li>
               ))}
             </ul>
             {lignes.length > 4 && <p className="text-[11px] text-ink-muted">+ {lignes.length - 4} autre{lignes.length - 4 > 1 ? "s" : ""}</p>}
-            <p className="mt-2 rounded-lg bg-surface-2 p-2.5 text-[12.5px] leading-snug"><b>Betster :</b> {cs.conclusion}</p>
+            <p className="mt-2 rounded-lg bg-surface-2 p-2.5 text-[12.5px] leading-snug"><b>Betster :</b> {conclusion}</p>
             <Link href={`/matchs/${m.id}?t=sources`} className="mt-2 block text-right text-[12px] font-medium text-brand">Tout le détail ›</Link>
           </article>
         );
       })}
     </div>
   );
+}
+
+/** Libellé d'un pari pour cette page : « Victoire Real Madrid » plutôt que le seul nom de l'équipe (24/11). */
+function libelle(market: string, param: number | null, sel: string, home: string, away: string): string {
+  if (market === "1X2" && (sel === "1" || sel === "2")) return `Victoire ${sel === "1" ? home : away}`;
+  if (market === "1X2" && sel === "N") return "Match nul";
+  return pickLabel(market, param, sel, home, away);
 }

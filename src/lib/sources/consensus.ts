@@ -114,11 +114,15 @@ export function pointDuJour(l: Candidat[]): { simples: Candidat[]; combine: { se
   const vus = new Set<string>(), simples: Candidat[] = [];
   for (const x of tri) { if (vus.has(x.matchId)) continue; vus.add(x.matchId); simples.push(x); if (simples.length === 5) break; }
   const sur = simples.filter((x) => (x.p ?? 0) >= 0.65 && x.cote).sort((a, b) => (b.p ?? 0) - (a.p ?? 0));
-  let sel: Candidat[] = [];
-  for (const x of sur) {
-    const essai = [...sel, x];
-    if (essai.reduce((c, y) => c * (y.cote ?? 1), 1) <= 3) sel = essai;
-    if (sel.length === 3) break;
+  const coteDe = (l: Candidat[]) => l.reduce((c, y) => c * (y.cote ?? 1), 1);
+  // La meilleure combinaison de 2 ou 3 paris dont la cote totale est entre 1,50 et 3,00 (consensus du conseil, 23/11) :
+  // la plus probable d'abord.
+  let sel: Candidat[] = [], pSel = 0;
+  for (let i = 0; i < sur.length; i++) for (let j = i + 1; j < sur.length; j++) {
+    for (const l of [[sur[i], sur[j]], ...sur.slice(j + 1).map((k) => [sur[i], sur[j], k])]) {
+      const c = coteDe(l), p = l.reduce((x, y) => x * (y.p ?? 1), 1);
+      if (c >= 1.5 && c <= 3 && p > pSel) { sel = l; pSel = p; }
+    }
   }
   const combine = sel.length >= 2 ? { selections: sel, cote: Math.round(sel.reduce((c, y) => c * (y.cote ?? 1), 1) * 100) / 100, p: sel.reduce((c, y) => c * (y.p ?? 1), 1) } : null;
   return { simples, combine };

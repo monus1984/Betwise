@@ -42,7 +42,9 @@ describe("ce que disent les sources", () => {
     const r = pointDuJour([c("A", 4, 0.8, 1.25), c("A", 2, 0.9, 1.1), c("B", 3, 0.7, 1.4), c("C", 2, 0.85, 1.2), c("D", 1, 0.95, 1.05), c("E", 3, 0.55, 1.9)]);
     expect(r.simples.map((x) => x.matchId)).toEqual(["A", "B", "E", "C"]);
     expect(r.simples[0].voix).toBe(4);
-    expect(r.combine!.selections.map((x) => x.matchId)).toEqual(["C", "A", "B"]);
-    expect(r.combine!.cote).toBe(2.1);
+    // A·C (1,50) est la combinaison la plus probable qui atteint 1,50
+    expect(r.combine!.selections.map((x) => x.matchId).sort()).toEqual(["A", "C"]);
+    expect(r.combine!.cote).toBe(1.5);
+    expect(pointDuJour([c("A", 3, 0.9, 1.1), c("B", 3, 0.9, 1.1)]).combine).toBeNull(); // 1,21 : trop bas
   });
 });
