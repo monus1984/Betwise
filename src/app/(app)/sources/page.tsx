@@ -7,9 +7,9 @@ import { NIVEAU, SEUIL, classer, lire, niveau, raison, rendement, resume, reussi
 import { labelType } from "./source-ui";
 import { AXE_FR, bilanDe, forcesEtFaiblesses, type Prono } from "@/lib/sources/analyse";
 import { COMP_SHORT, shortName } from "@/components/match-ui";
-import { consensus, estIA } from "@/lib/sources/consensus";
+import { consensus, estIA, pointDuJour, type Candidat } from "@/lib/sources/consensus";
+import { loadSignals, pariDe, pickLabel, releveFrais } from "@/lib/probs/signals";
 import { loadRecit } from "@/lib/matches/recit";
-import { pickLabel } from "@/lib/probs/signals";
 
 export const dynamic = "force-dynamic";
 
@@ -232,17 +232,62 @@ async function Aujourdhui({ sourceIds, proofOf }: { sourceIds: string[]; proofOf
   const rows = ((data ?? []) as unknown as R[]).filter((r) => r.match.statut !== "termine" && r.source && r.source.type !== "perso" && r.source.type !== "modele_betwise");
   const parMatch = new Map<string, R[]>();
   for (const r of rows) parMatch.set(r.match.id, [...(parMatch.get(r.match.id) ?? []), r]);
-  const matchs = [...parMatch.values()].sort((a, b) => b.length - a.length || Date.parse(a[0].match.kickoff_at) - Date.parse(b[0].match.kickoff_at)).slice(0, 12)
-    .sort((a, b) => Date.parse(a[0].match.kickoff_at) - Date.parse(b[0].match.kickoff_at));
-  if (!matchs.length) return vide;
-  const recits = await Promise.all(matchs.map((l) => loadRecit(db as never, l[0].match.id).catch(() => null)));
+  const tous = [...parMatch.values()].sort((a, b) => new Set(b.map((x) => x.source_id)).size - new Set(a.map((x) => x.source_id)).size).slice(0, 15);
+  if (!tous.length) return vide;
+  const [recits, signaux] = await Promise.all([
+    Promise.all(tous.map((l) => loadRecit(db as never, l[0].match.id).catch(() => null))),
+    loadSignals(db as never, tous.map((l) => l[0].match.id), { bookmakers: true }).catch(() => new Map()),
+  ]);
+  // Pour chaque match : les pronos avec ce qui les confirme, et la force du match = le plus de voix derrière un même pari
+  const fiches = tous.map((l, k) => {
+    const m = l[0].match, home = shortName(m.home?.nom ?? "?"), away = shortName(m.away?.nom ?? "?"), rc = recits[k];
+    const avis = l.map((r) => ({ sourceId: r.source_id, nom: r.source!.nom.replace(/ · tipster IA$/, " (IA)"), ia: estIA(r.source!.nom), regles: proofOf.get(r.source_id)?.prouvesRegles ?? 0, market: r.market_code, param: r.market_param === null ? null : Number(r.market_param), sel: r.selection, cote: r.cote_annoncee === null ? null : Number(r.cote_annoncee) }));
+    const cs = consensus(avis, rc?.verdict ? { market: rc.verdict.market, param: rc.verdict.param, sel: rc.verdict.sel, label: rc.verdict.label } : null);
+    const sg = signaux.get(m.id);
+    const lignes = cs.lignes.map((x) => {
+      const pk = sg ? pariDe(sg, x.avis.market, x.avis.param, x.avis.sel) : null;
+      const cote = pk?.book && releveFrais(pk.book.releveAt, m.kickoff_at) ? pk.book.cote : pk?.cote ?? x.avis.cote;
+      return { ...x, voix: x.confirment.length + 1, p: pk?.p ?? null, cote };
+    }).sort((a, b) => b.voix - a.voix || (b.p ?? 0) - (a.p ?? 0));
+    return { m, home, away, cs, lignes, force: lignes[0]?.voix ?? 0, sources: new Set(l.map((x) => x.source_id)).size };
+  }).sort((a, b) => b.force - a.force || b.sources - a.sources || Date.parse(a.m.kickoff_at) - Date.parse(b.m.kickoff_at));
+  // Le point de Betster : un pari par prono distinct (le même pari de plusieurs sources ne compte qu'une fois)
+  const candidats: Candidat[] = fiches.flatMap((f) => {
+    const vus = new Set<string>();
+    return f.lignes.filter((x) => { const k = `${x.avis.market}|${x.avis.param}|${x.avis.sel}`; if (vus.has(k)) return false; vus.add(k); return true; })
+      .map((x) => ({ matchId: f.m.id, match: `${f.home} – ${f.away}`, label: pickLabel(x.avis.market, x.avis.param, x.avis.sel, f.home, f.away), voix: x.voix, qui: [x.avis.nom, ...x.confirment], p: x.p, cote: x.cote }));
+  });
+  const point = pointDuJour(candidats);
+  const pct = (p: number | null) => (p === null ? "" : `${Math.round(p * 100)} %`);
+  const co = (c: number | null) => (c ? c.toFixed(2).replace(".", ",") : "—");
   return (
     <div className="space-y-3">
       <p className="px-1 text-[12px] leading-relaxed text-ink-muted">Les pronos de tes sources sur les 36 prochaines heures. « Pour » : les autres sources qui jouent le même pari ou un pari qui l’entraîne. Un accord n’est pas une certitude.</p>
-      {matchs.map((l, k) => {
-        const m = l[0].match, home = shortName(m.home?.nom ?? "?"), away = shortName(m.away?.nom ?? "?"), rc = recits[k];
-        const avis = l.map((r) => ({ sourceId: r.source_id, nom: r.source!.nom.replace(/ · tipster IA$/, " (IA)"), ia: estIA(r.source!.nom), regles: proofOf.get(r.source_id)?.prouvesRegles ?? 0, market: r.market_code, param: r.market_param === null ? null : Number(r.market_param), sel: r.selection, cote: r.cote_annoncee === null ? null : Number(r.cote_annoncee) }));
-        const cs = consensus(avis, rc?.verdict ? { market: rc.verdict.market, param: rc.verdict.param, sel: rc.verdict.sel, label: rc.verdict.label } : null);
+      <section className="rounded-2xl bg-pitch p-4 text-white" aria-label="Le point de Betster">
+        <h2 className="text-[15px] font-bold">Le point de Betster</h2>
+        {point.simples.length === 0
+          ? <p className="mt-1.5 text-[13px] leading-snug text-white/80">Aucun pari n’est encore porté par au moins deux sources. Charge d’autres coupons : dès que deux sources se rejoignent sur un pari, je le retiens ici.</p>
+          : <>
+            <p className="mt-1 text-[12px] text-white/70">Les paris sur lesquels tes sources se rejoignent le plus, avec la chance calculée par BETWISE.</p>
+            <ol className="mt-2.5 space-y-2">
+              {point.simples.map((x) => (
+                <li key={x.matchId + x.label} className="rounded-xl bg-white/10 p-2.5">
+                  <div className="flex items-baseline justify-between gap-2"><span className="text-[14px] font-semibold">{x.label}</span><span className="shrink-0 text-[12px] tabular-nums text-white/80">{pct(x.p)}{x.cote ? ` · ${co(x.cote)}` : ""}</span></div>
+                  <p className="mt-0.5 text-[11.5px] text-white/70">{x.match} · {x.voix} sources : {x.qui.slice(0, 4).join(", ")}{x.qui.length > 4 ? "…" : ""}</p>
+                </li>
+              ))}
+            </ol>
+            {point.combine && (
+              <div className="mt-3 rounded-xl border border-white/25 p-2.5">
+                <p className="text-[13px] font-semibold">Combiné retenu · cote {co(point.combine.cote)}</p>
+                <ul className="mt-1 text-[12.5px] text-white/85">{point.combine.selections.map((x) => <li key={x.matchId}>{x.label} <span className="text-white/60">({x.match})</span></li>)}</ul>
+                <p className="mt-1 text-[11.5px] text-white/70">Chance d’ensemble environ {pct(point.combine.p)}, si les matchs ne dépendent pas l’un de l’autre. Un combiné perd dès qu’une sélection perd.</p>
+              </div>
+            )}
+          </>}
+        <p className="mt-2.5 text-[11px] text-white/60">Un accord entre sources n’est pas une certitude. Les tipsters IA comptent ensemble pour une seule voix.</p>
+      </section>
+      {fiches.map(({ m, home, away, cs, lignes }) => {
         return (
           <article key={m.id} className="tile p-3.5">
             <Link href={`/matchs/${m.id}?t=sources`} className="flex items-baseline justify-between gap-2">
@@ -250,7 +295,7 @@ async function Aujourdhui({ sourceIds, proofOf }: { sourceIds: string[]; proofOf
               <span className="shrink-0 text-[11px] text-ink-muted">{new Date(m.kickoff_at).toLocaleString("fr-FR", { weekday: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}{m.competition?.code_externe && COMP_SHORT[m.competition.code_externe] ? ` · ${COMP_SHORT[m.competition.code_externe]}` : ""}</span>
             </Link>
             <ul className="mt-2 divide-y divide-line text-[13px]">
-              {cs.lignes.slice(0, 4).map((x) => (
+              {lignes.slice(0, 4).map((x) => (
                 <li key={`${x.avis.sourceId}${x.avis.market}${x.avis.param}${x.avis.sel}`} className="flex items-baseline justify-between gap-3 py-1.5">
                   <span className="min-w-0"><span className="font-medium">{pickLabel(x.avis.market, x.avis.param, x.avis.sel, home, away)}</span> <span className="text-ink-muted">· {x.avis.nom}</span></span>
                   <span className="flex shrink-0 gap-1 text-[11px] font-semibold">
@@ -260,7 +305,7 @@ async function Aujourdhui({ sourceIds, proofOf }: { sourceIds: string[]; proofOf
                 </li>
               ))}
             </ul>
-            {cs.lignes.length > 4 && <p className="text-[11px] text-ink-muted">+ {cs.lignes.length - 4} autre{cs.lignes.length - 4 > 1 ? "s" : ""}</p>}
+            {lignes.length > 4 && <p className="text-[11px] text-ink-muted">+ {lignes.length - 4} autre{lignes.length - 4 > 1 ? "s" : ""}</p>}
             <p className="mt-2 rounded-lg bg-surface-2 p-2.5 text-[12.5px] leading-snug"><b>Betster :</b> {cs.conclusion}</p>
             <Link href={`/matchs/${m.id}?t=sources`} className="mt-2 block text-right text-[12px] font-medium text-brand">Tout le détail ›</Link>
           </article>

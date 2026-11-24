@@ -189,6 +189,13 @@ export const ALL_CANDIDATES: [string, number | null, string][] = [
 ];
 
 /** Sélections candidates d'un match, de la plus probable à la moins probable. « all » : la liste exhaustive. */
+/** Probabilité et cotes d'un pari donné sur un match (n'importe quel marché calculable), ou null (24/11). */
+export function pariDe(s: Signal, market: string, param: number | null, sel: string): Pick | null {
+  const p = (s.source === "marche" ? s.direct(market, param, sel) : null) ?? probOf(s.grid, market, param, sel);
+  if (p === null) return null;
+  return { market, param, sel, p, cote: s.refOdd(market, param, sel), book: s.bookOdd(market, param, sel), pModele: s.source === "marche" && s.model ? probOf(s.model.grid, market, param, sel) : null };
+}
+
 export function picksOf(s: Signal, liste: "base" | "all" = "base"): Pick[] {
   return (liste === "all" ? ALL_CANDIDATES : CANDIDATES).flatMap(([market, param, sel]) => {
     const p = (s.source === "marche" ? s.direct(market, param, sel) : null) ?? probOf(s.grid, market, param, sel);

@@ -58,7 +58,11 @@ export async function POST(req: Request) {
   let serie = 0;
   for (const b of paris.filter((x) => (x.statut === "gagne" || x.statut === "perdu") && x.settled_at).sort((x, y) => Date.parse(y.settled_at!) - Date.parse(x.settled_at!))) { if (b.statut === "perdu") serie++; else break; }
   const alerte = alerteCoach(message, { serie, budget: bud ? etatBudget({ miseSemaine: Number(bud.mise_semaine), perteMaxSemaine: Number(bud.perte_max_semaine) }, paris) : null });
-  const system = alerte.active ? `${COACH_SYSTEM}\n\n${alerte.consigne}` : COACH_SYSTEM;
+  // Date et heure du moment (24/11) : sans elles, Betster disait « demain » pour un match du jour. Les heures des outils sont
+  // en UTC, c'est-à-dire l'heure d'Abidjan.
+  const maintenant = new Date();
+  const repere = `Nous sommes le ${maintenant.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Abidjan" })}, il est ${maintenant.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })} à Abidjan. Les heures de coup d'envoi des outils (coup_envoi, heure, kickoff) sont en UTC, la même heure qu'Abidjan. Un match dont la date est celle d'aujourd'hui se joue « aujourd'hui » ou « ce soir », jamais « demain ».`;
+  const system = `${alerte.active ? `${COACH_SYSTEM}\n\n${alerte.consigne}` : COACH_SYSTEM}\n\n${repere}`;
 
   try {
     const r = await getLlm().chat({ system, history, tools: COACH_TOOLS, run: (name, input) => (alerte.bloquerPropositions && OUTILS_PROPOSITION.has(name) ? Promise.resolve(MESSAGE_BLOQUE) : runCoachTool(db, name, input)), maxTokens: 2000 });

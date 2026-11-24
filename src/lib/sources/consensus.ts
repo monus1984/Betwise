@@ -97,3 +97,26 @@ export function consensus(avis: Avis[], verdict: (Pari & { label: string }) | nu
 
 /** Une source est un tipster IA de BETWISE (nom fixé à la création, voir scripts/tipsters-ia.ts). */
 export const estIA = (nom: string) => /· tipster IA$/.test(nom);
+
+/**
+ * Le point de Betster sur la journée (24/11, Mounir : « Betster fait le point et retient les paris les plus probables
+ * selon les sources, simples et combinés »). Entrée : chaque prono avec le nombre de voix qui le portent (lui-même et
+ * ceux qui le confirment), la chance BETWISE et la cote quand on les a.
+ * Simples : au moins 2 voix, un par match, classés par voix puis par chance. Combiné : 2 ou 3 de ces simples, chacun
+ * à 65 % au moins, cote totale jusqu'à 3,00 (règle du conseil d'IA du 23/11).
+ */
+export type Candidat = { matchId: string; match: string; label: string; voix: number; qui: string[]; p: number | null; cote: number | null };
+export function pointDuJour(l: Candidat[]): { simples: Candidat[]; combine: { selections: Candidat[]; cote: number | null; p: number } | null } {
+  const tri = [...l].filter((x) => x.voix >= 2).sort((a, b) => b.voix - a.voix || (b.p ?? 0) - (a.p ?? 0));
+  const vus = new Set<string>(), simples: Candidat[] = [];
+  for (const x of tri) { if (vus.has(x.matchId)) continue; vus.add(x.matchId); simples.push(x); if (simples.length === 5) break; }
+  const sur = simples.filter((x) => (x.p ?? 0) >= 0.65 && x.cote).sort((a, b) => (b.p ?? 0) - (a.p ?? 0));
+  let sel: Candidat[] = [];
+  for (const x of sur) {
+    const essai = [...sel, x];
+    if (essai.reduce((c, y) => c * (y.cote ?? 1), 1) <= 3) sel = essai;
+    if (sel.length === 3) break;
+  }
+  const combine = sel.length >= 2 ? { selections: sel, cote: Math.round(sel.reduce((c, y) => c * (y.cote ?? 1), 1) * 100) / 100, p: sel.reduce((c, y) => c * (y.p ?? 1), 1) } : null;
+  return { simples, combine };
+}
