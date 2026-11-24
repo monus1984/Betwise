@@ -429,11 +429,11 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
               </div>
             )}
             <div className="flex items-center gap-3">
-              <Field label={l.odds_source === "estimee" ? "Cote (estimée)" : l.odds_source === "reference" ? "Cote (référence)" : "Cote"}><Input inputMode="decimal" value={l.coteStr} onChange={(e) => update(l.key, { coteStr: e.target.value, odds_source: "ticket" })} className="max-w-[7rem]" /></Field>
+              <Field label={l.odds_source === "estimee" ? "Cote (estimée)" : l.odds_source === "reference" ? "Cote (référence)" : l.odds_source === "bookmaker" ? `Cote ${l.odds_bookmaker ?? "1xBet"}` : "Cote"}><Input inputMode="decimal" value={l.coteStr} onChange={(e) => update(l.key, { coteStr: e.target.value, odds_source: "ticket" })} className="max-w-[7rem]" /></Field>
               {riskFromOdds(toNum(l.coteStr)) && <span className={`mt-5 rounded-full border px-2 py-1 text-[11px] ${RISK_CLASS[riskFromOdds(toNum(l.coteStr))!]}`}>{RISK_LABEL[riskFromOdds(toNum(l.coteStr))!]}</span>}
               <label className="ml-auto mt-5 flex items-center gap-1 text-xs text-slate-600"><input type="checkbox" checked={l.include} onChange={(e) => update(l.key, { include: e.target.checked })} /> inclure</label>
             </div>
-            {l.odds_source && l.odds_source !== "ticket" && <p className="-mt-1 text-[11px] text-ink-muted">Le tipster ne donne pas de cote : {l.odds_source === "reference" ? "cote de référence des bookmakers" : `cote estimée d’après les probabilités ${APP_NAME}`}. Mets la tienne si tu l’as.</p>}
+            {l.odds_source && l.odds_source !== "ticket" && <p className="-mt-1 text-[11px] text-ink-muted">Le tipster ne donne pas de cote : {l.odds_source === "bookmaker" ? `cote ${l.odds_bookmaker ?? "1xBet"} relevée pour ce pari` : l.odds_source === "reference" ? "cote de référence des bookmakers" : `cote estimée d’après les probabilités ${APP_NAME}`}. Mets la tienne si tu l’as.</p>}
             <Field label="Origine du choix">
               <SourceChooser size="sm" sources={srcList} value={l.origin} onChange={(id) => update(l.key, { origin: id })} onCreated={(s) => setSrcList((x) => [...x, s])} />
             </Field>

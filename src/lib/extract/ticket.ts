@@ -8,7 +8,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../supabase/database.types";
 import { getLlm, type LlmImage } from "../llm/provider";
 import { normalizeTeam, teamSimilarity } from "../odds-api/client";
-import { loadSignals, probOfSignal } from "../probs/signals";
+import { loadSignals, probOfSignal, releveFrais } from "../probs/signals";
 import { coteEstimee } from "../options/build";
 import { selectionCombo } from "../bets/combo";
 import { ApiFootball } from "../api-football/client";
@@ -724,7 +724,9 @@ export type MatchedSelection = NormalizedSelection & {
   home_team: string | null;
   away_team: string | null;
   odds: number | null;
-  odds_source: "ticket" | "reference" | "estimee" | null;
+  odds_source: "ticket" | "bookmaker" | "reference" | "estimee" | null;
+  /** Bookmaker de la cote quand elle vient d'un relevé (1xBet). */
+  odds_bookmaker?: string | null;
   outcome: "won" | "lost" | "void" | "pending" | "unknown";
   score: string | null;
   confidence: number;
@@ -825,13 +827,17 @@ export async function rapprocherTickets(db: Db, raws: RawTicket[], res: { tokens
   // cote de référence quand elle existe, sinon cote estimée à partir des probabilités (marquée comme telle)
   const ids = [...new Set(out.flatMap((t) => t.selections.filter((x) => x.match && x.ok).map((x) => x.match!.id)))];
   if (ids.length) {
-    const signals = await loadSignals(db as never, ids);
+    const signals = await loadSignals(db as never, ids, { bookmakers: true });
     for (const t of out) for (const x of t.selections) {
       if (!x.match || !x.ok) continue;
       const sg = signals.get(x.match.id); if (!sg) continue;
       const p = probOfSignal(sg, x.market_code, x.market_param, x.selection);
       x.p_estimee = p ?? null;
       if (x.odds) continue;
+      // Cote absente du prono : d'abord la vraie cote 1xBet relevée pour ce pari (24/11), puis la médiane des
+      // bookmakers, et seulement en dernier une cote estimée d'après les probabilités.
+      const book = sg.bookOdd(x.market_code, x.market_param, x.selection);
+      if (book && releveFrais(book.releveAt, x.match.kickoff_at)) { x.odds = book.cote; x.odds_source = "bookmaker"; x.odds_bookmaker = book.bookmaker; continue; }
       const refOdd = sg.refOdd(x.market_code, x.market_param, x.selection);
       if (refOdd) { x.odds = refOdd; x.odds_source = "reference"; }
       else if (p) { x.odds = Math.round(coteEstimee({ p, cote: null }) * 100) / 100; x.odds_source = "estimee"; }
