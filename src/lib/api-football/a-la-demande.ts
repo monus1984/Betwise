@@ -28,13 +28,18 @@ export function choisirMatch(fx: AfFixture[], equipe: number, refIso: string, ad
 }
 
 async function chercherEquipe(api: ApiFootball, nom: string) {
-  const essais = [nomCherchable(nom)];
+  // Équipes nationales acceptées (listes « Sénégal – Victoire », 24/11) ; une équipe féminine ne doit jamais
+  // être confondue avec l'équipe masculine du même club (ni l'inverse).
+  const femme = /\bwomen\b|\bféminin/i.test(nom) || /\sW$/.test(nom.trim());
+  const estFemme = (n: string) => /\bwomen\b|\sW$/i.test(n.trim());
+  const essais = [nomCherchable(nom.replace(/\bwomen\b|\bféminines?\b/gi, " ").replace(/\s+/g, " ").trim())];
   const long = essais[0].split(" ").filter((m) => m.length >= 4).sort((a, b) => b.length - a.length)[0];
   if (long && long !== essais[0]) essais.push(long);
   for (const q of essais) {
     if (q.length < 3) continue;
-    const l = (await api.searchTeams(q)).filter((t) => !t.national);
-    const best = l.map((t) => ({ t, s: teamSimilarity(nom, t.name) })).sort((a, b) => b.s - a.s)[0];
+    const l = (await api.searchTeams(q)).filter((t) => estFemme(t.name) === femme);
+    const best = l.map((t) => ({ t, s: teamSimilarity(nom, t.name) || teamSimilarity(essais[0], t.name) }))
+      .sort((a, b) => b.s - a.s || Number(a.t.national) - Number(b.t.national))[0];
     if (best && best.s >= 0.5) return best.t;
   }
   return null;

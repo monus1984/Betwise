@@ -30,7 +30,7 @@ describe("lectures fausses corrigées", () => {
     expect(lit("Plus de 1.5", "Total équipe 1")).toMatchObject({ market_code: "TT1", market_param: 1.5, selection: "Plus", ok: true });
   });
   it("paiement anticipé et « excl. » : lus mais à confirmer", () => {
-    expect(lit("1X (1up)")).toMatchObject({ market_code: "DC", selection: "1N", ok: false });
+    expect(lit("1X (1up)")).toMatchObject({ market_code: "DC", selection: "1N", ok: true });
     expect(lit("2up").ok).toBe(false);
     expect(lit("Excl. 1 goal")).toMatchObject({ market_code: "LIBRE", ok: false });
   });

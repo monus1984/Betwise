@@ -346,4 +346,17 @@ describe("pronos de pages Facebook (23/11)", () => {
     expect(normalizePick("", "1 - 4", "Neftchi", "Al Hilal")).toMatchObject({ market_code: "CS", selection: "1-4", ok: true });
     expect(normalizePick("", "Va marquer ✅", "Brentford", "Everton", "Brentford", { home: ["Brentford"], away: ["Everton"] })).toMatchObject({ market_code: "TT1", market_param: 0.5, selection: "Plus", ok: true });
   });
+  it("formats des captures du 24/11 : listes anglaises, codes OV/UN, équipe qui marque, victoire + buts", () => {
+    const n = (pick: string, team: string | null, h: string, a: string) => normalizePick(pick, pick, h, a, team, { home: [h], away: [a] });
+    expect(n("Win/X", "Craiova", "Craiova", "FCSB")).toMatchObject({ market_code: "DC", selection: "1N", ok: true });
+    expect(n("1(2up)", null, "Bayern", "Cologne")).toMatchObject({ market_code: "1X2", selection: "1", ok: true });
+    expect(n("OV15", null, "Kazakhstan", "Slovakia")).toMatchObject({ market_code: "OU", market_param: 1.5, selection: "Plus", ok: true });
+    expect(n("Home/Draw", null, "Granada", "Las Palmas")).toMatchObject({ market_code: "DC", selection: "1N", ok: true });
+    expect(n("Away/Draw", null, "Belarus", "Albania")).toMatchObject({ market_code: "DC", selection: "N2", ok: true });
+    expect(n("Home", null, "Eibar", "Cadiz")).toMatchObject({ market_code: "1X2", selection: "1", ok: true });
+    expect(n("Plus de 0,5 but", "Monténégro", "Chypre", "Monténégro")).toMatchObject({ market_code: "TT2", market_param: 0.5, selection: "Plus", ok: true });
+    expect(n("Victoire + Plus de 1,5 but", "France", "France", "Turquie")).toMatchObject({ market_code: "1X2_OU", market_param: 1.5, selection: "1|Plus", ok: true });
+    expect(n("Victoire 1ère mi-temps", "Finlande", "Saint-Marin", "Finlande")).toMatchObject({ market_code: "HT_1X2", selection: "2", ok: true });
+    expect(n("Plus de 1,5 buts", "Espagne", "Espagne", "Angleterre")).toMatchObject({ market_code: "OU", market_param: 1.5, selection: "Plus", ok: true });
+  });
 });

@@ -142,7 +142,10 @@ Pronos de tipsters (kind = pronos) : messages Telegram ou WhatsApp, posts, vidé
 - Texte dicté à la voix (il commence par « [dictée] ») : une ou plusieurs phrases parlées qui décrivent des paris (« ajoute en pari test la victoire de Lens contre Lyon en Ligue 1 à deux dix »). kind = pronos, une sélection par pari décrit : home_team et away_team si les deux équipes sont dites (« X contre Y », « X face à Y », « X–Y »), sinon team_only ; pick_text = le pari en mots courts (« victoire Lens », « plus de 2,5 buts », « les deux marquent »). Les nombres dits en lettres se lisent en chiffres (« deux dix », « deux virgule dix » = 2.10 ; « un cinquante » = 1.50) ; la cote n'est remplie que si elle est dite, jamais devinée. Le championnat dit va dans competition. « Pari test », « tester », « sans miser » ne sont pas des choix : ignore-les.
 - Tableau de pronostics de scores (titre « Predictions », « pronos du jour », « Today's Football Predictions », mention « scores are illustrative ») : chaque ligne « équipe A score équipe B » est un prono de score exact sur un match à venir, pas un résultat. home_team, away_team, pick_text = le score recopié (« 2 - 2 »), score = null, outcome = unknown, kind = pronos, ticket_type single.
 - « Gagne au moins une partie » ou « une période » veut dire « gagne au moins une mi-temps » ; « Va marquer » après une équipe veut dire « cette équipe marque au moins un but » : recopie la ligne telle quelle.
-- Les drapeaux affichés identifient les pays : utilise-les pour nommer les équipes quand le texte est caché ou coupé.
+- Les drapeaux affichés identifient les pays : utilise-les pour nommer les équipes quand le texte est caché ou coupé. Les publications traduites automatiquement (« Voir la traduction », « Notez cette traduction ») déforment souvent les noms (« Sécure » pour Chypre, « Bulgérie », « Albaigne », un nom de pays faux à côté du bon drapeau) : rétablis le vrai nom d'après le drapeau, l'adversaire et le contexte.
+- Écris les noms d'équipes sous leur forme internationale usuelle, pas l'exonyme français : Côme → Como, Naples → Napoli, Munich → Bayern Munich, Turin → Juventus ou Torino selon le logo. Une équipe féminine garde sa mention (« Juventus Women »), ne la confonds jamais avec le club masculin.
+- Une ligne qui annonce un pari sans le donner (« PÉPITE DU JOUR », « lien en bio », « réservé aux abonnés ») n'est pas une sélection : ignore-la.
+- Les équipes peuvent être des sélections nationales (Sénégal, Germany) : recopie-les telles quelles, ce sont des équipes comme les autres.
 - Une fiche de match affichée sans choix écrit (le tipster parle) donne une sélection avec home_team, away_team, kickoff et pick_text vide.
 Si le ticket est montré dans une conversation ou une publication (Telegram, WhatsApp, Facebook, Instagram, TikTok), relève dans source le nom du canal, de la page ou du groupe, et l'heure de publication ; un filigrane ou une signature sur l'image compte aussi. Ne déduis pas : seulement ce qui est écrit.
 Plusieurs tickets peuvent apparaître : chacun a son en-tête (type, nombre de sélections) et son pied (mise, cote totale, gains, horodatage). Ne fusionne jamais deux tickets : un élément de tickets par ticket distinct. Une sélection n'appartient qu'à un ticket.`;
@@ -189,13 +192,26 @@ export function normalizePick(marketText: string, pickText: string, home: string
   { const up = p.match(/^(.*?)\s*\(?\b([12])\s*up\)?$/);
     if (up) {
       const base = up[1].trim() ? normalizePick(marketText.replace(/\(?\b[12]\s*up\b\)?/i, ""), pickText.replace(/\(?\b[12]\s*up\b\)?/i, "").trim(), home, away, team, alias) : null;
-      return { ...(base && base.ok ? base : { market_code: "LIBRE", market_param: null, selection: pickText }), label_pick: pickText, ok: false,
-        reason: `Option « ${up[2]}up » (payé dès que l’équipe mène de ${up[2]} but${up[2] === "2" ? "s" : ""}) : ${base?.ok ? "lu comme le pari de base, sans le paiement anticipé" : "pari de base non reconnu"}. Vérifie si le bookmaker a payé plus tôt.` };
+      // Lu comme le pari de base (24/11) : l'option ne change pas le pari, seulement le moment où le bookmaker paie
+      if (base?.ok) return { ...base, label_pick: pickText };
+      return { market_code: "LIBRE", market_param: null, selection: pickText, label_pick: pickText, ok: false,
+        reason: `Option « ${up[2]}up » : pari de base non reconnu. Gardé tel quel, à confirmer.` };
     } }
   if (/\bexcl\.?\s*\d/.test(p)) return { market_code: "LIBRE", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "Mention « excl. » (but exclu) : règle propre au bookmaker, pas suivie. Gardé tel quel, à confirmer." };
   // Écritures anglaises de tipsters, côté désigné par home / away / 1 / 2
   { const cote = (x: string): "1" | "2" | null => (/^(home|1|domicile)$/.test(x) ? "1" : /^(away|2|extérieur|exterieur)$/.test(x) ? "2" : null);
     const ok = (market_code: string, market_param: number | null, selection: string): NormalizedSelection => ({ market_code, market_param, selection, label_pick: pickText, ok: true });
+    // « Home », « Away », « Home/Draw », « Win/X » (listes anglaises de tipsters, 24/11)
+    if (/^home$/.test(p)) return ok("1X2", null, "1");
+    if (/^away$/.test(p)) return ok("1X2", null, "2");
+    if (/^draw$/.test(p)) return ok("1X2", null, "N");
+    if (/^(?:home\s*\/\s*draw|draw\s*\/\s*home)$/.test(p)) return ok("DC", null, "1N");
+    if (/^(?:away\s*\/\s*draw|draw\s*\/\s*away)$/.test(p)) return ok("DC", null, "N2");
+    if (/^home\s*\/\s*away$/.test(p)) return ok("DC", null, "12");
+    { const t = team && (home || away) ? (Math.max(teamSimilarity(team, home ?? ""), ...(alias?.home ?? []).map((x) => teamSimilarity(team, x))) >= Math.max(teamSimilarity(team, away ?? ""), ...(alias?.away ?? []).map((x) => teamSimilarity(team, x))) ? "1" : "2") : null;
+      if (t && /^(?:win|victoire)\s*\/\s*(?:x|draw|nul)$/.test(p)) return ok("DC", null, t === "1" ? "1N" : "N2"); }
+    // « OV15 », « UN35 » : plus de 1,5 / moins de 3,5 (tableaux « Choice », 24/11)
+    { const c = p.replace(/[\s.]/g, "").match(/^(ov|un)(\d)5$/); if (c) return ok("OU", Number(`${c[2]}.5`), c[1] === "ov" ? "Plus" : "Moins"); }
     // « Home over 1.5 », « Away team under 0.5 » : buts de l'équipe
     let e = p.match(/^(home|away)(?: team)?\s+(over|under|plus de|moins de)\s*(\d+(?:[.,]\d+)?)(?: goals?)?$/);
     if (e) return ok(`TT${cote(e[1])}`, Number(e[3].replace(",", ".")), /over|plus/.test(e[2]) ? "Plus" : "Moins");
@@ -488,6 +504,10 @@ export function normalizePick(marketText: string, pickText: string, home: string
     if (ti && o) return { market_code: `TT${ti[1]}`, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true };
     const tm = !ti ? all.trim().match(/^total\s+((?:plus|moins|over|under)\b.*)$/) : null; const o2 = tm ? ouLine(tm[1]) : null;
     if (o2) return { market_code: "OU", market_param: o2.line, selection: o2.dir, label_pick: pickText, ok: true }; }
+  // « Monténégro : Plus de 0,5 but » (équipe nommée, 24/11) : l'équipe marque, comme « va marquer ».
+  // Seulement 0,5 : au-delà (« Espagne +1,5 buts »), les tipsters parlent du total du match.
+  { const z = teamSide && !/match/.test(all) ? p.match(/^(?:\+|plus de|over)\s*0[.,]5\s*(?:buts?|goals?)?$/) : null;
+    if (z) return { market_code: `TT${teamSide}`, market_param: 0.5, selection: "Plus", label_pick: pickText, ok: true }; }
   // « Total équipe 1 », « Team total 2 », « Total buts de l'équipe 1 » dans le nom du marché : buts de cette équipe
   { const te = m.match(/(?:total|buts?)[^0-9]*?(?:[ée]quipe|team)\s*([12])\b|team total\s*([12])\b|(home|away) team total/); const o = te ? ouLine(p) : null;
     if (te && o) return { market_code: `TT${te[1] ?? te[2] ?? (te[3] === "home" ? "1" : "2")}`, market_param: o.line, selection: o.dir, label_pick: pickText, ok: true }; }
@@ -510,7 +530,7 @@ export function normalizePick(marketText: string, pickText: string, home: string
       const dc = parseDoubleChance(y, side, isDraw) ?? (teamSide && /^(double|ou nul|ou match nul)?$/.test(y) && /double|ou nul/.test(x) ? (teamSide === "1" ? "1N" : "N2") : null);
       return { dc, r: dc ? null : who(y) ?? (teamSide && /^(victoire|gagne|vainqueur|wins?)$/.test(y) ? teamSide : null) };
     };
-    const parts = /^double( chance)?\s*\+/.test(p) && team ? ["double", p.replace(/^double( chance)?\s*/, "")] : p.split(/\s*&\s*|\s+et\s+(?=[+]|plus|moins|les (?:2|deux)|btts)/);
+    const parts = /^double( chance)?\s*\+/.test(p) && team ? ["double", p.replace(/^double( chance)?\s*/, "")] : p.split(/\s*&\s*|\s+et\s+(?=[+]|plus|moins|les (?:2|deux)|btts)|\s+\+\s+(?=plus|moins|over|under|les (?:2|deux)|btts)/);
     if (parts.length === 2) {
       const [a, b] = parts;
       const ou = ouLine(b), bt = btts(b), { dc, r } = res(a);
