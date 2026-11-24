@@ -1,0 +1,57 @@
+{
+  "quand": "2026-11-24T13:51:36.206Z",
+  "essai": false,
+  "jour": "2026-11-24",
+  "matchs": 29,
+  "avecCotes": 29,
+  "candidats": 2870,
+  "selectionsSansCote1xBet": 3017,
+  "relevesTropEloignes": 505,
+  "dejaAujourdhui": 0,
+  "choix": [
+    {
+      "match": "Real Madrid CF – PSV",
+      "comp": "CL",
+      "kickoff": "2026-11-24T20:00:00+00:00",
+      "market": "OU",
+      "param": 4.5,
+      "sel": "Plus",
+      "cote": 2.03,
+      "p": 0.534,
+      "pModele": null,
+      "valeur": 0.085,
+      "profil": "risque",
+      "mise": 2100,
+      "coteRelevee": "2026-11-24T08:08:20+00:00",
+      "referenceRelevee": "2026-11-24T08:08:20+00:00",
+      "raison": "Probabilité 53 % selon les cotes de référence. 1xBet paie 2,03 pour une cote juste de 1,87 : écart de +8,5 %."
+    },
+    {
+      "match": "Como 1907 – PAE AEK",
+      "comp": "CL",
+      "kickoff": "2026-11-24T20:00:00+00:00",
+      "market": "AH",
+      "param": -1.5,
+      "sel": "1",
+      "cote": 1.75,
+      "p": 0.595,
+      "pModele": null,
+      "valeur": 0.041,
+      "profil": "risque",
+      "mise": 1400,
+      "coteRelevee": "2026-11-24T08:08:20+00:00",
+      "referenceRelevee": "2026-11-24T08:08:20+00:00",
+      "raison": "Probabilité 59 % selon les cotes de référence. 1xBet paie 1,75 pour une cote juste de 1,68 : écart de +4,1 %."
+    }
+  ],
+  "bilan": {
+    "bankroll": 101364,
+    "net": 1364,
+    "enJeu": 3500,
+    "regles": 3,
+    "gagnes": 2,
+    "roi": 0.3788888888888889
+  },
+  "resume": "Tipster à règles fixes (témoin sans IA). Paris simples sur cote 1xBet, seulement quand le prix dépasse la valeur juste. Bankroll virtuelle : 101 364 FCFA (départ 100 000), 3 paris réglés dont 2 gagnés, rendement 37,9 %, 3 500 FCFA en jeu. Mis à jour le 24/11/2026 13:51:35.",
+  "candidatsVus": 203
+}
