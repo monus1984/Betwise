@@ -1,19 +1,28 @@
 name: Sonde matchs internationaux (The Odds API)
-
 on:
   workflow_dispatch:
-
+permissions:
+  contents: write
 jobs:
-  probe:
+  sonde:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: npm
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
       - run: npm ci
-      - run: npx tsx scripts/probe-odds-international.ts
+      - name: Rejeu du rapprochement
         env:
-          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          UID: a20c0945-ce54-4902-a842-bb50cfea6450
+          JOURS: "2"
+        run: npx tsx scripts/diag-rapprochement.ts
+      - name: Publier
+        if: always()
+        run: |
+          mkdir -p /tmp/o && cp rapports/diag-rapprochement.json /tmp/o/ || true
+          git config user.name "betwise-bot" && git config user.email "bot@betwise.local"
+          git fetch origin rapports-tipster && git checkout -q rapports-tipster
+          mkdir -p diag && cp /tmp/o/diag-rapprochement.json diag/ && git add diag && git commit -qm "Diagnostic rapprochement" && git push -q origin HEAD:rapports-tipster
