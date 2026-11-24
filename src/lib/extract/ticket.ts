@@ -700,6 +700,7 @@ const ABBR: Record<string, string> = {
   "betis séville": "Real Betis", "betis seville": "Real Betis", séville: "Sevilla", seville: "Sevilla", "fc séville": "Sevilla", rome: "Roma", "as rome": "Roma",
   "aek athènes": "AEK Athens", "aek athenes": "AEK Athens", "olympiakos le pirée": "Olympiacos", "lisbonne": "Sporting CP", "sporting lisbonne": "Sporting CP", "benfica lisbonne": "Benfica",
   "atletico madrid": "Atlético Madrid", "atl madrid": "Atlético Madrid", "atl. madrid": "Atlético Madrid", "real sociedad": "Real Sociedad", "étoile rouge de belgrade": "Crvena Zvezda", "etoile rouge": "Crvena Zvezda",
+  copenhague: "FC København", "fc copenhague": "FC København", bologne: "Bologna", "fc bologne": "Bologna", gênes: "Genoa", genes: "Genoa", florence: "Fiorentina", "dynamo kiev": "Dynamo Kyiv", "chakhtar donetsk": "Shakhtar Donetsk",
   "glasgow rangers": "Rangers", "celtic glasgow": "Celtic", "bruges": "Club Brugge", "club bruges": "Club Brugge", "salzbourg": "Salzburg", "rb salzbourg": "Salzburg",
   civ: "Côte d'Ivoire", "cote divoire": "Côte d'Ivoire", "côte divoire": "Côte d'Ivoire", "république tchèque": "Tchéquie", "republique tcheque": "Tchéquie", rsa: "Afrique du Sud", usa: "États-Unis", "pays bas": "Pays-Bas",
 };

@@ -109,13 +109,16 @@ export function normalizeTeam(name: string): string {
     .toLowerCase()
     // Lettres sans accent décomposable (Bodø, Ærø, Łódź, ß) : sinon elles disparaissent (24/11)
     .replace(/ø/g, "o").replace(/æ/g, "ae").replace(/ß/g, "ss").replace(/ł/g, "l").replace(/đ/g, "d").replace(/ı/g, "i")
-    .replace(/\bman\.? (?=city|utd|united)/g, "manchester ").replace(/\butd\b/g, "united")
+    .replace(/\bman\s*\.?\s*(?=city|utd|united)/g, "manchester ")
+    .replace(/\bmunich\b/g, "munchen").replace(/\bmünchen\b/g, "munchen").replace(/\butd\b/g, "united")
     // « City » et « United » sont retirés plus bas : on garde Manchester City et Manchester United distincts
     .replace(/\bmanchester (city|united)\b/g, (_, x: string) => `manchester${x}`)
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/\b(fc|cf|sc|ac|as|us|sv|rb|ssc|afc|cfc|club|calcio|de|futbol|football|hotspur|wanderers|united|city)\b/g, " ")
     .replace(/[^a-z0-9 ]/g, " ")
+    // Équipe féminine : « F. », « W », « Women », « Frauen », « Féminines » ne forment qu'un seul mot
+    .replace(/\b(f|w|women|frauen|feminines?|ladies|fem)\b/g, " fem ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -125,14 +128,27 @@ export function teamSimilarity(a: string, b: string): number {
   const A = new Set(normalizeTeam(a).split(" ").filter(Boolean));
   const B = new Set(normalizeTeam(b).split(" ").filter(Boolean));
   if (A.size === 0 || B.size === 0) return 0;
+  // Une équipe féminine n'est jamais la même que l'équipe masculine du club (24/11)
+  if (A.has("fem") !== B.has("fem")) return 0;
+  // Un mot long à une lettre près compte comme le même (« Broendby » / « Brøndby », fautes de frappe)
+  const proche = (w: string, l: Set<string>) => l.has(w) || (w.length >= 6 && [...l].some((x) => x.length >= 6 && Math.abs(x.length - w.length) <= 1 && distance(w, x) <= 1));
   let common = 0;
-  for (const w of A) if (B.has(w)) common++;
+  for (const w of A) if (proche(w, B)) common++;
   const jaccard = common / Math.max(A.size, B.size);
   // Nom court contenu dans le nom long (« Bodo » / « Bodø/Glimt », « Slovan » / « ŠK Slovan Bratislava », 24/11) :
   // tous les mots du nom court, d'au moins 4 lettres, se retrouvent dans le nom long.
   const [petit, grand] = A.size <= B.size ? [A, B] : [B, A];
   const generique = /^(real|sporting|atletico|athletic|racing|dynamo|dinamo|inter|olympique|union|deportivo|sporting|club|royal|nacional|national|saint|santa|san|young|boys|rangers|rovers|town|county|wanderers)$/;
   // Les mots de 3 lettres ou moins (« al », « el », « fk ») doivent être là aussi, mais un mot distinctif de 4 lettres au moins est exigé
-  const contenu = [...petit].every((w) => grand.has(w)) && [...petit].some((w) => w.length >= 4 && !generique.test(w));
+  const contenu = [...petit].every((w) => proche(w, grand)) && [...petit].some((w) => w.length >= 4 && !generique.test(w));
   return contenu ? Math.max(jaccard, 0.85) : jaccard;
+}
+
+/** Distance d'édition (Levenshtein), pour deux mots courts. */
+function distance(a: string, b: string): number {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++)
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return d[a.length][b.length];
 }

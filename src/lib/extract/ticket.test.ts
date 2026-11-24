@@ -1,4 +1,4 @@
-import { bestMatch } from "./ticket";
+import { bestMatch, canon } from "./ticket";
 import { teamSimilarity } from "../odds-api/client";
 import { describe, expect, it } from "vitest";
 import { libelleBrut, normalizePick, parseFrDate } from "./ticket";
@@ -384,5 +384,12 @@ describe("pronos de pages Facebook (23/11)", () => {
     expect(bestMatch("Man City", "Naples", pool, "2026-11-24T08:00:00Z")?.id).toBe("city");
     expect(bestMatch("Napoli", "Manchester City", pool, "2026-11-24T08:00:00Z")?.id).toBe("city");
     expect(bestMatch("Lorient", "Rennes", pool, "2026-11-22T08:00:00Z")?.id).toBe("l1");
+  });
+  it("noms : lettre près, équipes féminines à part, noms français (24/11)", () => {
+    expect(teamSimilarity("Broendby IF", "Brondby")).toBeGreaterThanOrEqual(0.8);
+    expect(teamSimilarity("Bayern Munich F.", "FC Bayern München W")).toBe(1);
+    expect(teamSimilarity("Bayern Munich F.", "FC Bayern München")).toBe(0);
+    expect(teamSimilarity("Arsenal", "Arsenal W")).toBe(0);
+    expect(teamSimilarity(canon("Copenhague"), "FC København")).toBe(1);
   });
 });
