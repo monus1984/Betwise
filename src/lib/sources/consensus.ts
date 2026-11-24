@@ -68,7 +68,8 @@ export function consensus(avis: Avis[], verdict: (Pari & { label: string }) | nu
   if (!verdict) return { groupes: liste, lignes, pour: vide, contre: vide, iaTotal,
     conclusion: avis.length ? "Betster n'a pas d'avis sur ce match (pas de cote) : les avis ci-dessous sont à titre d'information." : "Aucun avis de source sur ce match pour l'instant." };
 
-  const pour = camp((a) => soutient(a, verdict));
+  // Va dans le même sens que Betster : même pari, ou l'un entraîne l'autre (comme « Betster d'accord » sur chaque ligne)
+  const pour = camp((a) => soutient(a, verdict) || soutient(verdict, a));
   const contre = camp((a) => oppose(a, verdict));
   // Les IA ne comptent qu'une fois, dans le camp où elles sont le plus nombreuses
   const iaPour = pour.ia > 0 && pour.ia >= contre.ia ? 1 : 0, iaContre = contre.ia > pour.ia ? 1 : 0;

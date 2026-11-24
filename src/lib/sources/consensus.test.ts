@@ -47,4 +47,10 @@ describe("ce que disent les sources", () => {
     expect(r.combine!.cote).toBe(1.5);
     expect(pointDuJour([c("A", 3, 0.9, 1.1), c("B", 3, 0.9, 1.1)]).combine).toBeNull(); // 1,21 : trop bas
   });
+  it("la conclusion compte une source dont le pari est entraîné par celui de Betster (24/11)", () => {
+    const v = { market: "TT1", param: 2.5, sel: "Plus", label: "Real : plus de 2,5 buts" };
+    const c = consensus([a("s4", 3, "OU", "Plus", 2.5)], v);
+    expect(c.pour.autres).toBe(1);
+    expect(c.conclusion).toContain("va dans le même sens");
+  });
 });
