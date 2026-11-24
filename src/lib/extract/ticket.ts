@@ -752,17 +752,27 @@ export async function extractTickets(db: Db, input: { images?: LlmImage[]; text?
     : `Lis le ou les tickets de pari partagés en texte et remplis un élément de tickets par ticket. Copie les libellés tels quels.\n\n${input.text ?? ""}`;
   const res = await llm.extract({ system: SYSTEM, user, images: input.images, schema: SCHEMA_MULTI as unknown as Record<string, unknown>, maxTokens: 12000 });
   const raws = rawMulti.parse(res.json).tickets.slice(0, 12);
+  return rapprocherTickets(db, raws, res);
+}
 
+/** Après la lecture : retrouver chaque match, puis la cote quand le prono n'en donne pas (séparé le 24/11 pour être testé seul). */
+export async function rapprocherTickets(db: Db, raws: RawTicket[], res: { tokensIn: number; tokensOut: number; model: string }): Promise<ExtractedTicket[]> {
   const construire = async () => {
-  // Fenêtre de recherche des matchs : ±10 jours autour d'aujourd'hui (les tickets importés sont récents)
-  const from = new Date(Date.now() - 10 * 86400000).toISOString();
-  const to = new Date(Date.now() + 10 * 86400000).toISOString();
-  const { data: pool } = await db
-    .from("matches")
-    .select("id, kickoff_at, score_home, score_away, home:teams!matches_home_team_id_fkey(nom, alias), away:teams!matches_away_team_id_fkey(nom, alias), competition:competitions(code_externe)")
-    .gte("kickoff_at", from).lte("kickoff_at", to).limit(600);
+  // Fenêtre de recherche : de 2 jours avant à 5 jours après la date des tickets, TOUS les matchs (24/11 : avec une
+  // limite de 600 lignes sur ±10 jours, des centaines de matchs restaient hors de la recherche et n'étaient jamais retrouvés)
+  const refs = raws.map((r) => Date.parse(parseFrDate(r.placed_at) ?? parsePublished(r.source?.published_at ?? null) ?? new Date().toISOString()));
+  const from = new Date(Math.min(...refs, Date.now()) - 2 * 86400000).toISOString();
+  const to = new Date(Math.max(...refs, Date.now()) + 5 * 86400000).toISOString();
   type M = { id: string; kickoff_at: string; score_home: number | null; score_away: number | null; home: { nom: string; alias: string[] } | null; away: { nom: string; alias: string[] } | null; competition: { code_externe: string | null } | null };
-  const matches = ((pool ?? []) as unknown as M[]).filter((x) => x.home && x.away);
+  const pool: M[] = [];
+  for (let page = 0; page < 8; page++) {
+    const { data } = await db.from("matches")
+      .select("id, kickoff_at, score_home, score_away, home:teams!matches_home_team_id_fkey(nom, alias), away:teams!matches_away_team_id_fkey(nom, alias), competition:competitions(code_externe)")
+      .gte("kickoff_at", from).lte("kickoff_at", to).neq("statut", "annule").order("kickoff_at").range(page * 1000, page * 1000 + 999);
+    pool.push(...((data ?? []) as unknown as M[]));
+    if (!data || data.length < 1000) break;
+  }
+  const matches = pool.filter((x) => x.home && x.away);
 
   const out = raws.map((raw, k) => {
     const pronos = raw.kind === "pronos";
