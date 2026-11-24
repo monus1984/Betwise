@@ -95,6 +95,9 @@ export function consensus(avis: Avis[], verdict: (Pari & { label: string }) | nu
   return { groupes: liste, lignes, pour, contre, conclusion, iaTotal };
 }
 
+/** Les coups du jour de BETWISE sont les choix de Betster lui-même : ils ne comptent pas comme une source qui le confirme (24/11). */
+export const estBetwise = (nom: string) => /^Coups du jour BETWISE$/i.test(nom.trim());
+
 /** Une source est un tipster IA de BETWISE (nom fixé à la création, voir scripts/tipsters-ia.ts). */
 export const estIA = (nom: string) => /· tipster IA$/.test(nom);
 

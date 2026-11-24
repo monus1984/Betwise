@@ -7,7 +7,7 @@ import { NIVEAU, SEUIL, classer, lire, niveau, raison, rendement, resume, reussi
 import { labelType } from "./source-ui";
 import { AXE_FR, bilanDe, forcesEtFaiblesses, type Prono } from "@/lib/sources/analyse";
 import { COMP_SHORT, shortName } from "@/components/match-ui";
-import { consensus, estIA, pointDuJour, type Candidat } from "@/lib/sources/consensus";
+import { consensus, estBetwise, estIA, pointDuJour, type Candidat } from "@/lib/sources/consensus";
 import { loadSignals, pariDe, pickLabel, releveFrais } from "@/lib/probs/signals";
 import { loadRecit } from "@/lib/matches/recit";
 
@@ -229,7 +229,7 @@ async function Aujourdhui({ sourceIds, proofOf }: { sourceIds: string[]; proofOf
     .in("source_id", sourceIds).neq("statut", "annule")
     .gte("match.kickoff_at", new Date(Date.now() - 2 * 3600_000).toISOString()).lte("match.kickoff_at", new Date(Date.now() + 36 * 3600_000).toISOString()).limit(800);
   type R = { source_id: string; market_code: string; market_param: number | null; selection: string; cote_annoncee: number | null; source: { nom: string; type: string } | null; match: { id: string; kickoff_at: string; statut: string; home: { nom: string } | null; away: { nom: string } | null; competition: { code_externe: string | null } | null } };
-  const rows = ((data ?? []) as unknown as R[]).filter((r) => r.match.statut !== "termine" && r.source && r.source.type !== "perso" && r.source.type !== "modele_betwise");
+  const rows = ((data ?? []) as unknown as R[]).filter((r) => r.match.statut !== "termine" && r.source && r.source.type !== "perso" && r.source.type !== "modele_betwise" && !estBetwise(r.source.nom));
   const parMatch = new Map<string, R[]>();
   for (const r of rows) parMatch.set(r.match.id, [...(parMatch.get(r.match.id) ?? []), r]);
   const tous = [...parMatch.values()].sort((a, b) => new Set(b.map((x) => x.source_id)).size - new Set(a.map((x) => x.source_id)).size).slice(0, 15);

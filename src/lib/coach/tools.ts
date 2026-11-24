@@ -7,7 +7,7 @@ import { APP_NAME } from "@/lib/app-name";
  */
 import { etatBudget } from "./budget";
 import { loadRecit } from "../matches/recit";
-import { consensus, estIA } from "../sources/consensus";
+import { consensus, estBetwise, estIA } from "../sources/consensus";
 import { lire as lireProof } from "../sources/proof";
 import type { createClient } from "../supabase/server";
 import type { ChatTool } from "../llm/provider";
@@ -396,7 +396,7 @@ export async function runCoachTool(db: Db, name: string, input: Record<string, u
           // Recoupements (23/11) : à lire APRÈS avoir dit ton propre choix ; ils le confortent ou l'alertent, ils ne le remplacent pas
           ce_que_disent_les_sources: (() => {
             const avis = (preds ?? []).filter((p) => p.match_id === m.id).map((p) => ({ p, src: one(p.source as One<{ nom: string; type: string }>) }))
-              .filter(({ src }) => src && src.type !== "perso" && src.type !== "modele_betwise")
+              .filter(({ src }) => src && src.type !== "perso" && src.type !== "modele_betwise" && !estBetwise(src.nom))
               .map(({ p, src }) => ({ sourceId: p.source_id, nom: src!.nom, ia: estIA(src!.nom), regles: regles.get(p.source_id) ?? 0, market: p.market_code, param: p.market_param === null ? null : Number(p.market_param), sel: p.selection, cote: p.cote_annoncee === null ? null : Number(p.cote_annoncee) }));
             if (!avis.length) return null;
             const c = consensus(avis, rc?.verdict ? { market: rc.verdict.market, param: rc.verdict.param, sel: rc.verdict.sel, label: rc.verdict.label } : null);

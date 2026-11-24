@@ -3,7 +3,7 @@ import { pickLabel } from "@/lib/probs/signals";
 import { desaccords } from "@/lib/sources/desaccord";
 import { resume, type Proof } from "@/lib/sources/proof";
 import { Empty } from "@/components/ui";
-import { consensus, estIA } from "@/lib/sources/consensus";
+import { consensus, estBetwise, estIA } from "@/lib/sources/consensus";
 
 type Prono = { id: string; sourceId: string; source: string; type?: string; market: string; param: number | null; sel: string; cote: number | null; prouve: boolean; resultat: string };
 
@@ -16,7 +16,7 @@ export function MatchSources({ pronos, proofs, home, away, joue, verdict }: { pr
   for (const p of pronos) parSource.set(p.sourceId, [...(parSource.get(p.sourceId) ?? []), p]);
 
   // Recoupements et conclusion de Betster (23/11) : avant le match seulement, sans tes propres choix ni le modèle
-  const avis = pronos.filter((p) => p.type !== "perso" && p.type !== "modele_betwise").map((p) => ({ sourceId: p.sourceId, nom: p.source, ia: estIA(p.source), regles: proofs[p.sourceId]?.prouvesRegles ?? 0, market: p.market, param: p.param, sel: p.sel, cote: p.cote }));
+  const avis = pronos.filter((p) => p.type !== "perso" && p.type !== "modele_betwise" && !estBetwise(p.source)).map((p) => ({ sourceId: p.sourceId, nom: p.source, ia: estIA(p.source), regles: proofs[p.sourceId]?.prouvesRegles ?? 0, market: p.market, param: p.param, sel: p.sel, cote: p.cote }));
   const cs = !joue && avis.length ? consensus(avis, verdict ?? null) : null;
 
   return (
