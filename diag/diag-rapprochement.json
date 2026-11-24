@@ -423,10 +423,10 @@
   "kind": "pronos",
   "source": "Parieurs Foot",
   "lu": "Man.City | Naples | team_only= |  |  | score=3 - 2",
-  "match": "Manchester City FC – SSC Napoli (11-24T20:00)",
+  "match": null,
   "marche": "CS  3-2",
-  "cote": 14,
-  "origine": "bookmaker"
+  "cote": null,
+  "origine": null
  },
  {
   "upload": "3d13ed41",
@@ -632,7 +632,7 @@
   "kind": "ticket",
   "source": null,
   "lu": "Bayern Munich F. | Hoffenheim F. | team_only= | Nombre total de buts (t. rég) | + de 3,5 | score=1 - 0",
-  "match": "Bayern Munich W – 1899 Hoffenheim W (11-23T17:00)",
+  "match": null,
   "marche": "OU 3.5 Plus",
   "cote": 1.37,
   "origine": "ticket"
@@ -676,7 +676,7 @@
   "kind": "ticket",
   "source": null,
   "lu": "Bayern Munich F. | Hoffenheim F. | team_only= | Nombre total de buts (t. rég) | + de 3,5 | score=1 - 0",
-  "match": "Bayern Munich W – 1899 Hoffenheim W (11-23T17:00)",
+  "match": null,
   "marche": "OU 3.5 Plus",
   "cote": 1.37,
   "origine": "ticket"
@@ -742,10 +742,10 @@
   "kind": "pronos",
   "source": "Daily Tips",
   "lu": "Broendby IF | FC Midtjylland | team_only= |  |  | score=2 - 2",
-  "match": "Brondby – FC Midtjylland (11-23T18:00)",
+  "match": null,
   "marche": "CS  2-2",
-  "cote": 10,
-  "origine": "bookmaker"
+  "cote": null,
+  "origine": null
  },
  {
   "upload": "db33f803",
@@ -819,10 +819,10 @@
   "kind": "pronos",
   "source": "Daily Tips",
   "lu": "Al-Shamal | Al Ahli Saudi FC | team_only= |  |  | score=1 - 2",
-  "match": "Al-Ettifaq – Al-Hilal Saudi FC (11-28T14:20)",
+  "match": "Al Shamal – Al-Ahli Jeddah (11-23T16:00)",
   "marche": "CS  1-2",
-  "cote": 7.5,
-  "origine": "bookmaker"
+  "cote": null,
+  "origine": null
  },
  {
   "upload": "db33f803",
@@ -830,10 +830,10 @@
   "kind": "pronos",
   "source": "Daily Tips",
   "lu": "Al-Ittihad Club | Pakhtakor | team_only= |  |  | score=3 - 1",
-  "match": "Al-Ittihad FC – NEOM (11-27T17:30)",
+  "match": null,
   "marche": "CS  3-1",
-  "cote": 13,
-  "origine": "bookmaker"
+  "cote": null,
+  "origine": null
  },
  {
   "upload": "744b58db",
@@ -841,8 +841,8 @@
   "kind": "pronos",
   "source": "La BONNE Analyse",
   "lu": " |  | team_only=Al Hilal |  | Victoire ✅ | score=",
-  "match": null,
-  "marche": "NON : ",
+  "match": "Neftchi – Al-Hilal Saudi FC (11-23T13:45)",
+  "marche": "1X2  2",
   "cote": null,
   "origine": null
  },
@@ -1050,8 +1050,8 @@
   "kind": "ticket",
   "source": null,
   "lu": "Nordsjaelland | Copenhague | team_only= | Total de buts (t. rég) - Copenhague | - de 2,5 | score=1 - 0",
-  "match": "FC Nordsjaelland – FC Copenhagen (11-22T17:00)",
-  "marche": "OU 2.5 Moins",
+  "match": null,
+  "marche": "TT2 2.5 Moins",
   "cote": 1.13,
   "origine": "ticket"
  },
@@ -1083,7 +1083,7 @@
   "kind": "ticket",
   "source": null,
   "lu": "Bologne | Udinese | team_only= | Nombre total de buts (t. rég) | + de 1,5 | score=",
-  "match": "Bologna FC 1909 – Udinese Calcio (11-22T14:00)",
+  "match": null,
   "marche": "OU 1.5 Plus",
   "cote": 1.28,
   "origine": "ticket"
@@ -1130,105 +1130,6 @@
   "match": "FC Barcelona – Villarreal CF (11-22T13:00)",
   "marche": "RED  Oui",
   "cote": 4.9,
-  "origine": "ticket"
- },
- {
-  "upload": "eeb38740",
-  "quand": "11-22T13:32",
-  "kind": "ticket",
-  "source": null,
-  "lu": "Juventus | Venezia | team_only= | Double chance (t. rég) | Juventus ou Venezia | score=4 - 0",
-  "match": "Juventus FC – Venezia FC (11-22T11:30)",
-  "marche": "DC  12",
-  "cote": 1.3,
-  "origine": "ticket"
- },
- {
-  "upload": "eeb38740",
-  "quand": "11-22T13:32",
-  "kind": "ticket",
-  "source": null,
-  "lu": "Barcelone | Villarreal | team_only= | Résultat du match (t. rég) | Barcelone | score=0 - 2",
-  "match": "FC Barcelona – Villarreal CF (11-22T13:00)",
-  "marche": "1X2  1",
-  "cote": 1.19,
-  "origine": "ticket"
- },
- {
-  "upload": "eeb38740",
-  "quand": "11-22T13:32",
-  "kind": "ticket",
-  "source": null,
-  "lu": "Monza | Fiorentina | team_only= | 2ème mi-temps (seule) - Nombre total de buts - Monza | - de 1,5 | score=",
-  "match": "AC Monza – ACF Fiorentina (11-23T19:45)",
-  "marche": "NON : Pari de mi-temps : choisis le marché et le choix.",
-  "cote": 1.15,
-  "origine": "ticket"
- },
- {
-  "upload": "eeb38740",
-  "quand": "11-22T13:32",
-  "kind": "ticket",
-  "source": null,
-  "lu": "Levante | Elche | team_only= | Total de buts (t. rég) - Elche | - de 2,5 | score=",
-  "match": "Levante UD – Elche CF (11-23T20:00)",
-  "marche": "TT2 2.5 Moins",
-  "cote": 1.13,
-  "origine": "ticket"
- },
- {
-  "upload": "eeb38740",
-  "quand": "11-22T13:32",
-  "kind": "ticket",
-  "source": null,
-  "lu": "Brentford | Everton | team_only= | 2ème mi-temps (seule) - Nombre total de buts - Everton | - de 1,5 | score=",
-  "match": "Brentford FC – Everton FC (11-23T20:00)",
-  "marche": "NON : Pari de mi-temps : choisis le marché et le choix.",
-  "cote": 1.15,
-  "origine": "ticket"
- },
- {
-  "upload": "e2a8a52e",
-  "quand": "11-22T13:30",
-  "kind": "ticket",
-  "source": null,
-  "lu": "Hull | Brighton | team_only= | Double chance & nombre de buts | Brighton / Nul & + de 1,5 | score=",
-  "match": "Hull City AFC – Brighton & Hove Albion FC (11-22T14:00)",
-  "marche": "DC_OU 1.5 N2|Plus",
-  "cote": 1.34,
-  "origine": "ticket"
- },
- {
-  "upload": "e2a8a52e",
-  "quand": "11-22T13:30",
-  "kind": "ticket",
-  "source": null,
-  "lu": "Monza | Fiorentina | team_only= | 2ème mi-temps (seule) - Nombre total de buts - Monza | - de 1,5 | score=",
-  "match": "AC Monza – ACF Fiorentina (11-23T19:45)",
-  "marche": "NON : Pari de mi-temps : choisis le marché et le choix.",
-  "cote": 1.15,
-  "origine": "ticket"
- },
- {
-  "upload": "e2a8a52e",
-  "quand": "11-22T13:30",
-  "kind": "ticket",
-  "source": null,
-  "lu": "Levante | Elche | team_only= | Total de buts (t. rég) - Elche | - de 2,5 | score=",
-  "match": "Levante UD – Elche CF (11-23T20:00)",
-  "marche": "TT2 2.5 Moins",
-  "cote": 1.13,
-  "origine": "ticket"
- },
- {
-  "upload": "e2a8a52e",
-  "quand": "11-22T13:30",
-  "kind": "ticket",
-  "source": null,
-  "lu": "Brentford | Everton | team_only= | 2ème mi-temps (seule) - Nombre total de buts - Everton | - de 1,5 | score=",
-  "match": "Brentford FC – Everton FC (11-23T20:00)",
-  "marche": "NON : Pari de mi-temps : choisis le marché et le choix.",
-  "cote": 1.15,
   "origine": "ticket"
  }
 ]
