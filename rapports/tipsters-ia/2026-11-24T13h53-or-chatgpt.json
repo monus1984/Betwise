@@ -1,0 +1,15 @@
+{
+  "profil": "or-chatgpt",
+  "nom": "ChatGPT",
+  "modele": "openai/gpt-6.2-sol",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "f420bf38cc25519a",
+  "saute": "déjà passé aujourd'hui (4 pari(s)) : pas d'appel (économie)",
+  "tours": 0,
+  "jetons": null,
+  "retenus": [],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": []
+}

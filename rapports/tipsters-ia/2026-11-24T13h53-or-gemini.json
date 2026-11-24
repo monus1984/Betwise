@@ -1,0 +1,15 @@
+{
+  "profil": "or-gemini",
+  "nom": "Gemini",
+  "modele": "google/gemini-4-carbon",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "f420bf38cc25519a",
+  "saute": "déjà passé aujourd'hui (7 pari(s)) : pas d'appel (économie)",
+  "tours": 0,
+  "jetons": null,
+  "retenus": [],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": []
+}
