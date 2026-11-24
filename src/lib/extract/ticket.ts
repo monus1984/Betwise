@@ -695,6 +695,12 @@ export function libelleBrut(marketText: string, pickText: string): string {
 /** Sigles et noms longs que les tipsters emploient, ramenés au nom du référentiel. */
 const ABBR: Record<string, string> = {
   rdc: "RD Congo", "dr congo": "RD Congo", "congo rdc": "RD Congo", "congo kinshasa": "RD Congo", rca: "Centrafrique", "république centrafricaine": "Centrafrique", "republique centrafricaine": "Centrafrique",
+  // Noms français de clubs (24/11) : la base et les bookmakers utilisent la forme internationale
+  naples: "Napoli", "ssc naples": "Napoli", côme: "Como", come: "Como", "bayern munich": "Bayern München", munich: "Bayern München", "inter milan": "Inter",
+  "betis séville": "Real Betis", "betis seville": "Real Betis", séville: "Sevilla", seville: "Sevilla", "fc séville": "Sevilla", rome: "Roma", "as rome": "Roma",
+  "aek athènes": "AEK Athens", "aek athenes": "AEK Athens", "olympiakos le pirée": "Olympiacos", "lisbonne": "Sporting CP", "sporting lisbonne": "Sporting CP", "benfica lisbonne": "Benfica",
+  "atletico madrid": "Atlético Madrid", "atl madrid": "Atlético Madrid", "atl. madrid": "Atlético Madrid", "real sociedad": "Real Sociedad", "étoile rouge de belgrade": "Crvena Zvezda", "etoile rouge": "Crvena Zvezda",
+  "glasgow rangers": "Rangers", "celtic glasgow": "Celtic", "bruges": "Club Brugge", "club bruges": "Club Brugge", "salzbourg": "Salzburg", "rb salzbourg": "Salzburg",
   civ: "Côte d'Ivoire", "cote divoire": "Côte d'Ivoire", "côte divoire": "Côte d'Ivoire", "république tchèque": "Tchéquie", "republique tcheque": "Tchéquie", rsa: "Afrique du Sud", usa: "États-Unis", "pays bas": "Pays-Bas",
 };
 
@@ -786,7 +792,7 @@ export async function rapprocherTickets(db: Db, raws0: RawTicket[], res: { token
     const pronos = raw.kind === "pronos";
     const ref = parseFrDate(raw.placed_at) ?? parsePublished(raw.source?.published_at ?? null, now) ?? new Date(now).toISOString();
     const selections: MatchedSelection[] = raw.selections.map((s) => {
-      const best = s.team_only && !(s.home_team && s.away_team) ? bestMatchOne(s.team_only, matches, ref) : bestMatch(s.home_team, s.away_team, matches);
+      const best = s.team_only && !(s.home_team && s.away_team) ? bestMatchOne(s.team_only, matches, ref) : bestMatch(s.home_team, s.away_team, matches, ref);
       const h = best ? best.home!.nom : s.home_team, a = best ? best.away!.nom : s.away_team;
       const norm = normalizePick(s.market_text, s.pick_text, h, a, s.team_only ?? null, best ? { home: best.home!.alias, away: best.away!.alias } : undefined);
       const scoreDb = best && best.score_home !== null ? `${best.score_home}-${best.score_away}` : null;
@@ -872,15 +878,27 @@ function bestMatchOne(teamRaw: string, pool: Parameters<typeof bestMatch>[2], re
   return best?.m ?? null;
 }
 
-function bestMatch(home: string | null, away: string | null, pool: { id: string; kickoff_at: string; score_home: number | null; score_away: number | null; home: { nom: string; alias: string[] } | null; away: { nom: string; alias: string[] } | null; competition: { code_externe: string | null } | null }[]) {
+export function bestMatch(home: string | null, away: string | null, pool: { id: string; kickoff_at: string; score_home: number | null; score_away: number | null; home: { nom: string; alias: string[] } | null; away: { nom: string; alias: string[] } | null; competition: { code_externe: string | null } | null }[], refIso?: string) {
   if (!home || !away) return null;
   home = canon(home); away = canon(away);
+  const ref = refIso ? Date.parse(refIso) : null;
   let best: { m: (typeof pool)[number]; score: number } | null = null;
   for (const m of pool) {
-    const sh = Math.max(teamSimilarity(home, m.home!.nom), ...m.home!.alias.map((a) => teamSimilarity(home, a)));
-    const sa = Math.max(teamSimilarity(away, m.away!.nom), ...m.away!.alias.map((a) => teamSimilarity(away, a)));
-    const score = (sh + sa) / 2;
-    if (score >= 0.5 && (!best || score > best.score)) best = { m, score };
+    // Les deux équipes, éventuellement inversées (un tipster écrit parfois l'extérieur en premier)
+    const sim = (x: string, t: { nom: string; alias: string[] }) => Math.max(teamSimilarity(x, t.nom), ...t.alias.map((a) => teamSimilarity(x, a)));
+    const droit = [sim(home, m.home!), sim(away, m.away!)], inverse = [sim(home, m.away!), sim(away, m.home!)];
+    const [sh, sa] = Math.min(...droit) >= Math.min(...inverse) ? droit : inverse;
+    // Chaque équipe doit être reconnue (24/11) : une seule équipe connue ne suffit plus (« Al-Ittihad – Pakhtakor »
+    // était rattaché à « Al-Ittihad – NEOM »). Faute de mieux, le match est cherché chez API-Football.
+    if (Math.min(sh, sa) < 0.34) continue;
+    let score = (sh + sa) / 2;
+    if (score < 0.5) continue;
+    if (ref !== null) {
+      const dt = (Date.parse(m.kickoff_at) - ref) / 3600000;
+      if (dt < -6 || dt > 120) continue;
+      score -= Math.max(0, dt) / 400; // à égalité, le match le plus proche de la publication
+    }
+    if (!best || score > best.score) best = { m, score };
   }
   return best?.m ?? null;
 }

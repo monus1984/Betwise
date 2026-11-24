@@ -132,6 +132,7 @@ export function teamSimilarity(a: string, b: string): number {
   // tous les mots du nom court, d'au moins 4 lettres, se retrouvent dans le nom long.
   const [petit, grand] = A.size <= B.size ? [A, B] : [B, A];
   const generique = /^(real|sporting|atletico|athletic|racing|dynamo|dinamo|inter|olympique|union|deportivo|sporting|club|royal|nacional|national|saint|santa|san|young|boys|rangers|rovers|town|county|wanderers)$/;
-  const contenu = [...petit].every((w) => w.length >= 4 && !generique.test(w) && grand.has(w));
+  // Les mots de 3 lettres ou moins (« al », « el », « fk ») doivent être là aussi, mais un mot distinctif de 4 lettres au moins est exigé
+  const contenu = [...petit].every((w) => grand.has(w)) && [...petit].some((w) => w.length >= 4 && !generique.test(w));
   return contenu ? Math.max(jaccard, 0.85) : jaccard;
 }

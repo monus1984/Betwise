@@ -1,3 +1,4 @@
+import { bestMatch } from "./ticket";
 import { teamSimilarity } from "../odds-api/client";
 import { describe, expect, it } from "vitest";
 import { libelleBrut, normalizePick, parseFrDate } from "./ticket";
@@ -375,5 +376,13 @@ describe("pronos de pages Facebook (23/11)", () => {
     expect(teamSimilarity("Man City", "Manchester City FC")).toBe(1);
     expect(teamSimilarity("Manchester United", "Manchester City FC")).toBe(0);
     expect(teamSimilarity("Real", "Real Betis Balompié")).toBeLessThan(0.5);
+  });
+  it("rapprochement : les deux équipes doivent être reconnues, et le match le plus proche de la publication l'emporte (24/11)", () => {
+    const m = (id: string, h: string, a: string, k: string) => ({ id, kickoff_at: k, score_home: null, score_away: null, home: { nom: h, alias: [] }, away: { nom: a, alias: [] }, competition: null });
+    const pool = [m("neom", "Al-Ittihad FC", "NEOM", "2026-11-27T17:30:00Z"), m("city", "Manchester City FC", "SSC Napoli", "2026-11-24T20:00:00Z"), m("l1", "Lorient", "Rennes", "2026-11-22T14:00:00Z"), m("l2", "Lorient", "Rennes", "2027-03-01T14:00:00Z")];
+    expect(bestMatch("Al-Ittihad Club", "Pakhtakor", pool, "2026-11-23T10:00:00Z")).toBeNull();
+    expect(bestMatch("Man City", "Naples", pool, "2026-11-24T08:00:00Z")?.id).toBe("city");
+    expect(bestMatch("Napoli", "Manchester City", pool, "2026-11-24T08:00:00Z")?.id).toBe("city");
+    expect(bestMatch("Lorient", "Rennes", pool, "2026-11-22T08:00:00Z")?.id).toBe("l1");
   });
 });
