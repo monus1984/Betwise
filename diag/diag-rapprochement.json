@@ -423,10 +423,10 @@
   "kind": "pronos",
   "source": "Parieurs Foot",
   "lu": "Man.City | Naples | team_only= |  |  | score=3 - 2",
-  "match": null,
+  "match": "Manchester City FC – SSC Napoli (11-24T20:00)",
   "marche": "CS  3-2",
-  "cote": null,
-  "origine": null
+  "cote": 14,
+  "origine": "bookmaker"
  },
  {
   "upload": "3d13ed41",
@@ -632,7 +632,7 @@
   "kind": "ticket",
   "source": null,
   "lu": "Bayern Munich F. | Hoffenheim F. | team_only= | Nombre total de buts (t. rég) | + de 3,5 | score=1 - 0",
-  "match": null,
+  "match": "Bayern Munich W – 1899 Hoffenheim W (11-23T17:00)",
   "marche": "OU 3.5 Plus",
   "cote": 1.37,
   "origine": "ticket"
@@ -676,7 +676,7 @@
   "kind": "ticket",
   "source": null,
   "lu": "Bayern Munich F. | Hoffenheim F. | team_only= | Nombre total de buts (t. rég) | + de 3,5 | score=1 - 0",
-  "match": null,
+  "match": "Bayern Munich W – 1899 Hoffenheim W (11-23T17:00)",
   "marche": "OU 3.5 Plus",
   "cote": 1.37,
   "origine": "ticket"
@@ -742,10 +742,10 @@
   "kind": "pronos",
   "source": "Daily Tips",
   "lu": "Broendby IF | FC Midtjylland | team_only= |  |  | score=2 - 2",
-  "match": null,
+  "match": "Brondby – FC Midtjylland (11-23T18:00)",
   "marche": "CS  2-2",
-  "cote": null,
-  "origine": null
+  "cote": 10,
+  "origine": "bookmaker"
  },
  {
   "upload": "db33f803",
@@ -1083,7 +1083,7 @@
   "kind": "ticket",
   "source": null,
   "lu": "Bologne | Udinese | team_only= | Nombre total de buts (t. rég) | + de 1,5 | score=",
-  "match": null,
+  "match": "Bologna FC 1909 – Udinese Calcio (11-22T14:00)",
   "marche": "OU 1.5 Plus",
   "cote": 1.28,
   "origine": "ticket"
