@@ -179,7 +179,9 @@ export function normalizePick(marketText: string, pickText: string, home: string
   const m = plat(marketText) === plat(pickText) ? "" : mOrig;
   // ✅ = « oui, cette option » ; ❌ = « non ». Les autres emojis sont de la décoration.
   const oui = /[✅✔☑]/u.test(pickText) || /[✅✔☑]/u.test(marketText), non = /[❌✖🚫]/u.test(pickText);
-  const p = anglais(pickText.toLowerCase().replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ").replace(/\s+/g, " ").trim().replace(/^[–—-](?!\s*(?:de\b|\d))\s*|\s*[–—-]$/g, "").trim());
+  const p0 = anglais(pickText.toLowerCase().replace(/[\p{Extended_Pictographic}\uFE0F]/gu, " ").replace(/\s+/g, " ").trim().replace(/^[–—-](?!\s*(?:de\b|\d))\s*|\s*[–—-]$/g, "").trim());
+  // « (V1) », « (+2.5) », « (GG) » : la parenthèse entoure le pari (listes Facebook, 24/11)
+  const p = /^\((.+)\)$/.test(p0) && !/\(.*\(/.test(p0) ? p0.slice(1, -1).trim() : p0;
   // Un score seul (« 2 - 2 ») publié comme prono : score exact (tableaux « Predictions » de pages Facebook, 23/11)
   { const cs = p.match(/^(\d{1,2})\s*[-–:]\s*(\d{1,2})$/);
     if (cs && (!m || /score|correct|exact|prediction|prono/.test(m)) && !/mi[- ]?temps|half|\bht\b|\b2e\b|1(?:ère|re)/.test(m)) return { market_code: "CS", market_param: null, selection: `${cs[1]}-${cs[2]}`, label_pick: `Score exact ${cs[1]}-${cs[2]}`, ok: true }; }
@@ -210,6 +212,9 @@ export function normalizePick(marketText: string, pickText: string, home: string
     if (/^home\s*\/\s*away$/.test(p)) return ok("DC", null, "12");
     { const t = team && (home || away) ? (Math.max(teamSimilarity(team, home ?? ""), ...(alias?.home ?? []).map((x) => teamSimilarity(team, x))) >= Math.max(teamSimilarity(team, away ?? ""), ...(alias?.away ?? []).map((x) => teamSimilarity(team, x))) ? "1" : "2") : null;
       if (t && /^(?:win|victoire)\s*\/\s*(?:x|draw|nul)$/.test(p)) return ok("DC", null, t === "1" ? "1N" : "N2"); }
+    // « T1+0.5 », « T¹+0.5 », « T2-1.5 » : buts de l'équipe 1 ou 2 (listes Facebook, 24/11)
+    { const t = p.replace(/¹/g, "1").replace(/²/g, "2").replace(/\s/g, "").match(/^t([12])([+-])(\d+(?:[.,]5))$/);
+      if (t) return ok(`TT${t[1]}`, Number(t[3].replace(",", ".")), t[2] === "+" ? "Plus" : "Moins"); }
     // « OV15 », « UN35 » : plus de 1,5 / moins de 3,5 (tableaux « Choice », 24/11)
     { const c = p.replace(/[\s.]/g, "").match(/^(ov|un)(\d)5$/); if (c) return ok("OU", Number(`${c[2]}.5`), c[1] === "ov" ? "Plus" : "Moins"); }
     // « Home over 1.5 », « Away team under 0.5 » : buts de l'équipe
@@ -443,9 +448,10 @@ export function normalizePick(marketText: string, pickText: string, home: string
         : { market_code: code, market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: neg ? "Pari « non » sur les deux mi-temps : pas suivi, gardé tel quel et réglé à la main." : "Pari sur les deux mi-temps : équipe non reconnue." };
     } }
   // « Gagne au moins une mi-temps » : l'une ou l'autre, pas forcément la première
-  if (/(gagne|remporte|gagner|remporter) au moins (1|une) (mi[- ]?temps|partie|période)|win(s)? (either|at least one) half/.test(all)) {
-    const nm = all.match(/^(.*?)\s*(?:va gagner|va remporter|gagne|remporte) au moins/);
-    const sd = teamSide ?? (nm && nm[1].trim() ? side(nm[1].trim()) : null);
+  if (/(gagne|remporte|gagner|remporter) au moins (1|une) (mi[- ]?temps|partie|période)|win(s)? (either|at least one) half|^va (?:gagner|remporter) une (?:mi[- ]?temps|partie|période)$/.test(all.trim())) {
+    const nm = all.match(/^(.*?)\s*(?:va gagner|va remporter|gagne|remporte) (?:au moins )?(?:1|une)/);
+    // « Como vs AEK (va gagner une mi-temps) » : sans équipe nommée, c'est celle citée en premier (24/11)
+    const sd = teamSide ?? (nm && nm[1].trim() ? side(nm[1].trim()) : /^va (?:gagner|remporter)/.test(p) && home ? "1" : null);
     const neg = non || /^(non|no)$/.test(p) || /[-–—:]\s*non$/.test(p);
     return sd && !neg ? { market_code: "WEH", market_param: null, selection: sd, label_pick: pickText, ok: true }
       : { market_code: "WEH", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: neg ? "« Ne gagne aucune mi-temps » : pari pas suivi, gardé tel quel et réglé à la main." : "Gagne au moins une mi-temps : équipe non reconnue." };

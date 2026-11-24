@@ -1,3 +1,4 @@
+import { teamSimilarity } from "../odds-api/client";
 import { describe, expect, it } from "vitest";
 import { libelleBrut, normalizePick, parseFrDate } from "./ticket";
 import { matchSource } from "./source-match";
@@ -358,5 +359,21 @@ describe("pronos de pages Facebook (23/11)", () => {
     expect(n("Victoire + Plus de 1,5 but", "France", "France", "Turquie")).toMatchObject({ market_code: "1X2_OU", market_param: 1.5, selection: "1|Plus", ok: true });
     expect(n("Victoire 1ère mi-temps", "Finlande", "Saint-Marin", "Finlande")).toMatchObject({ market_code: "HT_1X2", selection: "2", ok: true });
     expect(n("Plus de 1,5 buts", "Espagne", "Espagne", "Angleterre")).toMatchObject({ market_code: "OU", market_param: 1.5, selection: "Plus", ok: true });
+  });
+  it("listes Facebook du 24/11 : pari entre parenthèses, T¹+0.5, « va gagner une mi-temps » sans équipe", () => {
+    const n = (pick: string, h: string, a: string) => normalizePick("", pick, h, a, null, { home: [h], away: [a] });
+    expect(n("(+2.5)", "Bodo", "LASK")).toMatchObject({ market_code: "OU", market_param: 2.5, selection: "Plus", ok: true });
+    expect(n("(V1)", "Arsenal", "Dortmund")).toMatchObject({ market_code: "1X2", selection: "1", ok: true });
+    expect(n("(GG)", "Feyenoord", "Porto")).toMatchObject({ market_code: "BTTS", selection: "Oui", ok: true });
+    expect(n("2X", "Feyenoord", "Porto")).toMatchObject({ market_code: "DC", selection: "N2", ok: true });
+    expect(n("(T¹+0.5)", "Arsenal", "Dortmund")).toMatchObject({ market_code: "TT1", market_param: 0.5, selection: "Plus", ok: true });
+    expect(n("(va gagner une mi-temps)", "Como", "AEK")).toMatchObject({ market_code: "WEH", selection: "1", ok: true });
+  });
+  it("noms courts des listes Facebook retrouvés, sans confondre les deux Manchester (24/11)", () => {
+    expect(teamSimilarity("Bodo", "FK Bodø/Glimt")).toBeGreaterThanOrEqual(0.8);
+    expect(teamSimilarity("Slovan", "ŠK Slovan Bratislava")).toBeGreaterThanOrEqual(0.8);
+    expect(teamSimilarity("Man City", "Manchester City FC")).toBe(1);
+    expect(teamSimilarity("Manchester United", "Manchester City FC")).toBe(0);
+    expect(teamSimilarity("Real", "Real Betis Balompié")).toBeLessThan(0.5);
   });
 });

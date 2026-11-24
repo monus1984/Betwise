@@ -107,6 +107,11 @@ export function median(values: number[]): number | null {
 export function normalizeTeam(name: string): string {
   return name
     .toLowerCase()
+    // Lettres sans accent décomposable (Bodø, Ærø, Łódź, ß) : sinon elles disparaissent (24/11)
+    .replace(/ø/g, "o").replace(/æ/g, "ae").replace(/ß/g, "ss").replace(/ł/g, "l").replace(/đ/g, "d").replace(/ı/g, "i")
+    .replace(/\bman\.? (?=city|utd|united)/g, "manchester ").replace(/\butd\b/g, "united")
+    // « City » et « United » sont retirés plus bas : on garde Manchester City et Manchester United distincts
+    .replace(/\bmanchester (city|united)\b/g, (_, x: string) => `manchester${x}`)
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/\b(fc|cf|sc|ac|as|us|sv|rb|ssc|afc|cfc|club|calcio|de|futbol|football|hotspur|wanderers|united|city)\b/g, " ")
@@ -122,5 +127,11 @@ export function teamSimilarity(a: string, b: string): number {
   if (A.size === 0 || B.size === 0) return 0;
   let common = 0;
   for (const w of A) if (B.has(w)) common++;
-  return common / Math.max(A.size, B.size);
+  const jaccard = common / Math.max(A.size, B.size);
+  // Nom court contenu dans le nom long (« Bodo » / « Bodø/Glimt », « Slovan » / « ŠK Slovan Bratislava », 24/11) :
+  // tous les mots du nom court, d'au moins 4 lettres, se retrouvent dans le nom long.
+  const [petit, grand] = A.size <= B.size ? [A, B] : [B, A];
+  const generique = /^(real|sporting|atletico|athletic|racing|dynamo|dinamo|inter|olympique|union|deportivo|sporting|club|royal|nacional|national|saint|santa|san|young|boys|rangers|rovers|town|county|wanderers)$/;
+  const contenu = [...petit].every((w) => w.length >= 4 && !generique.test(w) && grand.has(w));
+  return contenu ? Math.max(jaccard, 0.85) : jaccard;
 }
