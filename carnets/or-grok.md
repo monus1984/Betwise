@@ -1,40 +1,35 @@
-<!-- jour: 2026-11-23 version: tipster-ia-v4 -->
-CARNET BETWISE — 23/11/2026, passage 13:51 (0 pari réglé)
+<!-- jour: 2026-11-24 version: tipster-ia-v4 -->
+CARNET BETWISE — 24/11/2026, passage 07:52 (6 paris réglés)
 
 Objectif
-Gérer une bankroll virtuelle de 100 000 FCFA comme un parieur sérieux : probabilité honnête, paris qui ont le plus de chances de passer d'après l'analyse, mise proportionnée. Jugé sur calibration, réussite par niveau comparée à ce que la cote annonçait, et évolution de bankroll. Zéro certitude : tout pari peut perdre. On ne cherche pas à battre le bookmaker.
+Bankroll virtuelle (départ 100 000, 96 442). Probabilité honnête, paris les plus probables d'après l'analyse, mise proportionnée. Jugé sur calibration, réussite par niveau vs cote, évolution de bankroll. Zéro certitude. On ne cherche pas à battre le bookmaker.
 
 Règles de sélection
-1. N'analyser que les matchs du passage via les outils. Ne jamais inventer absent, forme, score ou cote.
-2. Un seul pari simple par match. Un même match ne figure qu'une fois dans un combiné. Maximum 8 paris par jour. Aucun quota par niveau de cote, aucun nombre minimum : zéro pari est permis si rien ne convainc.
-3. Ne jouer que des options réellement cotées (identifiant cotes_match). S'adapter aux cotes du moment.
-4. Choisir le pari qui a le plus de chances de passer d'après la forme, l'enjeu, les absents et les buts attendus. Pas de seuil cote × probabilité. La cote n'a pas à payer plus que ma probabilité. Une double chance très basse (sous 1,20) passe souvent mais rapporte peu : ne pas la forcer pour « sécuriser ».
-5. Combinés : 2 ou 3 sélections de matchs différents, chacune déjà analysée, cote totale entre 1,50 et 3. La proba du combiné est le produit des probas seulement si les sélections sont indépendantes. Ne pas associer deux sélections du même match, ni deux lectures qui dépendent l'une de l'autre. Mise plus petite que les simples.
-6. Préférer les marchés que je comprends : 1X2, double chance, remboursé si nul, plus/moins de buts, les deux marquent, mi-temps, quand la forme, l'enjeu, les absents et les buts attendus (marché + modèle BETWISE) vont dans le même sens.
-7. Méfiance si compositions non publiées et absents importants possibles, ou si marché et modèle divergent fortement : réduire la mise, ou s'abstenir.
-8. Mieux vaut sauter un match douteux que forcer. On ne force pas pour atteindre un nombre.
-9. Si proba_modele est nulle (championnat hors couverture BETWISE), ne pas inventer un écart au marché. La forme récente ne déplace une proba que de quelques points. Annoncer une proba proche du marché, un cran en dessous si l'info est incomplète.
-10. Deux équipes en zone de relégation peuvent fermer un match que les buts attendus voient ouvert : ne pas forcer l'over sur ce seul signal.
-11. Ne pas corriger le bookmaker sur un seul dernier match. La cote intègre déjà le classement et la forme.
+1. N'analyser que via les outils. Ne jamais inventer absent, forme, score ou cote.
+2. Un seul simple par match. Un match une seule fois dans un combiné. Max 8/jour. Zéro pari permis.
+3. Seulement des options cotées (identifiant cotes_match).
+4. Choisir le plus probable d'après forme, enjeu, absents, buts. Pas de seuil cote × proba. Double chance sous 1,20 : ne pas forcer.
+5. Combinés : 2-3 matchs différents, déjà analysés, cote totale 1,50-3, indépendants. Mise plus petite que les simples.
+6. Marchés compris : 1X2, double chance, DNB, plus/moins, BTTS, mi-temps, quand les signaux convergent.
+7. Compositions absentes ou absents importants : réduire ou s'abstenir.
+8. Mieux sauter qu'forcer. Pas de quota.
+9. Pas de modèle BETWISE : ne pas inventer un écart. Forme = quelques points. Proba proche du marché, un cran sous si info incomplète.
+10. Deux relégables peuvent fermer un match que les buts voient ouvert.
+11. Ne pas corriger le bookmaker sur un seul dernier match.
 
-Mise (bankroll)
-- Plafond dur : 10 % de la bankroll par pari, 40 % engagé au total. Je vise bien en dessous.
-- Mise de base : 1,5 à 3 % si le match est lisible et les infos convergent.
-- 3 à 5 % seulement si forme, enjeu, absents et buts vont clairement dans le même sens, et cote pas extrême.
-- Jamais plus de 5 % tant que je n'ai pas 20 paris réglés.
-- Favoris très bas (< 1,20) : mise faible, le rendement ne paie pas le risque de calibration.
-- Cotes longues (> 3,50) : uniquement si ma proba est chiffrée et le scénario est le plus probable parmi les options longues ; mise plafonnée à 1,5 %.
-- Combiné : mise inférieure à celle des simples qui le composent.
+Mise
+- Plafond : 10 % / pari, 40 % engagé. Viser bien en dessous.
+- Base 1,5 à 3 % si lisible. 3 à 5 % seulement si tout converge. Jamais plus de 5 % avant 20 réglés.
+- Favoris < 1,20 : mise faible ou rien. Cotes > 3,50 : max 1,5 %, seulement si scénario le plus probable.
+- Combiné : mise inférieure aux simples.
 
 Calibration
-- Annoncer une proba que je serais prêt à défendre sur 100 répétitions. 70 % doit passer ~70 fois, pas « j'y crois fort ».
-- Après chaque série, comparer proba annoncée et taux réel. Si je surestime (surtout favoris, overs, BTTS), baisser les probas et les mises avant de changer de méthode.
-- Ne pas changer une règle de sélection ou de mise sur moins de 15 à 20 paris réglés : le hasard pèse plus que la méthode.
-- Quand le modèle et le marché sont proches, prendre une proba entre les deux, ou un cran sous les deux si absents et compositions manquantes.
+- 70 % doit passer ~70 fois sur 100. Ne pas changer une règle avant 15-20 réglés.
+- Marché et modèle proches : entre les deux, ou un cran sous si absents/compos manquantes.
 
-Ce que j'apprends (0 pari réglé — méthode de mise inchangée)
-- Ancienne règle d'edge (cote × proba) et ancien minimum de 3 paris : retirés. On joue ce que l'analyse désigne, y compris rien.
-- Passage 09:28, toujours en cours : M5 Bayern W–Hoffenheim W over 3,5 à 1,43, proba 68 %, mise 2 500. M13 Monza–Fiorentina BTTS à 1,50, proba 60 %, mise 2 500. M10 Jong Ajax–Jong AZ BTTS à 1,27, proba 72 %, mise 2 000. À surveiller une fois réglé : est-ce que je surestime les overs et BTTS quand les compositions ne sont pas sorties.
-- Passage 13:51 : M12 Almería remboursé si nul (M12.103, 1,49, proba 64 %, 2 500). M7 Rapid remboursé si nul (M7.92, 1,35, proba 68 %, 2 000). Combiné des deux, proba 44 %, mise 1 500. Engagement du jour : 7 000 + 6 000 = 13 000, sous 40 %.
-- Laissés : M14 Nantes 1V/5 et mauvais à domicile malgré cote 1,44. M16 Brentford 7 absents dont Thiago suspendu. M17 les deux en relégation, modèle plus ouvert que le marché. M1 Aris fuit à l'extérieur (13 buts encaissés en 5). M9 BTTS tentant mais 3 jours de récupération et pas de modèle. M11 6 nuls sur 10 confrontations. M2 fiche presque vide.
-- Règle de mise et de calibration : inchangées, moins de 15 paris réglés.
+Ce que j'apprends (6 réglés — méthode inchangée)
+- Bilan : 3/6, bankroll 96 442. DNB 3/3, +57 %. BTTS 0/2, -100 %. Over 0/1, -100 %. Équilibré 2/4, -32 %. Audacieux 1/1. Prudent 0/1.
+- Trop tôt pour changer de méthode. Signal à surveiller, pas une règle : les BTTS et overs pris sans compositions ont tous perdu. En attendant 15 réglés, je ne force ni BTTS ni over si les compositions ne sont pas sorties.
+- DNB a bien marché sur des écarts de classement nets (Almería, Rapid). Je continue, mais je refuse le DNB sous 1,15 : le rendement ne paie pas le risque.
+- Passage 24/11 matin : M23 Wolves 1,29 proba 72 % mise 2 500. M16 Middlesbrough 1,44 proba 65 % mise 2 000. M4 Palermo 1,42 proba 65 % mise 2 000. M10 Bradford 1,55 proba 58 % mise 1 500. Combiné Wolves + Middlesbrough, cote 1,86, proba 47 %, mise 1 000. Engagement 9 000.
+- Laissés : Cardiff (5 absents), Juve Stabia (6 nuls H2H), Benevento (1V/5), City-Napoli, Rangers, Real, Betis, Como, Bodo, Galatasaray-Villa, Feyenoord-Porto, Arsenal-Dortmund, West Ham, Hibernian. Pas d'over ni de BTTS ce matin.

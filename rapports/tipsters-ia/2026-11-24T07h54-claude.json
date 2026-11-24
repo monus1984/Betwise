@@ -1,0 +1,120 @@
+{
+  "profil": "claude",
+  "nom": "Claude",
+  "modele": "claude-sonnet-5-5",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "964ccf302ac926da",
+  "duree_s": 27,
+  "tours": 3,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 3
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M22"
+      },
+      "ms": 1167
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M21"
+      },
+      "ms": 462
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M23"
+      },
+      "ms": 655
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M25"
+      },
+      "ms": 839
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M22"
+      },
+      "ms": 10
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M23"
+      },
+      "ms": 10
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M25"
+      },
+      "ms": 9
+    }
+  ],
+  "jetons": {
+    "entree": 98735,
+    "sortie": 2331,
+    "cacheLu": 8658,
+    "cacheEcrit": 2886
+  },
+  "erreur": null,
+  "bankroll": 97390,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M23.11",
+      "mise": 2000,
+      "probabilite": 0.71,
+      "raison": "Wolves (3e, 4 victoires sur 5, 5V-2N-1D à domicile) reçoivent Derby (23e, 0,9 but marqué et 2,0 encaissé par match, 1 victoire sur 5). Le marché attend 2,41 à 0,71 buts. Derby +2,5 ne perd que si Wolves gagne par 3 buts ou plus. Wolves a 2 absents et Derby plusieurs, mais les compositions ne sont pas publiées, donc la mise reste petite."
+    },
+    {
+      "option": "M25.11",
+      "mise": 1500,
+      "probabilite": 0.65,
+      "raison": "Rangers a la meilleure défense (10 buts encaissés en 13 matchs) et a battu Aberdeen 6 fois de suite, souvent de peu (1-0, 1-0). Rangers a joué samedi et peut faire tourner. Aberdeen +2,5 ne perd que si Rangers gagne par 3 buts ou plus. Je suis proche du marché (61,5 %) et je mise peu."
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M23.11",
+      "pari": "Derby handicap +2,5",
+      "cote": 1.31,
+      "mise": 2000,
+      "probabilite": 0.71,
+      "raison": "Wolves (3e, 4 victoires sur 5, 5V-2N-1D à domicile) reçoivent Derby (23e, 0,9 but marqué et 2,0 encaissé par match, 1 victoire sur 5). Le marché attend 2,41 à 0,71 buts. Derby +2,5 ne perd que si Wolves gagne par 3 buts ou plus. Wolves a 2 absents et Derby plusieurs, mais les compositions ne sont pas publiées, donc la mise reste petite."
+    },
+    {
+      "id": "M25.11",
+      "pari": "Aberdeen handicap +2,5",
+      "cote": 1.42,
+      "mise": 1500,
+      "probabilite": 0.65,
+      "raison": "Rangers a la meilleure défense (10 buts encaissés en 13 matchs) et a battu Aberdeen 6 fois de suite, souvent de peu (1-0, 1-0). Rangers a joué samedi et peut faire tourner. Aberdeen +2,5 ne perd que si Rangers gagne par 3 buts ou plus. Je suis proche du marché (61,5 %) et je mise peu."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M23.11",
+    "M25.11"
+  ]
+}

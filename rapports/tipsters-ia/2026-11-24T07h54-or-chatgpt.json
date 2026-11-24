@@ -1,0 +1,275 @@
+{
+  "profil": "or-chatgpt",
+  "nom": "ChatGPT",
+  "modele": "openai/gpt-6.2-sol",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "964ccf302ac926da",
+  "duree_s": 39,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 2
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 331
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 456
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 319
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 471
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M21"
+      },
+      "ms": 318
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M22"
+      },
+      "ms": 313
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M23"
+      },
+      "ms": 312
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M24"
+      },
+      "ms": 318
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M25"
+      },
+      "ms": 317
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M26"
+      },
+      "ms": 604
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 457
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M29"
+      },
+      "ms": 313
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 604
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 433
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 607
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M19"
+      },
+      "ms": 611
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M20"
+      },
+      "ms": 315
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 310
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M4",
+        "famille": "resultat"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M23",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M24",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M21",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M26",
+        "famille": "resultat"
+      },
+      "ms": 2
+    }
+  ],
+  "jetons": {
+    "entree": 77797,
+    "sortie": 1663,
+    "cacheLu": 26154,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 99768,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M16.1",
+      "mise": 850,
+      "probabilite": 0.69,
+      "raison": "Middlesbrough gagne à 1,44 (relevé 06 h 00). Le leader a gagné six de ses huit matchs à domicile sans en perdre un, avec 19 buts inscrits. Swansea a encaissé 15 buts en huit déplacements et trois absents sont signalés. Je relève légèrement le repère sans marge de 67,4 % : Swansea a tout de même gagné quatre fois à l’extérieur, et Middlesbrough rejoue vendredi."
+    },
+    {
+      "option": "M23.1",
+      "mise": 900,
+      "probabilite": 0.76,
+      "raison": "Wolves gagne à 1,29 (relevé 06 h 00). Quatre victoires sur les cinq dernières sorties et cinq en huit réceptions pour Wolves, contre cinq défaites en huit déplacements pour Derby, qui y a encaissé 17 buts. Le marché projette 2,41 buts pour Wolves contre 0,71 pour Derby. Je reste proche du repère sans marge de 75,1 % : certaines absences de Derby sont encore incertaines et le nul n’est pas couvert."
+    },
+    {
+      "option": "M21.246",
+      "mise": 900,
+      "probabilite": 0.79,
+      "raison": "Manchester City marque au moins deux buts à 1,22 (relevé 04 h 08). Le marché projette 2,92 buts pour City et donne 78,8 % sur cette ligne. Naples a encaissé 11 buts en quatre journées européennes, et Buongiorno, Di Lorenzo et Meret figurent parmi les absents signalés. Le 1–1 de City contre Fulham et les compositions encore inconnues incitent à rester près du marché. Le pari ne dépend pas d’un but napolitain ni d’une victoire de City."
+    },
+    {
+      "option": "M26.1",
+      "mise": 850,
+      "probabilite": 0.79,
+      "raison": "Le Betis gagne à 1,27 (relevé 04 h 08). Le Slovan a perdu ses quatre matchs européens, avec un seul but marqué et 17 encaissés ; le Betis a pris neuf points. Le marché projette 2,85 buts pour le Betis contre 0,82 pour le Slovan. Je reste proche du repère de 78,8 % : le Betis joue à l’extérieur et Antony est incertain."
+    }
+  ],
+  "abstention": "Quatre simples, sans chercher à atteindre le plafond quotidien. La troisième meilleure défense de Serie B tempère l’attrait de Palermo ; à Leipzig, les absences offensives signalées de Lens et la forme européenne de Leipzig brouillent le scénario. Pas de combiné : je préfère garder les risques séparés.",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M16.1",
+      "pari": "Middlesbrough",
+      "cote": 1.44,
+      "mise": 900,
+      "probabilite": 0.69,
+      "raison": "Middlesbrough gagne à 1,44 (relevé 06 h 00). Le leader a gagné six de ses huit matchs à domicile sans en perdre un, avec 19 buts inscrits. Swansea a encaissé 15 buts en huit déplacements et trois absents sont signalés. Je relève légèrement le repère sans marge de 67,4 % : Swansea a tout de même gagné quatre fois à l’extérieur, et Middlesbrough rejoue vendredi."
+    },
+    {
+      "id": "M23.1",
+      "pari": "Wolves",
+      "cote": 1.29,
+      "mise": 900,
+      "probabilite": 0.76,
+      "raison": "Wolves gagne à 1,29 (relevé 06 h 00). Quatre victoires sur les cinq dernières sorties et cinq en huit réceptions pour Wolves, contre cinq défaites en huit déplacements pour Derby, qui y a encaissé 17 buts. Le marché projette 2,41 buts pour Wolves contre 0,71 pour Derby. Je reste proche du repère sans marge de 75,1 % : certaines absences de Derby sont encore incertaines et le nul n’est pas couvert."
+    },
+    {
+      "id": "M21.246",
+      "pari": "Manchester City FC : plus de 1,5 buts",
+      "cote": 1.22,
+      "mise": 900,
+      "probabilite": 0.79,
+      "raison": "Manchester City marque au moins deux buts à 1,22 (relevé 04 h 08). Le marché projette 2,92 buts pour City et donne 78,8 % sur cette ligne. Naples a encaissé 11 buts en quatre journées européennes, et Buongiorno, Di Lorenzo et Meret figurent parmi les absents signalés. Le 1–1 de City contre Fulham et les compositions encore inconnues incitent à rester près du marché. Le pari ne dépend pas d’un but napolitain ni d’une victoire de City."
+    },
+    {
+      "id": "M26.1",
+      "pari": "Real Betis Balompié",
+      "cote": 1.27,
+      "mise": 900,
+      "probabilite": 0.79,
+      "raison": "Le Betis gagne à 1,27 (relevé 04 h 08). Le Slovan a perdu ses quatre matchs européens, avec un seul but marqué et 17 encaissés ; le Betis a pris neuf points. Le marché projette 2,85 buts pour le Betis contre 0,82 pour le Slovan. Je reste proche du repère de 78,8 % : le Betis joue à l’extérieur et Antony est incertain."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M16.1",
+    "M23.1",
+    "M21.246",
+    "M26.1"
+  ]
+}

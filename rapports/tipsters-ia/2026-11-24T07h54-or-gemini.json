@@ -1,0 +1,405 @@
+{
+  "profil": "or-gemini",
+  "nom": "Gemini",
+  "modele": "google/gemini-4-carbon",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "964ccf302ac926da",
+  "duree_s": 104,
+  "tours": 6,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 2
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 587
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 897
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 321
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 318
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 540
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 317
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 314
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M20"
+      },
+      "ms": 322
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M21"
+      },
+      "ms": 314
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M23"
+      },
+      "ms": 330
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M24"
+      },
+      "ms": 382
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M25"
+      },
+      "ms": 304
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M26"
+      },
+      "ms": 310
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M27"
+      },
+      "ms": 628
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 326
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M29"
+      },
+      "ms": 313
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 682
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 742
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 309
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 310
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M19"
+      },
+      "ms": 317
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M22"
+      },
+      "ms": 318
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "tout",
+        "match": "M4"
+      },
+      "ms": 8
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "tout",
+        "match": "M16"
+      },
+      "ms": 8
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "tout",
+        "match": "M17"
+      },
+      "ms": 8
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "tout",
+        "match": "M20"
+      },
+      "ms": 10
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M21",
+        "famille": "tout"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "tout",
+        "match": "M23"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M24",
+        "famille": "tout"
+      },
+      "ms": 10
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M26",
+        "famille": "tout"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "resultat",
+        "match": "M6"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M8",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M25",
+        "famille": "tout"
+      },
+      "ms": 8
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M28",
+        "famille": "tout"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "tout",
+        "match": "M1"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "tout",
+        "match": "M29"
+      },
+      "ms": 9
+    }
+  ],
+  "jetons": {
+    "entree": 567650,
+    "sortie": 3301,
+    "cacheLu": 243864,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 98111.25,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "probabilite": 0.68,
+      "option": "M4.1",
+      "mise": 2500,
+      "raison": "Palermo est leader de Serie B (27 pts en 12 matchs), possède la meilleure attaque du championnat (26 buts inscrits) et réalise un sans-faute absolu à domicile cette saison : 5 victoires en 5 réceptions (11 buts marqués, 4 encaissés). Sous la menace directe de Modena (à 1 point derrière) après son revers à Catanzaro samedi, Palermo doit réagir devant son public face à Südtirol (7e, seulement 1 victoire en 5 déplacements et battu lors de 5 des 8 dernières confrontations directes, dont 3-0 et 0-2 récemment). Aucun absent n'est signalé."
+    },
+    {
+      "option": "M23.7",
+      "raison": "Wolverhampton (3e avec 31 pts, à 1 unité de la montée directe et du leader) marche sur l'eau avec 4 victoires et 0 défaite sur ses 5 derniers matchs. À domicile (5V, 2N, 1D), les Wolves reçoivent Derby County, 23e et relégable (10 pts), qui affiche la co-pire défense de Championship (32 buts encaissés en 16 journées, 5 défaites en 8 déplacements) et déplore 8 joueurs absents ou incertains (dont Szmodics, Langas et Forsyth). Le handicap -1 (remboursé si Wolves gagne d'un seul but) offre une belle sécurité tout en valorisant l'écart de niveau.",
+      "probabilite": 0.69,
+      "mise": 2500
+    },
+    {
+      "probabilite": 0.74,
+      "raison": "Écart majeur en Ligue des champions entre le ŠK Slovan Bratislava (36e et dernier avec 0 point en 4 matchs, 1 seul but marqué contre 17 encaissés, soit 4,3 buts concédés par match) et le Real Betis (11e avec 9 pts, 3 victoires en 4 journées), qui joue une entrée directe dans le top 8 qualificatif pour les huitièmes de finale. Avec un handicap asiatique -1 à 1,33 (remboursé en cas de succès d'un but d'écart), le risque est bien couvert face à la défense la plus perméable de la compétition.",
+      "mise": 2500,
+      "option": "M26.6"
+    },
+    {
+      "mise": 2000,
+      "raison": "Manchester City (7e de C1 avec 9 pts, 3,0 buts inscrits par match sur les 4 derniers matchs) reçoit un SSC Napoli (27e avec 3 pts, 11 buts encaissés en 4 journées) décimé par 10 absences majeures dans tous les secteurs : le gardien Meret, les défenseurs Di Lorenzo, Buongiorno, Badiashile et Marin (suspendu), le milieu Lobotka et l'ailier David Neres. City a remporté ses 3 dernières confrontations face à Naples (dont 2-0 en septembre) et le handicap -1 (remboursé si victoire d'un but exactement) est tout indiqué.",
+      "option": "M21.7",
+      "probabilite": 0.71
+    },
+    {
+      "option": "M17.90",
+      "raison": "Leicester (10e de League One mais à 1 seul point du top 6 qualificatif pour les barrages) est en pleine dynamique positive avec 3 victoires sur ses 5 derniers matchs et une grande solidité en déplacement (3V, 3N, 1D en 7 voyages, seulement 7 buts encaissés). En face, Blackpool est 22e et relégable (3 défaites sur les 5 derniers matchs, 1,7 but encaissé par rencontre) et n'a gagné aucune des 6 dernières confrontations directes face aux Foxes (3 victoires de Leicester, 3 nuls). L'option Leicester remboursé si nul sécurise parfaitement ce déplacement.",
+      "probabilite": 0.73,
+      "mise": 2000
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M4.1",
+      "pari": "Palermo",
+      "cote": 1.42,
+      "mise": 2500,
+      "probabilite": 0.68,
+      "raison": "Palermo est leader de Serie B (27 pts en 12 matchs), possède la meilleure attaque du championnat (26 buts inscrits) et réalise un sans-faute absolu à domicile cette saison : 5 victoires en 5 réceptions (11 buts marqués, 4 encaissés). Sous la menace directe de Modena (à 1 point derrière) après son revers à Catanzaro samedi, Palermo doit réagir devant son public face à Südtirol (7e, seulement 1 victoire en 5 déplacements et battu lors de 5 des 8 dernières confrontations directes, dont 3-0 et 0-2 récemment). Aucun absent n'est signalé."
+    },
+    {
+      "id": "M23.7",
+      "pari": "Wolves handicap -1",
+      "cote": 1.39,
+      "mise": 2500,
+      "probabilite": 0.69,
+      "raison": "Wolverhampton (3e avec 31 pts, à 1 unité de la montée directe et du leader) marche sur l'eau avec 4 victoires et 0 défaite sur ses 5 derniers matchs. À domicile (5V, 2N, 1D), les Wolves reçoivent Derby County, 23e et relégable (10 pts), qui affiche la co-pire défense de Championship (32 buts encaissés en 16 journées, 5 défaites en 8 déplacements) et déplore 8 joueurs absents ou incertains (dont Szmodics, Langas et Forsyth). Le handicap -1 (remboursé si Wolves gagne d'un seul but) offre une belle sécurité tout en valorisant l'écart de niveau."
+    },
+    {
+      "id": "M26.6",
+      "pari": "Real Betis Balompié handicap -1",
+      "cote": 1.33,
+      "mise": 2500,
+      "probabilite": 0.74,
+      "raison": "Écart majeur en Ligue des champions entre le ŠK Slovan Bratislava (36e et dernier avec 0 point en 4 matchs, 1 seul but marqué contre 17 encaissés, soit 4,3 buts concédés par match) et le Real Betis (11e avec 9 pts, 3 victoires en 4 journées), qui joue une entrée directe dans le top 8 qualificatif pour les huitièmes de finale. Avec un handicap asiatique -1 à 1,33 (remboursé en cas de succès d'un but d'écart), le risque est bien couvert face à la défense la plus perméable de la compétition."
+    },
+    {
+      "id": "M21.7",
+      "pari": "Manchester City FC handicap -1",
+      "cote": 1.37,
+      "mise": 2000,
+      "probabilite": 0.71,
+      "raison": "Manchester City (7e de C1 avec 9 pts, 3,0 buts inscrits par match sur les 4 derniers matchs) reçoit un SSC Napoli (27e avec 3 pts, 11 buts encaissés en 4 journées) décimé par 10 absences majeures dans tous les secteurs : le gardien Meret, les défenseurs Di Lorenzo, Buongiorno, Badiashile et Marin (suspendu), le milieu Lobotka et l'ailier David Neres. City a remporté ses 3 dernières confrontations face à Naples (dont 2-0 en septembre) et le handicap -1 (remboursé si victoire d'un but exactement) est tout indiqué."
+    },
+    {
+      "id": "M17.90",
+      "pari": "Leicester (remboursé si nul)",
+      "cote": 1.28,
+      "mise": 2000,
+      "probabilite": 0.73,
+      "raison": "Leicester (10e de League One mais à 1 seul point du top 6 qualificatif pour les barrages) est en pleine dynamique positive avec 3 victoires sur ses 5 derniers matchs et une grande solidité en déplacement (3V, 3N, 1D en 7 voyages, seulement 7 buts encaissés). En face, Blackpool est 22e et relégable (3 défaites sur les 5 derniers matchs, 1,7 but encaissé par rencontre) et n'a gagné aucune des 6 dernières confrontations directes face aux Foxes (3 victoires de Leicester, 3 nuls). L'option Leicester remboursé si nul sécurise parfaitement ce déplacement."
+    }
+  ],
+  "combinesRetenus": [
+    {
+      "selections": [
+        "M26.1 Real Betis Balompié @1.27",
+        "M23.1 Wolves @1.29"
+      ],
+      "cote": 1.64,
+      "mise": 2000,
+      "probabilite": 0.6,
+      "raison": "Combiné de deux favoris nets dans deux compétitions totalement indépendantes (Ligue des champions à 20h00 et Championship anglaise à 20h00, cote totale ~1,64) : d'un côté le Real Betis (9 pts en 4 matchs, en course directe pour le top 8) chez la lanterne rouge Slovan Bratislava (36e avec 0 point, 1 seul but marqué et 17 encaissés en 4 journées) ; de l'autre Wolverhampton (3e de Championship, 4 victoires et 0 défaite sur les 5 derniers matchs, à 1 point de la montée directe) qui reçoit Derby County (23e relégable, 5 défaites en 8 déplacements, pire défense ex aequo avec 32 buts encaissés et 8 joueurs absents ou incertains). Deux dynamiques très déséquilibrées sans aucun lien entre elles (0,79 × 0,76 ≈ 0,60)."
+    },
+    {
+      "selections": [
+        "M21.1 Manchester City FC @1.31",
+        "M24.1 RB Leipzig @1.4"
+      ],
+      "cote": 1.83,
+      "mise": 1500,
+      "probabilite": 0.55,
+      "raison": "Combiné Ligue des champions sur deux rencontres indépendantes de 20h00 (cote totale ~1,83) opposant deux équipes très fortes à domicile à des visiteurs lourdement diminués défensivement : Manchester City (7e avec 9 pts, 3,0 buts marqués par match récemment et vainqueur de ses 3 derniers duels face à Naples) reçoit un SSC Napoli 27e qui a encaissé 11 buts en 4 matchs et compte 10 absents annoncés (dont Meret, Di Lorenzo, Buongiorno, Lobotka, David Neres et Marin suspendu) ; parallèlement, le RB Leipzig (qui vient d'écraser l'Union Berlin 1-5 et joue sa place en barrages) accueille un RC Lens 33e ayant encaissé 16 buts en 4 matchs de C1 et privé de nombreux joueurs dont Gradit et Edouard (0,77 × 0,72 ≈ 0,55)."
+    }
+  ],
+  "rejets": [],
+  "enregistres": [
+    "M4.1",
+    "M23.7",
+    "M26.6",
+    "M21.7",
+    "M17.90",
+    "combiné M26.1+M23.1",
+    "combiné M21.1+M24.1"
+  ]
+}

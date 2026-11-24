@@ -1,0 +1,350 @@
+{
+  "profil": "or-grok",
+  "nom": "Grok",
+  "modele": "x-ai/grok-4.7",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "964ccf302ac926da",
+  "duree_s": 75,
+  "tours": 7,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 3
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 318
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 322
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 330
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M20"
+      },
+      "ms": 560
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 330
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 448
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M21"
+      },
+      "ms": 594
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M23"
+      },
+      "ms": 538
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M24"
+      },
+      "ms": 541
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M25"
+      },
+      "ms": 326
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 327
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 536
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M22"
+      },
+      "ms": 309
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M26"
+      },
+      "ms": 311
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 308
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M29"
+      },
+      "ms": 304
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 308
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 643
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M23",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M4",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M25",
+        "famille": "resultat"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M20",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M10",
+        "famille": "resultat"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M21",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M23",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "buts"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M8",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3",
+        "famille": "resultat"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 431
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M27"
+      },
+      "ms": 331
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M4",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M10",
+        "famille": "buts"
+      },
+      "ms": 2
+    }
+  ],
+  "jetons": {
+    "entree": 314996,
+    "sortie": 4713,
+    "cacheLu": 211200,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 96442.25,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M23.1",
+      "mise": 2500,
+      "probabilite": 0.72,
+      "raison": "Wolves 3e, 31 pts/16, à 1 pt du leader, 4 victoires sans défaite sur 5, 5V 2N 1D à domicile. Derby 23e, zone de relégation, 1V 3D sur 5, 0,9 but et 2,0 encaissé, 1V 2N 5D à l'extérieur, une des deux pires défenses (32 buts encaissés), 8 absents dont 5 confirmés. Marché 2,41-0,71, victoire Wolves 75,1 % à 1,29. Compositions non publiées et pas de modèle : proba 72 %, un cran sous le marché. Tout pari peut perdre."
+    },
+    {
+      "option": "M16.1",
+      "mise": 2000,
+      "probabilite": 0.65,
+      "raison": "Middlesbrough 1er à égalité de points, 32 pts/16, 3V 1D sur 5, 2,0 buts, invaincu à domicile (6V 2N 0D, 19 buts). Swansea 8e, 1V 3D sur 5, 4V 0N 4D à l'extérieur, 3 absents dont Tymon suspendu. H2H : 7 victoires de Boro sur 10. Cote 1,44, marché 67,4 %. Absents des deux côtés et compositions non publiées : proba 65 %. Tout pari peut perdre."
+    },
+    {
+      "option": "M4.1",
+      "mise": 2000,
+      "probabilite": 0.65,
+      "raison": "Palermo 1er, 27 pts/12, +1 sur Modena, une défaite peut lui coûter la tête, meilleure attaque (26 buts), invaincu à domicile (5V 0N 0D, 11-4). Sudtirol 7e, 1V 1D sur 5, 1V 2N 2D à l'extérieur, 3e défense. H2H : 5 victoires de Palermo sur 8, dont 3-0 et 0-2 cette saison. Cote 1,42, marché 67,3 %. Défaite 3-1 à Catanzaro samedi et pas de modèle : proba 65 %, pas 67. Tout pari peut perdre."
+    },
+    {
+      "option": "M10.1",
+      "mise": 1500,
+      "probabilite": 0.58,
+      "raison": "Bradford 6e, montée, meilleure défense (10 buts encaissés en 14). Barnsley 24e, relégation, 4 pts de retard, 0 victoire et 4 défaites sur 5, 1,9 but encaissé, 1V 1N 5D à l'extérieur. Cote 1,55, marché 61,7 %. Forme de Bradford médiocre (1V 1D sur 5, 0,9 but) et H2H plutôt Barnsley (5/10) : proba 58 %, sous le marché, mise réduite. Tout pari peut perdre."
+    }
+  ],
+  "abstention": "Laiss\\u00e9s : M20 Cardiff 5 absents et forme 1,8-1,8, cote 1,49 trop courte pour l'incertitude. M3 6 nuls sur 10 H2H. M8 Benevento seulement 1V/5 et 2V 4N \\u00e0 domicile. M21 City sans Semenyo, Napoli 10 absents, compositions inconnues, victoire s\\u00e8che 1,31 trop courte. M25 Rangers 1,23 apr\\u00e8s 3 jours de r\\u00e9cup\\u00e9ration. M22 Real 1,19, M26 Betis 1,27, M28 Como : favoris trop courts, pas de mod\\u00e8le. M1 Bodo forme 1V 2D et 7 absents au total. M2 et M27 trop d'absents des deux c\\u00f4t\\u00e9s. M29 Arsenal sans Saka, Dortmund sans Guirassy. M13 West Ham 0V/5 malgr\\u00e9 la cote. M14 Hibernian 0 victoire \\u00e0 domicile. Pas d'over ni de BTTS : 0/3 r\\u00e9gl\\u00e9, compositions non publi\\u00e9es. Engagement 9 000, sous 40 %.",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M23.1",
+      "pari": "Wolves",
+      "cote": 1.29,
+      "mise": 2500,
+      "probabilite": 0.72,
+      "raison": "Wolves 3e, 31 pts/16, à 1 pt du leader, 4 victoires sans défaite sur 5, 5V 2N 1D à domicile. Derby 23e, zone de relégation, 1V 3D sur 5, 0,9 but et 2,0 encaissé, 1V 2N 5D à l'extérieur, une des deux pires défenses (32 buts encaissés), 8 absents dont 5 confirmés. Marché 2,41-0,71, victoire Wolves 75,1 % à 1,29. Compositions non publiées et pas de modèle : proba 72 %, un cran sous le marché. Tout pari peut perdre."
+    },
+    {
+      "id": "M16.1",
+      "pari": "Middlesbrough",
+      "cote": 1.44,
+      "mise": 2000,
+      "probabilite": 0.65,
+      "raison": "Middlesbrough 1er à égalité de points, 32 pts/16, 3V 1D sur 5, 2,0 buts, invaincu à domicile (6V 2N 0D, 19 buts). Swansea 8e, 1V 3D sur 5, 4V 0N 4D à l'extérieur, 3 absents dont Tymon suspendu. H2H : 7 victoires de Boro sur 10. Cote 1,44, marché 67,4 %. Absents des deux côtés et compositions non publiées : proba 65 %. Tout pari peut perdre."
+    },
+    {
+      "id": "M4.1",
+      "pari": "Palermo",
+      "cote": 1.42,
+      "mise": 2000,
+      "probabilite": 0.65,
+      "raison": "Palermo 1er, 27 pts/12, +1 sur Modena, une défaite peut lui coûter la tête, meilleure attaque (26 buts), invaincu à domicile (5V 0N 0D, 11-4). Sudtirol 7e, 1V 1D sur 5, 1V 2N 2D à l'extérieur, 3e défense. H2H : 5 victoires de Palermo sur 8, dont 3-0 et 0-2 cette saison. Cote 1,42, marché 67,3 %. Défaite 3-1 à Catanzaro samedi et pas de modèle : proba 65 %, pas 67. Tout pari peut perdre."
+    },
+    {
+      "id": "M10.1",
+      "pari": "Bradford",
+      "cote": 1.55,
+      "mise": 1500,
+      "probabilite": 0.58,
+      "raison": "Bradford 6e, montée, meilleure défense (10 buts encaissés en 14). Barnsley 24e, relégation, 4 pts de retard, 0 victoire et 4 défaites sur 5, 1,9 but encaissé, 1V 1N 5D à l'extérieur. Cote 1,55, marché 61,7 %. Forme de Bradford médiocre (1V 1D sur 5, 0,9 but) et H2H plutôt Barnsley (5/10) : proba 58 %, sous le marché, mise réduite. Tout pari peut perdre."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [
+    {
+      "option": "combiné M23.1 + M16.1",
+      "motif": "sélection déjà jouée en simple : elle compterait deux fois"
+    }
+  ],
+  "enregistres": [
+    "M23.1",
+    "M16.1",
+    "M4.1",
+    "M10.1"
+  ]
+}
