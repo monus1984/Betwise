@@ -758,13 +758,19 @@ export async function extractTickets(db: Db, input: { images?: LlmImage[]; text?
 }
 
 /** Après la lecture : retrouver chaque match, puis la cote quand le prono n'en donne pas (séparé le 24/11 pour être testé seul). */
-export async function rapprocherTickets(db: Db, raws: RawTicket[], res: { tokensIn: number; tokensOut: number; model: string }): Promise<ExtractedTicket[]> {
+export async function rapprocherTickets(db: Db, raws0: RawTicket[], res: { tokensIn: number; tokensOut: number; model: string }, now = Date.now()): Promise<ExtractedTicket[]> {
+  // Tableau de scores publié comme pronos (Daily Tips, Parieurs Foot, 24/11) : la lecture range souvent le score dans
+  // « score » (le résultat) et laisse le pari vide. Pour un prono sans pari écrit dont le match n'est pas joué,
+  // ce score est le pari : un score exact.
+  const raws = raws0.map((raw) => raw.kind !== "pronos" ? raw : { ...raw, selections: raw.selections.map((x) =>
+    !x.pick_text?.trim() && !x.market_text?.trim() && x.score && /^\s*\d{1,2}\s*[-–:]\s*\d{1,2}\s*$/.test(x.score) && x.outcome === "unknown"
+      ? { ...x, pick_text: x.score.replace(/\s+/g, " ").trim(), market_text: "Score exact", score: null } : x) });
   const construire = async () => {
   // Fenêtre de recherche : de 2 jours avant à 5 jours après la date des tickets, TOUS les matchs (24/11 : avec une
   // limite de 600 lignes sur ±10 jours, des centaines de matchs restaient hors de la recherche et n'étaient jamais retrouvés)
-  const refs = raws.map((r) => Date.parse(parseFrDate(r.placed_at) ?? parsePublished(r.source?.published_at ?? null) ?? new Date().toISOString()));
-  const from = new Date(Math.min(...refs, Date.now()) - 2 * 86400000).toISOString();
-  const to = new Date(Math.max(...refs, Date.now()) + 5 * 86400000).toISOString();
+  const refs = raws.map((r) => Date.parse(parseFrDate(r.placed_at) ?? parsePublished(r.source?.published_at ?? null, now) ?? new Date(now).toISOString()));
+  const from = new Date(Math.min(...refs, now) - 2 * 86400000).toISOString();
+  const to = new Date(Math.max(...refs, now) + 5 * 86400000).toISOString();
   type M = { id: string; kickoff_at: string; score_home: number | null; score_away: number | null; home: { nom: string; alias: string[] } | null; away: { nom: string; alias: string[] } | null; competition: { code_externe: string | null } | null };
   const pool: M[] = [];
   for (let page = 0; page < 8; page++) {
@@ -778,7 +784,7 @@ export async function rapprocherTickets(db: Db, raws: RawTicket[], res: { tokens
 
   const out = raws.map((raw, k) => {
     const pronos = raw.kind === "pronos";
-    const ref = parseFrDate(raw.placed_at) ?? parsePublished(raw.source?.published_at ?? null) ?? new Date().toISOString();
+    const ref = parseFrDate(raw.placed_at) ?? parsePublished(raw.source?.published_at ?? null, now) ?? new Date(now).toISOString();
     const selections: MatchedSelection[] = raw.selections.map((s) => {
       const best = s.team_only && !(s.home_team && s.away_team) ? bestMatchOne(s.team_only, matches, ref) : bestMatch(s.home_team, s.away_team, matches);
       const h = best ? best.home!.nom : s.home_team, a = best ? best.away!.nom : s.away_team;
@@ -800,7 +806,7 @@ export async function rapprocherTickets(db: Db, raws: RawTicket[], res: { tokens
       count_ok: raw.nb_selections_declared !== null && !raw.is_collapsed ? raw.selections.length === raw.nb_selections_declared : null,
     };
     // Coût de l'appel compté une fois, sur le premier ticket
-    return { raw, selections, checks, placed_at_iso: parseFrDate(raw.placed_at) ?? parsePublished(raw.source?.published_at ?? null), usage: { tokensIn: k ? 0 : res.tokensIn, tokensOut: k ? 0 : res.tokensOut, model: res.model } };
+    return { raw, selections, checks, placed_at_iso: parseFrDate(raw.placed_at) ?? parsePublished(raw.source?.published_at ?? null, now), usage: { tokensIn: k ? 0 : res.tokensIn, tokensOut: k ? 0 : res.tokensOut, model: res.model } };
   });
   return out;
   };
@@ -810,7 +816,7 @@ export async function rapprocherTickets(db: Db, raws: RawTicket[], res: { tokens
   // on l'ajoute avec ses cotes, puis on refait le rapprochement (23/11).
   const manquants: { equipe: string; adversaire: string | null; ref: string }[] = [];
   for (const t of out) {
-    const ref = parseFrDate(t.raw.placed_at) ?? parsePublished(t.raw.source?.published_at ?? null) ?? new Date().toISOString();
+    const ref = parseFrDate(t.raw.placed_at) ?? parsePublished(t.raw.source?.published_at ?? null, now) ?? new Date(now).toISOString();
     t.selections.forEach((x, j) => {
       if (x.match) return;
       const s = t.raw.selections[j], equipe = s?.team_only ?? s?.home_team ?? null;
