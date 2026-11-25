@@ -31,7 +31,7 @@ async function main() {
   const session = await sessionAudit();
   const moi = clientAudit(session);
   await moi.rpc("ensure_profile", { p_pseudo: AUDIT_PSEUDO });
-  const rpc = moi.rpc as unknown as (f: string, a: object) => Promise<{ data: unknown; error: { message: string } | null }>;
+  const rpc = moi.rpc.bind(moi) as unknown as (f: string, a: object) => Promise<{ data: unknown; error: { message: string } | null }>;
 
   // Données de test : 2 matchs à venir, la source « Moi », une source à soi avec un prono, un dépôt, un combiné, une montante à 2 paliers
   const { data: ms } = await admin.from("matches").select("id").eq("statut", "programme").gte("kickoff_at", new Date(Date.now() + 3 * 3600000).toISOString()).order("kickoff_at").limit(3);
