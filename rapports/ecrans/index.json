@@ -1,0 +1,5407 @@
+{
+ "quand": "2026-11-25T21:15:58.939Z",
+ "base": "https://betwise-iota.vercel.app",
+ "sourcesMasquees": 16,
+ "ecrans": [
+  {
+   "passe": "clair",
+   "nom": "00a-connexion",
+   "chemin": "/connexion",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/connexion",
+   "ms": 1241,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 5,
+    "sous24": 1,
+    "sous44": 2,
+    "exemplesSous24": [
+     "S’inscrire"
+    ]
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {},
+   "betster": null,
+   "noeuds": 67,
+   "perf": {
+    "ttfb": 97,
+    "dom": 421,
+    "charge": 498,
+    "ko": 250
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "00b-inscription",
+   "chemin": "/inscription",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/inscription",
+   "ms": 1331,
+   "erreurs": [],
+   "hauteur": 840,
+   "ecrans": 1.1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 7,
+    "sous24": 2,
+    "sous44": 3,
+    "exemplesSous24": [
+     "INPUT",
+     "Se connecter"
+    ]
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {},
+   "betster": null,
+   "noeuds": 74,
+   "perf": {
+    "ttfb": 23,
+    "dom": 442,
+    "charge": 483,
+    "ko": 7
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "01-predictions",
+   "chemin": "/",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/",
+   "ms": 4748,
+   "erreurs": [],
+   "hauteur": 3392,
+   "ecrans": 4.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 37,
+    "sous24": 1,
+    "sous44": 26,
+    "exemplesSous24": [
+     "Tous ›"
+    ]
+   },
+   "images": {
+    "total": 2,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 4,
+    "11": 63,
+    "10.5": 32,
+    "11.5": 45
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 22
+   },
+   "noeuds": 406,
+   "perf": {
+    "ttfb": 68,
+    "dom": 3302,
+    "charge": 3423,
+    "ko": 302
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "01b-predictions-audacieux",
+   "chemin": "/",
+   "note": "onglet Audacieux des coups du jour",
+   "statut": 200,
+   "arrivee": "/",
+   "ms": 4150,
+   "erreurs": [],
+   "hauteur": 3427,
+   "ecrans": 4.4,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 37,
+    "sous24": 1,
+    "sous44": 26,
+    "exemplesSous24": [
+     "Tous ›"
+    ]
+   },
+   "images": {
+    "total": 2,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 4,
+    "11": 57,
+    "10.5": 32,
+    "11.5": 36
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 22
+   },
+   "noeuds": 403,
+   "perf": {
+    "ttfb": 22,
+    "dom": 2533,
+    "charge": 2543,
+    "ko": 22
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "01c-predictions-aide",
+   "chemin": "/",
+   "note": "aide ouverte",
+   "statut": 200,
+   "arrivee": "/",
+   "ms": 3676,
+   "erreurs": [],
+   "hauteur": 3392,
+   "ecrans": 4.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 40,
+    "sous24": 1,
+    "sous44": 30,
+    "exemplesSous24": [
+     "Tous ›"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 4,
+    "11": 68,
+    "10.5": 32,
+    "11.5": 45
+   },
+   "betster": null,
+   "noeuds": 435,
+   "perf": {
+    "ttfb": 22,
+    "dom": 2376,
+    "charge": 2386,
+    "ko": 22
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "02-matchs",
+   "chemin": "/matchs",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs",
+   "ms": 2922,
+   "erreurs": [],
+   "hauteur": 1477,
+   "ecrans": 1.9,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 81,
+    "sous24": 0,
+    "sous44": 31,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 49,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 8,
+    "10.5": 14,
+    "11.5": 21
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 37
+   },
+   "noeuds": 703,
+   "perf": {
+    "ttfb": 22,
+    "dom": 1199,
+    "charge": 1199,
+    "ko": 32
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "02b-matchs-championnat-ouvert",
+   "chemin": "/matchs",
+   "note": "premier championnat déroulé",
+   "statut": 200,
+   "arrivee": "/matchs",
+   "ms": 3322,
+   "erreurs": [],
+   "hauteur": 1764,
+   "ecrans": 2.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 82,
+    "sous24": 0,
+    "sous44": 32,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 49,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 8,
+    "10.5": 14,
+    "11.5": 21
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 2
+   },
+   "noeuds": 705,
+   "perf": {
+    "ttfb": 24,
+    "dom": 1354,
+    "charge": 1355,
+    "ko": 25
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "02c-matchs-hier",
+   "chemin": "/matchs?d=2026-11-24",
+   "note": "veille : matchs terminés, scores",
+   "statut": 200,
+   "arrivee": "/matchs?d=2026-11-24",
+   "ms": 2937,
+   "erreurs": [],
+   "hauteur": 2242,
+   "ecrans": 2.9,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 80,
+    "sous24": 0,
+    "sous44": 15,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 75,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 7,
+    "10.5": 16,
+    "11.5": 25
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 2
+   },
+   "noeuds": 884,
+   "perf": {
+    "ttfb": 22,
+    "dom": 974,
+    "charge": 1110,
+    "ko": 62
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "02d-matchs-termines",
+   "chemin": "/matchs?s=termines&d=2026-11-25",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs?s=termines&d=2026-11-25",
+   "ms": 2861,
+   "erreurs": [],
+   "hauteur": 1193,
+   "ecrans": 1.5,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 44,
+    "sous24": 0,
+    "sous44": 13,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 13,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 7,
+    "11.5": 10
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 19
+   },
+   "noeuds": 315,
+   "perf": {
+    "ttfb": 22,
+    "dom": 820,
+    "charge": 822,
+    "ko": 21
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "02e-matchs-a-venir",
+   "chemin": "/matchs?s=programmes&d=2026-11-25",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs?s=programmes&d=2026-11-25",
+   "ms": 1796,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 32,
+    "sous24": 0,
+    "sous44": 9,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 7
+   },
+   "noeuds": 184,
+   "perf": {
+    "ttfb": 22,
+    "dom": 636,
+    "charge": 636,
+    "ko": 10
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "02f-matchs-direct",
+   "chemin": "/matchs?f=direct",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs?f=direct",
+   "ms": 2587,
+   "erreurs": [],
+   "hauteur": 1494,
+   "ecrans": 1.9,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 61,
+    "sous24": 0,
+    "sous44": 25,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 23,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 7,
+    "11.5": 16
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 24
+   },
+   "noeuds": 428,
+   "perf": {
+    "ttfb": 22,
+    "dom": 717,
+    "charge": 724,
+    "ko": 27
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "02g-matchs-suivis",
+   "chemin": "/matchs?f=suivis",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs?f=suivis",
+   "ms": 1909,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 32,
+    "sous24": 0,
+    "sous44": 9,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 7
+   },
+   "noeuds": 182,
+   "perf": {
+    "ttfb": 22,
+    "dom": 990,
+    "charge": 990,
+    "ko": 10
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "02h-matchs-recherche",
+   "chemin": "/matchs?q=barcelona",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs?q=barcelona",
+   "ms": 2646,
+   "erreurs": [],
+   "hauteur": 1300,
+   "ecrans": 1.7,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 34,
+    "sous24": 0,
+    "sous44": 17,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 17,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 14,
+    "11": 6,
+    "11.5": 17,
+    "9.5": 4
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 21
+   },
+   "noeuds": 304,
+   "perf": {
+    "ttfb": 22,
+    "dom": 864,
+    "charge": 871,
+    "ko": 22
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "02i-matchs-recherche-vide",
+   "chemin": "/matchs?q=zzqqxx",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs?q=zzqqxx",
+   "ms": 2075,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 10,
+    "sous24": 0,
+    "sous44": 4,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 4
+   },
+   "noeuds": 95,
+   "perf": {
+    "ttfb": 22,
+    "dom": 933,
+    "charge": 933,
+    "ko": 9
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "02j-matchs-aide",
+   "chemin": "/matchs",
+   "note": "aide ouverte",
+   "statut": 200,
+   "arrivee": "/matchs",
+   "ms": 2406,
+   "erreurs": [],
+   "hauteur": 1477,
+   "ecrans": 1.9,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 83,
+    "sous24": 0,
+    "sous44": 34,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 48,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 13,
+    "10.5": 14,
+    "11.5": 21
+   },
+   "betster": null,
+   "noeuds": 728,
+   "perf": {
+    "ttfb": 22,
+    "dom": 701,
+    "charge": 702,
+    "ko": 25
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "03a-match-analyse",
+   "chemin": "/matchs/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>",
+   "ms": 2641,
+   "erreurs": [],
+   "hauteur": 8096,
+   "ecrans": 10.4,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 285,
+    "sous24": 27,
+    "sous44": 90,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "voir son bilan",
+     "2e mi-temps▾",
+     "Sur les deux mi-temps▾",
+     "Mi-temps / fin de match▾",
+     "Mi-temps avec le plus de buts▾",
+     "Nombre exact de buts▾",
+     "Tranche de buts▾",
+     "Score exact : les huit plus probables▾",
+     "Handicap européen (3 issues)▾",
+     "Double chance et buts▾",
+     "Résultat et buts▾"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 202,
+    "11": 402,
+    "11.5": 6
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 195
+   },
+   "noeuds": 1599,
+   "perf": {
+    "ttfb": 22,
+    "dom": 1240,
+    "charge": 1249,
+    "ko": 38
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "03b-match-stats",
+   "chemin": "/matchs/<id>?t=stats",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>?t=stats",
+   "ms": 2172,
+   "erreurs": [],
+   "hauteur": 1741,
+   "ecrans": 2.2,
+   "debordePage": 0,
+   "coupes": {
+    "n": 1,
+    "exemples": [
+     "Borussia Mönchengladbach"
+    ]
+   },
+   "cibles": {
+    "total": 17,
+    "sous24": 2,
+    "sous44": 10,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "tout le classement ›"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 32
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 6
+   },
+   "noeuds": 286,
+   "perf": {
+    "ttfb": 22,
+    "dom": 858,
+    "charge": 864,
+    "ko": 13
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "03c-match-compos",
+   "chemin": "/matchs/<id>?t=compos",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>?t=compos",
+   "ms": 1828,
+   "erreurs": [],
+   "hauteur": 1195,
+   "ecrans": 1.5,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 16,
+    "sous24": 1,
+    "sous44": 9,
+    "exemplesSous24": [
+     "‹ Matchs"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 11,
+    "11.5": 16
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 5
+   },
+   "noeuds": 187,
+   "perf": {
+    "ttfb": 22,
+    "dom": 781,
+    "charge": 785,
+    "ko": 11
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "03c2-match-compos-direct",
+   "chemin": "/matchs/<id>?t=compos",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>?t=compos",
+   "ms": 1933,
+   "erreurs": [],
+   "hauteur": 2560,
+   "ecrans": 3.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 6,
+    "exemples": [
+     "Sporting Clube de Portugal · Paulo Fonseca",
+     "Manchester United · M. Pochettino",
+     "S. Lammens (G)",
+     "Eduardo Quaresma",
+     "Lisandro Martínez",
+     "Eduardo Felicíssimo"
+    ]
+   },
+   "cibles": {
+    "total": 17,
+    "sous24": 1,
+    "sous44": 10,
+    "exemplesSous24": [
+     "‹ Matchs"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "9": 1,
+    "10": 2,
+    "11": 20,
+    "10.5": 22,
+    "9.5": 22,
+    "11.5": 8
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 5
+   },
+   "noeuds": 538,
+   "perf": {
+    "ttfb": 22,
+    "dom": 1017,
+    "charge": 1024,
+    "ko": 17
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "03d-match-sources",
+   "chemin": "/matchs/<id>?t=sources",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>?t=sources",
+   "ms": 1762,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 16,
+    "sous24": 1,
+    "sous44": 9,
+    "exemplesSous24": [
+     "‹ Matchs"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 11
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 5
+   },
+   "noeuds": 132,
+   "perf": {
+    "ttfb": 22,
+    "dom": 704,
+    "charge": 704,
+    "ko": 10
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "03e-match-termine",
+   "chemin": "/matchs/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>",
+   "ms": 1697,
+   "erreurs": [],
+   "hauteur": 6698,
+   "ecrans": 8.6,
+   "debordePage": 0,
+   "coupes": {
+    "n": 1,
+    "exemples": [
+     "Mantova (remboursé si nul) · 1xBet"
+    ]
+   },
+   "cibles": {
+    "total": 244,
+    "sous24": 15,
+    "sous44": 78,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "2e mi-temps▾",
+     "Sur les deux mi-temps▾",
+     "Mi-temps / fin de match▾",
+     "Mi-temps avec le plus de buts▾",
+     "Nombre exact de buts▾",
+     "Tranche de buts▾",
+     "Buts de Mantova : nombre exact, pair ou impair▾",
+     "Buts de Arezzo : nombre exact, pair ou impair▾",
+     "Score exact : les huit plus probables▾",
+     "Handicap européen (3 issues)▾",
+     "Double chance et buts▾"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 192,
+    "11": 367
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 181
+   },
+   "noeuds": 1484,
+   "perf": {
+    "ttfb": 23,
+    "dom": 848,
+    "charge": 857,
+    "ko": 28
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "03f-match-termine-stats",
+   "chemin": "/matchs/<id>?t=stats",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>?t=stats",
+   "ms": 2359,
+   "erreurs": [],
+   "hauteur": 1543,
+   "ecrans": 2,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 15,
+    "sous24": 2,
+    "sous44": 9,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "tout le classement ›"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 19
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 4
+   },
+   "noeuds": 272,
+   "perf": {
+    "ttfb": 22,
+    "dom": 1138,
+    "charge": 1143,
+    "ko": 12
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "03g-match-termine-marches",
+   "chemin": "/matchs/<id>?t=marches",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>?t=marches",
+   "ms": 1981,
+   "erreurs": [],
+   "hauteur": 6698,
+   "ecrans": 8.6,
+   "debordePage": 0,
+   "coupes": {
+    "n": 1,
+    "exemples": [
+     "Mantova (remboursé si nul) · 1xBet"
+    ]
+   },
+   "cibles": {
+    "total": 244,
+    "sous24": 15,
+    "sous44": 78,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "2e mi-temps▾",
+     "Sur les deux mi-temps▾",
+     "Mi-temps / fin de match▾",
+     "Mi-temps avec le plus de buts▾",
+     "Nombre exact de buts▾",
+     "Tranche de buts▾",
+     "Buts de Mantova : nombre exact, pair ou impair▾",
+     "Buts de Arezzo : nombre exact, pair ou impair▾",
+     "Score exact : les huit plus probables▾",
+     "Handicap européen (3 issues)▾",
+     "Double chance et buts▾"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 192,
+    "11": 367
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 181
+   },
+   "noeuds": 1487,
+   "perf": {
+    "ttfb": 22,
+    "dom": 1075,
+    "charge": 1075,
+    "ko": 28
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "03h-match-en-direct",
+   "chemin": "/matchs/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>",
+   "ms": 2479,
+   "erreurs": [],
+   "hauteur": 7822,
+   "ecrans": 10,
+   "debordePage": 0,
+   "coupes": {
+    "n": 2,
+    "exemples": [
+     "Sporting Clube de Portugal ou nul",
+     "Manchester United : plus de 0,5 but · Betclic"
+    ]
+   },
+   "cibles": {
+    "total": 260,
+    "sous24": 26,
+    "sous44": 65,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "2e mi-temps▾",
+     "Sur les deux mi-temps▾",
+     "Mi-temps / fin de match▾",
+     "Mi-temps avec le plus de buts▾",
+     "Nombre exact de buts▾",
+     "Tranche de buts▾",
+     "Score exact : les huit plus probables▾",
+     "Handicap européen (3 issues)▾",
+     "Double chance et buts▾",
+     "Résultat et buts▾",
+     "Résultat et les deux marquent▾"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 203,
+    "11": 401,
+    "11.5": 6
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 183
+   },
+   "noeuds": 1583,
+   "perf": {
+    "ttfb": 22,
+    "dom": 1534,
+    "charge": 1555,
+    "ko": 32
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "03i-match-sans-cote",
+   "chemin": "/matchs/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>",
+   "ms": 2153,
+   "erreurs": [],
+   "hauteur": 7252,
+   "ecrans": 9.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 279,
+    "sous24": 25,
+    "sous44": 109,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "2e mi-temps▾",
+     "Sur les deux mi-temps▾",
+     "Mi-temps / fin de match▾",
+     "Mi-temps avec le plus de buts▾",
+     "Nombre exact de buts▾",
+     "Tranche de buts▾",
+     "Buts de Al-Fateh : nombre exact, pair ou impair▾",
+     "Buts de Al Riyadh : nombre exact, pair ou impair",
+     "Score exact : les huit plus probables▾",
+     "Handicap européen (3 issues)▾",
+     "Double chance et buts▾"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 193,
+    "11": 378,
+    "11.5": 6
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 193
+   },
+   "noeuds": 1534,
+   "perf": {
+    "ttfb": 22,
+    "dom": 1152,
+    "charge": 1172,
+    "ko": 31
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "03j-match-introuvable",
+   "chemin": "/matchs/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>",
+   "ms": 2047,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 1,
+    "sous24": 0,
+    "sous44": 0,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {},
+   "betster": null,
+   "noeuds": 51,
+   "perf": {
+    "ttfb": 22,
+    "dom": 987,
+    "charge": 987,
+    "ko": 7
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "04-classement",
+   "chemin": "/matchs/classement",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/classement",
+   "ms": 1682,
+   "erreurs": [],
+   "hauteur": 1146,
+   "ecrans": 1.5,
+   "debordePage": 0,
+   "coupes": {
+    "n": 5,
+    "exemples": [
+     "Brighton & Hove Albion",
+     "Tottenham Hotspur",
+     "Newcastle United",
+     "Nottingham Forest",
+     "Manchester United"
+    ]
+   },
+   "cibles": {
+    "total": 48,
+    "sous24": 1,
+    "sous44": 42,
+    "exemplesSous24": [
+     "‹ Matchs"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 14
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 3
+   },
+   "noeuds": 481,
+   "perf": {
+    "ttfb": 22,
+    "dom": 509,
+    "charge": 576,
+    "ko": 13
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "05a-paris-en-cours",
+   "chemin": "/paris",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/paris",
+   "ms": 2026,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 17,
+    "sous24": 3,
+    "sous44": 11,
+    "exemplesSous24": [
+     "Analyser · modifier ›",
+     "Moi",
+     "Supprimer"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 8
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 7
+   },
+   "noeuds": 121,
+   "perf": {
+    "ttfb": 22,
+    "dom": 671,
+    "charge": 671,
+    "ko": 21
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "05b-paris-regles",
+   "chemin": "/paris?f=regles",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/paris?f=regles",
+   "ms": 2113,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 14,
+    "sous24": 0,
+    "sous44": 8,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 5
+   },
+   "noeuds": 99,
+   "perf": {
+    "ttfb": 22,
+    "dom": 587,
+    "charge": 587,
+    "ko": 10
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "05c-paris-test",
+   "chemin": "/paris?vue=tests",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/paris?vue=tests",
+   "ms": 2099,
+   "erreurs": [],
+   "hauteur": 2129,
+   "ecrans": 2.7,
+   "debordePage": 0,
+   "coupes": {
+    "n": 1,
+    "exemples": [
+     "✗ GO Ahead Eagles – Fortuna Sittard"
+    ]
+   },
+   "cibles": {
+    "total": 40,
+    "sous24": 21,
+    "sous44": 32,
+    "exemplesSous24": [
+     "Par type de marché",
+     "Par compétition",
+     "Par origine (toi, tes tipsters, le modèle)",
+     "Analyser · modifier ›",
+     "Moi",
+     "Supprimer"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 43
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 21
+   },
+   "noeuds": 315,
+   "perf": {
+    "ttfb": 22,
+    "dom": 696,
+    "charge": 697,
+    "ko": 17
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "05d-detail-pari",
+   "chemin": "/paris/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/paris/<id>",
+   "ms": 1581,
+   "erreurs": [],
+   "hauteur": 1917,
+   "ecrans": 2.5,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 21,
+    "sous24": 3,
+    "sous44": 9,
+    "exemplesSous24": [
+     "‹ Mes paris",
+     "Changer",
+     "Moi"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 3,
+    "11": 15
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 7
+   },
+   "noeuds": 282,
+   "perf": {
+    "ttfb": 22,
+    "dom": 739,
+    "charge": 742,
+    "ko": 31
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "06a-ajouter",
+   "chemin": "/paris/ajouter",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/paris/ajouter",
+   "ms": 2231,
+   "erreurs": [],
+   "hauteur": 942,
+   "ecrans": 1.2,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 13,
+    "sous24": 1,
+    "sous44": 3,
+    "exemplesSous24": [
+     "Ajoute la source"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 6
+   },
+   "noeuds": 132,
+   "perf": {
+    "ttfb": 22,
+    "dom": 516,
+    "charge": 556,
+    "ko": 17
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "06b-nouveau-pari",
+   "chemin": "/nouveau",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/nouveau",
+   "ms": 1572,
+   "erreurs": [],
+   "hauteur": 2048,
+   "ecrans": 2.6,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 126,
+    "sous24": 0,
+    "sous44": 90,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 6
+   },
+   "betster": null,
+   "noeuds": 484,
+   "perf": {
+    "ttfb": 25,
+    "dom": 806,
+    "charge": 806,
+    "ko": 24
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "06c-nouveau-test",
+   "chemin": "/nouveau?test=1",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/nouveau?test=1",
+   "ms": 1760,
+   "erreurs": [],
+   "hauteur": 2265,
+   "ecrans": 2.9,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 126,
+    "sous24": 0,
+    "sous44": 90,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 6
+   },
+   "betster": null,
+   "noeuds": 486,
+   "perf": {
+    "ttfb": 23,
+    "dom": 794,
+    "charge": 794,
+    "ko": 18
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "06d-importer",
+   "chemin": "/import",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/import",
+   "ms": 1450,
+   "erreurs": [],
+   "hauteur": 1496,
+   "ecrans": 1.9,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 32,
+    "sous24": 0,
+    "sous44": 22,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 25
+   },
+   "betster": null,
+   "noeuds": 145,
+   "perf": {
+    "ttfb": 22,
+    "dom": 554,
+    "charge": 556,
+    "ko": 27
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "06e-importer-test",
+   "chemin": "/import?test=1",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/import?test=1",
+   "ms": 1605,
+   "erreurs": [],
+   "hauteur": 1578,
+   "ecrans": 2,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 32,
+    "sous24": 0,
+    "sous44": 22,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 25
+   },
+   "betster": null,
+   "noeuds": 147,
+   "perf": {
+    "ttfb": 22,
+    "dom": 625,
+    "charge": 625,
+    "ko": 12
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "07a-coach",
+   "chemin": "/coach",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/coach",
+   "ms": 1829,
+   "erreurs": [],
+   "hauteur": 1226,
+   "ecrans": 1.6,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 21,
+    "sous24": 2,
+    "sous44": 11,
+    "exemplesSous24": [
+     "Bilan détaillé ›",
+     "Fixer mon budget"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 10,
+    "11.5": 2
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 10
+   },
+   "noeuds": 166,
+   "perf": {
+    "ttfb": 22,
+    "dom": 620,
+    "charge": 620,
+    "ko": 22
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "07b-coach-discussion",
+   "chemin": "/coach?v=discussion",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/coach?v=discussion",
+   "ms": 1475,
+   "erreurs": [],
+   "hauteur": 973,
+   "ecrans": 1.2,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 17,
+    "sous24": 1,
+    "sous44": 7,
+    "exemplesSous24": [
+     "Reprendre la précédente"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 6
+   },
+   "betster": null,
+   "noeuds": 99,
+   "perf": {
+    "ttfb": 22,
+    "dom": 421,
+    "charge": 470,
+    "ko": 8
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "07c-bankroll",
+   "chemin": "/bankroll",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/bankroll",
+   "ms": 1942,
+   "erreurs": [],
+   "hauteur": 1054,
+   "ecrans": 1.4,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 14,
+    "sous24": 0,
+    "sous44": 8,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 13
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 4
+   },
+   "noeuds": 130,
+   "perf": {
+    "ttfb": 22,
+    "dom": 495,
+    "charge": 559,
+    "ko": 13
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "07d-montantes",
+   "chemin": "/montantes",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/montantes",
+   "ms": 2119,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 12,
+    "sous24": 0,
+    "sous44": 4,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 5,
+    "11.5": 4
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 4
+   },
+   "noeuds": 108,
+   "perf": {
+    "ttfb": 22,
+    "dom": 806,
+    "charge": 861,
+    "ko": 14
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "07e-montante",
+   "chemin": "/montantes/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/montantes/<id>",
+   "ms": 2262,
+   "erreurs": [],
+   "hauteur": 1196,
+   "ecrans": 1.5,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 21,
+    "sous24": 0,
+    "sous44": 12,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 23,
+    "11.5": 9
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 12
+   },
+   "noeuds": 151,
+   "perf": {
+    "ttfb": 22,
+    "dom": 1140,
+    "charge": 1168,
+    "ko": 21
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "07f-options",
+   "chemin": "/options",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/options",
+   "ms": 1993,
+   "erreurs": [],
+   "hauteur": 979,
+   "ecrans": 1.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 27,
+    "sous24": 0,
+    "sous44": 21,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 8
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 5
+   },
+   "noeuds": 130,
+   "perf": {
+    "ttfb": 22,
+    "dom": 610,
+    "charge": 688,
+    "ko": 13
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "08a-sources",
+   "chemin": "/sources",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources",
+   "ms": 4308,
+   "erreurs": [],
+   "hauteur": 3348,
+   "ecrans": 4.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 31,
+    "sous24": 9,
+    "sous44": 16,
+    "exemplesSous24": [
+     "Tout le détail ›"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 82
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 22
+   },
+   "noeuds": 264,
+   "perf": {
+    "ttfb": 22,
+    "dom": 3232,
+    "charge": 3241,
+    "ko": 102
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "08b-sources-analyse",
+   "chemin": "/sources?f=analyse",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources?f=analyse",
+   "ms": 1944,
+   "erreurs": [],
+   "hauteur": 978,
+   "ecrans": 1.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 15,
+    "sous24": 2,
+    "sous44": 9,
+    "exemplesSous24": [
+     "Source 5Page Facebook ›",
+     "MoiMes propres choix ›"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 33
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 6
+   },
+   "noeuds": 158,
+   "perf": {
+    "ttfb": 23,
+    "dom": 669,
+    "charge": 669,
+    "ko": 12
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "08d-sources-suivies",
+   "chemin": "/sources?f=suivies",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources?f=suivies",
+   "ms": 1927,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 40,
+    "sous24": 0,
+    "sous44": 7,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 19,
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 31
+   },
+   "noeuds": 327,
+   "perf": {
+    "ttfb": 22,
+    "dom": 565,
+    "charge": 565,
+    "ko": 14
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "08c-sources-classement",
+   "chemin": "/sources?f=classement",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources?f=classement",
+   "ms": 2007,
+   "erreurs": [],
+   "hauteur": 2192,
+   "ecrans": 2.8,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 33,
+    "sous24": 0,
+    "sous44": 8,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 5,
+    "11": 35
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 24
+   },
+   "noeuds": 219,
+   "perf": {
+    "ttfb": 23,
+    "dom": 561,
+    "charge": 561,
+    "ko": 17
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "08d-sources-decouvrir",
+   "chemin": "/sources?f=decouvrir",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources?f=decouvrir",
+   "ms": 2526,
+   "erreurs": [],
+   "hauteur": 1738,
+   "ecrans": 2.2,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 41,
+    "sous24": 0,
+    "sous44": 7,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 19,
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 32
+   },
+   "noeuds": 324,
+   "perf": {
+    "ttfb": 23,
+    "dom": 591,
+    "charge": 591,
+    "ko": 20
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "08e-source-modele",
+   "chemin": "/sources/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources/<id>",
+   "ms": 1621,
+   "erreurs": [],
+   "hauteur": 8166,
+   "ecrans": 10.5,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 13,
+    "sous24": 1,
+    "sous44": 7,
+    "exemplesSous24": [
+     "‹ Sources"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 65,
+    "11": 278
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 3
+   },
+   "noeuds": 1181,
+   "perf": {
+    "ttfb": 22,
+    "dom": 1092,
+    "charge": 1093,
+    "ko": 32
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "08f-source-coups-du-jour",
+   "chemin": "/sources/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources/<id>",
+   "ms": 1925,
+   "erreurs": [],
+   "hauteur": 8738,
+   "ecrans": 11.2,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 17,
+    "sous24": 1,
+    "sous44": 10,
+    "exemplesSous24": [
+     "‹ Sources"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 65,
+    "11": 278
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 6
+   },
+   "noeuds": 1343,
+   "perf": {
+    "ttfb": 22,
+    "dom": 942,
+    "charge": 942,
+    "ko": 30
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "08g-nouvelle-source",
+   "chemin": "/sources/nouvelle",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources/nouvelle",
+   "ms": 1889,
+   "erreurs": [],
+   "hauteur": 1097,
+   "ecrans": 1.4,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 15,
+    "sous24": 3,
+    "sous44": 3,
+    "exemplesSous24": [
+     "‹ Sources",
+     "INPUT"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 7
+   },
+   "noeuds": 121,
+   "perf": {
+    "ttfb": 22,
+    "dom": 830,
+    "charge": 866,
+    "ko": 9
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "08h-comparer",
+   "chemin": "/sources/comparer",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources/comparer",
+   "ms": 1525,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 10,
+    "sous24": 0,
+    "sous44": 4,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 4
+   },
+   "noeuds": 134,
+   "perf": {
+    "ttfb": 22,
+    "dom": 486,
+    "charge": 557,
+    "ko": 11
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "09a-bilan",
+   "chemin": "/bilan",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/bilan",
+   "ms": 1761,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 13,
+    "sous24": 1,
+    "sous44": 7,
+    "exemplesSous24": [
+     "importe un ticket"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 4
+   },
+   "noeuds": 90,
+   "perf": {
+    "ttfb": 23,
+    "dom": 465,
+    "charge": 531,
+    "ko": 12
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "09b-notifications",
+   "chemin": "/notifications",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/notifications",
+   "ms": 2084,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 7,
+    "sous24": 0,
+    "sous44": 1,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 6
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 2
+   },
+   "noeuds": 87,
+   "perf": {
+    "ttfb": 22,
+    "dom": 780,
+    "charge": 856,
+    "ko": 10
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "09c-reglages",
+   "chemin": "/reglages",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/reglages",
+   "ms": 1839,
+   "erreurs": [],
+   "hauteur": 833,
+   "ecrans": 1.1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 1,
+    "exemples": [
+     "Connecté : audit@betwise.invalid"
+    ]
+   },
+   "cibles": {
+    "total": 13,
+    "sous24": 1,
+    "sous44": 4,
+    "exemplesSous24": [
+     "Voir les notifications reçues"
+    ]
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 6
+   },
+   "betster": null,
+   "noeuds": 111,
+   "perf": {
+    "ttfb": 37,
+    "dom": 652,
+    "charge": 652,
+    "ko": 15
+   },
+   "a11y": []
+  },
+  {
+   "passe": "clair",
+   "nom": "10-page-inexistante",
+   "chemin": "/page-qui-n-existe-pas",
+   "note": null,
+   "statut": 404,
+   "arrivee": "/page-qui-n-existe-pas",
+   "ms": 1415,
+   "erreurs": [
+    "Failed to load resource: the server responded with a status of 404 ()"
+   ],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 1,
+    "sous24": 0,
+    "sous44": 0,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {},
+   "betster": null,
+   "noeuds": 45,
+   "perf": {
+    "ttfb": 23,
+    "dom": 373,
+    "charge": 403,
+    "ko": 5
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "00a-connexion",
+   "chemin": "/connexion",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/connexion",
+   "ms": 813,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 5,
+    "sous24": 1,
+    "sous44": 2,
+    "exemplesSous24": [
+     "S’inscrire"
+    ]
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {},
+   "betster": null,
+   "noeuds": 64,
+   "perf": {
+    "ttfb": 68,
+    "dom": 138,
+    "charge": 222,
+    "ko": 250
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "00b-inscription",
+   "chemin": "/inscription",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/inscription",
+   "ms": 681,
+   "erreurs": [],
+   "hauteur": 840,
+   "ecrans": 1.1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 7,
+    "sous24": 2,
+    "sous44": 3,
+    "exemplesSous24": [
+     "INPUT",
+     "Se connecter"
+    ]
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {},
+   "betster": null,
+   "noeuds": 76,
+   "perf": {
+    "ttfb": 22,
+    "dom": 71,
+    "charge": 119,
+    "ko": 7
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "01-predictions",
+   "chemin": "/",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/",
+   "ms": 4304,
+   "erreurs": [],
+   "hauteur": 3392,
+   "ecrans": 4.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 37,
+    "sous24": 1,
+    "sous44": 26,
+    "exemplesSous24": [
+     "Tous ›"
+    ]
+   },
+   "images": {
+    "total": 2,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 4,
+    "11": 63,
+    "10.5": 32,
+    "11.5": 45
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 22
+   },
+   "noeuds": 401,
+   "perf": {
+    "ttfb": 70,
+    "dom": 3040,
+    "charge": 3098,
+    "ko": 302
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "01b-predictions-audacieux",
+   "chemin": "/",
+   "note": "onglet Audacieux des coups du jour",
+   "statut": 200,
+   "arrivee": "/",
+   "ms": 2893,
+   "erreurs": [],
+   "hauteur": 3427,
+   "ecrans": 4.4,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 37,
+    "sous24": 1,
+    "sous44": 26,
+    "exemplesSous24": [
+     "Tous ›"
+    ]
+   },
+   "images": {
+    "total": 2,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 4,
+    "11": 57,
+    "10.5": 32,
+    "11.5": 36
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 22
+   },
+   "noeuds": 395,
+   "perf": {
+    "ttfb": 23,
+    "dom": 1706,
+    "charge": 1720,
+    "ko": 25
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "01c-predictions-aide",
+   "chemin": "/",
+   "note": "aide ouverte",
+   "statut": 200,
+   "arrivee": "/",
+   "ms": 3486,
+   "erreurs": [],
+   "hauteur": 3392,
+   "ecrans": 4.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 40,
+    "sous24": 1,
+    "sous44": 30,
+    "exemplesSous24": [
+     "Tous ›"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 4,
+    "11": 68,
+    "10.5": 32,
+    "11.5": 45
+   },
+   "betster": null,
+   "noeuds": 432,
+   "perf": {
+    "ttfb": 22,
+    "dom": 2217,
+    "charge": 2217,
+    "ko": 22
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "02-matchs",
+   "chemin": "/matchs",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs",
+   "ms": 2354,
+   "erreurs": [],
+   "hauteur": 1477,
+   "ecrans": 1.9,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 81,
+    "sous24": 0,
+    "sous44": 31,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 49,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 8,
+    "10.5": 14,
+    "11.5": 21
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 37
+   },
+   "noeuds": 696,
+   "perf": {
+    "ttfb": 23,
+    "dom": 934,
+    "charge": 943,
+    "ko": 32
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "02b-matchs-championnat-ouvert",
+   "chemin": "/matchs",
+   "note": "premier championnat déroulé",
+   "statut": 200,
+   "arrivee": "/matchs",
+   "ms": 2216,
+   "erreurs": [],
+   "hauteur": 1764,
+   "ecrans": 2.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 82,
+    "sous24": 0,
+    "sous44": 32,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 49,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 8,
+    "10.5": 14,
+    "11.5": 21
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 2
+   },
+   "noeuds": 701,
+   "perf": {
+    "ttfb": 24,
+    "dom": 777,
+    "charge": 785,
+    "ko": 25
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "02c-matchs-hier",
+   "chemin": "/matchs?d=2026-11-24",
+   "note": "veille : matchs terminés, scores",
+   "statut": 200,
+   "arrivee": "/matchs?d=2026-11-24",
+   "ms": 2605,
+   "erreurs": [],
+   "hauteur": 2242,
+   "ecrans": 2.9,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 80,
+    "sous24": 0,
+    "sous44": 15,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 75,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 7,
+    "10.5": 16,
+    "11.5": 25
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 2
+   },
+   "noeuds": 881,
+   "perf": {
+    "ttfb": 23,
+    "dom": 1221,
+    "charge": 1230,
+    "ko": 63
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "02d-matchs-termines",
+   "chemin": "/matchs?s=termines&d=2026-11-25",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs?s=termines&d=2026-11-25",
+   "ms": 2224,
+   "erreurs": [],
+   "hauteur": 1193,
+   "ecrans": 1.5,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 44,
+    "sous24": 0,
+    "sous44": 13,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 13,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 7,
+    "11.5": 10
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 19
+   },
+   "noeuds": 310,
+   "perf": {
+    "ttfb": 23,
+    "dom": 775,
+    "charge": 775,
+    "ko": 21
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "02e-matchs-a-venir",
+   "chemin": "/matchs?s=programmes&d=2026-11-25",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs?s=programmes&d=2026-11-25",
+   "ms": 1704,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 32,
+    "sous24": 0,
+    "sous44": 9,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 7
+   },
+   "noeuds": 179,
+   "perf": {
+    "ttfb": 23,
+    "dom": 830,
+    "charge": 831,
+    "ko": 10
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "02f-matchs-direct",
+   "chemin": "/matchs?f=direct",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs?f=direct",
+   "ms": 6644,
+   "erreurs": [],
+   "hauteur": 1494,
+   "ecrans": 1.9,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 61,
+    "sous24": 0,
+    "sous44": 25,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 23,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 7,
+    "11.5": 16
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 24
+   },
+   "noeuds": 427,
+   "perf": {
+    "ttfb": 23,
+    "dom": 4164,
+    "charge": 4171,
+    "ko": 28
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "02g-matchs-suivis",
+   "chemin": "/matchs?f=suivis",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs?f=suivis",
+   "ms": 2219,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 32,
+    "sous24": 0,
+    "sous44": 9,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 7
+   },
+   "noeuds": 178,
+   "perf": {
+    "ttfb": 23,
+    "dom": 1065,
+    "charge": 1075,
+    "ko": 10
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "02h-matchs-recherche",
+   "chemin": "/matchs?q=barcelona",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs?q=barcelona",
+   "ms": 5528,
+   "erreurs": [],
+   "hauteur": 1300,
+   "ecrans": 1.7,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 34,
+    "sous24": 0,
+    "sous44": 17,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 17,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 14,
+    "11": 6,
+    "11.5": 17,
+    "9.5": 4
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 21
+   },
+   "noeuds": 299,
+   "perf": {
+    "ttfb": 23,
+    "dom": 3970,
+    "charge": 3990,
+    "ko": 23
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "02i-matchs-recherche-vide",
+   "chemin": "/matchs?q=zzqqxx",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs?q=zzqqxx",
+   "ms": 2700,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 10,
+    "sous24": 0,
+    "sous44": 4,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 4
+   },
+   "noeuds": 96,
+   "perf": {
+    "ttfb": 23,
+    "dom": 1932,
+    "charge": 1940,
+    "ko": 9
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "02j-matchs-aide",
+   "chemin": "/matchs",
+   "note": "aide ouverte",
+   "statut": 200,
+   "arrivee": "/matchs",
+   "ms": 4398,
+   "erreurs": [],
+   "hauteur": 1477,
+   "ecrans": 1.9,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 83,
+    "sous24": 0,
+    "sous44": 34,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 48,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 13,
+    "10.5": 14,
+    "11.5": 21
+   },
+   "betster": null,
+   "noeuds": 720,
+   "perf": {
+    "ttfb": 23,
+    "dom": 2576,
+    "charge": 2585,
+    "ko": 25
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "03a-match-analyse",
+   "chemin": "/matchs/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>",
+   "ms": 3638,
+   "erreurs": [],
+   "hauteur": 8096,
+   "ecrans": 10.4,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 285,
+    "sous24": 27,
+    "sous44": 90,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "voir son bilan",
+     "2e mi-temps▾",
+     "Sur les deux mi-temps▾",
+     "Mi-temps / fin de match▾",
+     "Mi-temps avec le plus de buts▾",
+     "Nombre exact de buts▾",
+     "Tranche de buts▾",
+     "Score exact : les huit plus probables▾",
+     "Handicap européen (3 issues)▾",
+     "Double chance et buts▾",
+     "Résultat et buts▾"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 202,
+    "11": 402,
+    "11.5": 6
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 195
+   },
+   "noeuds": 1595,
+   "perf": {
+    "ttfb": 23,
+    "dom": 2659,
+    "charge": 2660,
+    "ko": 38
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "03b-match-stats",
+   "chemin": "/matchs/<id>?t=stats",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>?t=stats",
+   "ms": 11887,
+   "erreurs": [],
+   "hauteur": 1741,
+   "ecrans": 2.2,
+   "debordePage": 0,
+   "coupes": {
+    "n": 1,
+    "exemples": [
+     "Borussia Mönchengladbach"
+    ]
+   },
+   "cibles": {
+    "total": 17,
+    "sous24": 2,
+    "sous44": 10,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "tout le classement ›"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 32
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 6
+   },
+   "noeuds": 280,
+   "perf": {
+    "ttfb": 22,
+    "dom": 10761,
+    "charge": 10767,
+    "ko": 13
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "03c-match-compos",
+   "chemin": "/matchs/<id>?t=compos",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>?t=compos",
+   "ms": 2137,
+   "erreurs": [],
+   "hauteur": 1195,
+   "ecrans": 1.5,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 16,
+    "sous24": 1,
+    "sous44": 9,
+    "exemplesSous24": [
+     "‹ Matchs"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 11,
+    "11.5": 16
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 5
+   },
+   "noeuds": 185,
+   "perf": {
+    "ttfb": 23,
+    "dom": 1184,
+    "charge": 1189,
+    "ko": 11
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "03c2-match-compos-direct",
+   "chemin": "/matchs/<id>?t=compos",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>?t=compos",
+   "ms": 3344,
+   "erreurs": [],
+   "hauteur": 2611,
+   "ecrans": 3.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 7,
+    "exemples": [
+     "Sporting Clube de Portugal · Paulo Fonseca",
+     "Manchester United · M. Pochettino",
+     "S. Lammens (G)",
+     "Eduardo Quaresma",
+     "Lisandro Martínez",
+     "Bruno Fernandes",
+     "Eduardo Felicíssimo"
+    ]
+   },
+   "cibles": {
+    "total": 17,
+    "sous24": 1,
+    "sous44": 10,
+    "exemplesSous24": [
+     "‹ Matchs"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "9": 2,
+    "10": 2,
+    "11": 21,
+    "10.5": 22,
+    "9.5": 22,
+    "8.5": 1,
+    "11.5": 8
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 5
+   },
+   "noeuds": 552,
+   "perf": {
+    "ttfb": 23,
+    "dom": 2154,
+    "charge": 2154,
+    "ko": 17
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "03d-match-sources",
+   "chemin": "/matchs/<id>?t=sources",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>?t=sources",
+   "ms": 4019,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 16,
+    "sous24": 1,
+    "sous44": 9,
+    "exemplesSous24": [
+     "‹ Matchs"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 11
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 5
+   },
+   "noeuds": 131,
+   "perf": {
+    "ttfb": 27,
+    "dom": 3079,
+    "charge": 3092,
+    "ko": 10
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "03e-match-termine",
+   "chemin": "/matchs/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>",
+   "ms": 1625,
+   "erreurs": [],
+   "hauteur": 6698,
+   "ecrans": 8.6,
+   "debordePage": 0,
+   "coupes": {
+    "n": 1,
+    "exemples": [
+     "Mantova (remboursé si nul) · 1xBet"
+    ]
+   },
+   "cibles": {
+    "total": 244,
+    "sous24": 15,
+    "sous44": 78,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "2e mi-temps▾",
+     "Sur les deux mi-temps▾",
+     "Mi-temps / fin de match▾",
+     "Mi-temps avec le plus de buts▾",
+     "Nombre exact de buts▾",
+     "Tranche de buts▾",
+     "Buts de Mantova : nombre exact, pair ou impair▾",
+     "Buts de Arezzo : nombre exact, pair ou impair▾",
+     "Score exact : les huit plus probables▾",
+     "Handicap européen (3 issues)▾",
+     "Double chance et buts▾"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 192,
+    "11": 367
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 181
+   },
+   "noeuds": 1487,
+   "perf": {
+    "ttfb": 22,
+    "dom": 970,
+    "charge": 970,
+    "ko": 28
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "03f-match-termine-stats",
+   "chemin": "/matchs/<id>?t=stats",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>?t=stats",
+   "ms": 1772,
+   "erreurs": [],
+   "hauteur": 1543,
+   "ecrans": 2,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 15,
+    "sous24": 2,
+    "sous44": 9,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "tout le classement ›"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 19
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 4
+   },
+   "noeuds": 272,
+   "perf": {
+    "ttfb": 23,
+    "dom": 848,
+    "charge": 864,
+    "ko": 12
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "03g-match-termine-marches",
+   "chemin": "/matchs/<id>?t=marches",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>?t=marches",
+   "ms": 1537,
+   "erreurs": [],
+   "hauteur": 6698,
+   "ecrans": 8.6,
+   "debordePage": 0,
+   "coupes": {
+    "n": 1,
+    "exemples": [
+     "Mantova (remboursé si nul) · 1xBet"
+    ]
+   },
+   "cibles": {
+    "total": 244,
+    "sous24": 15,
+    "sous44": 78,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "2e mi-temps▾",
+     "Sur les deux mi-temps▾",
+     "Mi-temps / fin de match▾",
+     "Mi-temps avec le plus de buts▾",
+     "Nombre exact de buts▾",
+     "Tranche de buts▾",
+     "Buts de Mantova : nombre exact, pair ou impair▾",
+     "Buts de Arezzo : nombre exact, pair ou impair▾",
+     "Score exact : les huit plus probables▾",
+     "Handicap européen (3 issues)▾",
+     "Double chance et buts▾"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 192,
+    "11": 367
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 181
+   },
+   "noeuds": 1487,
+   "perf": {
+    "ttfb": 22,
+    "dom": 912,
+    "charge": 913,
+    "ko": 28
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "03h-match-en-direct",
+   "chemin": "/matchs/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>",
+   "ms": 2123,
+   "erreurs": [],
+   "hauteur": 7848,
+   "ecrans": 10.1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 2,
+    "exemples": [
+     "Sporting Clube de Portugal ou nul",
+     "Manchester United : plus de 0,5 but · Betclic"
+    ]
+   },
+   "cibles": {
+    "total": 260,
+    "sous24": 26,
+    "sous44": 65,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "2e mi-temps▾",
+     "Sur les deux mi-temps▾",
+     "Mi-temps / fin de match▾",
+     "Mi-temps avec le plus de buts▾",
+     "Nombre exact de buts▾",
+     "Tranche de buts▾",
+     "Score exact : les huit plus probables▾",
+     "Handicap européen (3 issues)▾",
+     "Double chance et buts▾",
+     "Résultat et buts▾",
+     "Résultat et les deux marquent▾"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 203,
+    "11": 401,
+    "11.5": 6
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 183
+   },
+   "noeuds": 1589,
+   "perf": {
+    "ttfb": 23,
+    "dom": 1170,
+    "charge": 1171,
+    "ko": 32
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "03i-match-sans-cote",
+   "chemin": "/matchs/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>",
+   "ms": 2335,
+   "erreurs": [],
+   "hauteur": 7252,
+   "ecrans": 9.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 279,
+    "sous24": 25,
+    "sous44": 109,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "2e mi-temps▾",
+     "Sur les deux mi-temps▾",
+     "Mi-temps / fin de match▾",
+     "Mi-temps avec le plus de buts▾",
+     "Nombre exact de buts▾",
+     "Tranche de buts▾",
+     "Buts de Al-Fateh : nombre exact, pair ou impair▾",
+     "Buts de Al Riyadh : nombre exact, pair ou impair",
+     "Score exact : les huit plus probables▾",
+     "Handicap européen (3 issues)▾",
+     "Double chance et buts▾"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 193,
+    "11": 378,
+    "11.5": 6
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 193
+   },
+   "noeuds": 1537,
+   "perf": {
+    "ttfb": 22,
+    "dom": 1359,
+    "charge": 1359,
+    "ko": 31
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "03j-match-introuvable",
+   "chemin": "/matchs/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>",
+   "ms": 1552,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 1,
+    "sous24": 0,
+    "sous44": 0,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {},
+   "betster": null,
+   "noeuds": 45,
+   "perf": {
+    "ttfb": 22,
+    "dom": 629,
+    "charge": 629,
+    "ko": 7
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "04-classement",
+   "chemin": "/matchs/classement",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/classement",
+   "ms": 1479,
+   "erreurs": [],
+   "hauteur": 1146,
+   "ecrans": 1.5,
+   "debordePage": 0,
+   "coupes": {
+    "n": 5,
+    "exemples": [
+     "Brighton & Hove Albion",
+     "Tottenham Hotspur",
+     "Newcastle United",
+     "Nottingham Forest",
+     "Manchester United"
+    ]
+   },
+   "cibles": {
+    "total": 48,
+    "sous24": 1,
+    "sous44": 42,
+    "exemplesSous24": [
+     "‹ Matchs"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 14
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 3
+   },
+   "noeuds": 481,
+   "perf": {
+    "ttfb": 22,
+    "dom": 636,
+    "charge": 636,
+    "ko": 13
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "05a-paris-en-cours",
+   "chemin": "/paris",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/paris",
+   "ms": 1854,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 17,
+    "sous24": 3,
+    "sous44": 11,
+    "exemplesSous24": [
+     "Analyser · modifier ›",
+     "Moi",
+     "Supprimer"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 8
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 7
+   },
+   "noeuds": 125,
+   "perf": {
+    "ttfb": 22,
+    "dom": 752,
+    "charge": 752,
+    "ko": 21
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "05b-paris-regles",
+   "chemin": "/paris?f=regles",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/paris?f=regles",
+   "ms": 2105,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 14,
+    "sous24": 0,
+    "sous44": 8,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 5
+   },
+   "noeuds": 106,
+   "perf": {
+    "ttfb": 23,
+    "dom": 1067,
+    "charge": 1071,
+    "ko": 10
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "05c-paris-test",
+   "chemin": "/paris?vue=tests",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/paris?vue=tests",
+   "ms": 1916,
+   "erreurs": [],
+   "hauteur": 2129,
+   "ecrans": 2.7,
+   "debordePage": 0,
+   "coupes": {
+    "n": 1,
+    "exemples": [
+     "✗ GO Ahead Eagles – Fortuna Sittard"
+    ]
+   },
+   "cibles": {
+    "total": 40,
+    "sous24": 21,
+    "sous44": 32,
+    "exemplesSous24": [
+     "Par type de marché",
+     "Par compétition",
+     "Par origine (toi, tes tipsters, le modèle)",
+     "Analyser · modifier ›",
+     "Moi",
+     "Supprimer"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 43
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 21
+   },
+   "noeuds": 315,
+   "perf": {
+    "ttfb": 22,
+    "dom": 645,
+    "charge": 645,
+    "ko": 18
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "05d-detail-pari",
+   "chemin": "/paris/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/paris/<id>",
+   "ms": 1712,
+   "erreurs": [],
+   "hauteur": 1917,
+   "ecrans": 2.5,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 21,
+    "sous24": 3,
+    "sous44": 9,
+    "exemplesSous24": [
+     "‹ Mes paris",
+     "Changer",
+     "Moi"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 3,
+    "11": 15
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 7
+   },
+   "noeuds": 283,
+   "perf": {
+    "ttfb": 23,
+    "dom": 770,
+    "charge": 783,
+    "ko": 31
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "06a-ajouter",
+   "chemin": "/paris/ajouter",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/paris/ajouter",
+   "ms": 1807,
+   "erreurs": [],
+   "hauteur": 942,
+   "ecrans": 1.2,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 13,
+    "sous24": 1,
+    "sous44": 3,
+    "exemplesSous24": [
+     "Ajoute la source"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 6
+   },
+   "noeuds": 138,
+   "perf": {
+    "ttfb": 23,
+    "dom": 256,
+    "charge": 301,
+    "ko": 17
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "06b-nouveau-pari",
+   "chemin": "/nouveau",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/nouveau",
+   "ms": 1508,
+   "erreurs": [],
+   "hauteur": 2048,
+   "ecrans": 2.6,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 126,
+    "sous24": 0,
+    "sous44": 90,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 6
+   },
+   "betster": null,
+   "noeuds": 481,
+   "perf": {
+    "ttfb": 23,
+    "dom": 891,
+    "charge": 911,
+    "ko": 24
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "06c-nouveau-test",
+   "chemin": "/nouveau?test=1",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/nouveau?test=1",
+   "ms": 1407,
+   "erreurs": [],
+   "hauteur": 2265,
+   "ecrans": 2.9,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 126,
+    "sous24": 0,
+    "sous44": 90,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 6
+   },
+   "betster": null,
+   "noeuds": 491,
+   "perf": {
+    "ttfb": 23,
+    "dom": 773,
+    "charge": 795,
+    "ko": 18
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "06d-importer",
+   "chemin": "/import",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/import",
+   "ms": 1484,
+   "erreurs": [],
+   "hauteur": 1496,
+   "ecrans": 1.9,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 32,
+    "sous24": 0,
+    "sous44": 22,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 25
+   },
+   "betster": null,
+   "noeuds": 145,
+   "perf": {
+    "ttfb": 24,
+    "dom": 605,
+    "charge": 605,
+    "ko": 27
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "06e-importer-test",
+   "chemin": "/import?test=1",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/import?test=1",
+   "ms": 1436,
+   "erreurs": [],
+   "hauteur": 1578,
+   "ecrans": 2,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 32,
+    "sous24": 0,
+    "sous44": 22,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 25
+   },
+   "betster": null,
+   "noeuds": 147,
+   "perf": {
+    "ttfb": 22,
+    "dom": 580,
+    "charge": 580,
+    "ko": 12
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "07a-coach",
+   "chemin": "/coach",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/coach",
+   "ms": 1926,
+   "erreurs": [],
+   "hauteur": 1226,
+   "ecrans": 1.6,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 21,
+    "sous24": 2,
+    "sous44": 11,
+    "exemplesSous24": [
+     "Bilan détaillé ›",
+     "Fixer mon budget"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 10,
+    "11.5": 2
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 10
+   },
+   "noeuds": 168,
+   "perf": {
+    "ttfb": 23,
+    "dom": 598,
+    "charge": 598,
+    "ko": 22
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "07b-coach-discussion",
+   "chemin": "/coach?v=discussion",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/coach?v=discussion",
+   "ms": 1546,
+   "erreurs": [],
+   "hauteur": 973,
+   "ecrans": 1.2,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 17,
+    "sous24": 1,
+    "sous44": 7,
+    "exemplesSous24": [
+     "Reprendre la précédente"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 6
+   },
+   "betster": null,
+   "noeuds": 102,
+   "perf": {
+    "ttfb": 24,
+    "dom": 450,
+    "charge": 492,
+    "ko": 8
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "07c-bankroll",
+   "chemin": "/bankroll",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/bankroll",
+   "ms": 1823,
+   "erreurs": [],
+   "hauteur": 1054,
+   "ecrans": 1.4,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 14,
+    "sous24": 0,
+    "sous44": 8,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 13
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 4
+   },
+   "noeuds": 134,
+   "perf": {
+    "ttfb": 22,
+    "dom": 531,
+    "charge": 531,
+    "ko": 13
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "07d-montantes",
+   "chemin": "/montantes",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/montantes",
+   "ms": 1784,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 12,
+    "sous24": 0,
+    "sous44": 4,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 5,
+    "11.5": 4
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 4
+   },
+   "noeuds": 104,
+   "perf": {
+    "ttfb": 23,
+    "dom": 487,
+    "charge": 487,
+    "ko": 14
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "07e-montante",
+   "chemin": "/montantes/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/montantes/<id>",
+   "ms": 2531,
+   "erreurs": [],
+   "hauteur": 1196,
+   "ecrans": 1.5,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 21,
+    "sous24": 0,
+    "sous44": 12,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 23,
+    "11.5": 9
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 12
+   },
+   "noeuds": 152,
+   "perf": {
+    "ttfb": 23,
+    "dom": 1307,
+    "charge": 1312,
+    "ko": 21
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "07f-options",
+   "chemin": "/options",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/options",
+   "ms": 2173,
+   "erreurs": [],
+   "hauteur": 979,
+   "ecrans": 1.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 27,
+    "sous24": 0,
+    "sous44": 21,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 8
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 5
+   },
+   "noeuds": 130,
+   "perf": {
+    "ttfb": 23,
+    "dom": 787,
+    "charge": 797,
+    "ko": 13
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "08a-sources",
+   "chemin": "/sources",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources",
+   "ms": 2407,
+   "erreurs": [],
+   "hauteur": 3348,
+   "ecrans": 4.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 31,
+    "sous24": 9,
+    "sous44": 16,
+    "exemplesSous24": [
+     "Tout le détail ›"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 82
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 22
+   },
+   "noeuds": 262,
+   "perf": {
+    "ttfb": 23,
+    "dom": 1460,
+    "charge": 1503,
+    "ko": 102
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "08b-sources-analyse",
+   "chemin": "/sources?f=analyse",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources?f=analyse",
+   "ms": 1840,
+   "erreurs": [],
+   "hauteur": 978,
+   "ecrans": 1.3,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 15,
+    "sous24": 2,
+    "sous44": 9,
+    "exemplesSous24": [
+     "Source 5Page Facebook ›",
+     "MoiMes propres choix ›"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 33
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 6
+   },
+   "noeuds": 158,
+   "perf": {
+    "ttfb": 23,
+    "dom": 610,
+    "charge": 610,
+    "ko": 12
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "08d-sources-suivies",
+   "chemin": "/sources?f=suivies",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources?f=suivies",
+   "ms": 1892,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 40,
+    "sous24": 0,
+    "sous44": 7,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 19,
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 31
+   },
+   "noeuds": 322,
+   "perf": {
+    "ttfb": 22,
+    "dom": 568,
+    "charge": 569,
+    "ko": 14
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "08c-sources-classement",
+   "chemin": "/sources?f=classement",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources?f=classement",
+   "ms": 2036,
+   "erreurs": [],
+   "hauteur": 2192,
+   "ecrans": 2.8,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 33,
+    "sous24": 0,
+    "sous44": 8,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 5,
+    "11": 35
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 24
+   },
+   "noeuds": 223,
+   "perf": {
+    "ttfb": 22,
+    "dom": 510,
+    "charge": 510,
+    "ko": 16
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "08d-sources-decouvrir",
+   "chemin": "/sources?f=decouvrir",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources?f=decouvrir",
+   "ms": 2815,
+   "erreurs": [],
+   "hauteur": 1738,
+   "ecrans": 2.2,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 41,
+    "sous24": 0,
+    "sous44": 7,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 19,
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 32
+   },
+   "noeuds": 327,
+   "perf": {
+    "ttfb": 22,
+    "dom": 741,
+    "charge": 741,
+    "ko": 20
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "08e-source-modele",
+   "chemin": "/sources/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources/<id>",
+   "ms": 1532,
+   "erreurs": [],
+   "hauteur": 8166,
+   "ecrans": 10.5,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 13,
+    "sous24": 1,
+    "sous44": 7,
+    "exemplesSous24": [
+     "‹ Sources"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 65,
+    "11": 278
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 3
+   },
+   "noeuds": 1186,
+   "perf": {
+    "ttfb": 22,
+    "dom": 937,
+    "charge": 937,
+    "ko": 32
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "08f-source-coups-du-jour",
+   "chemin": "/sources/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources/<id>",
+   "ms": 2104,
+   "erreurs": [],
+   "hauteur": 8738,
+   "ecrans": 11.2,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 17,
+    "sous24": 1,
+    "sous44": 10,
+    "exemplesSous24": [
+     "‹ Sources"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 65,
+    "11": 278
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 6
+   },
+   "noeuds": 1346,
+   "perf": {
+    "ttfb": 23,
+    "dom": 1126,
+    "charge": 1126,
+    "ko": 30
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "08g-nouvelle-source",
+   "chemin": "/sources/nouvelle",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources/nouvelle",
+   "ms": 1364,
+   "erreurs": [],
+   "hauteur": 1097,
+   "ecrans": 1.4,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 15,
+    "sous24": 3,
+    "sous44": 3,
+    "exemplesSous24": [
+     "‹ Sources",
+     "INPUT"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 7
+   },
+   "noeuds": 124,
+   "perf": {
+    "ttfb": 23,
+    "dom": 256,
+    "charge": 302,
+    "ko": 9
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "08h-comparer",
+   "chemin": "/sources/comparer",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources/comparer",
+   "ms": 1497,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 10,
+    "sous24": 0,
+    "sous44": 4,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 4
+   },
+   "noeuds": 140,
+   "perf": {
+    "ttfb": 22,
+    "dom": 465,
+    "charge": 466,
+    "ko": 11
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "09a-bilan",
+   "chemin": "/bilan",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/bilan",
+   "ms": 1923,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 13,
+    "sous24": 1,
+    "sous44": 7,
+    "exemplesSous24": [
+     "importe un ticket"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 5
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 4
+   },
+   "noeuds": 97,
+   "perf": {
+    "ttfb": 23,
+    "dom": 516,
+    "charge": 517,
+    "ko": 12
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "09b-notifications",
+   "chemin": "/notifications",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/notifications",
+   "ms": 1764,
+   "erreurs": [],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 7,
+    "sous24": 0,
+    "sous44": 1,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 6
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 2
+   },
+   "noeuds": 89,
+   "perf": {
+    "ttfb": 22,
+    "dom": 459,
+    "charge": 465,
+    "ko": 10
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "09c-reglages",
+   "chemin": "/reglages",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/reglages",
+   "ms": 1871,
+   "erreurs": [],
+   "hauteur": 833,
+   "ecrans": 1.1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 1,
+    "exemples": [
+     "Connecté : audit@betwise.invalid"
+    ]
+   },
+   "cibles": {
+    "total": 13,
+    "sous24": 1,
+    "sous44": 4,
+    "exemplesSous24": [
+     "Voir les notifications reçues"
+    ]
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 6
+   },
+   "betster": null,
+   "noeuds": 112,
+   "perf": {
+    "ttfb": 22,
+    "dom": 549,
+    "charge": 549,
+    "ko": 15
+   },
+   "a11y": []
+  },
+  {
+   "passe": "sombre",
+   "nom": "10-page-inexistante",
+   "chemin": "/page-qui-n-existe-pas",
+   "note": null,
+   "statut": 404,
+   "arrivee": "/page-qui-n-existe-pas",
+   "ms": 1252,
+   "erreurs": [
+    "Failed to load resource: the server responded with a status of 404 ()"
+   ],
+   "hauteur": 780,
+   "ecrans": 1,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 1,
+    "sous24": 0,
+    "sous44": 0,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {},
+   "betster": null,
+   "noeuds": 45,
+   "perf": {
+    "ttfb": 23,
+    "dom": 305,
+    "charge": 338,
+    "ko": 5
+   },
+   "a11y": []
+  },
+  {
+   "passe": "petit",
+   "nom": "01-predictions",
+   "chemin": "/",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/",
+   "ms": 3737,
+   "erreurs": [],
+   "hauteur": 3786,
+   "ecrans": 5.9,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 37,
+    "sous24": 1,
+    "sous44": 26,
+    "exemplesSous24": [
+     "Tous ›"
+    ]
+   },
+   "images": {
+    "total": 2,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 4,
+    "11": 63,
+    "10.5": 32,
+    "11.5": 45
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 23
+   },
+   "noeuds": 409,
+   "perf": {
+    "ttfb": 68,
+    "dom": 2519,
+    "charge": 2551,
+    "ko": 302
+   },
+   "a11y": []
+  },
+  {
+   "passe": "petit",
+   "nom": "02-matchs",
+   "chemin": "/matchs",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs",
+   "ms": 2065,
+   "erreurs": [],
+   "hauteur": 1537,
+   "ecrans": 2.4,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 81,
+    "sous24": 0,
+    "sous44": 31,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 49,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 8,
+    "10.5": 14,
+    "11.5": 21
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 39
+   },
+   "noeuds": 704,
+   "perf": {
+    "ttfb": 24,
+    "dom": 787,
+    "charge": 787,
+    "ko": 32
+   },
+   "a11y": []
+  },
+  {
+   "passe": "petit",
+   "nom": "02b-matchs-championnat-ouvert",
+   "chemin": "/matchs",
+   "note": "premier championnat déroulé",
+   "statut": 200,
+   "arrivee": "/matchs",
+   "ms": 2401,
+   "erreurs": [],
+   "hauteur": 1823,
+   "ecrans": 2.8,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 82,
+    "sous24": 0,
+    "sous44": 32,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 49,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 35,
+    "11": 8,
+    "10.5": 14,
+    "11.5": 21
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 4
+   },
+   "noeuds": 705,
+   "perf": {
+    "ttfb": 22,
+    "dom": 773,
+    "charge": 781,
+    "ko": 25
+   },
+   "a11y": []
+  },
+  {
+   "passe": "petit",
+   "nom": "03a-match-analyse",
+   "chemin": "/matchs/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>",
+   "ms": 2287,
+   "erreurs": [],
+   "hauteur": 8809,
+   "ecrans": 12.4,
+   "debordePage": 36,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 285,
+    "sous24": 27,
+    "sous44": 88,
+    "exemplesSous24": [
+     "‹ Matchs",
+     "voir son bilan",
+     "2e mi-temps▾",
+     "Sur les deux mi-temps▾",
+     "Mi-temps / fin de match▾",
+     "Mi-temps avec le plus de buts▾",
+     "Nombre exact de buts▾",
+     "Tranche de buts▾",
+     "Score exact : les huit plus probables▾",
+     "Handicap européen (3 issues)▾",
+     "Double chance et buts▾",
+     "Résultat et buts▾"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 202,
+    "11": 402,
+    "11.5": 6
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 188
+   },
+   "noeuds": 1597,
+   "perf": {
+    "ttfb": 22,
+    "dom": 1332,
+    "charge": 1355,
+    "ko": 38
+   },
+   "a11y": []
+  },
+  {
+   "passe": "petit",
+   "nom": "03c-match-compos",
+   "chemin": "/matchs/<id>?t=compos",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/matchs/<id>?t=compos",
+   "ms": 1759,
+   "erreurs": [],
+   "hauteur": 1215,
+   "ecrans": 1.7,
+   "debordePage": 36,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 16,
+    "sous24": 1,
+    "sous44": 9,
+    "exemplesSous24": [
+     "‹ Matchs"
+    ]
+   },
+   "images": {
+    "total": 3,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 11,
+    "11.5": 16
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 6
+   },
+   "noeuds": 187,
+   "perf": {
+    "ttfb": 22,
+    "dom": 687,
+    "charge": 687,
+    "ko": 11
+   },
+   "a11y": []
+  },
+  {
+   "passe": "petit",
+   "nom": "05c-paris-test",
+   "chemin": "/paris?vue=tests",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/paris?vue=tests",
+   "ms": 1814,
+   "erreurs": [],
+   "hauteur": 2367,
+   "ecrans": 3.7,
+   "debordePage": 0,
+   "coupes": {
+    "n": 3,
+    "exemples": [
+     "✓ Sabah FK – FC Barcelona",
+     "✓ Erzurumspor FK – Göztepe",
+     "✗ GO Ahead Eagles – Fortuna Sittard"
+    ]
+   },
+   "cibles": {
+    "total": 40,
+    "sous24": 21,
+    "sous44": 32,
+    "exemplesSous24": [
+     "Par type de marché",
+     "Par compétition",
+     "Par origine (toi, tes tipsters, le modèle)",
+     "Analyser · modifier ›",
+     "Moi",
+     "Supprimer"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 1,
+    "11": 43
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 22
+   },
+   "noeuds": 311,
+   "perf": {
+    "ttfb": 22,
+    "dom": 567,
+    "charge": 567,
+    "ko": 27
+   },
+   "a11y": []
+  },
+  {
+   "passe": "petit",
+   "nom": "06b-nouveau-pari",
+   "chemin": "/nouveau",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/nouveau",
+   "ms": 1408,
+   "erreurs": [],
+   "hauteur": 2157,
+   "ecrans": 3.4,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 126,
+    "sous24": 0,
+    "sous44": 81,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 0,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 6
+   },
+   "betster": null,
+   "noeuds": 483,
+   "perf": {
+    "ttfb": 23,
+    "dom": 733,
+    "charge": 781,
+    "ko": 65
+   },
+   "a11y": []
+  },
+  {
+   "passe": "petit",
+   "nom": "07f-options",
+   "chemin": "/options",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/options",
+   "ms": 1867,
+   "erreurs": [],
+   "hauteur": 1017,
+   "ecrans": 1.6,
+   "debordePage": 0,
+   "coupes": {
+    "n": 1,
+    "exemples": [
+     "Montantes"
+    ]
+   },
+   "cibles": {
+    "total": 27,
+    "sous24": 0,
+    "sous44": 21,
+    "exemplesSous24": []
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "11": 8
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 8
+   },
+   "noeuds": 130,
+   "perf": {
+    "ttfb": 22,
+    "dom": 574,
+    "charge": 574,
+    "ko": 13
+   },
+   "a11y": []
+  },
+  {
+   "passe": "petit",
+   "nom": "08e-source-modele",
+   "chemin": "/sources/<id>",
+   "note": null,
+   "statut": 200,
+   "arrivee": "/sources/<id>",
+   "ms": 1701,
+   "erreurs": [],
+   "hauteur": 9590,
+   "ecrans": 15,
+   "debordePage": 0,
+   "coupes": {
+    "n": 0,
+    "exemples": []
+   },
+   "cibles": {
+    "total": 13,
+    "sous24": 1,
+    "sous44": 7,
+    "exemplesSous24": [
+     "‹ Sources"
+    ]
+   },
+   "images": {
+    "total": 1,
+    "cassees": []
+   },
+   "petitsCaracteres": {
+    "10": 65,
+    "11": 278
+   },
+   "betster": {
+    "fixes": [],
+    "passeDessous": 4
+   },
+   "noeuds": 1186,
+   "perf": {
+    "ttfb": 21,
+    "dom": 1150,
+    "charge": 1163,
+    "ko": 32
+   },
+   "a11y": []
+  }
+ ]
+}
