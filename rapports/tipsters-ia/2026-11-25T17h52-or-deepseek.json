@@ -1,0 +1,15 @@
+{
+  "profil": "or-deepseek",
+  "nom": "DeepSeek",
+  "modele": "deepseek/deepseek-v4.1-flash-1017",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "3034415a188f8f4e",
+  "saute": "déjà passé aujourd'hui (3 pari(s)) : pas d'appel (économie)",
+  "tours": 0,
+  "jetons": null,
+  "retenus": [],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": []
+}
