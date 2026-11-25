@@ -128,3 +128,24 @@ export function pointDuJour(l: Candidat[]): { simples: Candidat[]; combine: { se
   const combine = sel.length >= 2 ? { selections: sel, cote: Math.round(sel.reduce((c, y) => c * (y.cote ?? 1), 1) * 100) / 100, p: sel.reduce((c, y) => c * (y.p ?? 1), 1) } : null;
   return { simples, combine };
 }
+
+/**
+ * Un même pari donné par plusieurs sources = une seule ligne (24/11). `voix` : les sources qui le jouent et celles dont
+ * le pari l'entraîne (les tipsters IA comptent pour une voix) ; `compatibles` : ces dernières seulement.
+ */
+export type Groupe2 = { avis: Avis; qui: string[]; compatibles: string[]; contre: string[]; voix: number; betster: LigneAvis["betster"] };
+export function regrouper(lignes: LigneAvis[]): Groupe2[] {
+  const voixDe = (a: Avis) => (a.ia ? "IA" : a.nom);
+  const g = new Map<string, { avis: Avis; qui: string[]; propres: Set<string>; avec: Set<string>; contre: Set<string>; betster: LigneAvis["betster"] }>();
+  for (const x of lignes) {
+    const k = cle(x.avis);
+    const e = g.get(k) ?? { avis: x.avis, qui: [], propres: new Set<string>(), avec: new Set<string>(), contre: new Set<string>(), betster: x.betster };
+    if (!e.qui.includes(x.avis.nom)) e.qui.push(x.avis.nom);
+    e.propres.add(voixDe(x.avis)); e.avec.add(voixDe(x.avis));
+    for (const n of x.confirment) e.avec.add(n);
+    for (const n of x.contredisent) e.contre.add(n);
+    g.set(k, e);
+  }
+  return [...g.values()].map((e) => ({ avis: e.avis, qui: e.qui, compatibles: [...e.avec].filter((n) => !e.propres.has(n)), contre: [...e.contre], voix: e.avec.size, betster: e.betster }))
+    .sort((a, b) => b.voix - a.voix || a.contre.length - b.contre.length);
+}

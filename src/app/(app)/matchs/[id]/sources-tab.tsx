@@ -3,7 +3,7 @@ import { pickLabel } from "@/lib/probs/signals";
 import { desaccords } from "@/lib/sources/desaccord";
 import { resume, type Proof } from "@/lib/sources/proof";
 import { Empty } from "@/components/ui";
-import { consensus, estBetwise, estIA } from "@/lib/sources/consensus";
+import { consensus, estBetwise, estIA, regrouper } from "@/lib/sources/consensus";
 
 type Prono = { id: string; sourceId: string; source: string; type?: string; market: string; param: number | null; sel: string; cote: number | null; prouve: boolean; resultat: string };
 
@@ -25,29 +25,27 @@ export function MatchSources({ pronos, proofs, home, away, joue, verdict }: { pr
         <section className="rounded-xl border border-brand/30 bg-surface p-3" aria-label="Recoupements">
           <h2 className="text-sm font-semibold">Ce que disent les sources</h2>
           <ul className="mt-2 divide-y divide-line text-[13px]">
-            {cs.lignes.map((l) => {
-              const n = l.confirment.length, x = l.contredisent.length;
-              return (
-                <li key={`${l.avis.sourceId}${l.avis.market}${l.avis.param}${l.avis.sel}`} className="py-2">
-                  <div className="flex items-baseline justify-between gap-3">
-                    <span className="min-w-0"><span className="font-medium">{pickLabel(l.avis.market, l.avis.param, l.avis.sel, home, away)}</span> <span className="text-ink-muted">· {l.avis.nom}{l.avis.regles >= 30 ? " ✓" : ""}</span></span>
-                    {/* Décompte en clair (conseil d'IA du 23/11 : pas d'étoiles, qui se liraient comme une note du tipster) */}
-                    <span className="flex shrink-0 gap-1 text-[11px] font-semibold">
-                      <span className={`rounded-full px-2 py-0.5 ${n ? "bg-gain-soft text-gain-ink" : "bg-surface-2 text-ink-muted"}`}>{n} pour</span>
-                      {x > 0 && <span className="rounded-full bg-loss-soft px-2 py-0.5 text-loss-ink">{x} contre</span>}
-                    </span>
-                  </div>
-                  <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
-                    {n ? `Confirmé par ${l.confirment.join(", ")}` : "Personne d'autre"}
-                    {x ? <span className="text-loss"> · contredit par {l.contredisent.join(", ")}</span> : null}
-                    {l.betster === "avec" ? " · Betster d'accord" : l.betster === "contre" ? <span className="text-loss"> · Betster pense l'inverse</span> : null}
-                  </p>
-                </li>
-              );
-            })}
+            {regrouper(cs.lignes).map((g) => (
+              <li key={`${g.avis.market}${g.avis.param}${g.avis.sel}`} className="py-2">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="min-w-0 font-medium">{libellePari(g.avis.market, g.avis.param, g.avis.sel, home, away)}</span>
+                  {/* Décompte en clair (conseil d'IA du 23/11 : pas d'étoiles, qui se liraient comme une note du tipster) */}
+                  <span className="flex shrink-0 gap-1 text-[11px] font-semibold">
+                    <span className={`rounded-full px-2 py-0.5 ${g.voix >= 2 ? "bg-gain-soft text-gain-ink" : "bg-surface-2 text-ink-muted"}`}>{g.voix} source{g.voix > 1 ? "s" : ""}</span>
+                    {g.contre.length > 0 && <span className="rounded-full bg-loss-soft px-2 py-0.5 text-loss-ink">{g.contre.length} contre</span>}
+                  </span>
+                </div>
+                <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
+                  {g.qui.map((n) => `${n}${(avis.find((a) => a.nom === n)?.regles ?? 0) >= 30 ? " ✓" : ""}`).join(", ")}
+                  {g.compatibles.length ? ` · aussi par un pari compatible : ${g.compatibles.join(", ")}` : ""}
+                  {g.contre.length ? <span className="text-loss"> · contredit par {g.contre.join(", ")}</span> : null}
+                  {g.betster === "avec" ? " · Betster d'accord" : g.betster === "contre" ? <span className="text-loss"> · Betster pense l'inverse</span> : null}
+                </p>
+              </li>
+            ))}
           </ul>
           <p className="mt-2.5 rounded-lg bg-surface-2 p-2.5 text-[13px] leading-snug"><b>Betster :</b> {cs.conclusion}</p>
-          <p className="mt-1.5 text-[11px] leading-snug text-ink-muted">« Pour » : les autres sources qui jouent le même pari ou un pari qui l'entraîne (« les deux marquent » confirme « plus de 1,5 but », pas l'inverse). ✓ : 30 pronos réglés ou plus. Les tipsters IA comptent ensemble pour un seul avis. Un accord n'est pas une probabilité : un pari confirmé n'est pas certain.</p>
+          <p className="mt-1.5 text-[11px] leading-snug text-ink-muted">Un même pari de plusieurs sources tient sur une ligne. Le nombre de sources compte aussi celles dont le pari l'entraîne (« les deux marquent » confirme « plus de 1,5 but », pas l'inverse). ✓ : 30 pronos réglés ou plus. Les tipsters IA comptent ensemble pour un seul avis. Un accord n'est pas une probabilité : un pari confirmé n'est pas certain.</p>
         </section>
       )}
       {conflits.length > 0 && (
@@ -88,4 +86,11 @@ export function MatchSources({ pronos, proofs, home, away, joue, verdict }: { pr
       <p className="px-1 text-[11px] leading-relaxed text-ink-muted">À droite de chaque source : ses pronos justes sur ses pronos réglés. Ajoute les coupons de tes sources pour enrichir ces chiffres.</p>
     </div>
   );
+}
+
+/** « Victoire Lorient » plutôt que le seul nom de l'équipe (25/11, comme Sources › Aujourd'hui). */
+function libellePari(market: string, param: number | null, sel: string, home: string, away: string): string {
+  if (market === "1X2" && (sel === "1" || sel === "2")) return `Victoire ${sel === "1" ? home : away}`;
+  if (market === "1X2" && sel === "N") return "Match nul";
+  return pickLabel(market, param, sel, home, away);
 }

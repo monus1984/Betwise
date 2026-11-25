@@ -7,7 +7,7 @@ import { NIVEAU, SEUIL, classer, lire, niveau, raison, rendement, resume, reussi
 import { labelType } from "./source-ui";
 import { AXE_FR, bilanDe, forcesEtFaiblesses, type Prono } from "@/lib/sources/analyse";
 import { COMP_SHORT, shortName } from "@/components/match-ui";
-import { consensus, estBetwise, estIA, pointDuJour, type Candidat } from "@/lib/sources/consensus";
+import { consensus, estBetwise, estIA, pointDuJour, regrouper, type Candidat } from "@/lib/sources/consensus";
 import { loadSignals, pariDe, pickLabel, releveFrais } from "@/lib/probs/signals";
 import { loadRecit } from "@/lib/matches/recit";
 
@@ -244,21 +244,10 @@ async function Aujourdhui({ sourceIds, proofOf }: { sourceIds: string[]; proofOf
     const avis = l.map((r) => ({ sourceId: r.source_id, nom: r.source!.nom.replace(/ · tipster IA$/, " (IA)"), ia: estIA(r.source!.nom), regles: proofOf.get(r.source_id)?.prouvesRegles ?? 0, market: r.market_code, param: r.market_param === null ? null : Number(r.market_param), sel: r.selection, cote: r.cote_annoncee === null ? null : Number(r.cote_annoncee) }));
     const cs = consensus(avis, rc?.verdict ? { market: rc.verdict.market, param: rc.verdict.param, sel: rc.verdict.sel, label: rc.verdict.label } : null);
     const sg = signaux.get(m.id);
-    // Un même pari donné par plusieurs sources = une seule ligne (24/11) ; les tipsters IA comptent pour une voix
-    const voixDe = (nom: string, ia: boolean) => (ia ? "IA" : nom);
-    const groupes = new Map<string, { avis: (typeof cs.lignes)[number]["avis"]; qui: string[]; avec: Set<string>; contre: Set<string>; betster: (typeof cs.lignes)[number]["betster"] }>();
-    for (const x of cs.lignes) {
-      const k = `${x.avis.market}|${x.avis.param ?? ""}|${x.avis.sel.trim().toLowerCase()}`;
-      const g = groupes.get(k) ?? { avis: x.avis, qui: [], avec: new Set<string>(), contre: new Set<string>(), betster: x.betster };
-      g.qui.push(x.avis.nom); g.avec.add(voixDe(x.avis.nom, x.avis.ia));
-      for (const n of x.confirment) g.avec.add(n);
-      for (const n of x.contredisent) g.contre.add(n);
-      groupes.set(k, g);
-    }
-    const lignes = [...groupes.values()].map((g) => {
+    const lignes = regrouper(cs.lignes).map((g) => {
       const pk = sg ? pariDe(sg, g.avis.market, g.avis.param, g.avis.sel) : null;
       const cote = pk?.book && releveFrais(pk.book.releveAt, m.kickoff_at) ? pk.book.cote : pk?.cote ?? g.avis.cote;
-      return { ...g, label: libelle(g.avis.market, g.avis.param, g.avis.sel, home, away), voix: g.avec.size, compatibles: [...g.avec].filter((n) => !g.qui.map((q) => q.replace(/ \(IA\)$/, "")).includes(n) && !(n === "IA" && g.qui.some((q) => / \(IA\)$/.test(q)))), p: pk?.p ?? null, cote };
+      return { ...g, label: libelle(g.avis.market, g.avis.param, g.avis.sel, home, away), p: pk?.p ?? null, cote };
     }).sort((a, b) => b.voix - a.voix || (b.p ?? 0) - (a.p ?? 0));
     // Ce que les sources jouent surtout, quand Betster n'est pas sur ce pari : dit avant sa conclusion
     const tete = lignes[0];
@@ -311,7 +300,7 @@ async function Aujourdhui({ sourceIds, proofOf }: { sourceIds: string[]; proofOf
                     <span className="min-w-0 font-medium">{x.label}{x.p !== null ? <span className="ml-1.5 text-[11px] font-normal text-ink-muted">{Math.round(x.p * 100)} %</span> : null}</span>
                     <span className="flex shrink-0 gap-1 text-[11px] font-semibold">
                       <span className={`rounded-full px-2 py-0.5 ${x.voix >= 2 ? "bg-gain-soft text-gain-ink" : "bg-surface-2 text-ink-muted"}`}>{x.voix} source{x.voix > 1 ? "s" : ""}</span>
-                      {x.contre.size > 0 && <span className="rounded-full bg-loss-soft px-2 py-0.5 text-loss-ink">{x.contre.size} contre</span>}
+                      {x.contre.length > 0 && <span className="rounded-full bg-loss-soft px-2 py-0.5 text-loss-ink">{x.contre.length} contre</span>}
                     </span>
                   </div>
                   <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">{x.qui.slice(0, 3).join(", ")}{x.qui.length > 3 ? ` et ${x.qui.length - 3} autre${x.qui.length - 3 > 1 ? "s" : ""}` : ""}{x.compatibles.length ? ` · aussi par un pari compatible : ${x.compatibles.slice(0, 3).join(", ")}` : ""}{x.betster === "avec" ? " · Betster d’accord" : x.betster === "contre" ? " · Betster pense l’inverse" : ""}</p>

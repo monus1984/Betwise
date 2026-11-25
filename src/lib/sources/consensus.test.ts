@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { consensus, lignesAvis, pointDuJour, soutient, type Avis } from "./consensus";
+import { consensus, lignesAvis, pointDuJour, regrouper, soutient, type Avis } from "./consensus";
 
 const a = (sourceId: string, regles: number, market: string, sel: string, param: number | null = null, ia = false): Avis => ({ sourceId, nom: sourceId, ia, regles, market, param, sel, cote: null });
 const verdict = { market: "DC", param: null, sel: "1N", label: "Lorient ou nul" };
@@ -52,5 +52,13 @@ describe("ce que disent les sources", () => {
     const c = consensus([a("s4", 3, "OU", "Plus", 2.5)], v);
     expect(c.pour.autres).toBe(1);
     expect(c.conclusion).toContain("va dans le même sens");
+  });
+  it("regrouper : un même pari de plusieurs sources sur une ligne, IA comptées une fois, compatibles à part (25/11)", () => {
+    const l = lignesAvis([a("Paul", 3, "1X2", "1"), a("Awa", 40, "1X2", "1"), a("Grok", 0, "1X2", "1", null, true), a("ChatGPT", 0, "1X2", "1", null, true), a("Moussa", 5, "OU", "Plus", 1.5), a("Ali", 2, "1X2", "2")], null);
+    const g = regrouper(l);
+    expect(g[0].qui).toEqual(["Paul", "Awa", "Grok", "ChatGPT"]);
+    expect(g[0].voix).toBe(3);
+    expect(g[0].contre).toEqual(["Ali"]);
+    expect(g).toHaveLength(3);
   });
 });
