@@ -6,6 +6,7 @@
  * elles ne le prouvent pas, et l'écran le dit.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { coteDe } from "./compos";
 import type { Database } from "../supabase/database.types";
 import { profilDe, type Categorie } from "../coach/categories";
 import { familleOf, loadSignals, pickLabel, picksOf, releveFrais, type Pick } from "../probs/signals";
@@ -359,7 +360,8 @@ export function redaction(input: RecitInput, verdict: Choix | null): string[] {
   }
 
   // Les absents, les confrontations, le calendrier, les buts attendus
-  for (const x of absents ?? []) if (x.joueurs.length) c.push({ poids: 5 + Math.min(x.joueurs.length, 3), t: `${x.equipe} sera privé de ${lister(x.joueurs)}.` });
+  // Les absents, nommés avec le nom BETWISE de l'équipe ; une longue liste ne pèse pas plus qu'un fait de forme
+  for (const x of absents ?? []) if (x.joueurs.length) c.push({ poids: 4 + Math.min(x.joueurs.length, 3), t: `${coteDe(x.equipe, home, away) === "1" ? home : away} sera privé de ${lister(x.joueurs)}.` });
   const faces = h2h && h2h.length >= 3 ? h2h : passes.filter((p) => joue(p, home) && joue(p, away));
   if (faces.length >= 3 && !surLesButs) {
     const vainqueur = (p: Passe) => (p.sh > p.sa ? p.home : p.sa > p.sh ? p.away : null);
