@@ -1,0 +1,28 @@
+name: Compositions avant les matchs
+
+on:
+  schedule:
+    # Toutes les 15 min : compos des matchs qui commencent dans l'heure (aucune requête s'il n'y en a pas)
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: compos
+  cancel-in-progress: true
+
+jobs:
+  compos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsx scripts/charger-compos.ts
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

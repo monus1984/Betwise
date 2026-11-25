@@ -36,7 +36,7 @@ type Just = { lambda_dom?: number; lambda_ext?: number; score_probable?: string;
 type Evt = { t: "but" | "pen" | "csc" | "pen_rate" | "jaune" | "rouge"; n: string | null; e: "1" | "2"; m: number; x?: number };
 const EVT: Record<Evt["t"], { icon: string; txt: string }> = { but: { icon: "⚽", txt: "" }, pen: { icon: "⚽", txt: " (penalty)" }, csc: { icon: "⚽", txt: " (contre son camp)" }, pen_rate: { icon: "✖️", txt: " (penalty manqué)" }, jaune: { icon: "🟨", txt: "" }, rouge: { icon: "🟥", txt: "" } };
 const TABS = [
-  { k: "analyse", t: "Analyse" }, { k: "stats", t: "Stats" }, { k: "marches", t: "Marchés" }, { k: "sources", t: "Sources" },
+  { k: "analyse", t: "Analyse" }, { k: "stats", t: "Stats" }, { k: "compos", t: "Compos" }, { k: "sources", t: "Sources" },
 ] as const;
 const TZ = "Africa/Abidjan";
 
@@ -44,7 +44,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const { id } = await params;
   const sp = await searchParams;
   // Anciens liens (notifications, favoris) : on les range dans les quatre onglets actuels
-  const ANCIEN: Record<string, string> = { paris: "marches", cotes: "marches", forme: "stats", equipes: "stats", h2h: "stats", pronos: "sources" };
+  const ANCIEN: Record<string, string> = { marches: "analyse", paris: "analyse", cotes: "analyse", forme: "stats", equipes: "stats", h2h: "stats", pronos: "sources" };
   const tab = TABS.some((x) => x.k === sp.t) ? sp.t! : ANCIEN[sp.t ?? ""] ?? null;
   const supabase = await createClient();
 
@@ -88,7 +88,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const evts = [...(m.details?.evts ?? [])].sort((x, y) => x.m - y.m || (x.x ?? 0) - (y.x ?? 0));
   const mk = sg?.market ?? null;
   const onglet = tab ?? "analyse";
-  const extras: Extras | null = onglet === "stats" ? await getExtras({ id: m.id, af_fixture_id: m.af_fixture_id, kickoff_at: m.kickoff_at, statut: m.statut }) : null;
+  const extras: Extras | null = onglet === "stats" || onglet === "compos" ? await getExtras({ id: m.id, af_fixture_id: m.af_fixture_id, kickoff_at: m.kickoff_at, statut: m.statut }) : null;
   const srcIds = [...new Set((preds ?? []).map((p) => one(p.source as { id: string } | { id: string }[] | null)?.id).filter((x): x is string => !!x))];
   const { data: proofs } = onglet === "sources" && srcIds.length ? await supabase.from("source_proof").select("*").in("source_id", srcIds) : { data: [] };
   const recit = (onglet === "analyse" || onglet === "sources") && m.statut !== "termine" ? await loadRecit(supabase as never, m.id) : null;
@@ -152,7 +152,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
       {onglet === "analyse" && (
         <div className="space-y-3">
-          {recit && <MatchRecit match={{ id: m.id, home, away, kickoff: m.kickoff_at, comp: comp?.code_externe ?? "", ouvert: m.statut === "programme" }} etapes={recit.etapes} verdict={recit.verdict} autres={recit.autres} source={recit.source} />}
+          {recit && <MatchRecit match={{ id: m.id, home, away, kickoff: m.kickoff_at, comp: comp?.code_externe ?? "", ouvert: m.statut === "programme" }} cles={recit.cles} etapes={recit.etapes} verdict={recit.verdict} autres={recit.autres} source={recit.source} />}
           {picks.length > 0 && (
             <Card title="Les issues les plus probables" note={sg!.source === "modele" ? "estimation du modèle" : "d’après les cotes"}>
               <ul className="divide-y divide-line">
@@ -203,11 +203,8 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
               </p>
             </>
           )}
-        </div>
-      )}
-
-      {onglet === "marches" && (
-        <div className="space-y-3">
+          {/* Marchés et cotes (25/11) : en bas de l’analyse, l’onglet Compos a pris leur place */}
+          <h2 id="marches" className="scroll-mt-16 px-1 pt-3 text-[15px] font-bold">Marchés et cotes</h2>
           {sg ? <MatchMarkets m={{ id: m.id, kickoff_at: m.kickoff_at, home, away, comp: comp?.code_externe ?? "", ouvert: m.statut === "programme" }} sg={sg} /> : <Card><p className="text-sm text-ink-muted">Pas encore de cote ni d’estimation pour ce match. Les cotes sont relevées une fois par jour ; pour certains championnats, elles n’arrivent pas du tout.</p></Card>}
           {m.statut !== "programme" && sg && <p className="px-1 text-[11px] text-ink-muted">Match commencé ou terminé : les cotes sont affichées pour mémoire, le coupon est fermé.</p>}
           {sg && (releve || betclicAt) ? (
@@ -277,8 +274,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
       {onglet === "stats" && extras && (
         <div className="space-y-3">
-          {!extras.disponible && <Card><p className="text-sm text-ink-muted">Compositions et absents indisponibles pour ce match pour l’instant.</p></Card>}
-          {extras.stats && extras.stats.length === 2 && (
+                    {extras.stats && extras.stats.length === 2 && (
             <Card title="Statistiques du match" note={m.statut === "en_cours" ? "en direct" : undefined}>
               {([["Buts attendus (xG)", "xg"], ["Tirs", "tirs"], ["Tirs cadrés", "cadres"], ["Possession", "possession"], ["Corners", "corners"], ["Cartons jaunes", "jaunes"]] as const).map(([lab, k]) => {
                 const a = extras.stats![0][k], b = extras.stats![1][k];
@@ -294,10 +290,16 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
               <p className="mt-1 flex justify-between text-[11px] text-ink-muted"><span>{shortName(home)}</span><span>{shortName(away)}</span></p>
             </Card>
           )}
+        </div>
+      )}
+
+      {onglet === "compos" && extras && (
+        <div className="space-y-3">
+          {!extras.disponible && <Card><p className="text-sm text-ink-muted">Compositions et absents indisponibles pour ce match : il n’est pas relié à notre fournisseur de données.</p></Card>}
           {extras.disponible && (
             <Card title="Compositions">
               {!extras.lineups?.length ? (
-                <p className="text-sm text-ink-muted">{m.statut === "programme" ? "Elles sortent environ une heure avant le coup d’envoi. Reviens à ce moment-là : la page les récupère toute seule." : "Compositions non communiquées pour ce match."}</p>
+                <p className="text-sm text-ink-muted">{m.statut === "programme" ? "Elles sortent environ une heure avant le coup d’envoi et s’affichent ici d’elles-mêmes." : "Compositions non communiquées pour ce match."}</p>
               ) : (
                 <div className="grid grid-cols-2 gap-4">
                   {extras.lineups.slice(0, 2).map((l) => (

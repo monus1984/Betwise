@@ -22,7 +22,7 @@ export type Etape = { cle: "enjeu" | "forme" | "terrain" | "calendrier" | "absen
 export type Choix = { market: string; param: number | null; sel: string; label: string; p: number; cote: number | null; categorie: Categorie;
   /** D'où vient la cote : nom du bookmaker (1xBet) ou « médiane » des bookmakers européens ; null sans cote. */
   ou?: string | null };
-export type Recit = { affiche: string; etapes: Etape[]; verdict: Choix | null; autres: Choix[]; source: "marche" | "modele" | null; texte: string };
+export type Recit = { affiche: string; cles: string[]; etapes: Etape[]; verdict: Choix | null; autres: Choix[]; source: "marche" | "modele" | null; texte: string };
 
 export type Passe = { date: string; home: string; away: string; sh: number; sa: number; buteurs: { n: string | null; e: "1" | "2" }[] };
 export type RecitInput = {
@@ -200,6 +200,55 @@ function etapeChiffre({ home, away, rangs, butsAttendus, table }: RecitInput): E
   return lignes.length ? { cle: "chiffre", titre: "Le chiffre qui pèse", lignes: lignes.length > 4 ? [...lignes.slice(0, 3), lignes[lignes.length - 1]] : lignes } : null;
 }
 
+/**
+ * L'essentiel (25/11) : 2 à 4 faits courts, les plus parlants, comme un pronostiqueur qui va droit au but.
+ * Chaque fait n'est retenu que s'il est net (série, écart, absence) ; le détail reste dans « Toute l'analyse ».
+ */
+export function pointsCles({ home, away, rangs, passes, h2h, absents, calendrier, kickoff, butsAttendus }: RecitInput): string[] {
+  const c: { poids: number; t: string }[] = [];
+  const forme = (nom: string, r: StandingRow | null) => {
+    const f = (r?.forme ?? "").toUpperCase().replace(/[^WDL]/g, "");
+    if (f.length < 4) return;
+    const v = [...f].filter((x) => x === "W").length, d = [...f].filter((x) => x === "L").length;
+    if (v >= f.length - 1) c.push({ poids: 5 + v, t: `${nom} en forme : ${v} victoires sur ses ${f.length} derniers matchs.` });
+    else if (v === 0) c.push({ poids: 6 + d, t: `${nom} en difficulté : aucune victoire sur ses ${f.length} derniers matchs.` });
+    else if (d >= f.length - 1) c.push({ poids: 5 + d, t: `${nom} : ${d} défaites sur ses ${f.length} derniers matchs.` });
+  };
+  forme(home, rangs.home); forme(away, rangs.away);
+  const dom = rangs.home?.domicile, ext = rangs.away?.exterieur;
+  if (dom && dom.j >= 4 && dom.p === 0) c.push({ poids: 7, t: `${home} invaincu à domicile cette saison (${dom.g} V, ${dom.n} N).` });
+  else if (dom && dom.j >= 4 && dom.g === 0) c.push({ poids: 7, t: `${home} n'a pas encore gagné à domicile cette saison.` });
+  if (ext && ext.j >= 4 && ext.g === 0) c.push({ poids: 6, t: `${away} n'a pas encore gagné à l'extérieur cette saison.` });
+  else if (ext && ext.j >= 4 && ext.p === 0) c.push({ poids: 7, t: `${away} invaincu à l'extérieur cette saison.` });
+  const h = rangs.home, a = rangs.away;
+  if (h && a && h.groupe === a.groupe && h.joues >= 5 && Math.abs(h.rang - a.rang) >= 8) {
+    const fort = h.rang < a.rang ? [home, h] as const : [away, a] as const, faible = h.rang < a.rang ? [away, a] as const : [home, h] as const;
+    c.push({ poids: 6, t: `Écart au classement : ${fort[0]} ${ord(fort[1].rang)}, ${faible[0]} ${ord(faible[1].rang)}.` });
+  } else if (h && a && h.groupe === a.groupe && h.joues >= 5 && Math.abs(h.points - a.points) <= 2) c.push({ poids: 4, t: `Match serré au classement : ${pl(Math.abs(h.points - a.points), "point")} d'écart.` });
+  const faces = h2h && h2h.length >= 3 ? h2h : passes.filter((p) => joue(p, home) && joue(p, away));
+  if (faces.length >= 3) {
+    const vainqueur = (p: Passe) => (p.sh > p.sa ? p.home : p.sa > p.sh ? p.away : null);
+    const premier = vainqueur(faces[0]);
+    let serie = 0;
+    if (premier) for (const p of faces) { if (vainqueur(p) !== premier) break; serie++; }
+    if (premier && serie >= 3) c.push({ poids: 6, t: `${premier} a gagné les ${serie} dernières confrontations.` });
+    else {
+      const sans = faces.slice(0, 5).filter((p) => vainqueur(p) !== home).length, k = Math.min(5, faces.length);
+      if (sans === k) c.push({ poids: 5, t: `${home} n'a battu ${away} dans aucune des ${k} dernières confrontations.` });
+    }
+  }
+  for (const x of absents ?? []) if (x.joueurs.length >= 2) c.push({ poids: 3 + Math.min(x.joueurs.length, 4), t: `${x.equipe} privé de ${pl(x.joueurs.length, "joueur")}, dont ${x.joueurs.slice(0, 2).join(" et ")}.` });
+  if (calendrier && kickoff) {
+    const k = Date.parse(kickoff);
+    for (const [nom, l] of [[home, calendrier.home], [away, calendrier.away]] as const) {
+      const x = l.find((y) => y.avant && Math.abs(Date.parse(y.date) - k) < 3.5 * 86_400_000);
+      if (x) c.push({ poids: 4, t: `${nom} a joué il y a ${pl(Math.max(1, Math.round((k - Date.parse(x.date)) / 86_400_000)), "jour")} : peu de récupération.` });
+    }
+  }
+  if (butsAttendus !== null && (butsAttendus >= 3 || butsAttendus <= 2.1)) c.push({ poids: 4, t: butsAttendus >= 3 ? `Les cotes annoncent un match ouvert : environ ${dec(butsAttendus)} buts.` : `Les cotes annoncent un match fermé : environ ${dec(butsAttendus)} buts.` });
+  return c.sort((x, y) => y.poids - x.poids).slice(0, 4).map((x) => x.t);
+}
+
 /** Le verdict : la sélection la plus probable de la catégorie Audacieux, puis une plus sûre et une plus osée. */
 function verdictDe({ home, away, picks }: RecitInput): { verdict: Choix | null; autres: Choix[] } {
   const utiles = picks.filter((p) => familleOf(p.market) !== "mitemps" && !["MG", "OE", "HMG", "CS"].includes(p.market));
@@ -222,8 +271,9 @@ export function buildRecit(input: RecitInput): Recit {
   const avis = verdict
     ? `Le choix le plus probable : ${verdict.label}. ${Math.round(verdict.p * 100)} chances sur 100${verdict.cote ? "" : " (estimation)"}.${autres.length ? ` ${autres.map((c) => `Plus ${c.categorie === "sur" ? "probable" : "osé"} : ${c.label}, ${Math.round(c.p * 100)} sur 100.`).join(" ")}` : ""}`
     : "Pas encore de cote sur ce match : aucun choix à mettre en avant.";
-  const texte = [`${input.home} contre ${input.away}.`, ...etapes.map((e) => `${e.titre}. ${e.lignes.join(" ")}`), avis].join("\n");
-  return { affiche, etapes, verdict, autres, source: input.source, texte };
+  const cles = pointsCles(input);
+  const texte = [`${input.home} contre ${input.away}.`, ...(cles.length ? [`L'essentiel. ${cles.join(" ")}`] : []), ...etapes.map((e) => `${e.titre}. ${e.lignes.join(" ")}`), avis].join("\n");
+  return { affiche, cles, etapes, verdict, autres, source: input.source, texte };
 }
 
 export async function loadRecit(db: Db, matchId: string): Promise<(Recit & { matchId: string; home: string; away: string; kickoff: string; comp: string; statut: string }) | null> {

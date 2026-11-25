@@ -18,6 +18,37 @@ async function af<T>(path: string): Promise<T[]> {
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return ((await r.json()) as { response: T[] }).response ?? [];
 }
+type JoueurAf = { player: { name: string; number: number | null; pos: string | null } };
+type LineupAf = { team: { name: string }; formation: string | null; coach: { name: string | null } | null; startXI: JoueurAf[]; substitutes: JoueurAf[] };
+const versLineup = (x: LineupAf): Lineup => ({ equipe: x.team.name, schema: x.formation, entraineur: x.coach?.name ?? null, titulaires: (x.startXI ?? []).map((p) => ({ nom: p.player.name, numero: p.player.number, poste: p.player.pos })), remplacants: (x.substitutes ?? []).map((p) => p.player.name) });
+
+/**
+ * Compositions chargées d'avance (25/11) : pour les matchs qui commencent dans l'heure et n'en ont pas encore,
+ * 20 matchs par requête (/fixtures?ids=…). Avant, elles n'arrivaient que si quelqu'un ouvrait la fiche à temps.
+ */
+export async function chargerCompos(now = new Date()): Promise<{ matchs: number; trouves: number; requetes: number }> {
+  if (!process.env.API_FOOTBALL_KEY) return { matchs: 0, trouves: 0, requetes: 0 };
+  const db = createAdminClient();
+  const { data: ms } = await db.from("matches").select("id, af_fixture_id").not("af_fixture_id", "is", null).in("statut", ["programme", "en_cours"])
+    .gte("kickoff_at", new Date(now.getTime() - 20 * 60000).toISOString()).lte("kickoff_at", new Date(now.getTime() + 70 * 60000).toISOString()).limit(400);
+  const ids = (ms ?? []).map((x) => x.id);
+  const { data: deja } = ids.length ? await db.from("match_extras").select("match_id, lineups").in("match_id", ids) : { data: [] };
+  const ont = new Set((deja ?? []).filter((x) => Array.isArray(x.lineups) && x.lineups.length > 0).map((x) => x.match_id));
+  const aFaire = (ms ?? []).filter((x) => !ont.has(x.id));
+  const parFid = new Map(aFaire.map((x) => [Number(x.af_fixture_id), x.id]));
+  let trouves = 0, requetes = 0;
+  const fids = [...parFid.keys()];
+  for (let i = 0; i < fids.length && requetes < 15; i += 20) {
+    requetes++;
+    try {
+      const r = await af<{ fixture: { id: number }; lineups?: LineupAf[] }>(`/fixtures?ids=${fids.slice(i, i + 20).join("-")}`);
+      const lignes = r.filter((f) => f.lineups?.length).map((f) => ({ match_id: parFid.get(f.fixture.id)!, lineups: f.lineups!.map(versLineup) as unknown as Json, lineups_at: new Date().toISOString() })).filter((x) => x.match_id);
+      if (lignes.length) { await db.from("match_extras").upsert(lignes); trouves += lignes.length; }
+    } catch (e) { console.error("compos", e instanceof Error ? e.message : e); }
+  }
+  return { matchs: aFaire.length, trouves, requetes };
+}
+
 const age = (iso: string | null) => (iso ? (Date.now() - Date.parse(iso)) / 60000 : Infinity);
 
 export async function getExtras(m: { id: string; af_fixture_id: number | null; kickoff_at: string; statut: string }): Promise<Extras> {
@@ -38,10 +69,7 @@ export async function getExtras(m: { id: string; af_fixture_id: number | null; k
     }
     // Compositions : publiées environ une heure avant le coup d'envoi
     if (!out.lineups?.length && minsToKick < 75 && m.statut !== "annule" && age(row?.lineups_at ?? null) > 5) {
-      type P = { player: { name: string; number: number | null; pos: string | null } };
-      type R = { team: { name: string }; formation: string | null; coach: { name: string | null } | null; startXI: P[]; substitutes: P[] };
-      const l = await af<R>(`/fixtures/lineups?fixture=${fid}`);
-      out.lineups = l.map((x) => ({ equipe: x.team.name, schema: x.formation, entraineur: x.coach?.name ?? null, titulaires: (x.startXI ?? []).map((p) => ({ nom: p.player.name, numero: p.player.number, poste: p.player.pos })), remplacants: (x.substitutes ?? []).map((p) => p.player.name) }));
+      out.lineups = (await af<LineupAf>(`/fixtures/lineups?fixture=${fid}`)).map(versLineup);
       patch.lineups = out.lineups as unknown as Json; patch.lineups_at = new Date().toISOString();
     }
     // Statistiques : pendant le match (toutes les 3 min) puis une dernière fois après la fin

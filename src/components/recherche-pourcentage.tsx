@@ -52,7 +52,7 @@ export function RecherchePourcentage({ options }: { options: OptionRecherche[] }
                 {(i === 0 || estTop5(l[i - 1].comp) !== estTop5(o.comp)) && liste.some((x) => estTop5(x.comp)) && liste.some((x) => !estTop5(x.comp)) && (
                   <p className="pb-1 pt-2.5 text-[11px] font-semibold text-ink-muted">{estTop5(o.comp) ? "Grands championnats" : "Autres matchs"}</p>
                 )}
-                <Link href={`/matchs/${o.matchId}?t=marches`} className="flex items-center gap-3 py-2">
+                <Link href={`/matchs/${o.matchId}#marches`} className="flex items-center gap-3 py-2">
                   <span className="w-11 shrink-0 text-[12px] tabular-nums text-ink-soft">{heure(o.kickoff)}</span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-[13px] font-semibold leading-snug">{o.label}</span>

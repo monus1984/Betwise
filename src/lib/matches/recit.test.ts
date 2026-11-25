@@ -78,3 +78,20 @@ describe("récit d'un match", () => {
     expect(buildRecit({ ...base, h2h: [], absents: [], calendrier: { home: [], away: [] }, kickoff: "2026-11-22T14:00:00Z" }).etapes.map((e) => e.cle)).toEqual(["enjeu", "forme", "dernier", "face", "joueur", "chiffre"]);
   });
 });
+
+describe("l'essentiel (25/11)", () => {
+  it("ne retient que les faits nets, 4 au plus, en phrases courtes", () => {
+    const c = buildRecit({ ...base,
+      rangs: { home: { ...rang("Lens", 2, 25, 20, 6, "WWWWD"), joues: 11, domicile: { j: 6, g: 5, n: 1, p: 0, bp: 12, bc: 2 } } as never, away: { ...rang("Nantes", 15, 9, 9, 18, "LLDLL"), joues: 11 } as never },
+      home: "Lens", away: "Nantes", passes: [], butsAttendus: 2.6, absents: [{ equipe: "Nantes", joueurs: ["A", "B", "C"] }] }).cles;
+    expect(c.length).toBeLessThanOrEqual(4);
+    expect(c).toContain("Lens invaincu à domicile cette saison (5 V, 1 N).");
+    expect(c.some((x) => x.startsWith("Nantes en difficulté"))).toBe(true);
+    expect(c.some((x) => x.startsWith("Écart au classement"))).toBe(true);
+    expect(c.every((x) => x.length <= 110)).toBe(true);
+    expect(c.some((x) => x.includes("2,6 buts"))).toBe(false); // ni ouvert ni fermé : pas retenu
+  });
+  it("reste vide quand rien n'est tranché", () => {
+    expect(buildRecit({ ...base, rangs: { home: null, away: null }, passes: [], butsAttendus: 2.5 }).cles).toEqual([]);
+  });
+});
