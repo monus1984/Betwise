@@ -9,6 +9,7 @@ import { TicketAnalysisCard } from "./ticket-analysis";
 import { Cashout, CorrectResult, NotPlayed } from "./not-played";
 import { ConfirmResult } from "../confirm-result";
 import { BetEditor, type EditableBet } from "./editor";
+import { GererPari } from "./gerer";
 import { reglableA } from "@/lib/bets/reglement";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +23,7 @@ export default async function BetPage({ params }: { params: Promise<{ id: string
 
   const { data } = await supabase
     .from("bets")
-    .select("id, type, mise, cote_totale, statut, gain_net, placed_at, created_at, bookmaker, detail_complet, nb_selections, source_import, virtuel, resultat_propose, gain_propose, cashout, bet_selections(id, match_id, match_libre, market_code, market_param, selection, cote, resultat, risque_calcule, origin_source_id, match:matches(id, kickoff_at, statut, score_home, score_away, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe)))")
+    .select("id, type, mise, cote_totale, statut, gain_net, placed_at, created_at, bookmaker, detail_complet, nb_selections, source_import, virtuel, resultat_propose, gain_propose, cashout, montante_id, bet_selections(id, match_id, match_libre, market_code, market_param, selection, cote, resultat, risque_calcule, origin_source_id, match:matches(id, kickoff_at, statut, score_home, score_away, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe)))")
     .eq("id", id)
     .maybeSingle();
   if (!data) notFound();
@@ -62,6 +63,7 @@ export default async function BetPage({ params }: { params: Promise<{ id: string
       {b.cashout !== null && b.cashout !== undefined && <p className="mt-4 rounded-xl border border-info/30 bg-info-soft p-3 text-sm text-info-ink">Réglé par cashout : {Math.round(Number(b.cashout)).toLocaleString("fr-FR")} F encaissés. Les lignes dont le match n’était pas terminé restent « en attente ».</p>}
       {b.cashout === null && (b.statut === "gagne" || b.statut === "perdu" || b.statut === "rembourse") && <CorrectResult betId={b.id} statut={b.statut} test={b.virtuel} />}
       {!b.virtuel && b.statut !== "annule" && <NotPlayed betId={b.id} />}
+      {b.statut !== "annule" && <GererPari betId={b.id} regle={b.statut === "gagne" || b.statut === "perdu" || b.statut === "rembourse"} test={b.virtuel} montante={!!b.montante_id} />}
 
       <section className="mt-6">
         <h2 className="mb-2 text-sm font-semibold">Historique des modifications</h2>

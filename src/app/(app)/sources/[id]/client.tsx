@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { cancelPrediction, setSourceLink, toggleFollow } from "@/lib/sources/actions";
 import { linkLabel } from "@/lib/sources/link";
 import { RISK_CLASS, RISK_LABEL } from "@/components/ui";
+import { GererProno, type MarcheOpt } from "./edition-prono";
 
 export function FollowButton({ sourceId, following }: { sourceId: string; following: boolean }) {
   const [pending, start] = useTransition();
@@ -34,6 +35,7 @@ export type PredictionView = {
   resultat: "en_attente" | "gagne" | "perdu" | "rembourse";
   loggedAt: string;
   mine: boolean;
+  home?: string | null; away?: string | null;
 };
 
 const RES: Record<PredictionView["resultat"], { label: string; cls: string }> = {
@@ -43,7 +45,7 @@ const RES: Record<PredictionView["resultat"], { label: string; cls: string }> = 
   rembourse: { label: "Remboursé", cls: "bg-draw-soft text-draw-ink" },
 };
 
-export function PredictionRow({ p, sourceId }: { p: PredictionView; sourceId: string }) {
+export function PredictionRow({ p, sourceId, markets = [] }: { p: PredictionView; sourceId: string; markets?: MarcheOpt[] }) {
   const [pending, start] = useTransition();
   const [asking, setAsking] = useState(false);
   const [motif, setMotif] = useState("");
@@ -76,11 +78,10 @@ export function PredictionRow({ p, sourceId }: { p: PredictionView; sourceId: st
               Jouer ce prono
             </Link>
           )}
-          {p.mine && p.resultat === "en_attente" && !asking && (
-            <button onClick={() => setAsking(true)} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-700">Annuler…</button>
-          )}
         </div>
       )}
+      {/* Corriger ou supprimer un prono qu'on a chargé (25/11) ; l'annulation avec motif reste possible pour les autres cas */}
+      {p.mine && <div className="mt-2 flex flex-wrap gap-2"><GererProno p={{ id: p.id, matchId: p.matchId, home: p.home ?? null, away: p.away ?? null, kickoff: p.kickoff, label: p.label, market: p.market, param: p.param, selection: p.selection, cote: p.cote }} markets={markets} /></div>}
       {asking && (
         <div className="mt-2 flex gap-2">
           <input value={motif} onChange={(e) => setMotif(e.target.value)} placeholder="Motif (obligatoire, reste visible)" className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2 py-1.5 text-xs" />

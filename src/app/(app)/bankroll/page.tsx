@@ -6,6 +6,7 @@ import { LineChart } from "@/components/line-chart";
 import { bankrollAlignBk, bankrollMoveBk } from "@/lib/bets/actions";
 import { comptes as calculer, SANS_NOM, type Mouvement } from "@/lib/bankroll/comptes";
 import { loadDashboard } from "@/lib/stats/dashboard";
+import { GererMouvement } from "./gerer-mouvement";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -139,12 +140,13 @@ export default async function BankrollPage({ searchParams }: { searchParams: Pro
                   {vus.map((t) => {
                     const mot = t.note && !["Mise", "Gain"].includes(t.note) ? t.note : TYPE[t.type];
                     return (
-                      <li key={t.id} className="flex items-center gap-3 px-4 py-2.5">
+                      <li key={t.id} className="flex flex-wrap items-center gap-x-3 px-4 py-2.5">
                         <span className="min-w-0 flex-1">
                           {t.bet_id ? <Link href={`/paris/${t.bet_id}`} className="block truncate text-sm font-medium underline decoration-line underline-offset-2">{mot}</Link> : <span className="block truncate text-sm font-medium">{mot}</span>}
                           <span className="block text-[11px] text-ink-muted">{quand(t.at)} · {(t.bookmaker ?? "").trim() || SANS_NOM}</span>
                         </span>
                         <span className={`shrink-0 text-sm font-semibold tabular-nums ${ton(Number(t.montant))}`}>{signe(Number(t.montant))}</span>
+                        {!t.bet_id && (t.type === "depot" || t.type === "retrait") && <GererMouvement id={t.id} montant={Number(t.montant)} note={t.note} />}
                       </li>
                     );
                   })}
@@ -152,7 +154,7 @@ export default async function BankrollPage({ searchParams }: { searchParams: Pro
               </Card>
             );
           })()}
-          <p className="mt-2 px-1 text-[11px] text-ink-muted">150 mouvements les plus récents. Rien n’est jamais effacé : une correction s’ajoute au journal.</p>
+          <p className="mt-2 px-1 text-[11px] text-ink-muted">150 mouvements les plus récents. Dépôts et retraits se modifient ou se suppriment ici ; mises et gains se corrigent depuis le pari.</p>
         </>
       )}
     </>

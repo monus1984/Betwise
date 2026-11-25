@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { deleteDuplicateBet } from "@/lib/bets/actions";
+import { deleteBet } from "@/lib/bets/actions";
 import { ConfirmResult } from "./confirm-result";
 import Link from "next/link";
 import { RISK_CLASS, RISK_LABEL, fcfa } from "@/components/ui";
@@ -56,7 +56,7 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
   const st = STATUT[bet.statut];
   const propose = bet.resultat_propose && bet.resultat_propose !== "en_attente" ? bet.resultat_propose : null;
   const aConfirmer = bet.statut === "en_cours" && !!propose;
-  const recent = Date.now() - Date.parse(bet.created_at) < 24 * 3600000;
+  const recent = bet.statut !== "annule"; // suppression possible à tout moment depuis le 25/11 (avant : 24 h)
 
   return (
     <li className="rounded-xl border border-slate-200 bg-surface p-4">
@@ -105,11 +105,11 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
       {recent && (
         <div className="mt-2 text-right">
           {!confirmDel ? (
-            <button onClick={() => setConfirmDel(true)} className="text-[11px] text-slate-400 underline">Saisi en double ? Supprimer</button>
+            <button onClick={() => setConfirmDel(true)} className="text-[11px] text-ink-muted underline">Supprimer</button>
           ) : (
             <span className="text-[11px] text-slate-600">
               Supprimer ce pari et ses mouvements ?{" "}
-              <button disabled={pending} onClick={() => start(async () => { const r = await deleteDuplicateBet(bet.id); if (!r.ok) setErr(r.error); })} className="font-medium text-loss-ink underline">Oui</button>
+              <button disabled={pending} onClick={() => start(async () => { const r = await deleteBet(bet.id); if (!r.ok) setErr(r.error); })} className="font-medium text-loss-ink underline">Oui</button>
               {" · "}
               <button onClick={() => setConfirmDel(false)} className="underline">Non</button>
             </span>

@@ -9,6 +9,7 @@ import { Button, Chip, Field, Input, Notice, RISK_CLASS, RISK_LABEL, riskFromOdd
 import { MatchPicker, defaultParam, toNum, type MatchHit } from "@/components/match-picker";
 import { SelectionField } from "@/components/selection-field";
 import { OriginPicker, type SourceOpt } from "../origin-picker";
+import { RetirerLigne } from "./gerer";
 
 export type EditableBet = {
   id: string; type: "simple" | "combine"; mise: number; cote_totale: number; statut: string; placed_at: string;
@@ -42,7 +43,7 @@ export function BetEditor({ bet, sources, markets }: { bet: EditableBet; sources
   return (
     <div className="space-y-4">
       {locked && (
-        <Notice kind="info">Pari réglé : la mise, les cotes et les sélections sont figées pour garder la bankroll juste. Tu peux toujours corriger le match, l’origine de chaque choix, le bookmaker et la date.</Notice>
+        <Notice kind="info">Pari réglé : la mise, les cotes et les sélections sont figées pour garder la bankroll juste. Tu peux corriger le match, l’origine de chaque choix, le bookmaker et la date ; pour le reste, « Rouvrir pour corriger » plus bas.</Notice>
       )}
       <section className="space-y-3 rounded-xl border border-slate-200 bg-surface p-4">
         <div className="grid grid-cols-2 gap-3">
@@ -66,7 +67,7 @@ export function BetEditor({ bet, sources, markets }: { bet: EditableBet; sources
       )}
 
       {bet.selections.map((s, i) => (
-        <SelectionEditor key={s.id} index={i} s={s} locked={locked} sources={sources} markets={markets} onDone={() => router.refresh()} />
+        <SelectionEditor key={s.id} index={i} s={s} locked={locked} retirable={!locked && bet.selections.length > 1} sources={sources} markets={markets} onDone={() => router.refresh()} />
       ))}
 
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
@@ -79,7 +80,7 @@ const RESULT_LABEL: Record<string, { t: string; c: string }> = {
   perdu: { t: "perdue", c: "bg-loss-soft text-loss" }, rembourse: { t: "remboursée", c: "bg-draw-soft text-draw-ink" },
 };
 
-function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index: number; s: EditableBet["selections"][number]; locked: boolean; sources: SourceOpt[]; markets: Market[]; onDone: () => void }) {
+function SelectionEditor({ index, s, locked, retirable, sources, markets, onDone }: { index: number; s: EditableBet["selections"][number]; locked: boolean; retirable?: boolean; sources: SourceOpt[]; markets: Market[]; onDone: () => void }) {
   const [pending, start] = useTransition();
   const [err, setErr] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -129,6 +130,7 @@ function SelectionEditor({ index, s, locked, sources, markets, onDone }: { index
         <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Sélection {index + 1}</p>
         <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${res.c}`}>{res.t}</span>
       </div>
+      {retirable && <div className="-mt-1 text-right"><RetirerLigne selectionId={s.id} /></div>}
 
       <MatchPicker line={{ query, match }} onChange={(p) => { if (p.query !== undefined) setQuery(p.query); if (p.match !== undefined) setMatch(p.match); }} hint="Retrouve le match pour activer le règlement automatique." />
 

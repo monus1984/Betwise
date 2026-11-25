@@ -65,3 +65,21 @@ export async function supprimerMontante(id: string): Promise<R> {
   revalidatePath("/montantes");
   return { ok: true };
 }
+
+/** Détacher un pari rattaché par erreur : il reste dans Mes paris (25/11). */
+export async function detacherPalier(montanteId: string, betId: string): Promise<R> {
+  const db = await createClient();
+  const { error } = await (db.rpc as unknown as (f: string, a: object) => PromiseLike<{ error: { message: string } | null }>)("montante_detacher", { p_bet_id: betId });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/montantes/${montanteId}`); revalidatePath("/montantes");
+  return { ok: true };
+}
+
+/** Reprendre une montante arrêtée (25/11). */
+export async function reprendreMontante(id: string): Promise<R> {
+  const db = await createClient();
+  const { error } = await (db.rpc as unknown as (f: string, a: object) => PromiseLike<{ error: { message: string } | null }>)("montante_reprendre", { p_montante_id: id });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/montantes/${id}`); revalidatePath("/montantes");
+  return { ok: true };
+}

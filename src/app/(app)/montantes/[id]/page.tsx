@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { STATUT_FR, etat, pourLePalier, type Palier } from "@/lib/montantes/regles";
 import { loadOptions } from "@/lib/options/load";
 import { legFrom } from "@/lib/slip/leg";
-import { Arreter, ModifierSupprimer, Rattacher } from "./boutons";
+import { Arreter, Detacher, ModifierSupprimer, Rattacher, Reprendre } from "./boutons";
 
 export const dynamic = "force-dynamic";
 
@@ -56,11 +56,11 @@ export default async function MontantePage({ params }: { params: Promise<{ id: s
         <section className="tile mt-4 p-3.5" aria-label="Paliers joués">
           <h2 className="text-[15px] font-bold">Paliers joués</h2>
           <ul className="mt-1 divide-y divide-line">
-            {(bs ?? []).map((b) => (
+            {(bs ?? []).map((b, i, all) => (
               <li key={b.id}><Link href={`/paris/${b.id}`} className="flex items-center justify-between gap-3 py-2.5 text-[13px]">
                 <span>Palier {b.palier} · {b.nb_selections && b.nb_selections > 1 ? `combiné de ${b.nb_selections}` : "simple"}{b.cote_totale ? ` · cote ${fc(Number(b.cote_totale))}` : ""}</span>
                 <span className={`font-semibold ${b.statut === "gagne" ? "text-gain" : b.statut === "perdu" ? "text-loss" : "text-ink-soft"}`}><Montant texte={fcfa(Number(b.mise))} /> · {b.statut === "gagne" ? "gagné" : b.statut === "perdu" ? "perdu" : b.statut === "rembourse" ? "remboursé" : "en cours"}</span>
-              </Link></li>
+              </Link>{i === all.length - 1 && <Detacher montanteId={id} betId={b.id} />}</li>
             ))}
           </ul>
         </section>
@@ -109,6 +109,7 @@ export default async function MontantePage({ params }: { params: Promise<{ id: s
       <div className="mt-5 space-y-2">
         <ModifierSupprimer edition={{ id, nom: m.nom, mise: Number(m.mise_depart), objectif: Number(m.objectif), paliers: m.paliers_prevus, niveau: m.niveau, joues: (paliers ?? []).filter((b) => b.statut !== "annule").length }} />
         {!fini && <Arreter id={id} />}
+        {m.statut === "arretee" && <Reprendre id={id} />}
       </div>
     </>
   );

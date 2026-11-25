@@ -6,6 +6,7 @@ import { labelType, MARCHE_FR } from "../source-ui";
 import { COMPETITIONS } from "@/lib/competitions";
 import { NIVEAU, lire, niveau, raison, rendement, reussite } from "@/lib/sources/proof";
 import { FollowButton, PredictionRow, SourceLink } from "./client";
+import { GererSource } from "./gerer-source";
 import { linkOf } from "@/lib/sources/link";
 import { CumulChart, type CumulPoint } from "./cumul-chart";
 import { bilanMoi, type BilanMoi, type Ligne, type SelMoi } from "@/lib/sources/moi";
@@ -40,6 +41,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
   const { data: cumul } = await supabase.rpc("source_cumulative", { p_source_id: id, p_since: since });
   const points = ((cumul ?? []) as unknown as CumulPoint[]);
 
+  const { data: marches } = await supabase.from("markets").select("code, libelle_fr, a_parametre").order("code");
   const { data: preds } = await supabase
     .from("predictions")
     .select("id, match_libre, market_code, market_param, selection, cote_annoncee, risque_annonce, risque_calcule, statut, resultat, logged_at, published_at, submitted_by, match:matches(id, kickoff_at, score_home, score_away, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom))")
@@ -50,6 +52,8 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
     .limit(60);
 
   const isSystem = s.type === "modele_betwise" || s.type === "perso";
+  const gerable = !isSystem && s.created_by === user!.id;
+  const { count: nbPronos } = gerable ? await supabase.from("predictions").select("id", { count: "exact", head: true }).eq("source_id", id) : { count: 0 };
 
   // Tipster IA (23/11) : ses tickets réels, simples et combinés, dans sa bankroll ; visibles par l'administrateur seul
   let tickets: Ticket[] | null = null;
@@ -236,13 +240,16 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
                     resultat: p.resultat,
                     loggedAt: p.logged_at,
                     mine: p.submitted_by === user!.id,
+                    home: m ? one(m.home)?.nom ?? null : null, away: m ? one(m.away)?.nom ?? null : null,
                   }}
+                  markets={marches ?? []}
                 />
               );
             })}
           </ul>
         )}
       </section>
+      {gerable && <GererSource id={id} nom={s.nom} type={s.type} visibilite={s.visibilite as "privee" | "partagee"} pronos={nbPronos ?? 0} />}
     </>
   );
 }

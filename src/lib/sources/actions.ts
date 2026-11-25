@@ -159,3 +159,43 @@ export async function setSourceLink(sourceId: string, type: string, saisie: stri
   revalidatePath("/sources");
   return { ok: true, lien };
 }
+
+// ── Modifier et supprimer ses saisies (25/11, 0059) ─────────────────────────────────────────────
+type Rpc = (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
+const appel = async (fn: string, args: Record<string, unknown>) => {
+  const supabase = await createClient();
+  const { data, error } = await (supabase.rpc as unknown as Rpc)(fn, args);
+  return { data, error: error ? error.message.replace(/^.*?:\s*/, "").replace(/^./, (c) => c.toUpperCase()) : null };
+};
+
+/** Corriger un prono chargé (match, pari, cote) ; il sera réglé de nouveau. */
+export async function updatePrediction(input: { id: string; matchId: string | null; market: string; param: number | null; sel: string; cote: number | null }) {
+  const { error } = await appel("update_prediction", { p_id: input.id, p_match_id: input.matchId, p_market_code: input.market, p_market_param: input.param, p_selection: input.sel, p_cote: input.cote });
+  if (error) return { ok: false as const, error };
+  revalidatePath("/sources", "layout"); revalidatePath("/matchs", "layout");
+  return { ok: true as const };
+}
+
+/** Supprimer un prono chargé par erreur. */
+export async function deletePrediction(id: string) {
+  const { error } = await appel("delete_prediction", { p_id: id });
+  if (error) return { ok: false as const, error };
+  revalidatePath("/sources", "layout"); revalidatePath("/matchs", "layout");
+  return { ok: true as const };
+}
+
+/** Renommer une source, changer son type ou sa visibilité. */
+export async function updateSource(input: { id: string; nom: string; type: string; visibilite: "privee" | "partagee" }) {
+  const { error } = await appel("update_source", { p_id: input.id, p_nom: input.nom, p_type: input.type, p_visibilite: input.visibilite });
+  if (error) return { ok: false as const, error };
+  revalidatePath("/sources", "layout");
+  return { ok: true as const };
+}
+
+/** Supprimer une source qu'on a créée, avec ses pronos (si personne d'autre ne s'en sert). */
+export async function deleteSource(id: string) {
+  const { data, error } = await appel("delete_source", { p_id: id });
+  if (error) return { ok: false as const, error };
+  revalidatePath("/sources", "layout");
+  return { ok: true as const, pronos: Number(data ?? 0) };
+}

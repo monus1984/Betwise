@@ -194,3 +194,50 @@ export async function cashoutBet(betId: string, montant: number) {
   revalidatePath("/paris", "layout"); revalidatePath("/"); revalidatePath("/bankroll");
   return { ok: true as const };
 }
+
+// ── Modifier et supprimer ses saisies (25/11, 0059) ─────────────────────────────────────────────
+type Rpc = (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
+const appel = async (fn: string, args: Record<string, unknown>) => {
+  const supabase = await createClient();
+  const { data, error } = await (supabase.rpc as unknown as Rpc)(fn, args);
+  return { data, error: error ? humanize(error.message) : null };
+};
+const rafraichir = () => { revalidatePath("/"); revalidatePath("/paris", "layout"); revalidatePath("/bankroll"); revalidatePath("/montantes", "layout"); revalidatePath("/sources", "layout"); };
+
+/** Supprimer un pari, à tout moment ; ses mouvements de bankroll partent avec lui. */
+export async function deleteBet(betId: string) {
+  const { error } = await appel("delete_bet", { p_bet_id: betId });
+  if (error) return { ok: false as const, error };
+  rafraichir();
+  return { ok: true as const };
+}
+
+/** Rouvrir un pari réglé pour le corriger : gains annulés, mise gardée, il sera réglé de nouveau. */
+export async function reopenBet(betId: string) {
+  const { error } = await appel("reopen_bet", { p_bet_id: betId });
+  if (error) return { ok: false as const, error };
+  rafraichir();
+  return { ok: true as const };
+}
+
+/** Retirer une ligne d'un combiné en cours ; la cote totale est recalculée. */
+export async function removeSelection(selectionId: string) {
+  const { error } = await appel("remove_bet_selection", { p_selection_id: selectionId });
+  if (error) return { ok: false as const, error };
+  rafraichir();
+  return { ok: true as const };
+}
+
+/** Modifier ou supprimer un dépôt ou un retrait saisi à la main. */
+export async function updateBankrollTx(id: string, montant: number, note: string) {
+  const { error } = await appel("update_bankroll_tx", { p_id: id, p_montant: montant, p_note: note });
+  if (error) return { ok: false as const, error };
+  rafraichir();
+  return { ok: true as const };
+}
+export async function deleteBankrollTx(id: string) {
+  const { error } = await appel("delete_bankroll_tx", { p_id: id });
+  if (error) return { ok: false as const, error };
+  rafraichir();
+  return { ok: true as const };
+}
