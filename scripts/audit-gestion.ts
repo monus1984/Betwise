@@ -157,8 +157,8 @@ async function main() {
   } finally {
     await browser.close();
     // Nettoyage : tout ce que le robot a créé
-    if (betId) await rpc("delete_bet", { p_bet_id: betId }).catch(() => {});
-    if (p1.data) await rpc("delete_bet", { p_bet_id: p1.data }).catch(() => {});
+    if (betId) await rpc("delete_bet", { p_bet_id: betId });
+    if (p1.data) await rpc("delete_bet", { p_bet_id: p1.data }); // l'erreur éventuelle est renvoyée, pas levée
     await admin.from("montantes").delete().eq("id", moId);
     await admin.from("predictions").delete().eq("source_id", srcId);
     await admin.from("source_follows").delete().eq("source_id", srcId);
