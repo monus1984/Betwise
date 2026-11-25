@@ -10,18 +10,19 @@ import { legFrom } from "@/lib/slip/leg";
 
 type Props = {
   match: { id: string; home: string; away: string; kickoff: string; comp: string; ouvert: boolean };
-  cles?: string[]; etapes: Etape[]; verdict: Choix | null; autres: Choix[]; source: "marche" | "modele" | null;
+  cles?: string[]; redaction?: string[]; etapes: Etape[]; verdict: Choix | null; autres: Choix[]; source: "marche" | "modele" | null;
 };
 const pct = (p: number) => Math.round(p * 100);
 const cote = (c: Choix) => (c.cote ? `${c.ou && c.ou !== "médiane" ? `${c.ou} ` : ""}${c.cote.toFixed(2).replace(".", ",")}` : `≈ ${(1 / c.p / 1.05).toFixed(2).replace(".", ",")}`);
 
 /** L'analyse d'un match, étape par étape, lue à voix haute si on le demande : l'étape en cours de lecture est mise en avant. */
-export function MatchRecit({ match, cles = [], etapes, verdict, autres, source }: Props) {
+export function MatchRecit({ match, cles = [], redaction = [], etapes, verdict, autres, source }: Props) {
   // Lecture à voix haute (25/11) : l'essentiel puis le choix, plus tout le détail (bloc 0 = l'essentiel, 1 = le choix)
   const [lu, setLu] = useState<number | null>(null);
   useEffect(() => () => stopSpeaking(), []);
 
-  const resume = cles.length ? cles.join(" ") : etapes.slice(0, 2).map((e) => e.lignes[0]).join(" ");
+  // La rédaction de Betster (25/11) d'abord ; à défaut, les faits clés ; à défaut, les deux premières étapes
+  const resume = redaction.length ? redaction.join(" ") : cles.length ? cles.join(" ") : etapes.slice(0, 2).map((e) => e.lignes[0]).join(" ");
   const blocs = [
     resume,
     verdict ? `Le choix le plus probable : ${verdict.label}. ${pct(verdict.p)} chances sur 100${verdict.cote ? "" : ", c’est une estimation"}.` : "Pas encore de cote sur ce match : aucun choix à mettre en avant.",
@@ -42,12 +43,10 @@ export function MatchRecit({ match, cles = [], etapes, verdict, autres, source }
         )}
       </div>
 
-      {cles.length > 0 ? (
+      {redaction.length > 0 ? (
         <div className={`rounded-xl border p-3 transition-colors ${lu === 0 ? "border-brand bg-brand/5" : "border-line bg-surface"}`}>
-          <p className="text-[11px] font-semibold text-brand">L’essentiel</p>
-          <ul className="mt-1 space-y-1.5">
-            {cles.map((c) => <li key={c} className="flex gap-2 text-[14px] leading-snug"><span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />{c}</li>)}
-          </ul>
+          <p className="text-[11px] font-semibold text-brand">Betster résume</p>
+          <p className="mt-1 text-[14px] leading-snug">{redaction.join(" ")}</p>
         </div>
       ) : etapes.length === 0 ? (
         <p className="rounded-xl border border-line bg-surface p-3 text-sm text-ink-muted">Pas encore assez de données sur ces deux équipes (classement, derniers matchs). Le choix ci-dessous repose sur les cotes seules.</p>

@@ -22,7 +22,7 @@ export type Etape = { cle: "enjeu" | "forme" | "terrain" | "calendrier" | "absen
 export type Choix = { market: string; param: number | null; sel: string; label: string; p: number; cote: number | null; categorie: Categorie;
   /** D'où vient la cote : nom du bookmaker (1xBet) ou « médiane » des bookmakers européens ; null sans cote. */
   ou?: string | null };
-export type Recit = { affiche: string; cles: string[]; etapes: Etape[]; verdict: Choix | null; autres: Choix[]; source: "marche" | "modele" | null; texte: string };
+export type Recit = { affiche: string; cles: string[]; redaction: string[]; etapes: Etape[]; verdict: Choix | null; autres: Choix[]; source: "marche" | "modele" | null; texte: string };
 
 export type Passe = { date: string; home: string; away: string; sh: number; sa: number; buteurs: { n: string | null; e: "1" | "2" }[] };
 export type RecitInput = {
@@ -264,6 +264,132 @@ function verdictDe({ home, away, picks }: RecitInput): { verdict: Choix | null; 
   return { verdict, autres: [s, a, r].filter((c): c is Choix => !!c && c !== verdict) };
 }
 
+
+/* ---------- La rédaction de Betster (25/11) ----------
+ * Sur le modèle des pronostiqueurs en vidéo : un contexte, un ou deux chiffres de forme par équipe, les absents,
+ * puis le choix en une phrase. 3 à 5 phrases, chacune posée sur une donnée réelle ; rien n'est inventé.
+ * Les faits mis en avant dépendent du type de choix : résultat (forme, terrain, classement) ou buts (marqués, encaissés). */
+
+type Bilan = { n: number; v: number; nul: number; d: number; marque: number; encaisse: number; btts: number; plus25: number };
+function bilanRecent(nom: string, passes: Passe[], max = 7): Bilan {
+  const ms = passes.filter((p) => joue(p, nom)).slice(0, max);
+  const b: Bilan = { n: ms.length, v: 0, nul: 0, d: 0, marque: 0, encaisse: 0, btts: 0, plus25: 0 };
+  for (const p of ms) {
+    const pour = p.home === nom ? p.sh : p.sa, contre = p.home === nom ? p.sa : p.sh;
+    if (pour > contre) b.v++; else if (pour < contre) b.d++; else b.nul++;
+    if (pour > 0) b.marque++; if (contre > 0) b.encaisse++; if (pour > 0 && contre > 0) b.btts++; if (pour + contre >= 3) b.plus25++;
+  }
+  return b;
+}
+const formeDe = (r: StandingRow | null) => {
+  const f = (r?.forme ?? "").toUpperCase().replace(/[^WDL]/g, "");
+  return f.length >= 3 ? { k: f.length, v: [...f].filter((c) => c === "W").length, d: [...f].filter((c) => c === "L").length, nul: [...f].filter((c) => c === "D").length } : null;
+};
+const lister = (l: string[]) => (l.length <= 4 ? l.join(", ").replace(/, ([^,]*)$/, " et $1") : `${l.slice(0, 3).join(", ")} et ${l.length - 3} autres`);
+
+/** L'équipe que vise le choix (celle qu'on voit gagner ou ne pas perdre), s'il y en a une. */
+function equipeVisee(c: Choix | null, home: string, away: string): { nom: string; adv: string; cote: "1" | "2" } | null {
+  if (!c) return null;
+  const sel = c.market === "DC_OU" || c.market === "1X2_OU" ? c.sel.split("|")[0] : c.sel;
+  const un = ["1X2", "DNB", "AH", "DC_OU", "1X2_OU", "TT1", "TT2"].includes(c.market) ? (c.market === "TT1" ? "1" : c.market === "TT2" ? "2" : sel) : c.market === "DC" ? (sel === "1N" ? "1" : sel === "N2" ? "2" : null) : null;
+  if (un === "1") return { nom: home, adv: away, cote: "1" };
+  if (un === "2") return { nom: away, adv: home, cote: "2" };
+  return null;
+}
+
+/** La phrase du choix, dans la voix d'un pronostiqueur, avec la probabilité d'après les cotes. */
+function phraseChoix(c: Choix, home: string, away: string, source: "marche" | "modele" | null): string {
+  const p = `${Math.round(c.p * 100)} chances sur 100${c.cote ? "" : ", estimation"}${source === "modele" ? " d'après le modèle" : " d'après les cotes"}`;
+  const minuscule = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
+  const v = equipeVisee(c, home, away);
+  const param = c.param !== null ? String(c.param).replace(".", ",") : "";
+  let t: string;
+  switch (c.market) {
+    case "1X2": t = c.sel === "N" ? "Je pars sur le match nul" : c.sel === "1" ? `Je vois ${home} s'imposer` : `Je vois ${away} l'emporter à l'extérieur`; break;
+    case "DC": t = c.sel === "12" ? `Je ne vois pas de match nul : ${home} ou ${away}` : `Je ne vois pas ${v!.nom} perdre : ${c.sel === "1N" ? `${home} ou nul` : `nul ou ${away}`}`; break;
+    case "DNB": t = `Je pars sur ${v!.nom}, remboursé si nul`; break;
+    case "OU": t = c.sel === "Plus" ? `Je m'attends à des buts : ${minuscule(c.label)}` : `Je vois un match fermé : ${minuscule(c.label)}`; break;
+    case "BTTS": t = c.sel === "Oui" ? "Des buts de chaque côté : les deux équipes marquent" : "Je vois au moins une équipe rester muette"; break;
+    case "AH": t = `Je pars sur ${v!.nom} avec le handicap ${param}`; break;
+    default: t = `Je pars sur ${c.label}`;
+  }
+  return `${t} (${p}).`;
+}
+
+export function redaction(input: RecitInput, verdict: Choix | null): string[] {
+  const { home, away, rangs, passes, h2h, absents, calendrier, kickoff, butsAttendus, source } = input;
+  const c: { poids: number; t: string }[] = [];
+  const vise = equipeVisee(verdict, home, away);
+  const surLesButs = !!verdict && ["OU", "BTTS", "TT1", "TT2", "DC_OU", "1X2_OU", "OU_BTTS"].includes(verdict.market);
+  const h = rangs.home, a = rangs.away;
+
+  // Le contexte : l'écart au classement, ou deux équipes qui se tiennent
+  if (h && a && h.groupe === a.groupe && h.joues >= 5) {
+    const [fort, faible] = h.rang < a.rang ? [[home, h], [away, a]] as const : [[away, a], [home, h]] as const;
+    if (Math.abs(h.rang - a.rang) >= 8) c.push({ poids: 7, t: `${fort[0]} est ${ord(fort[1].rang)}, ${faible[0]} ${ord(faible[1].rang)} : l'écart au classement est net.` });
+    else if (Math.abs(h.points - a.points) <= 2) c.push({ poids: 4, t: `Les deux équipes se tiennent en ${pl(Math.abs(h.points - a.points), "point")} au classement.` });
+  }
+  for (const [nom, r] of [[home, h], [away, a]] as const) {
+    const z = r?.zone ? zoneFr(r.zone) : null;
+    if (z && r && r.joues >= 5 && !surLesButs) c.push({ poids: 3, t: `${nom} est ${ord(r.rang)}, ${z}.` });
+  }
+
+  // La forme de chaque équipe : le fait le plus net, un par équipe
+  for (const [nom, r, b, chez] of [[home, h, bilanRecent(home, passes), "domicile"], [away, a, bilanRecent(away, passes), "exterieur"]] as const) {
+    const f = formeDe(r);
+    const t = chez === "domicile" ? r?.domicile : r?.exterieur;
+    const ou = chez === "domicile" ? "à domicile" : "à l'extérieur";
+    const estVise = vise?.nom === nom, estAdv = vise?.adv === nom;
+    if (surLesButs) {
+      if (b.n >= 4 && b.marque >= b.n - 1) c.push({ poids: 7, t: b.marque === b.n ? `${nom} a marqué à chacun de ses ${b.n} derniers matchs.` : `${nom} a marqué sur ${b.marque} de ses ${b.n} derniers matchs.` });
+      else if (b.n >= 4 && b.marque <= 1) c.push({ poids: 7, t: `${nom} n'a marqué que sur ${b.marque} de ses ${b.n} derniers matchs.` });
+      if (b.n >= 4 && b.encaisse >= b.n - 1) c.push({ poids: 6, t: b.encaisse === b.n ? `${nom} a encaissé à chacun de ses ${b.n} derniers matchs.` : `${nom} a encaissé sur ${b.encaisse} de ses ${b.n} derniers matchs.` });
+      else if (b.n >= 4 && b.encaisse <= 1) c.push({ poids: 6, t: `${nom} n'a encaissé que sur ${b.encaisse} de ses ${b.n} derniers matchs.` });
+      if (b.n >= 5 && b.plus25 >= b.n - 1) c.push({ poids: 5, t: `Plus de 2,5 buts dans ${b.plus25} des ${b.n} derniers matchs de ${nom}.` });
+      else if (b.n >= 5 && b.plus25 <= 1) c.push({ poids: 5, t: `Moins de 3 buts dans ${b.n - b.plus25} des ${b.n} derniers matchs de ${nom}.` });
+      continue;
+    }
+    if (f && f.v >= f.k - 1) c.push({ poids: 7 + (estVise ? 1 : 0), t: `${nom} reste sur ${f.v} victoires sur ses ${f.k} derniers matchs de championnat.` });
+    else if (f && f.v === 0) c.push({ poids: 7 + (estAdv ? 1 : 0), t: `${nom} n'a gagné aucun de ses ${f.k} derniers matchs de championnat${f.d >= f.k - 1 ? ` (${pl(f.d, "défaite")})` : ""}.` });
+    else if (f && f.d === 0 && f.k >= 4) c.push({ poids: 5 + (estVise ? 1 : 0), t: `${nom} n'a pas perdu sur ses ${f.k} derniers matchs de championnat.` });
+    else if (f) c.push({ poids: 2, t: `${nom} : ${pl(f.v, "victoire")}, ${pl(f.nul, "nul")}, ${pl(f.d, "défaite")} sur ses ${f.k} derniers matchs de championnat.` });
+    if (t && t.j >= 4 && t.p === 0) c.push({ poids: 6 + (estVise ? 1 : 0), t: `${nom} est invaincu ${ou} cette saison (${t.g} V, ${t.n} N).` });
+    else if (t && t.j >= 4 && t.g === 0) c.push({ poids: 6 + (estAdv ? 1 : 0), t: `${nom} n'a pas encore gagné ${ou} cette saison (${t.n} N, ${t.p} D).` });
+    else if (t && t.j >= 5 && t.g >= t.j - 1) c.push({ poids: 5, t: `${nom} ${ou} : ${t.g} victoires en ${t.j} matchs.` });
+  }
+
+  // Les absents, les confrontations, le calendrier, les buts attendus
+  for (const x of absents ?? []) if (x.joueurs.length) c.push({ poids: 5 + Math.min(x.joueurs.length, 3), t: `${x.equipe} sera privé de ${lister(x.joueurs)}.` });
+  const faces = h2h && h2h.length >= 3 ? h2h : passes.filter((p) => joue(p, home) && joue(p, away));
+  if (faces.length >= 3 && !surLesButs) {
+    const vainqueur = (p: Passe) => (p.sh > p.sa ? p.home : p.sa > p.sh ? p.away : null);
+    const premier = vainqueur(faces[0]);
+    let serie = 0;
+    if (premier) for (const p of faces) { if (vainqueur(p) !== premier) break; serie++; }
+    if (premier && serie >= 3) c.push({ poids: 6, t: `${premier} a gagné les ${serie} dernières confrontations.` });
+  }
+  if (faces.length >= 3 && surLesButs) {
+    const k = Math.min(faces.length, 5), deux = faces.slice(0, k).filter((p) => p.sh > 0 && p.sa > 0).length;
+    if (deux >= k - 1 || deux <= 1) c.push({ poids: 5, t: `Les deux équipes ont marqué dans ${deux} de leurs ${k} dernières confrontations.` });
+  }
+  if (calendrier && kickoff) {
+    const k = Date.parse(kickoff);
+    for (const [nom, l] of [[home, calendrier.home], [away, calendrier.away]] as const) {
+      const x = l.find((y) => y.avant && k - Date.parse(y.date) < 3.5 * 86_400_000);
+      if (x) c.push({ poids: 4, t: `${nom} a joué il y a ${pl(Math.max(1, Math.round((k - Date.parse(x.date)) / 86_400_000)), "jour")} (${x.comp}) : peu de récupération.` });
+    }
+  }
+  if (butsAttendus !== null && surLesButs) c.push({ poids: 4, t: `Les cotes annoncent environ ${dec(butsAttendus)} buts.` });
+  else if (butsAttendus !== null && (butsAttendus >= 3.2 || butsAttendus <= 2)) c.push({ poids: 3, t: `Les cotes annoncent ${butsAttendus >= 3.2 ? "un match ouvert" : "un match fermé"}, environ ${dec(butsAttendus)} buts.` });
+
+  // 4 faits au plus, les plus nets, dans l'ordre du raisonnement ; puis le choix
+  const garde = new Set(c.map((x, i) => ({ x, i })).sort((p, q) => q.x.poids - p.x.poids).slice(0, 4).map((p) => p.i));
+  const faits = c.filter((_, i) => garde.has(i)).map((x) => x.t);
+  if (verdict) faits.push(phraseChoix(verdict, home, away, source));
+  else if (faits.length) faits.push("Pas encore de cote sur ce match : je ne tranche pas.");
+  return faits;
+}
+
 export function buildRecit(input: RecitInput): Recit {
   const etapes = [etapeEnjeu(input), etapeForme(input), etapeTerrain(input), etapeCalendrier(input), etapeAbsents(input), etapeDernier(input), etapeFace(input), etapeJoueur(input), etapeChiffre(input)].filter((e): e is Etape => !!e);
   const { verdict, autres } = verdictDe(input);
@@ -272,8 +398,9 @@ export function buildRecit(input: RecitInput): Recit {
     ? `Le choix le plus probable : ${verdict.label}. ${Math.round(verdict.p * 100)} chances sur 100${verdict.cote ? "" : " (estimation)"}.${autres.length ? ` ${autres.map((c) => `Plus ${c.categorie === "sur" ? "probable" : "osé"} : ${c.label}, ${Math.round(c.p * 100)} sur 100.`).join(" ")}` : ""}`
     : "Pas encore de cote sur ce match : aucun choix à mettre en avant.";
   const cles = pointsCles(input);
-  const texte = [`${input.home} contre ${input.away}.`, ...(cles.length ? [`L'essentiel. ${cles.join(" ")}`] : []), ...etapes.map((e) => `${e.titre}. ${e.lignes.join(" ")}`), avis].join("\n");
-  return { affiche, cles, etapes, verdict, autres, source: input.source, texte };
+  const redac = redaction(input, verdict);
+  const texte = [`${input.home} contre ${input.away}.`, ...(redac.length ? [redac.join(" ")] : []), ...etapes.map((e) => `${e.titre}. ${e.lignes.join(" ")}`), avis].join("\n");
+  return { affiche, cles, redaction: redac, etapes, verdict, autres, source: input.source, texte };
 }
 
 export async function loadRecit(db: Db, matchId: string): Promise<(Recit & { matchId: string; home: string; away: string; kickoff: string; comp: string; statut: string }) | null> {

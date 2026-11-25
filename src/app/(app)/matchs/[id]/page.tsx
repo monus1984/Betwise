@@ -152,7 +152,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
 
       {onglet === "analyse" && (
         <div className="space-y-3">
-          {recit && <MatchRecit match={{ id: m.id, home, away, kickoff: m.kickoff_at, comp: comp?.code_externe ?? "", ouvert: m.statut === "programme" }} cles={recit.cles} etapes={recit.etapes} verdict={recit.verdict} autres={recit.autres} source={recit.source} />}
+          {recit && <MatchRecit match={{ id: m.id, home, away, kickoff: m.kickoff_at, comp: comp?.code_externe ?? "", ouvert: m.statut === "programme" }} cles={recit.cles} redaction={recit.redaction} etapes={recit.etapes} verdict={recit.verdict} autres={recit.autres} source={recit.source} />}
           {picks.length > 0 && (
             <Card title="Les issues les plus probables" note={sg!.source === "modele" ? "estimation du modèle" : "d’après les cotes"}>
               <ul className="divide-y divide-line">
