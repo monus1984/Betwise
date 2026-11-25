@@ -209,7 +209,8 @@ async function main() {
     { nom: "02j-matchs-aide", chemin: "/matchs", action: clic(/Comment ça marche/), ecranSeul: true, note: "aide ouverte" },
     { nom: "03a-match-analyse", chemin: m(mTop) },
     { nom: "03b-match-stats", chemin: m(mTop, "?t=stats") },
-    { nom: "03c-match-marches", chemin: m(mTop, "?t=marches") },
+    { nom: "03c-match-compos", chemin: m(mTop, "?t=compos") },
+    { nom: "03c2-match-compos-direct", chemin: m(mDirect, "?t=compos") },
     { nom: "03d-match-sources", chemin: m(mTop, "?t=sources") },
     { nom: "03e-match-termine", chemin: m(mFini) },
     { nom: "03f-match-termine-stats", chemin: m(mFini, "?t=stats") },
@@ -247,7 +248,7 @@ async function main() {
     { nom: "09c-reglages", chemin: "/reglages" },
     { nom: "10-page-inexistante", chemin: "/page-qui-n-existe-pas" },
   ];
-  const PETIT = new Set(["01-predictions", "02-matchs", "02b-matchs-championnat-ouvert", "03a-match-analyse", "03c-match-marches", "05c-paris-test", "06b-nouveau-pari", "07f-options", "08e-source-modele"]);
+  const PETIT = new Set(["01-predictions", "02-matchs", "02b-matchs-championnat-ouvert", "03a-match-analyse", "03c-match-compos", "05c-paris-test", "06b-nouveau-pari", "07f-options", "08e-source-modele"]);
 
   const browser = await chromium.launch();
   const index: Record<string, unknown>[] = [];
