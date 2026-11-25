@@ -35,7 +35,7 @@ const OUTCOME: Record<MatchedSelection["outcome"], { label: string; cls: string 
 };
 const toNum = (s: string) => Number(String(s).replace(/\s/g, "").replace(",", "."));
 
-export function ImportFlow({ markets, sources, defaultOrigin, initialText, justSaved, nextTab, initialTest }: { markets: { code: string; libelle_fr: string; a_parametre: boolean }[]; sources: Source[]; defaultOrigin: string | null; initialText: string; justSaved?: boolean; nextTab?: string; initialTest?: boolean }) {
+export function ImportFlow({ markets, sources, defaultOrigin, initialText, justSaved, nextTab, initialTest, initialSource }: { markets: { code: string; libelle_fr: string; a_parametre: boolean }[]; sources: Source[]; defaultOrigin: string | null; initialText: string; justSaved?: boolean; nextTab?: string; initialTest?: boolean; initialSource?: string | null }) {
   const [srcList, setSrcList] = useState<{ id: string; nom: string; type?: string }[]>(sources);
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -56,7 +56,9 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
   const [test, setTest] = useState(!!initialTest);
   const [stage, setStage] = useState<string | null>(null);
   const [videoNote, setVideoNote] = useState<string | null>(null);
-  const [summaryOrigin, setSummaryOrigin] = useState<string | null>(defaultOrigin);
+  const [summaryOrigin, setSummaryOrigin] = useState<string | null>(initialSource ?? defaultOrigin);
+  // Source choisie avant de charger (25/11) : appliquée d'office à toutes les lignes du ticket, et aux tickets suivants du même envoi
+  const [amont, setAmont] = useState<string | null>(initialSource ?? null);
   const [pending, start] = useTransition();
 
   // Fichiers arrivés par la feuille de partage Android : déposés par le service worker (sans limite de taille),
@@ -100,9 +102,10 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
     // Source lue sur la capture (canal, page, groupe, filigrane) : appliquée si elle existe déjà
     const hint = t.raw.source?.name ? t.raw.source : null;
     const found = hint ? matchSource(hint.name, srcList) : null;
-    setDetected(hint ? { hint, sourceId: found?.id ?? null } : null);
-    const origin = found?.id ?? lines[0]?.origin ?? defaultOrigin;
-    if (found) setSummaryOrigin(found.id);
+    setDetected(hint && !amont ? { hint, sourceId: found?.id ?? null } : null);
+    // Le choix fait avant de charger l'emporte sur la source lue sur la capture
+    const origin = amont ?? found?.id ?? lines[0]?.origin ?? defaultOrigin;
+    if (amont || found) setSummaryOrigin(origin);
     setLines(t.selections.map((s, i) => ({ ...s, key: i, origin, lu: cleDe(s), verifie: false, coteStr: s.odds ? String(s.odds) : "", include: true, editing: !s.match, paramStr: s.market_param !== null ? String(s.market_param) : "", query: s.match ? "" : [s.home_team, s.away_team].filter(Boolean).join(" ") })));
     // Pronos de tipster : ce ne sont pas des paris de l'utilisateur, on les enregistre comme tests par défaut
     const pronos = t.raw.kind === "pronos";
@@ -285,6 +288,11 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
           <Notice kind="info">Lien {coupon.bookmaker} reconnu (coupon {coupon.code}). Il ne contient pas les sélections : ajoute une capture ou le texte du coupon.</Notice>
         )}
         {test && <Notice kind="info">Mode test : ce ticket sera suivi et réglé comme un pari, sans toucher à ta bankroll.</Notice>}
+        <section className="rounded-xl border border-slate-200 bg-surface p-4" aria-label="Source du ticket">
+          <h2 className="mb-1 text-sm font-semibold">De qui vient ce ticket ?</h2>
+          <p className="mb-2.5 text-xs text-slate-500">Choisis ou crée la source : elle s’appliquera à toutes les lignes du ticket. Tu pourras encore la changer ligne par ligne.</p>
+          <SourceChooser size="sm" sources={srcList} value={amont ?? defaultOrigin} onChange={(id) => { setAmont(id); setSummaryOrigin(id); }} onCreated={(x) => { setSrcList((l) => (l.some((y) => y.id === x.id) ? l : [...l, x])); setAmont(x.id); setSummaryOrigin(x.id); }} />
+        </section>
         <section className="rounded-xl border border-slate-200 bg-surface p-4">
           <h2 className="mb-2 text-sm font-semibold">Capture ou vidéo d’écran</h2>
           <p className="mb-3 text-xs text-slate-500">Déplie le ticket avant la capture. Un ticket long : plusieurs captures dans l’ordre (6 max), ou une vidéo d’écran en faisant défiler sans te presser. La vidéo est découpée sur ton téléphone, elle n’est pas envoyée.</p>
@@ -342,6 +350,13 @@ export function ImportFlow({ markets, sources, defaultOrigin, initialText, justS
             </div>
           )}
         </div>
+      )}
+      {!(detected && !detected.sourceId) && lines.length > 0 && (
+        <section className="rounded-xl border border-line bg-surface p-3" aria-label="Source de tout le ticket">
+          <p className="mb-2 text-sm font-semibold">Source de tout le ticket</p>
+          <SourceChooser size="sm" sources={srcList} value={lines.every((l) => l.origin === lines[0].origin) ? lines[0].origin : null} onChange={(id) => { setAmont(id); applySource(id); }} onCreated={(x) => { setSrcList((l) => (l.some((y) => y.id === x.id) ? l : [...l, x])); setAmont(x.id); applySource(x.id); }} />
+          {!lines.every((l) => l.origin === lines[0].origin) && <p className="mt-1.5 text-[11px] text-ink-muted">Les lignes ont des sources différentes : en choisir une ici l’applique à toutes.</p>}
+        </section>
       )}
       {raw.kind === "pronos" && <Notice kind="info">Pronos de tipster{separes ? ` : ${valides.length} pronos séparés, enregistrés chacun comme un ${test ? "test" : "pari"} simple` : raw.total_odds ? " : combiné annoncé par le tipster" : ""}. Réglés automatiquement après les matchs ; les ✅ du message ne sont pas des résultats.</Notice>}
       {test && raw.kind !== "pronos" && <Notice kind="info">Coupon ou pronos chargés comme test : suivis et réglés automatiquement, sans toucher à ta bankroll. Choisis bien l’origine (toi ou le tipster) : c’est elle qui sera notée.</Notice>}

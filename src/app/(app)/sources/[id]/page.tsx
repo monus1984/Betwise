@@ -86,6 +86,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
         subtitle={`${labelType(s.type)}${s.identifiant_externe ? ` · ${s.identifiant_externe}` : ""}${s.visibilite === "partagee" && !isSystem ? " · partagée" : ""}`}
         action={!isSystem ? <FollowButton sourceId={id} following={!!f} /> : undefined}
       />
+      {!isSystem && <Link href={`/import?source=${id}`} className="mt-3 flex items-center justify-center rounded-xl border border-line bg-surface py-2.5 text-[13px] font-medium">Charger un ticket de cette source</Link>}
       {!isSystem && <SourceLink sourceId={id} type={s.type} url={linkOf(s)} saved={!!s.lien} canEdit={s.created_by === user!.id || (s.visibilite === "partagee" && !s.lien)} />}
       {sp.existante && <p className="mb-4 rounded-lg border border-info/30 bg-info-soft p-3 text-sm text-info-ink">Cette source existait déjà en partagé : tu la suis maintenant, son historique est commun.</p>}
       {sp.ajout && !sp.doublon && <p className="mb-4 rounded-lg border border-gain/30 bg-gain-soft p-3 text-sm text-gain-ink">Prono enregistré.</p>}

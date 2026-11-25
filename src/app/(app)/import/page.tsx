@@ -6,7 +6,7 @@ import { ImportFlow } from "./import-flow";
 export const dynamic = "force-dynamic";
 
 /** Cible de partage Android (manifest share_target) et point d'entrée « Importer un ticket ». */
-export default async function ImportPage({ searchParams }: { searchParams: Promise<{ text?: string; url?: string; title?: string; ok?: string; next?: string; test?: string }> }) {
+export default async function ImportPage({ searchParams }: { searchParams: Promise<{ text?: string; url?: string; title?: string; ok?: string; next?: string; test?: string; source?: string }> }) {
   const sp = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -18,7 +18,7 @@ export default async function ImportPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <PageHeader aide="import" title="Importer" subtitle="Ticket de bookmaker ou pronos d’un tipster : une capture, une vidéo ou le texte. Tu vérifies, puis tu enregistres." />
-      <ImportFlow markets={markets ?? []} sources={ordered} defaultOrigin={mine?.id ?? null} initialText={sharedText} justSaved={!!sp.ok} nextTab={sp.next} initialTest={sp.test === "1"} />
+      <ImportFlow markets={markets ?? []} sources={ordered} defaultOrigin={mine?.id ?? null} initialText={sharedText} justSaved={!!sp.ok} nextTab={sp.next} initialTest={sp.test === "1"} initialSource={ordered.some((x) => x.id === sp.source) ? sp.source! : null} />
     </>
   );
 }
