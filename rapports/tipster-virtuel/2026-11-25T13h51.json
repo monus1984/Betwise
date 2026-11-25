@@ -1,0 +1,40 @@
+{
+  "quand": "2026-11-25T13:51:36.629Z",
+  "essai": false,
+  "jour": "2026-11-25",
+  "matchs": 17,
+  "avecCotes": 17,
+  "candidats": 1670,
+  "selectionsSansCote1xBet": 1781,
+  "relevesTropEloignes": 0,
+  "dejaAujourdhui": 0,
+  "choix": [
+    {
+      "match": "Sabah FK – FC Barcelona",
+      "comp": "CL",
+      "kickoff": "2026-11-25T17:45:00+00:00",
+      "market": "OU",
+      "param": 4.5,
+      "sel": "Plus",
+      "cote": 1.97,
+      "p": 0.565,
+      "pModele": null,
+      "valeur": 0.113,
+      "profil": "risque",
+      "mise": 3000,
+      "coteRelevee": "2026-11-25T08:20:14+00:00",
+      "referenceRelevee": "2026-11-25T08:20:14+00:00",
+      "raison": "Probabilité 56 % selon les cotes de référence. 1xBet paie 1,97 pour une cote juste de 1,77 : écart de +11,3 %."
+    }
+  ],
+  "bilan": {
+    "bankroll": 102127,
+    "net": 2127,
+    "enJeu": 3000,
+    "regles": 5,
+    "gagnes": 3,
+    "roi": 0.2995774647887324
+  },
+  "resume": "Tipster à règles fixes (témoin sans IA). Paris simples sur cote 1xBet, seulement quand le prix dépasse la valeur juste. Bankroll virtuelle : 102 127 FCFA (départ 100 000), 5 paris réglés dont 3 gagnés, rendement 30,0 %, 3 000 FCFA en jeu. Mis à jour le 25/11/2026 13:51:36.",
+  "candidatsVus": 203
+}
