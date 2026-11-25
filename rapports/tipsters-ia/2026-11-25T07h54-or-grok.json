@@ -1,0 +1,252 @@
+{
+  "profil": "or-grok",
+  "nom": "Grok",
+  "modele": "x-ai/grok-4.7",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "1ab8e6693cc585fe",
+  "duree_s": 60,
+  "tours": 5,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 719
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 642
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 372
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 426
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 684
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M9"
+      },
+      "ms": 379
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 392
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 391
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 647
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 733
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 383
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 371
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M6",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "resultat"
+      },
+      "ms": 8
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M9",
+        "famille": "resultat"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M7"
+      },
+      "ms": 381
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 379
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 384
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M8",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "buts"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5",
+        "famille": "resultat"
+      },
+      "ms": 6
+    }
+  ],
+  "jetons": {
+    "entree": 154675,
+    "sortie": 3589,
+    "cacheLu": 86528,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 99712.25,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M6.101",
+      "mise": 2500,
+      "probabilite": 0.68,
+      "raison": "Mantova 8e, 19 pts/12, place de barrages. Arezzo 18e, relégable, 12 pts, 0 victoire et 3 défaites sur 5, 0,8 but et 1,8 encaissé. Marché 1,86-0,94, victoire Mantova 57,9 %. DNB 1,22 (marché 76 %) : je reste à 68 % car Mantova n'a que 1V/5, domicile médiocre (2V 2N 2D) et défaite 1-4 à Avellino le 22/11. Aucun absent signalé, compositions non publiées. Remboursé si nul, donc le scénario le plus probable sans forcer la victoire sèche."
+    },
+    {
+      "option": "M9.120",
+      "mise": 2000,
+      "probabilite": 0.6,
+      "raison": "West Brom 5e, 29 pts/16, +11 sur Bolton 19e (18 pts). West Brom 2V sans défaite sur 5, 1,6 but et 1,1 encaissé, 4V 2N 2D à l'extérieur, 3e défense (17 buts en 16). Bolton 1V 3D sur 5, 1,9 encaissé, 2V 1N 5D à domicile. Marché 1,19-1,70, victoire West Brom 48,4 %. DNB 1,48 (marché 64,9 %) : 60 %, un cran sous, car 5 absents côté Bolton, compositions non sorties et H2H plutôt Bolton (4/8). Remboursé si nul."
+    },
+    {
+      "option": "M17.123",
+      "mise": 2000,
+      "probabilite": 0.56,
+      "raison": "Stoke 3e, 32 pts/16, montée, 4V sans défaite sur 5, 5V 1N 2D à domicile (13-6). Millwall 18e, 18 pts, 1V 4D sur 5, 2V 1N 5D à l'extérieur (18 buts encaissés). Marché 1,44-1,16, victoire Stoke 42,3 %. DNB 1,59 (marché 58,8 %) : 56 %, car H2H Millwall 7/10 dont 3 victoires de suite, 4 absents de chaque côté et compositions non publiées. Remboursé si nul."
+    }
+  ],
+  "abstention": "\"Laiss\\u00e9s : Bar\\u00e7a 1,10 et Atl\\u00e9tico 1,11 trop courts, et Atl\\u00e9tico a Lookman et Romero absents. Inter DNB 1,15 refus\\u00e9 (sous 1,15) : Calhanoglu, Zielinski et Bonny absents, 4-4 \\u00e0 Atalanta, rotation samedi. PSG : Dou\\u00e9 et Kvaratskhelia absents, Rome a gagn\\u00e9 5-1 \\u00e0 Parme. Bayern : 7 absents dont Kane, Olise et Neuer, nul 1-1 contre K\\u00f6ln. Liverpool : 8 absents, Brugge 11e \\u00e0 \\u00e9galit\\u00e9. Slavia-Villarreal : 11 et 5 absents. Birmingham DNB seulement 52 % de march\\u00e9, Burnley 0 victoire \\u00e0 domicile mais 6 nuls en 8. Modena est 2e avec la meilleure d\\u00e9fense, mais \\u00e0 l'ext\\u00e9rieur chez Pisa 7e le march\\u00e9 ne donne que 30,7 %. Watford-Blackburn, Cremonese-Avellino et Padova-Sampdoria trop ouverts. Aucun BTTS ni over : compositions non publi\\u00e9es, et ces march\\u00e9s sont \\u00e0 0/3 sur 10 r\\u00e9gl\\u00e9s.\"",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M6.101",
+      "pari": "Mantova (remboursé si nul)",
+      "cote": 1.22,
+      "mise": 2500,
+      "probabilite": 0.68,
+      "raison": "Mantova 8e, 19 pts/12, place de barrages. Arezzo 18e, relégable, 12 pts, 0 victoire et 3 défaites sur 5, 0,8 but et 1,8 encaissé. Marché 1,86-0,94, victoire Mantova 57,9 %. DNB 1,22 (marché 76 %) : je reste à 68 % car Mantova n'a que 1V/5, domicile médiocre (2V 2N 2D) et défaite 1-4 à Avellino le 22/11. Aucun absent signalé, compositions non publiées. Remboursé si nul, donc le scénario le plus probable sans forcer la victoire sèche."
+    },
+    {
+      "id": "M9.120",
+      "pari": "West Brom (remboursé si nul)",
+      "cote": 1.48,
+      "mise": 2000,
+      "probabilite": 0.6,
+      "raison": "West Brom 5e, 29 pts/16, +11 sur Bolton 19e (18 pts). West Brom 2V sans défaite sur 5, 1,6 but et 1,1 encaissé, 4V 2N 2D à l'extérieur, 3e défense (17 buts en 16). Bolton 1V 3D sur 5, 1,9 encaissé, 2V 1N 5D à domicile. Marché 1,19-1,70, victoire West Brom 48,4 %. DNB 1,48 (marché 64,9 %) : 60 %, un cran sous, car 5 absents côté Bolton, compositions non sorties et H2H plutôt Bolton (4/8). Remboursé si nul."
+    },
+    {
+      "id": "M17.123",
+      "pari": "Stoke City (remboursé si nul)",
+      "cote": 1.59,
+      "mise": 2000,
+      "probabilite": 0.56,
+      "raison": "Stoke 3e, 32 pts/16, montée, 4V sans défaite sur 5, 5V 1N 2D à domicile (13-6). Millwall 18e, 18 pts, 1V 4D sur 5, 2V 1N 5D à l'extérieur (18 buts encaissés). Marché 1,44-1,16, victoire Stoke 42,3 %. DNB 1,59 (marché 58,8 %) : 56 %, car H2H Millwall 7/10 dont 3 victoires de suite, 4 absents de chaque côté et compositions non publiées. Remboursé si nul."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [
+    {
+      "option": "combiné M6.101 + M9.120 + M17.123",
+      "motif": "sélection déjà jouée en simple : elle compterait deux fois"
+    }
+  ],
+  "enregistres": [
+    "M6.101",
+    "M9.120",
+    "M17.123"
+  ]
+}

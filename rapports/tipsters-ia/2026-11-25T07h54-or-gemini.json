@@ -1,0 +1,336 @@
+{
+  "profil": "or-gemini",
+  "nom": "Gemini",
+  "modele": "google/gemini-4-carbon",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "1ab8e6693cc585fe",
+  "duree_s": 98,
+  "tours": 6,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 2
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 374
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 382
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 372
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 428
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 371
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 378
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M7"
+      },
+      "ms": 390
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 372
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M9"
+      },
+      "ms": 380
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 473
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 377
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 368
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 385
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 389
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 392
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 711
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 392
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "resultat",
+        "match": "M5"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M8",
+        "famille": "resultat"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M9",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "resultat",
+        "match": "M13"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M15",
+        "famille": "tout"
+      },
+      "ms": 18
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "tout",
+        "match": "M16"
+      },
+      "ms": 18
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "resultat"
+      },
+      "ms": 10
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "tout",
+        "match": "M1"
+      },
+      "ms": 20
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "tout",
+        "match": "M2"
+      },
+      "ms": 20
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "resultat",
+        "match": "M14"
+      },
+      "ms": 8
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M11",
+        "famille": "tout"
+      },
+      "ms": 18
+    }
+  ],
+  "jetons": {
+    "entree": 514659,
+    "sortie": 2776,
+    "cacheLu": 320375,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 98737.85,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M15.1",
+      "raison": "Le Paris Saint-Germain est 2e de Ligue des champions avec un sans-faute de 12 points en 4 journées et traverse une forme étincelante (4 victoires sur ses 4 derniers matchs, 5,0 buts inscrits par rencontre). À domicile au Parc des Princes, Paris affronte une AS Roma 23e (4 points) qui souffre défensivement en C1 (8 buts encaissés en 4 matchs, 2 défaites sur ses 4 dernières sorties toutes compétitions confondues). Malgré l'absence de Doué et Kvaratskhelia, la force de frappe parisienne (2,57 buts attendus par le marché) donne un net avantage aux locaux.",
+      "probabilite": 0.69,
+      "mise": 2500
+    },
+    {
+      "probabilite": 0.74,
+      "mise": 2000,
+      "option": "M16.6",
+      "raison": "Match capital pour l'Atlético de Madrid (26e avec 4 points, juste hors du top 24 qualificatif) qui doit impérativement s'imposer et soigner sa différence de buts à domicile contre Viking FK (25e, 4 points). L'Atlético vient de retrouver toute son efficacité dimanche à Getafe (victoire 0-3) et ne compte que 2 absents, tandis que Viking a encaissé 10 buts en 4 matchs de C1 (2,5 buts concédés par match récemment) et se présente avec 8 joueurs absents ou incertains (dont Bjørshol, Roseth, Haugen et Berisha incertain). Les cotes annoncent 3,48 buts attendus pour Madrid contre 0,62 pour Viking."
+    },
+    {
+      "option": "M14.252",
+      "raison": "Affiche directe pour le top 8 européen entre le Club Brugge (11e, 9 pts) et Liverpool (10e, 9 pts), deux équipes résolument tournées vers l'offensive et perméables derrière : Bruges reste sur un 1-5 à Malines et tourne à 2,8 buts marqués et 1,8 encaissé sur ses 4 derniers matchs (avec un seul absent), tandis que Liverpool vient d'écraser Manchester United 4-0 et affiche 3,5 buts marqués et 2,5 encaissés par match récemment (10 buts concédés en 4 journées de C1). Avec 3,92 buts attendus au total par le marché, le scénario à au moins 3 buts est très cohérent.",
+      "probabilite": 0.75,
+      "mise": 2000
+    },
+    {
+      "probabilite": 0.66,
+      "mise": 2500,
+      "option": "M9.120",
+      "raison": "West Bromwich (5e de Championship avec 29 pts, 3e meilleure défense avec 17 buts encaissés en 16 journées) est invaincu sur ses 5 derniers matchs et voyage très bien cette saison (4 victoires, 2 nuls et seulement 2 défaites en 8 déplacements). Il affronte Bolton (19e, 18 pts), en difficulté récente (1 victoire et 3 défaites sur les 5 derniers matchs, 1,9 but encaissé par rencontre), très fragile à domicile (5 défaites en 8 réceptions, 16 buts concédés) et privé de plusieurs éléments importants (Erhahon, Hardie, McAtee, Nelson, plus Toal incertain). L'option remboursée si nul sécurise un éventuel partage des points."
+    },
+    {
+      "option": "M8.123",
+      "raison": "Écart très marqué en Championship entre Birmingham (4e avec 29 pts, meilleure défense du championnat avec seulement 15 buts encaissés en 16 matchs, 4 victoires en 8 déplacements) et Burnley (23e et relégable avec 11 pts, co-pire défense avec 33 buts concédés). Surtout, Burnley n'a remporté aucun de ses 8 matchs à domicile cette saison (0V, 6N, 2D) et subit une hécatombe de 13 absents (dont Roberts et Laurent suspendus, Barnes, Broja, Bruun Larsen, Humphreys, Mejbri). La double chance Birmingham ou nul couvre efficacement la forte propension de Burnley aux matchs nuls chez lui.",
+      "mise": 2000,
+      "probabilite": 0.66
+    }
+  ],
+  "abstention": "Je joue 5 paris simples et 1 combiné de 2 sélections (soit 6 paris sur la limite quotidienne de 8), en laissant volontairement 2 places disponibles pour pouvoir réagir aux compositions officielles de fin d'après-midi sur les matchs de 20h00 si une opportunité nette se dégage. J'écarte les rencontres où les absences brouillent la lecture (Lille – Bayern sans Kane, Olise, Neuer, Davies et Gnabry ; Slavia – Villarreal avec deux équipes en crise de résultats) ou celles où l'historique direct et la rotation potentielle freinent l'élan (Stoke – Millwall, Sabah – Barça avant les compos).",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M15.1",
+      "pari": "Paris Saint-Germain FC",
+      "cote": 1.49,
+      "mise": 2500,
+      "probabilite": 0.69,
+      "raison": "Le Paris Saint-Germain est 2e de Ligue des champions avec un sans-faute de 12 points en 4 journées et traverse une forme étincelante (4 victoires sur ses 4 derniers matchs, 5,0 buts inscrits par rencontre). À domicile au Parc des Princes, Paris affronte une AS Roma 23e (4 points) qui souffre défensivement en C1 (8 buts encaissés en 4 matchs, 2 défaites sur ses 4 dernières sorties toutes compétitions confondues). Malgré l'absence de Doué et Kvaratskhelia, la force de frappe parisienne (2,57 buts attendus par le marché) donne un net avantage aux locaux."
+    },
+    {
+      "id": "M16.6",
+      "pari": "Club Atlético de Madrid gagne par 2 buts ou plus",
+      "cote": 1.33,
+      "mise": 2000,
+      "probabilite": 0.74,
+      "raison": "Match capital pour l'Atlético de Madrid (26e avec 4 points, juste hors du top 24 qualificatif) qui doit impérativement s'imposer et soigner sa différence de buts à domicile contre Viking FK (25e, 4 points). L'Atlético vient de retrouver toute son efficacité dimanche à Getafe (victoire 0-3) et ne compte que 2 absents, tandis que Viking a encaissé 10 buts en 4 matchs de C1 (2,5 buts concédés par match récemment) et se présente avec 8 joueurs absents ou incertains (dont Bjørshol, Roseth, Haugen et Berisha incertain). Les cotes annoncent 3,48 buts attendus pour Madrid contre 0,62 pour Viking."
+    },
+    {
+      "id": "M14.252",
+      "pari": "Plus de 2,5 buts",
+      "cote": 1.32,
+      "mise": 2000,
+      "probabilite": 0.75,
+      "raison": "Affiche directe pour le top 8 européen entre le Club Brugge (11e, 9 pts) et Liverpool (10e, 9 pts), deux équipes résolument tournées vers l'offensive et perméables derrière : Bruges reste sur un 1-5 à Malines et tourne à 2,8 buts marqués et 1,8 encaissé sur ses 4 derniers matchs (avec un seul absent), tandis que Liverpool vient d'écraser Manchester United 4-0 et affiche 3,5 buts marqués et 2,5 encaissés par match récemment (10 buts concédés en 4 journées de C1). Avec 3,92 buts attendus au total par le marché, le scénario à au moins 3 buts est très cohérent."
+    },
+    {
+      "id": "M9.120",
+      "pari": "West Brom (remboursé si nul)",
+      "cote": 1.48,
+      "mise": 2500,
+      "probabilite": 0.66,
+      "raison": "West Bromwich (5e de Championship avec 29 pts, 3e meilleure défense avec 17 buts encaissés en 16 journées) est invaincu sur ses 5 derniers matchs et voyage très bien cette saison (4 victoires, 2 nuls et seulement 2 défaites en 8 déplacements). Il affronte Bolton (19e, 18 pts), en difficulté récente (1 victoire et 3 défaites sur les 5 derniers matchs, 1,9 but encaissé par rencontre), très fragile à domicile (5 défaites en 8 réceptions, 16 buts concédés) et privé de plusieurs éléments importants (Erhahon, Hardie, McAtee, Nelson, plus Toal incertain). L'option remboursée si nul sécurise un éventuel partage des points."
+    },
+    {
+      "id": "M8.123",
+      "pari": "Birmingham ou nul",
+      "cote": 1.44,
+      "mise": 2000,
+      "probabilite": 0.66,
+      "raison": "Écart très marqué en Championship entre Birmingham (4e avec 29 pts, meilleure défense du championnat avec seulement 15 buts encaissés en 16 matchs, 4 victoires en 8 déplacements) et Burnley (23e et relégable avec 11 pts, co-pire défense avec 33 buts concédés). Surtout, Burnley n'a remporté aucun de ses 8 matchs à domicile cette saison (0V, 6N, 2D) et subit une hécatombe de 13 absents (dont Roberts et Laurent suspendus, Barnes, Broja, Bruun Larsen, Humphreys, Mejbri). La double chance Birmingham ou nul couvre efficacement la forte propension de Burnley aux matchs nuls chez lui."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [
+    {
+      "option": "combiné M15.1 + M16.6",
+      "motif": "sélection déjà jouée en simple : elle compterait deux fois"
+    }
+  ],
+  "enregistres": [
+    "M15.1",
+    "M16.6",
+    "M14.252",
+    "M9.120",
+    "M8.123"
+  ]
+}

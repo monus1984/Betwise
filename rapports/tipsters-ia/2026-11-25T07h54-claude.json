@@ -1,0 +1,108 @@
+{
+  "profil": "claude",
+  "nom": "Claude",
+  "modele": "claude-sonnet-5-5",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "1ab8e6693cc585fe",
+  "duree_s": 18,
+  "tours": 3,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 3
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 766
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 682
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 669
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M15",
+        "famille": "resultat"
+      },
+      "ms": 8
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "resultat"
+      },
+      "ms": 9
+    }
+  ],
+  "jetons": {
+    "entree": 44225,
+    "sortie": 1944,
+    "cacheLu": 8658,
+    "cacheEcrit": 2886
+  },
+  "erreur": null,
+  "bankroll": 96020,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M15.13",
+      "mise": 2000,
+      "probabilite": 0.73,
+      "raison": "PSG – Roma : le marché attend 2,57 à 1,14 buts. Roma +2,5 ne perd que si PSG gagne par 3 buts ou plus (marché 72,6 %). PSG a deux absents offensifs (Doué, Kvaratskhelia) et rejoue samedi, et Roma marque 2,5 buts par match. Je reste proche du marché."
+    },
+    {
+      "option": "M13.13",
+      "mise": 1500,
+      "probabilite": 0.7,
+      "raison": "Inter – Stuttgart : le marché attend 2,82 à 1,27 buts. Stuttgart +2,5 ne perd que si Inter gagne par 3 buts ou plus (marché 69,6 %). Inter a trois absents (Calhanoglu, Zielinski, Bonny), a fait 4-4 dimanche et a encaissé 1,5 but par match. Stuttgart en encaisse 1,0. Je reste proche du marché."
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M15.13",
+      "pari": "AS Roma handicap +2,5",
+      "cote": 1.31,
+      "mise": 2000,
+      "probabilite": 0.73,
+      "raison": "PSG – Roma : le marché attend 2,57 à 1,14 buts. Roma +2,5 ne perd que si PSG gagne par 3 buts ou plus (marché 72,6 %). PSG a deux absents offensifs (Doué, Kvaratskhelia) et rejoue samedi, et Roma marque 2,5 buts par match. Je reste proche du marché."
+    },
+    {
+      "id": "M13.13",
+      "pari": "VfB Stuttgart handicap +2,5",
+      "cote": 1.37,
+      "mise": 1500,
+      "probabilite": 0.7,
+      "raison": "Inter – Stuttgart : le marché attend 2,82 à 1,27 buts. Stuttgart +2,5 ne perd que si Inter gagne par 3 buts ou plus (marché 69,6 %). Inter a trois absents (Calhanoglu, Zielinski, Bonny), a fait 4-4 dimanche et a encaissé 1,5 but par match. Stuttgart en encaisse 1,0. Je reste proche du marché."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M15.13",
+    "M13.13"
+  ]
+}

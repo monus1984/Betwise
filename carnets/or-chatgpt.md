@@ -1,9 +1,9 @@
-<!-- jour: 2026-11-24 version: tipster-ia-v4 -->
-Carnet BETWISE — mardi 24 novembre 2026, 07 h 52, Abidjan.
-1. N’engager qu’un match analysé : enjeu, forme, domicile/extérieur, dernier match, confrontations disponibles, absents, compositions publiées et projections de buts. Vérifier l’identifiant, la cote 1xBet et l’heure du relevé. Aucun absent signalé ne garantit pas un effectif complet. Passer si une donnée déterminante manque, se contredit ou est périmée.
-2. Partir du marché sans marge, confronter au modèle BETWISE s’il existe et ajuster avec mesure sur les faits vérifiables, sans les compter deux fois. Estimer la probabilité de gain, jamais une garantie. Distinguer gain, remboursement et perte ; écarter les règlements incertains.
-3. Choisir les paris les plus solides pour leur niveau de cote. Une cote courte ne suffit pas. Le marché sert à la calibration, sans seuil cote × probabilité. Ni quota, ni minimum ; zéro pari si rien ne convainc. Les niveaux de cote servent au suivi.
-4. Un simple maximum par match. Combinés facultatifs : deux ou trois matchs différents analysés, cote totale de 1,50 à 3. Écarter les dépendances ; ne multiplier les probabilités que si l’indépendance est plausible. Vérifier l’exposition des matchs aussi joués en simple.
-5. Mise habituelle : 0,5 à 1 % de la bankroll ; plafond personnel : 2 % par pari. Plafonds serveur : 10 % par mise, 40 % d’engagement et huit paris par jour. Ne jamais se refaire en augmentant les mises.
+<!-- jour: 2026-11-25 version: tipster-ia-v4 -->
+Carnet BETWISE — mercredi 25 novembre 2026, 07 h 52, Abidjan.
+1. Ne jouer qu’un match analysé : enjeu, forme, domicile/extérieur, dernier match, confrontations disponibles, absents, compositions publiées et projections de buts. Vérifier identifiant, cote 1xBet et heure du relevé. Aucun absent signalé ne garantit un effectif complet. Passer si une donnée déterminante manque, se contredit ou est périmée.
+2. Partir du marché sans marge, confronter au modèle BETWISE si disponible, puis ajuster avec mesure sur les faits vérifiables sans les compter deux fois. Annoncer une probabilité de gain, jamais une garantie. Distinguer gain, remboursement et perte ; écarter les règlements incertains.
+3. Choisir les paris les plus solides pour leur niveau de cote. Une cote courte ne suffit pas. Pas de seuil cote × probabilité, de quota ni de minimum. Zéro pari est permis. Les niveaux de cote servent au suivi.
+4. Un simple maximum par match. Combinés facultatifs : deux ou trois matchs différents analysés, cote totale de 1,50 à 3. Écarter les dépendances et ne multiplier les probabilités que si l’indépendance est plausible. Vérifier le cumul d’exposition avec les simples.
+5. Mise habituelle : 0,5 à 1 % de la bankroll ; plafond personnel : 2 % par pari. Plafonds serveur : 10 % par mise, 40 % engagés et huit paris par jour. Ne jamais augmenter pour se refaire.
 6. Consigner cote, mise, probabilité, motif et résultat. Suivre bankroll, rendement, calibration et réussite par niveau et marché. Attendre 20 paris réglés pertinents avant de réviser une règle sur résultats.
-Journal : 99 768 FCFA, −232 FCFA au départ du passage, rien en jeu. Hier : 4 gains sur 5 ; la perte à 1,13 a dépassé les quatre gains cumulés. Échantillon insuffisant : règles inchangées. Ce matin : 4 simples, 3 500 FCFA, aucun combiné.
+Journal : 100 866 FCFA au départ, +866 FCFA, rien en jeu. Hier : quatre gains sur quatre, +1 098 FCFA. Cumul : huit gains sur neuf, échantillon insuffisant ; règles inchangées. Ce matin : quatre simples, 3 400 FCFA, aucun combiné.

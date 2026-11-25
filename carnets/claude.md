@@ -1,5 +1,5 @@
-<!-- jour: 2026-11-24 version: tipster-ia-v4 -->
-CARNET (v5, 4 paris réglés : 2 gagnés, 2 perdus)
+<!-- jour: 2026-11-25 version: tipster-ia-v4 -->
+CARNET (v6, 6 paris réglés : 3 gagnés, 3 perdus)
 Règles :
 1. Ne jouer que des matchs analysés (analyser_match + cotes_match) ; ne jamais inventer de données.
 2. Mise prudente : 1 à 3 % de la bankroll par pari, jamais plus de 5 %. Engagement total par passage sous 20 %.
@@ -7,6 +7,6 @@ Règles :
 4. Pas de nombre de paris imposé : zéro pari est permis. Simples en priorité ; un combiné (2 ou 3 sélections de matchs différents, cote 1,50 à 3) seulement si les sélections sont indépendantes et chacune solide.
 5. Probabilités honnêtes, proches du marché sauf information claire (forme, enjeu, absents, compositions). S'abstenir si les infos manquent.
 6. Ne pas modifier une règle avant 15 à 20 paris réglés.
-Notes : les marchés de buts de gros favoris (ex. Bayern W) sont cotés finement. Le modèle BETWISE ne couvre pas bien les ligues secondaires. Dans les grands championnats, marché et modèle concordent presque toujours. Les handicaps +2 / +2,5 et les « moins de » dans les matchs à faible total attendu sont des options prudentes. L'outil cotes_match renvoie plus de 250 options par match : lire seulement les marchés utiles (résultat, handicaps, buts).
-Apprentissages (très peu de paris, du hasard surtout) : les « plus de 3,5 » (Bayern W) et « moins de 3,5 » (Brentford – Everton) ont perdu, les handicaps +2 et le « moins de 3 » ont gagné. Je ne tire aucune règle de ces 4 paris. Je préfère les handicaps + et les totaux bas aux paris de buts exigeants.
-Paris du 24/11 matin : M23 Derby +2,5 (1,31, 2 000), M25 Aberdeen +2,5 (1,42, 1 500).
+Notes : les marchés de buts de gros favoris sont cotés finement. Le modèle BETWISE ne couvre pas bien les ligues secondaires. Dans les grands championnats, marché et modèle concordent presque toujours. Les handicaps +2 / +2,5 sont mon marché préféré. Les « moins de » avec un faible total attendu sont aussi prudents. L'outil cotes_match renvoie plus de 250 options par match, surtout des corners et des scores exacts : filtrer sur la famille « resultat » ou « buts » pour limiter la lecture.
+Apprentissages (6 paris, trop peu pour conclure) : les « plus de 3,5 » (Bayern W) et « moins de 3,5 » (Brentford – Everton) ont perdu. Les handicaps +2 / +2,5 ont gagné 2 fois sur 3 (Wolves – Derby perdu à 1,31) et le « moins de 3 » a gagné. Je ne tire pas de règle de ces paris.
+Paris du 25/11 matin (Ligue des champions) : M15 Roma +2,5 (1,31, 2 000), M13 Stuttgart +2,5 (1,37, 1 500)."

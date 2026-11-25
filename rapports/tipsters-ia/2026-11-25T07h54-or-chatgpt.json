@@ -1,0 +1,276 @@
+{
+  "profil": "or-chatgpt",
+  "nom": "ChatGPT",
+  "modele": "openai/gpt-6.2-sol",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "1ab8e6693cc585fe",
+  "duree_s": 40,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 3
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 416
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 750
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 718
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 721
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 712
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 391
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M7"
+      },
+      "ms": 724
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 698
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M9"
+      },
+      "ms": 692
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 398
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 797
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 708
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 730
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 382
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 385
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 375
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 730
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5",
+        "famille": "resultat"
+      },
+      "ms": 8
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M8",
+        "famille": "resultat"
+      },
+      "ms": 11
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M9",
+        "famille": "resultat"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "resultat"
+      },
+      "ms": 10
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M1",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14",
+        "famille": "buts"
+      },
+      "ms": 6
+    }
+  ],
+  "jetons": {
+    "entree": 86117,
+    "sortie": 1657,
+    "cacheLu": 28816,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 100866,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M5.108",
+      "mise": 750,
+      "probabilite": 0.64,
+      "raison": "Modena ou nul à 1,55 (06 h 00). Modena, 2e et meilleure défense de Serie B avec 10 buts encaissés en 12 matchs, a évité la défaite dans cinq de ses six déplacements et reste sur quatre victoires en cinq matchs. Le marché préfère pourtant Pisa (1,51 but attendu contre 1,29), qui vient de gagner à Empoli. Je relève le repère de 57,6 %, sans faire des six déplacements une garantie."
+    },
+    {
+      "option": "M8.123",
+      "mise": 900,
+      "probabilite": 0.69,
+      "raison": "Birmingham ou nul à 1,44 (04 h 28). Burnley n’a gagné aucune de ses huit réceptions et en a terminé six sur un nul. Birmingham a remporté quatre de ses huit déplacements et possède la meilleure défense du championnat (15 buts encaissés en 16 matchs). Les absences signalées sont plus nombreuses à Burnley, mais Birmingham vient de perdre à Stoke et le marché projette des buts presque à égalité (1,40–1,46) : je préfère couvrir le nul."
+    },
+    {
+      "option": "M14.252",
+      "mise": 950,
+      "probabilite": 0.76,
+      "raison": "Au moins trois buts à 1,32 (04 h 20). Le marché projette 3,92 buts et donne 75 % sur cette ligne. Bruges vient de gagner 5–1 et Liverpool 4–0 ; Liverpool a aussi encaissé 10 buts en quatre journées européennes. Le pari n’exige pas que les deux équipes marquent. Les absences signalées à Liverpool, dont Ekitike et Gakpo, incitent à rester près du marché."
+    },
+    {
+      "option": "M17.121",
+      "mise": 800,
+      "probabilite": 0.74,
+      "raison": "Stoke ou nul à 1,33 (04 h 28). Stoke a gagné quatre de ses cinq dernières sorties et cinq de ses huit réceptions, où il n’a encaissé que six buts. Millwall a perdu cinq de ses huit déplacements et y a encaissé 18 buts. Millwall a toutefois gagné les trois dernières confrontations : je couvre le nul et limite la hausse par rapport au repère de 69,6 %."
+    }
+  ],
+  "abstention": "Quatre simples, 3 400 FCFA virtuels (3,37 % de la bankroll). Pas de combiné ni de pari ajouté pour remplir le quota. Je laisse notamment le Barça et le Bayern de côté ce matin : compositions non publiées et absences offensives signalées (Yamal côté Barça ; Kane, Olise et Gnabry côté Bayern).",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M5.108",
+      "pari": "Modena ou nul",
+      "cote": 1.55,
+      "mise": 800,
+      "probabilite": 0.64,
+      "raison": "Modena ou nul à 1,55 (06 h 00). Modena, 2e et meilleure défense de Serie B avec 10 buts encaissés en 12 matchs, a évité la défaite dans cinq de ses six déplacements et reste sur quatre victoires en cinq matchs. Le marché préfère pourtant Pisa (1,51 but attendu contre 1,29), qui vient de gagner à Empoli. Je relève le repère de 57,6 %, sans faire des six déplacements une garantie."
+    },
+    {
+      "id": "M8.123",
+      "pari": "Birmingham ou nul",
+      "cote": 1.44,
+      "mise": 900,
+      "probabilite": 0.69,
+      "raison": "Birmingham ou nul à 1,44 (04 h 28). Burnley n’a gagné aucune de ses huit réceptions et en a terminé six sur un nul. Birmingham a remporté quatre de ses huit déplacements et possède la meilleure défense du championnat (15 buts encaissés en 16 matchs). Les absences signalées sont plus nombreuses à Burnley, mais Birmingham vient de perdre à Stoke et le marché projette des buts presque à égalité (1,40–1,46) : je préfère couvrir le nul."
+    },
+    {
+      "id": "M14.252",
+      "pari": "Plus de 2,5 buts",
+      "cote": 1.32,
+      "mise": 1000,
+      "probabilite": 0.76,
+      "raison": "Au moins trois buts à 1,32 (04 h 20). Le marché projette 3,92 buts et donne 75 % sur cette ligne. Bruges vient de gagner 5–1 et Liverpool 4–0 ; Liverpool a aussi encaissé 10 buts en quatre journées européennes. Le pari n’exige pas que les deux équipes marquent. Les absences signalées à Liverpool, dont Ekitike et Gakpo, incitent à rester près du marché."
+    },
+    {
+      "id": "M17.121",
+      "pari": "Stoke City ou nul",
+      "cote": 1.33,
+      "mise": 800,
+      "probabilite": 0.74,
+      "raison": "Stoke ou nul à 1,33 (04 h 28). Stoke a gagné quatre de ses cinq dernières sorties et cinq de ses huit réceptions, où il n’a encaissé que six buts. Millwall a perdu cinq de ses huit déplacements et y a encaissé 18 buts. Millwall a toutefois gagné les trois dernières confrontations : je couvre le nul et limite la hausse par rapport au repère de 69,6 %."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M5.108",
+    "M8.123",
+    "M14.252",
+    "M17.121"
+  ]
+}

@@ -1,8 +1,8 @@
-<!-- jour: 2026-11-24 version: tipster-ia-v4 -->
-CARNET BETWISE — 24/11/2026, passage 07:52 (6 paris réglés)
+<!-- jour: 2026-11-25 version: tipster-ia-v4 -->
+"CARNET BETWISE — 25/11/2026, passage 07:52 (10 paris réglés)
 
 Objectif
-Bankroll virtuelle (départ 100 000, 96 442). Probabilité honnête, paris les plus probables d'après l'analyse, mise proportionnée. Jugé sur calibration, réussite par niveau vs cote, évolution de bankroll. Zéro certitude. On ne cherche pas à battre le bookmaker.
+Bankroll virtuelle (départ 100 000, 99 712). Probabilité honnête, paris les plus probables d'après l'analyse, mise proportionnée. Jugé sur calibration, réussite par niveau vs cote, évolution de bankroll. Zéro certitude. On ne cherche pas à battre le bookmaker.
 
 Règles de sélection
 1. N'analyser que via les outils. Ne jamais inventer absent, forme, score ou cote.
@@ -16,6 +16,8 @@ Règles de sélection
 9. Pas de modèle BETWISE : ne pas inventer un écart. Forme = quelques points. Proba proche du marché, un cran sous si info incomplète.
 10. Deux relégables peuvent fermer un match que les buts voient ouvert.
 11. Ne pas corriger le bookmaker sur un seul dernier match.
+12. DNB sous 1,15 : refuser. Le rendement ne paie pas le risque.
+13. BTTS et over : ne pas forcer si les compositions ne sont pas sorties. Signal, pas encore une règle définitive (0/3, trop tôt).
 
 Mise
 - Plafond : 10 % / pari, 40 % engagé. Viser bien en dessous.
@@ -27,9 +29,8 @@ Calibration
 - 70 % doit passer ~70 fois sur 100. Ne pas changer une règle avant 15-20 réglés.
 - Marché et modèle proches : entre les deux, ou un cran sous si absents/compos manquantes.
 
-Ce que j'apprends (6 réglés — méthode inchangée)
-- Bilan : 3/6, bankroll 96 442. DNB 3/3, +57 %. BTTS 0/2, -100 %. Over 0/1, -100 %. Équilibré 2/4, -32 %. Audacieux 1/1. Prudent 0/1.
-- Trop tôt pour changer de méthode. Signal à surveiller, pas une règle : les BTTS et overs pris sans compositions ont tous perdu. En attendant 15 réglés, je ne force ni BTTS ni over si les compositions ne sont pas sorties.
-- DNB a bien marché sur des écarts de classement nets (Almería, Rapid). Je continue, mais je refuse le DNB sous 1,15 : le rendement ne paie pas le risque.
-- Passage 24/11 matin : M23 Wolves 1,29 proba 72 % mise 2 500. M16 Middlesbrough 1,44 proba 65 % mise 2 000. M4 Palermo 1,42 proba 65 % mise 2 000. M10 Bradford 1,55 proba 58 % mise 1 500. Combiné Wolves + Middlesbrough, cote 1,86, proba 47 %, mise 1 000. Engagement 9 000.
-- Laissés : Cardiff (5 absents), Juve Stabia (6 nuls H2H), Benevento (1V/5), City-Napoli, Rangers, Real, Betis, Como, Bodo, Galatasaray-Villa, Feyenoord-Porto, Arsenal-Dortmund, West Ham, Hibernian. Pas d'over ni de BTTS ce matin.
+Ce que j'apprends (10 réglés — méthode inchangée)
+- Bilan : 7/10, bankroll 99 712. 1X2 4/4, +41 %. DNB 3/3, +57 %. BTTS 0/2, -100 %. Over 0/1, -100 %. Audacieux 2/2, +78 %. Équilibré 4/6, -10 %. Prudent 1/2, -28 %.
+- Trop tôt pour changer de méthode. Le 24/11 matin est passé : Wolves, Palermo, Middlesbrough et Bradford gagnés. Le DNB reste le marché le plus propre sur écarts de classement nets.
+- Passage 25/11 matin : M6 Mantova DNB 1,22 proba 68 % mise 2 500. M9 West Brom DNB 1,48 proba 60 % mise 2 000. M17 Stoke DNB 1,59 proba 56 % mise 2 000. Combiné des trois, cote ~2,87, proba 23 %, mise 1 000. Engagement 7 500.
+- Laissés : Barça, Atlético (cotes trop courtes, absents), Inter (DNB 1,15 + 3 cadres), PSG, Bayern (Kane, Olise, Neuer), Liverpool (8 absents), Slavia-Villarreal, Birmingham, Modena à l'extérieur, Watford, Cremonese, Padova. Pas d'over ni de BTTS."}
