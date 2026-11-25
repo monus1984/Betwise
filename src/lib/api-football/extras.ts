@@ -8,7 +8,12 @@ import { cleanKey } from "./client";
 import type { Json } from "../supabase/database.types";
 
 const BASE = "https://v3.football.api-sports.io";
-export type Lineup = { equipe: string; schema: string | null; entraineur: string | null; titulaires: { nom: string; numero: number | null; poste: string | null }[]; remplacants: string[] };
+export type Joueur = { nom: string; numero: number | null; poste: string | null; grid?: string | null };
+/** `remplacants` : objets depuis le 25/11 ; les lignes plus anciennes gardent des noms seuls, normalisés à la lecture. */
+export type Lineup = { equipe: string; schema: string | null; entraineur: string | null; titulaires: Joueur[]; remplacants: Joueur[] };
+const lireLineups = (v: unknown): Lineup[] | null => Array.isArray(v) && v.length
+  ? (v as (Omit<Lineup, "remplacants"> & { remplacants: (string | Joueur)[] })[]).map((l) => ({ ...l, remplacants: (l.remplacants ?? []).map((r) => (typeof r === "string" ? { nom: r, numero: null, poste: null } : r)) }))
+  : null;
 export type Absent = { equipe: string; joueur: string; motif: string | null; type: string | null };
 export type TeamStats = { equipe: string; xg: number | null; tirs: number | null; cadres: number | null; possession: string | null; corners: number | null; jaunes: number | null; rouges: number | null };
 export type Extras = { lineups: Lineup[] | null; injuries: Absent[] | null; stats: TeamStats[] | null; disponible: boolean };
@@ -18,9 +23,10 @@ async function af<T>(path: string): Promise<T[]> {
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return ((await r.json()) as { response: T[] }).response ?? [];
 }
-type JoueurAf = { player: { name: string; number: number | null; pos: string | null } };
+type JoueurAf = { player: { name: string; number: number | null; pos: string | null; grid?: string | null } };
 type LineupAf = { team: { name: string }; formation: string | null; coach: { name: string | null } | null; startXI: JoueurAf[]; substitutes: JoueurAf[] };
-const versLineup = (x: LineupAf): Lineup => ({ equipe: x.team.name, schema: x.formation, entraineur: x.coach?.name ?? null, titulaires: (x.startXI ?? []).map((p) => ({ nom: p.player.name, numero: p.player.number, poste: p.player.pos })), remplacants: (x.substitutes ?? []).map((p) => p.player.name) });
+const joueur = (p: JoueurAf): Joueur => ({ nom: p.player.name, numero: p.player.number, poste: p.player.pos, grid: p.player.grid ?? null });
+const versLineup = (x: LineupAf): Lineup => ({ equipe: x.team.name, schema: x.formation, entraineur: x.coach?.name ?? null, titulaires: (x.startXI ?? []).map(joueur), remplacants: (x.substitutes ?? []).map(joueur) });
 
 /**
  * Compositions chargées d'avance (25/11) : pour les matchs qui commencent dans l'heure et n'en ont pas encore,
@@ -54,7 +60,7 @@ const age = (iso: string | null) => (iso ? (Date.now() - Date.parse(iso)) / 6000
 export async function getExtras(m: { id: string; af_fixture_id: number | null; kickoff_at: string; statut: string }): Promise<Extras> {
   const db = createAdminClient();
   const { data: row } = await db.from("match_extras").select("*").eq("match_id", m.id).maybeSingle();
-  const out: Extras = { lineups: (row?.lineups as Lineup[] | null) ?? null, injuries: (row?.injuries as Absent[] | null) ?? null, stats: (row?.stats as TeamStats[] | null) ?? null, disponible: !!m.af_fixture_id && !!process.env.API_FOOTBALL_KEY };
+  const out: Extras = { lineups: lireLineups(row?.lineups), injuries: (row?.injuries as Absent[] | null) ?? null, stats: (row?.stats as TeamStats[] | null) ?? null, disponible: !!m.af_fixture_id && !!process.env.API_FOOTBALL_KEY };
   if (!out.disponible) return out;
   const fid = m.af_fixture_id!;
   const minsToKick = (Date.parse(m.kickoff_at) - Date.now()) / 60000;

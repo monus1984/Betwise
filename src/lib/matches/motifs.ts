@@ -4,6 +4,7 @@ const MOTIFS: [RegExp, string][] = [
   [/^illness$|^sick/i, "malade"], [/^international duty$/i, "sélection nationale"], [/^personal reasons?$/i, "raisons personnelles"],
   [/^coach'?s decision$/i, "choix de l’entraîneur"], [/^lack of fitness$|^fitness$/i, "manque de condition"], [/^rest$/i, "repos"],
   [/^broken/i, "fracture"], [/concussion/i, "commotion"], [/knock/i, "coup"], [/^surgery$/i, "opération"],
+  [/^off the roster$|^not in squad$/i, "hors du groupe"], [/^not selected$|^not called up$/i, "non sélectionné"], [/^transfer/i, "transféré"], [/^virus|^covid/i, "malade"],
 ];
 const PARTIES: [RegExp, string][] = [
   [/hamstring/i, "ischios"], [/knee/i, "genou"], [/ankle/i, "cheville"], [/thigh/i, "cuisse"], [/calf/i, "mollet"], [/groin/i, "aine"],

@@ -25,7 +25,7 @@ import { GoalWatcher } from "@/components/goal-watcher";
 import { legFrom } from "@/lib/slip/leg";
 import { loadRecit } from "@/lib/matches/recit";
 import { MatchRecit } from "@/components/match-recit";
-import { motifFr } from "@/lib/matches/motifs";
+import { Compos } from "@/components/compos";
 
 export const dynamic = "force-dynamic";
 
@@ -294,47 +294,9 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
       )}
 
       {onglet === "compos" && extras && (
-        <div className="space-y-3">
-          {!extras.disponible && <Card><p className="text-sm text-ink-muted">Compositions et absents indisponibles pour ce match : il n’est pas relié à notre fournisseur de données.</p></Card>}
-          {extras.disponible && (
-            <Card title="Compositions">
-              {!extras.lineups?.length ? (
-                <p className="text-sm text-ink-muted">{m.statut === "programme" ? "Elles sortent environ une heure avant le coup d’envoi et s’affichent ici d’elles-mêmes." : "Compositions non communiquées pour ce match."}</p>
-              ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  {extras.lineups.slice(0, 2).map((l) => (
-                    <div key={l.equipe} className="min-w-0">
-                      <p className="text-sm font-semibold leading-snug">{l.equipe}</p>
-                      <p className="mb-2 text-[11px] text-ink-muted">{l.schema ?? "schéma ?"}{l.entraineur ? ` · ${l.entraineur}` : ""}</p>
-                      <ol className="space-y-1 text-sm">
-                        {l.titulaires.map((p) => <li key={p.nom} className="flex gap-2"><span className="w-5 shrink-0 text-right text-xs tabular-nums text-ink-muted">{p.numero ?? ""}</span><span className="truncate">{p.nom}</span></li>)}
-                      </ol>
-                      {l.remplacants.length > 0 && <p className="mt-2 text-[11px] leading-relaxed text-ink-muted">Banc : {l.remplacants.join(", ")}</p>}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </Card>
-          )}
-          {extras.disponible && m.statut === "programme" && (
-            <Card title="Absents annoncés" note="blessés et suspendus">
-              {extras.injuries === null ? <p className="text-sm text-ink-muted">Disponibles dans les 7 jours avant le match.</p>
-                : extras.injuries.length === 0 ? <p className="text-sm text-ink-muted">Aucun absent signalé pour l’instant. Cette information n’est pas suivie pour toutes les compétitions (sélections nationales notamment).</p> : (
-                  <div className="space-y-3">
-                    {[...new Set(extras.injuries.map((x) => x.equipe))].map((t) => (
-                      <div key={t}>
-                        <p className="mb-1 text-sm font-semibold">{t} <span className="font-normal text-ink-muted">· {extras.injuries!.filter((x) => x.equipe === t).length}</span></p>
-                        <ul className="space-y-0.5 text-sm">
-                          {extras.injuries!.filter((x) => x.equipe === t).map((x) => <li key={x.joueur} className="flex justify-between gap-2"><span className="truncate">{x.joueur}</span><span className="shrink-0 text-xs text-ink-muted">{x.type === "Questionable" ? "incertain" : "absent"}{x.motif ? ` · ${motifFr(x.motif)}` : ""}</span></li>)}
-                        </ul>
-                      </div>
-                    ))}
-                    <p className="text-[11px] text-ink-muted">Le modèle {APP_NAME} ne tient pas encore compte de ces absences : à toi d’en juger le poids.</p>
-                  </div>
-                )}
-            </Card>
-          )}
-        </div>
+        !extras.disponible
+          ? <Card><p className="text-sm text-ink-muted">Compositions et absents indisponibles pour ce match : il n’est pas relié à notre fournisseur de données.</p></Card>
+          : <Compos home={home} away={away} lineups={extras.lineups} evts={evts} absents={extras.injuries} statut={m.statut} />
       )}
 
       {onglet === "sources" && (
