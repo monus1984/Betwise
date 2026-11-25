@@ -1,0 +1,179 @@
+{
+  "profil": "or-deepseek",
+  "nom": "DeepSeek",
+  "modele": "deepseek/deepseek-v4.1-flash-1017",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "fb8d0a3c43e09139",
+  "duree_s": 39,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 653
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 661
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 554
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 643
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 549
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 618
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M9"
+      },
+      "ms": 525
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 426
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M9",
+        "famille": "resultat"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M15",
+        "famille": "tout"
+      },
+      "ms": 25
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M7",
+        "famille": "resultat"
+      },
+      "ms": 10
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M8",
+        "famille": "resultat"
+      },
+      "ms": 12
+    }
+  ],
+  "jetons": {
+    "entree": 86444,
+    "sortie": 4782,
+    "cacheLu": 13568,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 101750,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M15.1",
+      "mise": 4500,
+      "probabilite": 0.7,
+      "raison": "PSG 2e de la LDC (12 pts/4), 4 victoires sur 4, 5,0 buts marqués et 1,3 encaissé par match ; Roma est 23e avec 4 pts seulement, 8 buts encaissés en 4 matchs et 2,0 par match, avec Pellegrini et Rensch absents. PSG joue la qualification directe pour les huitièmes (2e, 8 pts d'avance sur Rome) et peut perdre Doue et Kvaratskhelia sans que sa force offensive s'effondre."
+    },
+    {
+      "option": "M9.2",
+      "mise": 3500,
+      "probabilite": 0.52,
+      "raison": "West Brom (5e, 29 pts, 3e meilleure défense du championnat avec 17 encaissés en 16) est invaincu sur 5 (2v, 1,6 marqué/1,1 encaissé) et réussit à l'extérieur : 4v-2n-2d, 12 marqués/10 encaissés. Bolton est 19e, en forme négative (1v/3d) et surtout très faible à domicile : 2v-1n-5d, 16 buts encaissés en 8 matchs, avec 5 absents dont Erhahon et McAtee. Je sais que le H2H récent est défavorable à West Brom (4v Bolton sur 8), d'où une proba modérée."
+    },
+    {
+      "option": "M13.1",
+      "mise": 3000,
+      "probabilite": 0.66,
+      "raison": "Inter doit gagner pour entrer dans les 8 premiers (à 3 pts de la 8e place) : enjeu maximal à San Siro. Stuttgart est solide (2v-1d sur 4, 1,0 encaissé) mais se déplace en Allemagne le week-end et l'Inter reste supérieur à domicile en coupe d'Europe. Les absences de Calhanoglu et Zielinski pèsent sur la création, ce qui explique que je reste sous la proba du marché (69%)."
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M15.1",
+      "pari": "Paris Saint-Germain FC",
+      "cote": 1.52,
+      "mise": 4500,
+      "probabilite": 0.7,
+      "raison": "PSG 2e de la LDC (12 pts/4), 4 victoires sur 4, 5,0 buts marqués et 1,3 encaissé par match ; Roma est 23e avec 4 pts seulement, 8 buts encaissés en 4 matchs et 2,0 par match, avec Pellegrini et Rensch absents. PSG joue la qualification directe pour les huitièmes (2e, 8 pts d'avance sur Rome) et peut perdre Doue et Kvaratskhelia sans que sa force offensive s'effondre."
+    },
+    {
+      "id": "M9.2",
+      "pari": "West Brom",
+      "cote": 1.99,
+      "mise": 3500,
+      "probabilite": 0.52,
+      "raison": "West Brom (5e, 29 pts, 3e meilleure défense du championnat avec 17 encaissés en 16) est invaincu sur 5 (2v, 1,6 marqué/1,1 encaissé) et réussit à l'extérieur : 4v-2n-2d, 12 marqués/10 encaissés. Bolton est 19e, en forme négative (1v/3d) et surtout très faible à domicile : 2v-1n-5d, 16 buts encaissés en 8 matchs, avec 5 absents dont Erhahon et McAtee. Je sais que le H2H récent est défavorable à West Brom (4v Bolton sur 8), d'où une proba modérée."
+    },
+    {
+      "id": "M13.1",
+      "pari": "FC Internazionale Milano",
+      "cote": 1.44,
+      "mise": 3000,
+      "probabilite": 0.66,
+      "raison": "Inter doit gagner pour entrer dans les 8 premiers (à 3 pts de la 8e place) : enjeu maximal à San Siro. Stuttgart est solide (2v-1d sur 4, 1,0 encaissé) mais se déplace en Allemagne le week-end et l'Inter reste supérieur à domicile en coupe d'Europe. Les absences de Calhanoglu et Zielinski pèsent sur la création, ce qui explique que je reste sous la proba du marché (69%)."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [
+    {
+      "option": "combiné M15.1 + M9.119",
+      "motif": "sélection déjà jouée en simple : elle compterait deux fois"
+    }
+  ],
+  "enregistres": [
+    "M15.1",
+    "M9.2",
+    "M13.1"
+  ]
+}
