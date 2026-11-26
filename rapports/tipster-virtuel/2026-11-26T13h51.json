@@ -1,0 +1,57 @@
+{
+  "quand": "2026-11-26T13:51:07.335Z",
+  "essai": false,
+  "jour": "2026-11-26",
+  "matchs": 40,
+  "avecCotes": 39,
+  "candidats": 3761,
+  "selectionsSansCote1xBet": 4156,
+  "relevesTropEloignes": 0,
+  "dejaAujourdhui": 0,
+  "choix": [
+    {
+      "match": "CSKA Sofia – Trabzonspor",
+      "comp": "ECL",
+      "kickoff": "2026-11-26T20:00:00+00:00",
+      "market": "AH",
+      "param": -1.5,
+      "sel": "2",
+      "cote": 3.18,
+      "p": 0.352,
+      "pModele": null,
+      "valeur": 0.12,
+      "profil": "risque",
+      "mise": 1400,
+      "coteRelevee": "2026-11-26T12:14:17+00:00",
+      "referenceRelevee": "2026-11-26T12:14:17+00:00",
+      "raison": "Probabilité 35 % selon les cotes de référence. 1xBet paie 3,18 pour une cote juste de 2,84 : écart de +12 %."
+    },
+    {
+      "match": "Red Bull Salzburg – Ararat-Armenia",
+      "comp": "EL",
+      "kickoff": "2026-11-26T17:45:00+00:00",
+      "market": "1X2",
+      "param": null,
+      "sel": "1",
+      "cote": 1.17,
+      "p": 0.864,
+      "pModele": null,
+      "valeur": 0.011,
+      "profil": "sur",
+      "mise": 1700,
+      "coteRelevee": "2026-11-26T12:15:22+00:00",
+      "referenceRelevee": "2026-11-26T12:15:22+00:00",
+      "raison": "Probabilité 86 % selon les cotes de référence. 1xBet paie 1,17 pour une cote juste de 1,16 : écart de +1,1 %."
+    }
+  ],
+  "bilan": {
+    "bankroll": 105037,
+    "net": 5037,
+    "enJeu": 3100,
+    "regles": 6,
+    "gagnes": 4,
+    "roi": 0.4987128712871287
+  },
+  "resume": "Tipster à règles fixes (témoin sans IA). Paris simples sur cote 1xBet, seulement quand le prix dépasse la valeur juste. Bankroll virtuelle : 105 037 FCFA (départ 100 000), 6 paris réglés dont 4 gagnés, rendement 49,9 %, 3 100 FCFA en jeu. Mis à jour le 26/11/2026 13:51:07.",
+  "candidatsVus": 203
+}
