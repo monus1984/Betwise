@@ -1,0 +1,40 @@
+{
+  "quand": "2026-11-26T17:51:02.793Z",
+  "essai": false,
+  "jour": "2026-11-26",
+  "matchs": 19,
+  "avecCotes": 19,
+  "candidats": 1832,
+  "selectionsSansCote1xBet": 2025,
+  "relevesTropEloignes": 1163,
+  "dejaAujourdhui": 2,
+  "choix": [
+    {
+      "match": "TSG 1899 Hoffenheim – Sturm Graz",
+      "comp": "EL",
+      "kickoff": "2026-11-26T20:00:00+00:00",
+      "market": "AH",
+      "param": -1.5,
+      "sel": "1",
+      "cote": 1.86,
+      "p": 0.561,
+      "pModele": null,
+      "valeur": 0.044,
+      "profil": "risque",
+      "mise": 1300,
+      "coteRelevee": "2026-11-26T16:17:17+00:00",
+      "referenceRelevee": "2026-11-26T17:41:30.078+00:00",
+      "raison": "Probabilité 56 % selon les cotes de référence. 1xBet paie 1,86 pour une cote juste de 1,78 : écart de +4,4 %."
+    }
+  ],
+  "bilan": {
+    "bankroll": 105037,
+    "net": 5037,
+    "enJeu": 4400,
+    "regles": 6,
+    "gagnes": 4,
+    "roi": 0.4987128712871287
+  },
+  "resume": "Tipster à règles fixes (témoin sans IA). Paris simples sur cote 1xBet, seulement quand le prix dépasse la valeur juste. Bankroll virtuelle : 105 037 FCFA (départ 100 000), 6 paris réglés dont 4 gagnés, rendement 49,9 %, 4 400 FCFA en jeu. Mis à jour le 26/11/2026 17:51:02.",
+  "candidatsVus": 203
+}
