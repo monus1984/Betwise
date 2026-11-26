@@ -1,0 +1,68 @@
+name: Tipster virtuel (ChatGPT API)
+
+on:
+  schedule:
+    # Même cadence que le tipster virtuel existant ; GitHub peut démarrer en retard.
+    - cron: "50 7,13,17 * * *"
+  workflow_dispatch:
+    inputs:
+      essai:
+        description: "Essai sans écriture Supabase (l'appel API reste facturé)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: tipster-chatgpt
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  tipster:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Vérifier la configuration (aucun appel API si absent)
+        id: config
+        shell: bash
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_TIPSTER_MODEL: ${{ vars.OPENAI_TIPSTER_MODEL }}
+        run: |
+          if [ -z "$OPENAI_API_KEY" ] || [ -z "$OPENAI_TIPSTER_MODEL" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Tipster ChatGPT ignoré : config API manquante. Aucun coût ni écriture."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v5
+        if: steps.config.outputs.skip != 'true'
+      - uses: actions/setup-node@v5
+        if: steps.config.outputs.skip != 'true'
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        if: steps.config.outputs.skip != 'true'
+      - name: Décision ChatGPT et paris virtuels
+        if: steps.config.outputs.skip != 'true'
+        run: npx tsx scripts/tipster-chatgpt.ts ${{ inputs.essai && '--essai' || '' }}
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_TIPSTER_MODEL: ${{ vars.OPENAI_TIPSTER_MODEL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BETWISE_ADMIN_ID: a20c0945-ce54-4902-a842-bb50cfea6450
+      - name: Publier le rapport sur la branche dédiée
+        if: steps.config.outputs.skip != 'true'
+        shell: bash
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          mv rapports /tmp/rapports
+          git fetch origin rapports-tipster-chatgpt && git checkout -B rapports-tipster-chatgpt origin/rapports-tipster-chatgpt || git checkout --orphan rapports-tipster-chatgpt
+          git rm -rqf --cached . >/dev/null 2>&1 || true
+          mkdir -p rapports && cp -r /tmp/rapports/tipster-chatgpt rapports/
+          git add -f rapports
+          git commit -qm "Tipster ChatGPT : passage du $(date -u +%d/%m\ %Hh%M)" && git push origin rapports-tipster-chatgpt || echo "rien à pousser"
