@@ -1,0 +1,203 @@
+{
+  "profil": "or-chatgpt",
+  "nom": "ChatGPT",
+  "modele": "openai/gpt-6.2-sol",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "0324fcbac0cafd19",
+  "duree_s": 31,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 3
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 505
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 497
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 533
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 491
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M21"
+      },
+      "ms": 887
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M23"
+      },
+      "ms": 409
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M27"
+      },
+      "ms": 442
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 781
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M30"
+      },
+      "ms": 407
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M32"
+      },
+      "ms": 403
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M39"
+      },
+      "ms": 423
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M8",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M30",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M32",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M39",
+        "famille": "resultat"
+      },
+      "ms": 3
+    }
+  ],
+  "jetons": {
+    "entree": 75454,
+    "sortie": 1397,
+    "cacheLu": 28963,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 102286,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M5.1",
+      "mise": 950,
+      "probabilite": 0.74,
+      "raison": "Victoire de l’Union Saint-Gilloise à 1,36 (06 h 00). L’Union a pris 10 points en quatre journées européennes, contre un pour le Lech, qui a encaissé 12 buts et n’en a marqué que deux. Le marché projette 2,53 buts pour l’Union contre 0,91. J’ajuste peu le repère sans marge de 72,5 % : le Lech compte plusieurs absents signalés, dont Ishak, mais l’Union rejoue dimanche et son onze n’est pas encore publié."
+    },
+    {
+      "option": "M8.1",
+      "mise": 850,
+      "probabilite": 0.79,
+      "raison": "Victoire de Beşiktaş à 1,27 (04 h 13). Beşiktaş vient de gagner 4–2 à Konyaspor et le marché lui projette 2,82 buts contre 0,82. L’Hapoel n’a marqué qu’une fois en quatre journées européennes, mais Beşiktaş y a encaissé huit buts : je reste près du repère sans marge de 78,6 %, sans exiger de victoire par plusieurs buts."
+    },
+    {
+      "option": "M30.2",
+      "mise": 650,
+      "probabilite": 0.59,
+      "raison": "Victoire de Huddersfield à 1,69 (04 h 16). Le deuxième de League One a gagné quatre de ses sept déplacements, avec cinq buts encaissés, et a remporté la dernière confrontation 3–1 à Doncaster. Le marché lui projette 2,01 buts contre 1,14. Doncaster n’a perdu que deux de ses six réceptions : le risque de nul reste réel, d’où une mise plus basse et un ajustement limité du repère de 57,4 %."
+    }
+  ],
+  "abstention": "Trois simples seulement. Je laisse Lyon et la Juventus de côté à ces cotes courtes, avec plusieurs absents signalés et des onze non publiés. Je ne rejoue pas mes sélections en combiné : cela augmenterait l’exposition aux mêmes résultats.",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M5.1",
+      "pari": "Union St. Gilloise",
+      "cote": 1.36,
+      "mise": 1000,
+      "probabilite": 0.74,
+      "raison": "Victoire de l’Union Saint-Gilloise à 1,36 (06 h 00). L’Union a pris 10 points en quatre journées européennes, contre un pour le Lech, qui a encaissé 12 buts et n’en a marqué que deux. Le marché projette 2,53 buts pour l’Union contre 0,91. J’ajuste peu le repère sans marge de 72,5 % : le Lech compte plusieurs absents signalés, dont Ishak, mais l’Union rejoue dimanche et son onze n’est pas encore publié."
+    },
+    {
+      "id": "M8.1",
+      "pari": "Beşiktaş",
+      "cote": 1.27,
+      "mise": 900,
+      "probabilite": 0.79,
+      "raison": "Victoire de Beşiktaş à 1,27 (04 h 13). Beşiktaş vient de gagner 4–2 à Konyaspor et le marché lui projette 2,82 buts contre 0,82. L’Hapoel n’a marqué qu’une fois en quatre journées européennes, mais Beşiktaş y a encaissé huit buts : je reste près du repère sans marge de 78,6 %, sans exiger de victoire par plusieurs buts."
+    },
+    {
+      "id": "M30.2",
+      "pari": "Huddersfield",
+      "cote": 1.69,
+      "mise": 700,
+      "probabilite": 0.59,
+      "raison": "Victoire de Huddersfield à 1,69 (04 h 16). Le deuxième de League One a gagné quatre de ses sept déplacements, avec cinq buts encaissés, et a remporté la dernière confrontation 3–1 à Doncaster. Le marché lui projette 2,01 buts contre 1,14. Doncaster n’a perdu que deux de ses six réceptions : le risque de nul reste réel, d’où une mise plus basse et un ajustement limité du repère de 57,4 %."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M5.1",
+    "M8.1",
+    "M30.2"
+  ]
+}

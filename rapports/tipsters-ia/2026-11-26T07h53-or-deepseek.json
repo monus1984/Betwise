@@ -1,0 +1,122 @@
+{
+  "profil": "or-deepseek",
+  "nom": "DeepSeek",
+  "modele": "deepseek/deepseek-v4.1-flash-1017",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "0324fcbac0cafd19",
+  "duree_s": 21,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M30"
+      },
+      "ms": 808
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M35"
+      },
+      "ms": 638
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M29"
+      },
+      "ms": 499
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M34"
+      },
+      "ms": 654
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 413
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 424
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M27"
+      },
+      "ms": 411
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M24"
+      },
+      "ms": 617
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 565
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 463
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M21"
+      },
+      "ms": 293
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 261
+    }
+  ],
+  "jetons": {
+    "entree": 53721,
+    "sortie": 3237,
+    "cacheLu": 19328,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 102035,
+  "enJeu": 0,
+  "propositions": [],
+  "abstention": null,
+  "carnetReecrit": false,
+  "retenus": [],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": []
+}

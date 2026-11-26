@@ -1,0 +1,295 @@
+{
+  "profil": "or-grok",
+  "nom": "Grok",
+  "modele": "x-ai/grok-4.7",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "0324fcbac0cafd19",
+  "duree_s": 53,
+  "tours": 5,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M30"
+      },
+      "ms": 390
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 392
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 428
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 561
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 425
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M21"
+      },
+      "ms": 379
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M24"
+      },
+      "ms": 274
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M27"
+      },
+      "ms": 386
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 429
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 237
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 400
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 441
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M32"
+      },
+      "ms": 407
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M35"
+      },
+      "ms": 415
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M38"
+      },
+      "ms": 431
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M39"
+      },
+      "ms": 241
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M30",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M2",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M10",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M38",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14",
+        "famille": "resultat"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 584
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M29"
+      },
+      "ms": 422
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 409
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 602
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M11",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M29",
+        "famille": "resultat"
+      },
+      "ms": 4
+    }
+  ],
+  "jetons": {
+    "entree": 193898,
+    "sortie": 4539,
+    "cacheLu": 105600,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 102402.25,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M30.116",
+      "mise": 2500,
+      "probabilite": 0.66,
+      "raison": "Huddersfield est 2e, 29 pts en 15, montée, à 3 pts du leader. Doncaster est 21e, relégable, 13 pts en 14, 1V 3D sur 5 (1,1 but, 1,7 encaissé). Huddersfield : 3V 1D sur 5, 1,9 but et 0,9 encaissé, 4V 2N 1D à l'extérieur (12-5), 2e défense (13 buts en 15). Marché : victoire Huddersfield 57,4 %, DNB 1,28 à 73 %. H2H plutôt Doncaster (4/8) et compositions non publiées : je reste à 66 %, un cran sous le marché. Aucun absent signalé. Rien n'est certain."
+    },
+    {
+      "option": "M2.99",
+      "mise": 2000,
+      "probabilite": 0.64,
+      "raison": "Abha est 18e, relégable, 3 pts en 11, 7 pts de retard sur le premier non concerné, 0 victoire sur 5 (0,6 but, 1,7 encaissé) et aucune victoire à domicile (0V 2N 3D). Al Shabab est 10e, 14 pts, 3 victoires sans défaite sur 5 (1,8 but), 5 victoires sur 10 H2H. Marché : victoire Al Shabab 52,9 %, DNB 1,38 à 69,6 %. Extérieur d'Al Shabab seulement 1V 2N 1D et nul 1-1 le 22/09 : je reste à 64 %. Aucun absent signalé, compositions non publiées. Rien n'est certain."
+    },
+    {
+      "option": "M11.117",
+      "mise": 1800,
+      "probabilite": 0.66,
+      "raison": "Leverkusen est 7e, 9 pts en 4, 3V 1D sur 4, 2,0 buts et 0,3 encaissé, 1 seul but encaissé, dernier match 4-0 à Paderborn. Dinamo est 9e, 7 pts, 2V 1D sur 4, 1,3 but et 1,0 encaissé, 7 absents. Marché : victoire Leverkusen 58,2 %, DNB 1,29 à 74 %. Je reste à 66 % : Dinamo à domicile, enjeu de qualification directe, 4 absents Leverkusen dont Boniface et Terrier, compositions non publiées, match de championnat dimanche. Rien n'est certain."
+    }
+  ],
+  "abstention": "\"Laiss\\u00e9s : Benfica (DNB 1,18 trop court, absents des deux c\\u00f4t\\u00e9s), Union SG (DNB 1,10), Monaco (DNB 1,21, calendrier Ligue 1 dimanche), Trabzonspor (DNB 1,33 mais forme courte, 3 matchs), Anderlecht (m\\u00eame nombre de points qu'OFI, deux nuls en H2H), Marseille (1V 3D, 0,5 but, d\\u00e9faite contre Le Mans), Sunderland (10 absents), Lyon (6 absents, DNB non retenu car cote trop courte attendue), Atalanta (forme 1V 1D, calendrier), Hoffenheim (absents des deux c\\u00f4t\\u00e9s, m\\u00eame zone). Pas d'over ni de BTTS : compositions non publi\\u00e9es, et ces march\\u00e9s sont \\u00e0 0/3.\"",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M30.116",
+      "pari": "Huddersfield (remboursé si nul)",
+      "cote": 1.28,
+      "mise": 2500,
+      "probabilite": 0.66,
+      "raison": "Huddersfield est 2e, 29 pts en 15, montée, à 3 pts du leader. Doncaster est 21e, relégable, 13 pts en 14, 1V 3D sur 5 (1,1 but, 1,7 encaissé). Huddersfield : 3V 1D sur 5, 1,9 but et 0,9 encaissé, 4V 2N 1D à l'extérieur (12-5), 2e défense (13 buts en 15). Marché : victoire Huddersfield 57,4 %, DNB 1,28 à 73 %. H2H plutôt Doncaster (4/8) et compositions non publiées : je reste à 66 %, un cran sous le marché. Aucun absent signalé. Rien n'est certain."
+    },
+    {
+      "id": "M2.99",
+      "pari": "Al Shabab (remboursé si nul)",
+      "cote": 1.38,
+      "mise": 2000,
+      "probabilite": 0.64,
+      "raison": "Abha est 18e, relégable, 3 pts en 11, 7 pts de retard sur le premier non concerné, 0 victoire sur 5 (0,6 but, 1,7 encaissé) et aucune victoire à domicile (0V 2N 3D). Al Shabab est 10e, 14 pts, 3 victoires sans défaite sur 5 (1,8 but), 5 victoires sur 10 H2H. Marché : victoire Al Shabab 52,9 %, DNB 1,38 à 69,6 %. Extérieur d'Al Shabab seulement 1V 2N 1D et nul 1-1 le 22/09 : je reste à 64 %. Aucun absent signalé, compositions non publiées. Rien n'est certain."
+    },
+    {
+      "id": "M11.117",
+      "pari": "Bayer 04 Leverkusen (remboursé si nul)",
+      "cote": 1.29,
+      "mise": 1800,
+      "probabilite": 0.66,
+      "raison": "Leverkusen est 7e, 9 pts en 4, 3V 1D sur 4, 2,0 buts et 0,3 encaissé, 1 seul but encaissé, dernier match 4-0 à Paderborn. Dinamo est 9e, 7 pts, 2V 1D sur 4, 1,3 but et 1,0 encaissé, 7 absents. Marché : victoire Leverkusen 58,2 %, DNB 1,29 à 74 %. Je reste à 66 % : Dinamo à domicile, enjeu de qualification directe, 4 absents Leverkusen dont Boniface et Terrier, compositions non publiées, match de championnat dimanche. Rien n'est certain."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [
+    {
+      "option": "combiné M30.116 + M2.99 + M11.117",
+      "motif": "sélection déjà jouée en simple : elle compterait deux fois"
+    }
+  ],
+  "enregistres": [
+    "M30.116",
+    "M2.99",
+    "M11.117"
+  ]
+}

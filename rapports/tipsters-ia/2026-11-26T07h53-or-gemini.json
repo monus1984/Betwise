@@ -1,0 +1,402 @@
+{
+  "profil": "or-gemini",
+  "nom": "Gemini",
+  "modele": "google/gemini-4-carbon",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "0324fcbac0cafd19",
+  "duree_s": 98,
+  "tours": 5,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 2
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M2"
+      },
+      "ms": 254
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 232
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 250
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 264
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 408
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 430
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 244
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M21"
+      },
+      "ms": 243
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M24"
+      },
+      "ms": 400
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M27"
+      },
+      "ms": 393
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M30"
+      },
+      "ms": 254
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M35"
+      },
+      "ms": 385
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M7"
+      },
+      "ms": 447
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 404
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 394
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M25"
+      },
+      "ms": 609
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 395
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M29"
+      },
+      "ms": 417
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M32"
+      },
+      "ms": 408
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M38"
+      },
+      "ms": 413
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "resultat",
+        "match": "M2"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "resultat",
+        "match": "M5"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "resultat",
+        "match": "M7"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M8",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "buts",
+        "match": "M8"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M10",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M10",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "resultat",
+        "match": "M24"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "resultat",
+        "match": "M30"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M38",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "combo",
+        "match": "M5"
+      },
+      "ms": 0
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "combo",
+        "match": "M8"
+      },
+      "ms": 0
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M24",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M24",
+        "famille": "combo"
+      },
+      "ms": 0
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 460
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M23"
+      },
+      "ms": 443
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M39"
+      },
+      "ms": 425
+    }
+  ],
+  "jetons": {
+    "entree": 264787,
+    "sortie": 3205,
+    "cacheLu": 155816,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 99617.85,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "raison": "En Saudi Pro League (15h05), opposition très déséquilibrée entre Abha, lanterne rouge (18e avec 3 points en 11 matchs, aucune victoire sur les 5 derniers matchs ni à domicile cette saison avec 0V, 2N, 3D et seulement 0,6 but marqué récemment), et Al Shabab (10e avec 14 points), invaincu sur ses 5 dernières sorties (3 victoires, 0 défaite, 1,8 but marqué par match) et dominateur dans les confrontations directes (5 victoires et 3 nuls sur les 10 dernières). Le DNB Al Shabab à 1,38 sécurise le partage des points à l'extérieur.",
+      "mise": 2000,
+      "probabilite": 0.7,
+      "option": "M2.99"
+    },
+    {
+      "raison": "L'Union St. Gilloise réalise un superbe parcours en Ligue Europa (4e avec 10 points en 4 journées, invaincue avec 3 victoires, 2,5 buts marqués et seulement 0,5 encaissé par match). À domicile, elle reçoit Lech Poznan, 35e avec 1 seul point (0 victoire, 3 défaites, 12 buts encaissés pour seulement 2 marqués en 4 matchs) et lourdement affaibli par 7 absents annoncés dont son attaquant majeur M. Ishak, A. Gholizadeh et le défenseur A. Douglas. La victoire simple à 1,36 est solide sans forcer sur le handicap.",
+      "probabilite": 0.74,
+      "mise": 2500,
+      "option": "M5.1"
+    },
+    {
+      "option": "M10.2",
+      "mise": 2500,
+      "probabilite": 0.67,
+      "raison": "Benfica est leader de la Ligue Europa avec un carton plein (1er, 12 points en 4 matchs, 4 victoires sur 4, 3,3 buts inscrits par rencontre contre 0,8 encaissé) et n'a pas d'alerte de calendrier signalée ce week-end. En face, le Viktoria Plzen pointe à la 30e place (3 points, 1 victoire et 3 défaites, 0,8 but marqué et 1,8 encaissé par match) et est privé de son défenseur V. Jemelka. L'écart de puissance offensive et de dynamique plaide nettement pour un succès lisboète à 1,49."
+    },
+    {
+      "mise": 2000,
+      "option": "M24.1",
+      "probabilite": 0.72,
+      "raison": "Ferencvaros réalise un sans-faute remarquable en Ligue Europa : 3e avec 12 points en 4 matchs (4 victoires sur 4, 2,8 buts marqués et 0,8 encaissé par rencontre). À Budapest (20h00), le club hongrois accueille Celje, 25e avec 4 points, qui souffre défensivement en coupe d'Europe (9 buts encaissés en 4 journées, 2,3 par match). Malgré quelques absences de part et d'autre, la solidité de Ferencvaros à domicile justifie pleinement la victoire sèche à 1,38."
+    },
+    {
+      "option": "M30.116",
+      "probabilite": 0.74,
+      "raison": "En League One anglaise (20h00), Huddersfield est 2e (29 pts, à 3 longueurs du leader Stockport), possède la 2e meilleure défense du championnat (13 buts encaissés en 15 matchs) et voyage remarquablement bien (4 victoires, 2 nuls et 1 seule défaite en 7 déplacements, 12 buts marqués pour 5 encaissés). Il se déplace chez Doncaster, 21e et relégable (13 pts, 1 seule victoire sur les 5 derniers matchs, 1,7 but encaissé par rencontre), que Huddersfield a déjà battu 1-3 à Doncaster en septembre. Le DNB Huddersfield à 1,28 protège efficacement contre un éventuel nul.",
+      "mise": 2000
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M2.99",
+      "pari": "Al Shabab (remboursé si nul)",
+      "cote": 1.38,
+      "mise": 2000,
+      "probabilite": 0.7,
+      "raison": "En Saudi Pro League (15h05), opposition très déséquilibrée entre Abha, lanterne rouge (18e avec 3 points en 11 matchs, aucune victoire sur les 5 derniers matchs ni à domicile cette saison avec 0V, 2N, 3D et seulement 0,6 but marqué récemment), et Al Shabab (10e avec 14 points), invaincu sur ses 5 dernières sorties (3 victoires, 0 défaite, 1,8 but marqué par match) et dominateur dans les confrontations directes (5 victoires et 3 nuls sur les 10 dernières). Le DNB Al Shabab à 1,38 sécurise le partage des points à l'extérieur."
+    },
+    {
+      "id": "M5.1",
+      "pari": "Union St. Gilloise",
+      "cote": 1.36,
+      "mise": 2500,
+      "probabilite": 0.74,
+      "raison": "L'Union St. Gilloise réalise un superbe parcours en Ligue Europa (4e avec 10 points en 4 journées, invaincue avec 3 victoires, 2,5 buts marqués et seulement 0,5 encaissé par match). À domicile, elle reçoit Lech Poznan, 35e avec 1 seul point (0 victoire, 3 défaites, 12 buts encaissés pour seulement 2 marqués en 4 matchs) et lourdement affaibli par 7 absents annoncés dont son attaquant majeur M. Ishak, A. Gholizadeh et le défenseur A. Douglas. La victoire simple à 1,36 est solide sans forcer sur le handicap."
+    },
+    {
+      "id": "M10.2",
+      "pari": "Benfica",
+      "cote": 1.49,
+      "mise": 2500,
+      "probabilite": 0.67,
+      "raison": "Benfica est leader de la Ligue Europa avec un carton plein (1er, 12 points en 4 matchs, 4 victoires sur 4, 3,3 buts inscrits par rencontre contre 0,8 encaissé) et n'a pas d'alerte de calendrier signalée ce week-end. En face, le Viktoria Plzen pointe à la 30e place (3 points, 1 victoire et 3 défaites, 0,8 but marqué et 1,8 encaissé par match) et est privé de son défenseur V. Jemelka. L'écart de puissance offensive et de dynamique plaide nettement pour un succès lisboète à 1,49."
+    },
+    {
+      "id": "M24.1",
+      "pari": "Ferencvarosi TC",
+      "cote": 1.38,
+      "mise": 2000,
+      "probabilite": 0.72,
+      "raison": "Ferencvaros réalise un sans-faute remarquable en Ligue Europa : 3e avec 12 points en 4 matchs (4 victoires sur 4, 2,8 buts marqués et 0,8 encaissé par rencontre). À Budapest (20h00), le club hongrois accueille Celje, 25e avec 4 points, qui souffre défensivement en coupe d'Europe (9 buts encaissés en 4 journées, 2,3 par match). Malgré quelques absences de part et d'autre, la solidité de Ferencvaros à domicile justifie pleinement la victoire sèche à 1,38."
+    },
+    {
+      "id": "M30.116",
+      "pari": "Huddersfield (remboursé si nul)",
+      "cote": 1.28,
+      "mise": 2000,
+      "probabilite": 0.74,
+      "raison": "En League One anglaise (20h00), Huddersfield est 2e (29 pts, à 3 longueurs du leader Stockport), possède la 2e meilleure défense du championnat (13 buts encaissés en 15 matchs) et voyage remarquablement bien (4 victoires, 2 nuls et 1 seule défaite en 7 déplacements, 12 buts marqués pour 5 encaissés). Il se déplace chez Doncaster, 21e et relégable (13 pts, 1 seule victoire sur les 5 derniers matchs, 1,7 but encaissé par rencontre), que Huddersfield a déjà battu 1-3 à Doncaster en septembre. Le DNB Huddersfield à 1,28 protège efficacement contre un éventuel nul."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [
+    {
+      "option": "combiné M5.1 + M8.1",
+      "motif": "sélection déjà jouée en simple : elle compterait deux fois"
+    }
+  ],
+  "enregistres": [
+    "M2.99",
+    "M5.1",
+    "M10.2",
+    "M24.1",
+    "M30.116"
+  ]
+}

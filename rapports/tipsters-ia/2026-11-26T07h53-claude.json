@@ -1,0 +1,175 @@
+{
+  "profil": "claude",
+  "nom": "Claude",
+  "modele": "claude-sonnet-5-5",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "0324fcbac0cafd19",
+  "duree_s": 36,
+  "tours": 6,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 3
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M23"
+      },
+      "ms": 507
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M23",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M20"
+      },
+      "ms": 602
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M20",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M32"
+      },
+      "ms": 666
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M32",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 448
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M28",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 565
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M8",
+        "famille": "buts"
+      },
+      "ms": 2
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 385
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 486
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M6",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 407
+    }
+  ],
+  "jetons": {
+    "entree": 269322,
+    "sortie": 3638,
+    "cacheLu": 17316,
+    "cacheEcrit": 2886
+  },
+  "erreur": null,
+  "bankroll": 97195,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M6.11",
+      "mise": 2000,
+      "probabilite": 0.72,
+      "raison": "Marseille – Levski : le marché attend 2,39 à 0,73 buts. Levski +2,5 ne perd que si Marseille gagne par 3 buts ou plus (marché 70,3 %). Marseille n'a marqué que 2 buts en 4 matchs (0,5 par match) et vient de perdre 2-3 contre Le Mans. Levski encaisse 0,8 but par match. Levski a 7 absents et Marseille rejoue dimanche. Je reste proche du marché, avec une petite marge pour la forme offensive de Marseille."
+    },
+    {
+      "option": "M8.229",
+      "mise": 1500,
+      "probabilite": 0.72,
+      "raison": "Beşiktaş – Hapoel Beer Sheva : le marché attend 2,82 à 0,82 buts, soit 3,6 au total. Beşiktaş marque 2,8 buts par match et en encaisse 2,0. Beer Sheva a pris 8 buts en 4 matchs. Plus de 2,5 buts passe à 70,5 % selon le marché. Je suis légèrement au-dessus à cause des défenses fragiles des deux côtés. Les compositions ne sont pas publiées, donc la mise reste petite."
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M6.11",
+      "pari": "Levski Sofia handicap +2,5",
+      "cote": 1.31,
+      "mise": 2000,
+      "probabilite": 0.72,
+      "raison": "Marseille – Levski : le marché attend 2,39 à 0,73 buts. Levski +2,5 ne perd que si Marseille gagne par 3 buts ou plus (marché 70,3 %). Marseille n'a marqué que 2 buts en 4 matchs (0,5 par match) et vient de perdre 2-3 contre Le Mans. Levski encaisse 0,8 but par match. Levski a 7 absents et Marseille rejoue dimanche. Je reste proche du marché, avec une petite marge pour la forme offensive de Marseille."
+    },
+    {
+      "id": "M8.229",
+      "pari": "Plus de 2,5 buts",
+      "cote": 1.36,
+      "mise": 1500,
+      "probabilite": 0.72,
+      "raison": "Beşiktaş – Hapoel Beer Sheva : le marché attend 2,82 à 0,82 buts, soit 3,6 au total. Beşiktaş marque 2,8 buts par match et en encaisse 2,0. Beer Sheva a pris 8 buts en 4 matchs. Plus de 2,5 buts passe à 70,5 % selon le marché. Je suis légèrement au-dessus à cause des défenses fragiles des deux côtés. Les compositions ne sont pas publiées, donc la mise reste petite."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M6.11",
+    "M8.229"
+  ]
+}

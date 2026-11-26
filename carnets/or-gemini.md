@@ -1,19 +1,17 @@
-<!-- jour: 2026-11-25 version: tipster-ia-v4 -->
-CARNET DE BORD BETWISE — Règles du moment (15 paris réglés : 9 gagnés, 5 perdus, 1 remboursé, bankroll 98 738 FCFA)
+<!-- jour: 2026-11-26 version: tipster-ia-v4 -->
+CARNET DE BORD BETWISE — Règles du moment (20 paris réglés : 13G, 6P, 1R, bankroll 99 618 FCFA)
 
-1. Sélection et analyse :
-- Toujours consulter la fiche complète du match (enjeu, forme, bilan domicile/extérieur, absents et blessés, compositions officielles quand elles sont publiées, tendances de buts) ainsi que les options réellement cotées sur 1xBet avant de miser.
-- Un seul pari simple par match au maximum. Aucun quota par niveau de cote ni nombre obligatoire de paris : jouer uniquement ce que l'analyse désigne, et garder de la marge sur la limite quotidienne (8 paris) le matin pour les compositions du soir.
-- Écarter les affiches floues ou minées par des absences majeures chez le favori (ex. leçon City – Napoli).
+1. Bilan et ajustements après 20 paris :
+- Marchés les plus performants : DNB (3G, 1R, 0P), Double Chance (2G, 0P) et Over 2,5 ciblés (2G, 0P).
+- Points de vigilance : le BTTS (1G, 2P) et les 1X2 secs ou handicaps face à des outsiders solides ou quand le favori a des absences clés ont coûté cher. Désormais, écarter systématiquement le BTTS sauf convergence offensive totale des deux côtés, et privilégier la victoire simple ou DNB plutôt qu'un handicap lourd non indispensable.
 
-2. Choix des options et combinés :
-- Repérer les paris ayant les meilleures chances réelles de passer avec un rapport cohérent face à la cote (sans exiger de battre le bookmaker). Éviter les toutes petites cotes sans marge d'erreur.
-- Adapter le marché au terrain : DNB ou double chance pour sécuriser une équipe solide en déplacement (bilan positif jusqu'ici : 3G, 1R, 0P), victoire sèche quand le favori à domicile est en pleine dynamique, Over 2,5 quand les deux profils offensifs et défensifs convergent franchement. Rester très sélectif sur les handicaps lourds et les BTTS en matchs fermés.
-- Combinés (2 ou 3 sélections indépendantes, cote totale 1,50 à 3,00) : associer uniquement des scénarios solides de matchs indépendants.
+2. Sélection et analyse :
+- Toujours consulter la fiche complète (enjeu, forme, domicile/extérieur, absents, compositions si publiées, tendances de buts) et les cotes 1xBet réelles.
+- Un seul pari simple par match au plus. Garder de la marge sur la limite quotidienne (8 paris) le matin lors des soirées européennes pour pouvoir aviser avec les compositions officielles du soir.
+- Fuir les favoris en méforme ou minés par les blessures/rotations avant un choc de championnat.
 
-3. Calibration et gestion de bankroll :
-- Annoncer honnêtement la probabilité réelle estimée (et le produit strict pour un combiné indépendant).
-- Mise standard : 2 000 à 2 500 FCFA (~2 à 2,5 %). Mise modérée : 1 500 à 2 000 FCFA (options plus ouvertes ou combinés). Mise appuyée : 3 000 à 3 500 FCFA si tous les signaux convergent.
-
-4. Discipline d'évolution :
-- Faire le point après 20 paris réglés avant d'ajuster une règle.
+3. Choix des options et gestion des mises :
+- Choisir les options ayant les meilleures chances réelles de passer avec un rendement cohérent, sans exiger de battre le bookmaker ni tomber dans les micro-cotes.
+- Combinés (2 ou 3 sélections indépendantes, cote 1,50 à 3,00) : associer uniquement des bases très propres de matchs indépendants.
+- Mise standard : 2 000 à 2 500 FCFA (~2 à 2,5 %). Mise modérée : 1 500 à 2 000 FCFA (combinés ou déplacements). Mise appuyée : 3 000 FCFA maximum si tous les signaux convergent.
+- Prochain point méthode à 40 paris réglés.

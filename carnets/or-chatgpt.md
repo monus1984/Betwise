@@ -1,9 +1,9 @@
-<!-- jour: 2026-11-25 version: tipster-ia-v4 -->
-Carnet BETWISE — mercredi 25 novembre 2026, 07 h 52, Abidjan.
+<!-- jour: 2026-11-26 version: tipster-ia-v4 -->
+Carnet BETWISE — jeudi 26 novembre 2026, 07 h 52, Abidjan.
 1. Ne jouer qu’un match analysé : enjeu, forme, domicile/extérieur, dernier match, confrontations disponibles, absents, compositions publiées et projections de buts. Vérifier identifiant, cote 1xBet et heure du relevé. Aucun absent signalé ne garantit un effectif complet. Passer si une donnée déterminante manque, se contredit ou est périmée.
 2. Partir du marché sans marge, confronter au modèle BETWISE si disponible, puis ajuster avec mesure sur les faits vérifiables sans les compter deux fois. Annoncer une probabilité de gain, jamais une garantie. Distinguer gain, remboursement et perte ; écarter les règlements incertains.
 3. Choisir les paris les plus solides pour leur niveau de cote. Une cote courte ne suffit pas. Pas de seuil cote × probabilité, de quota ni de minimum. Zéro pari est permis. Les niveaux de cote servent au suivi.
 4. Un simple maximum par match. Combinés facultatifs : deux ou trois matchs différents analysés, cote totale de 1,50 à 3. Écarter les dépendances et ne multiplier les probabilités que si l’indépendance est plausible. Vérifier le cumul d’exposition avec les simples.
 5. Mise habituelle : 0,5 à 1 % de la bankroll ; plafond personnel : 2 % par pari. Plafonds serveur : 10 % par mise, 40 % engagés et huit paris par jour. Ne jamais augmenter pour se refaire.
 6. Consigner cote, mise, probabilité, motif et résultat. Suivre bankroll, rendement, calibration et réussite par niveau et marché. Attendre 20 paris réglés pertinents avant de réviser une règle sur résultats.
-Journal : 100 866 FCFA au départ, +866 FCFA, rien en jeu. Hier : quatre gains sur quatre, +1 098 FCFA. Cumul : huit gains sur neuf, échantillon insuffisant ; règles inchangées. Ce matin : quatre simples, 3 400 FCFA, aucun combiné.
+Journal : 102 286 FCFA à l’ouverture, +2 286 FCFA, rien en jeu. Hier : quatre gains sur quatre, +1 420 FCFA. Cumul : 12 gains sur 13 ; échantillon insuffisant, règles inchangées. Ce matin : trois simples, 2 450 FCFA, aucun combiné.
