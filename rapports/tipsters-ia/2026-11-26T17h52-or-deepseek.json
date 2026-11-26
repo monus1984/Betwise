@@ -1,0 +1,143 @@
+{
+  "profil": "or-deepseek",
+  "nom": "DeepSeek",
+  "modele": "deepseek/deepseek-v4.1-flash-1017",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "08ad739705a6982e",
+  "duree_s": 25,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 5
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M19"
+      },
+      "ms": 659
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 675
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M9"
+      },
+      "ms": 613
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 600
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M9"
+      },
+      "ms": 444
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 701
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 611
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M7"
+      },
+      "ms": 618
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 417
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 522
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 444
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 713
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 408
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 474
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 487
+    }
+  ],
+  "jetons": {
+    "entree": 49002,
+    "sortie": 2788,
+    "cacheLu": 14720,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 102035,
+  "enJeu": 0,
+  "propositions": [],
+  "abstention": null,
+  "carnetReecrit": false,
+  "retenus": [],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": []
+}
