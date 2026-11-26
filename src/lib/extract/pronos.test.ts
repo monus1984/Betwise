@@ -45,7 +45,7 @@ describe("pronos de tipsters, de bout en bout (lecture simulée)", async () => {
     expect([0, 1, 2].map((i) => line(combine, i))).toEqual(["Turquie–Belgique 1X2 2 ok", "Uzbekistan–Russie 1X2 2 ok", "Madagascar–Guinée-Bissau 1X2 2 ok"]);
   });
   it("post Instagram : libellés courts, « pépite » à compléter", () => {
-    expect([0, 1, 2, 3].map((i) => line(niro, i))).toEqual(["Italie–France DC 1N ok", "Angleterre–Croatie 1X2 PÉPITE DU JOUR KO", "Tchéquie–Espagne BTTS Oui ok", "Turquie–Belgique BTTS Oui ok"]);
+    expect([0, 1, 2, 3].map((i) => line(niro, i))).toEqual(["Italie–France DC 1N ok", "Angleterre–Croatie LIBRE PÉPITE DU JOUR KO", "Tchéquie–Espagne BTTS Oui ok", "Turquie–Belgique BTTS Oui ok"]);
     expect(niro.raw.source?.name).toBe("NIRO SPORT");
   });
 });

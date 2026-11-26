@@ -393,3 +393,19 @@ describe("pronos de pages Facebook (23/11)", () => {
     expect(teamSimilarity(canon("Copenhague"), "FC København")).toBe(1);
   });
 });
+
+describe("captures du 26/11", () => {
+  it("lit les tournures des listes et tableaux de tipsters", () => {
+    expect(normalizePick("", "HT 2X", "Torreense", "Celtic")).toMatchObject({ market_code: "HT_DC", selection: "N2", ok: true });
+    expect(normalizePick("", "Win or Draw", "Monaco", "Adversaire", "Monaco")).toMatchObject({ market_code: "DC", selection: "1N", ok: true });
+    expect(normalizePick("", "To Score 2", "Brighton", "Adversaire", "Brighton")).toMatchObject({ market_code: "TT1", market_param: 1.5, selection: "Plus", ok: true });
+    expect(normalizePick("", "Nul R si Milan", "Olympiakos", "Milan")).toMatchObject({ market_code: "DNB", selection: "2", ok: true });
+    expect(normalizePick("", "Union par 2 ou +", "Union SG", "Lech")).toMatchObject({ market_code: "AH", market_param: -1.5, selection: "1", ok: true });
+    expect(normalizePick("", "(0:2)2", "CSKA Sofia", "Trabzonspor")).toMatchObject({ market_code: "EH", market_param: -2, selection: "2", ok: true });
+  });
+  it("ne devine pas : « l'un ou l'autre », codes ambigus, renvois vers un groupe", () => {
+    expect(normalizePick("", "Away or 2.5", "Dinamo Zagreb", "Leverkusen")).toMatchObject({ market_code: "LIBRE", ok: false });
+    expect(normalizePick("", "3G-Row No", "Crystal Palace", "Sociedad")).toMatchObject({ market_code: "LIBRE", ok: false });
+    expect(normalizePick("", "Groupe Public", "Marseille", "Levski")).toMatchObject({ market_code: "LIBRE", ok: false });
+  });
+});

@@ -131,7 +131,8 @@ export function teamSimilarity(a: string, b: string): number {
   // Une équipe féminine n'est jamais la même que l'équipe masculine du club (24/11)
   if (A.has("fem") !== B.has("fem")) return 0;
   // Un mot long à une lettre près compte comme le même (« Broendby » / « Brøndby », fautes de frappe)
-  const proche = (w: string, l: Set<string>) => l.has(w) || (w.length >= 6 && [...l].some((x) => x.length >= 6 && Math.abs(x.length - w.length) <= 1 && distance(w, x) <= 1));
+  // Mots de 8 lettres ou plus : deux fautes tolérées (« Torrence » / « Torreense », 26/11)
+  const proche = (w: string, l: Set<string>) => l.has(w) || (w.length >= 6 && [...l].some((x) => x.length >= 6 && Math.abs(x.length - w.length) <= 1 && distance(w, x) <= (w.length >= 8 && x.length >= 8 ? 2 : 1)));
   let common = 0;
   for (const w of A) if (proche(w, B)) common++;
   const jaccard = common / Math.max(A.size, B.size);

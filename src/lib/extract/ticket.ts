@@ -287,6 +287,33 @@ export function normalizePick(marketText: string, pickText: string, home: string
   // Pronos de tipsters, libellés courts (avec l'équipe nommée seule ou dans le texte)
   const all = `${m} ${p}`;
   const teamSide = team ? side(team) : null;
+  // Tournures relevées sur des captures du 26/11 (listes Facebook, tableaux, vidéos)
+  { const libre = (reason: string): NormalizedSelection => ({ market_code: "LIBRE", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason });
+    // Pas un pari : le tipster renvoie vers son groupe ou cache son choix
+    if (/^(groupe (public|priv[ée]|vip)|p[ée]pite du jour|vip|dans (le|mon) groupe|en priv[ée]|lien (en|dans la) bio)$/.test(p)) return libre("Pas un pari : le choix n’est pas donné publiquement. Ligne à supprimer.");
+    // « HT 2X », « MT 1X », « HT 12 » : double chance à la mi-temps ; « HT 1 » : résultat à la mi-temps
+    { const h = p.match(/^(?:ht|mt|1(?:ère|re) mi-temps)\s*[:\-]?\s*(1x|x1|2x|x2|12|1|x|2)$/);
+      if (h) { const v = h[1]; return v.length === 2 ? { market_code: "HT_DC", market_param: null, selection: /1/.test(v) && /x/.test(v) ? "1N" : /2/.test(v) && /x/.test(v) ? "N2" : "12", label_pick: pickText, ok: true }
+        : { market_code: "HT_1X2", market_param: null, selection: v === "x" ? "N" : v, label_pick: pickText, ok: true }; } }
+    // « Win or Draw », « Win/Draw » avec l'équipe nommée à part : double chance
+    if (teamSide && /^(?:win or draw|win\/draw|victoire ou nul|gagne ou nul)$/.test(p)) return { market_code: "DC", market_param: null, selection: teamSide === "1" ? "1N" : "N2", label_pick: `${team} ou nul`, ok: true };
+    // « To Score 2 » avec l'équipe nommée à part : au moins 2 buts de cette équipe
+    { const t = teamSide ? p.match(/^to score(?: (\d))?(?: goals?)?$/) : null;
+      if (t) { const n = Number(t[1] ?? 1); return { market_code: `TT${teamSide}`, market_param: n - 0.5, selection: "Plus", label_pick: pickText, ok: true }; } }
+    // « Nul R si Milan », « nul remboursé Milan » : remboursé si nul sur l'équipe
+    { const n = p.match(/^(?:nul|match nul)\s*(?:r\.?|remb\.?|rembours[ée]e?)\s*(?:si\s+)?(.+)$/); const sd = n ? side(n[1].trim()) : null;
+      if (sd) return { market_code: "DNB", market_param: null, selection: sd, label_pick: pickText, ok: true }; }
+    // « Union par 2 ou + », « Inter par au moins 2 buts d'écart » : victoire par 2 buts ou plus (handicap -1,5)
+    { const e = p.match(/^(.+?)\s+(?:gagne\s+)?par\s+(?:au moins\s+)?(\d)\s*(?:buts?\s*)?(?:ou\s*(?:\+|plus)|d['’]écart)$/); const sd = e ? side(e[1].trim()) : null;
+      if (sd && Number(e![2]) >= 1) return { market_code: "AH", market_param: -(Number(e![2]) - 0.5), selection: sd, label_pick: pickText, ok: true }; }
+    // « (0:2)2 », « (1:0) X » : handicap européen, score de départ fictif puis issue
+    { const e = p.replace(/\s/g, "").match(/^\((\d):(\d)\)([12x])$/);
+      if (e) return { market_code: "EH", market_param: Number(e[1]) - Number(e[2]), selection: e[3] === "x" ? "N" : e[3], label_pick: pickText, ok: true }; }
+    // « Away or 2.5 », « Home or Over 1.5 » : l'un OU l'autre, comme « résultat ou les deux marquent »
+    if (/^(?:home|away|1|2|win)\s+(?:or|ou)\s+(?:over\s*|\+\s*|plus de\s*)?\d+[.,]5$/.test(p)) return libre("« Résultat ou plus de buts » : pari « l’un ou l’autre », pas suivi automatiquement. Gardé tel quel, à confirmer et régler à la main.");
+    // Codes de tipsters dont le sens n'est pas sûr : on ne devine pas
+    if (/^home win nil no$|^\d+g[- ]?row\b/.test(p)) return libre("Code de tipster ambigu : je ne devine pas son sens. Gardé tel quel, à confirmer.");
+  }
   // Pair ou impair : le choix d'abord (le nom du marché contient souvent les deux mots, « Total pair/impair »)
   const parite = (): "Pair" | "Impair" | null => { for (const t of [p, all]) { if (/\bimpair\b|\bodd\b/.test(t)) return "Impair"; if (/\bpair\b|\beven\b/.test(t)) return "Pair"; } return null; };
   // Plusieurs conditions écrites à la suite (« Victoire & +1,5 buts & +8,5 corners ») : un combiné libre si chacune est comprise
@@ -701,6 +728,10 @@ const ABBR: Record<string, string> = {
   "aek athènes": "AEK Athens", "aek athenes": "AEK Athens", "olympiakos le pirée": "Olympiacos", "lisbonne": "Sporting CP", "sporting lisbonne": "Sporting CP", "benfica lisbonne": "Benfica",
   "atletico madrid": "Atlético Madrid", "atl madrid": "Atlético Madrid", "atl. madrid": "Atlético Madrid", "real sociedad": "Real Sociedad", "étoile rouge de belgrade": "Crvena Zvezda", "etoile rouge": "Crvena Zvezda",
   copenhague: "FC København", "fc copenhague": "FC København", bologne: "Bologna", "fc bologne": "Bologna", gênes: "Genoa", genes: "Genoa", florence: "Fiorentina", "dynamo kiev": "Dynamo Kyiv", "chakhtar donetsk": "Shakhtar Donetsk",
+  // Abréviations et fautes vues sur les captures du 26/11
+  "uni craiova": "Universitatea Craiova", "u craiova": "Universitatea Craiova", dinzagreb: "Dinamo Zagreb", "din zagreb": "Dinamo Zagreb", "d zagreb": "Dinamo Zagreb", "hbeer sheva": "Hapoel Beer Sheva", "h beer sheva": "Hapoel Beer Sheva",
+  lyon: "Olympique Lyonnais", "ol lyon": "Olympique Lyonnais", "union sg": "Union St. Gilloise", usg: "Union St. Gilloise", "union saint-gilloise": "Union St. Gilloise", "union gilloise": "Union St. Gilloise",
+  "sparta prague": "Sparta Praha", "slavia prague": "Slavia Praha", torrence: "Torreense", torrense: "Torreense", "scu torreense": "Torreense",
   "glasgow rangers": "Rangers", "celtic glasgow": "Celtic", "bruges": "Club Brugge", "club bruges": "Club Brugge", "salzbourg": "Salzburg", "rb salzbourg": "Salzburg",
   civ: "Côte d'Ivoire", "cote divoire": "Côte d'Ivoire", "côte divoire": "Côte d'Ivoire", "république tchèque": "Tchéquie", "republique tcheque": "Tchéquie", rsa: "Afrique du Sud", usa: "États-Unis", "pays bas": "Pays-Bas",
 };
