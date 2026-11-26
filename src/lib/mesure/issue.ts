@@ -71,6 +71,8 @@ export function issue(market: string, param: number | null, selection: string, s
     const adj = diff + param;
     return sel === "1" ? gp(adj > 0) : sel === "N" || sel === "X" ? gp(adj === 0) : sel === "2" ? gp(adj < 0) : null;
   }
+  // « Home Win to Nil — No » (26/11) : gagne si l'équipe ne gagne PAS sans encaisser
+  if (market === "WTN" && /\|non$/i.test(sel)) { const t = sel.split("|")[0]; return t === "1" ? gp(!(diff > 0 && s.a === 0)) : t === "2" ? gp(!(diff < 0 && s.h === 0)) : null; }
   if (market === "WTN") return sel === "1" ? gp(diff > 0 && s.a === 0) : sel === "2" ? gp(diff < 0 && s.h === 0) : null;
 
   if (["DC_OU", "1X2_OU", "DC_BTTS", "1X2_BTTS", "OU_BTTS"].includes(market)) {

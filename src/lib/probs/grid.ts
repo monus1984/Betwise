@@ -83,7 +83,8 @@ export function probOf(g: Grid, market: string, param: number | null, sel: strin
       if (param === null || !Number.isInteger(param) || !R1X2[sel]) return null;
       return sum(g, (i, j) => res(i + param, j) === sel);
     }
-    case "WTN": return sel === "1" ? sum(g, (i, j) => i > j && j === 0) : sel === "2" ? sum(g, (i, j) => j > i && i === 0) : null;
+    case "WTN": if (/\|non$/i.test(sel)) { const t = sel.split("|")[0]; return t === "1" ? 1 - sum(g, (i, j) => i > j && j === 0) : t === "2" ? 1 - sum(g, (i, j) => j > i && i === 0) : null; }
+      return sel === "1" ? sum(g, (i, j) => i > j && j === 0) : sel === "2" ? sum(g, (i, j) => j > i && i === 0) : null;
     case "OE1": case "OE2": { const v = (i: number, j: number) => (market === "OE1" ? i : j); return sel === "Pair" ? sum(g, (i, j) => v(i, j) % 2 === 0) : sel === "Impair" ? sum(g, (i, j) => v(i, j) % 2 === 1) : null; }
     case "MG1": case "MG2": { const r = sel.match(/^(\d+)-(\d+)$/); if (!r) return null; const lo = Number(r[1]), hi = Number(r[2]); return lo <= hi ? sum(g, (i, j) => { const v = market === "MG1" ? i : j; return v >= lo && v <= hi; }) : null; }
     // Gagne les deux mi-temps ; marque dans les deux mi-temps : produit des deux mi-temps, tirées séparément

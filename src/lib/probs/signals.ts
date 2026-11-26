@@ -294,7 +294,7 @@ export function pickLabel(market: string, param: number | null, sel: string, hom
       const txt = sel === "1" ? gagne(home, -h) : sel === "2" ? gagne(away, h) : `${h < 0 ? home : away} gagne par ${pl(Math.abs(h))} exactement`;
       return `${txt} (handicap ${h > 0 ? "+" : ""}${h})`;
     }
-    case "WTN": return `${sel === "1" ? home : away} gagne sans encaisser`;
+    case "WTN": return /\|non$/i.test(sel) ? `${sel.startsWith("1") ? home : away} ne gagne pas sans encaisser` : `${sel === "1" ? home : away} gagne sans encaisser`;
     case "OU_BTTS": { const [a, b] = sel.split("|"); const x = buts(a); return `${x[0].toUpperCase() + x.slice(1)} et ${btts(b)}`; }
   }
   return `${market} ${sel}`;

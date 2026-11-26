@@ -316,9 +316,14 @@ export function normalizePick(marketText: string, pickText: string, home: string
     { const e = p.replace(/\s/g, "").match(/^\((\d):(\d)\)([12x])$/);
       if (e) return { market_code: "EH", market_param: Number(e[1]) - Number(e[2]), selection: e[3] === "x" ? "N" : e[3], label_pick: pickText, ok: true }; }
     // « Away or 2.5 », « Home or Over 1.5 » : l'un OU l'autre, comme « résultat ou les deux marquent »
-    if (/^(?:home|away|1|2|win)\s+(?:or|ou)\s+(?:over\s*|\+\s*|plus de\s*)?\d+[.,]5$/.test(p)) return libre("« Résultat ou plus de buts » : pari « l’un ou l’autre », pas suivi automatiquement. Gardé tel quel, à confirmer et régler à la main.");
     // Codes de tipsters dont le sens n'est pas sûr : on ne devine pas
-    if (/^home win nil no$|^\d+g[- ]?row\b/.test(p)) return libre("Code de tipster ambigu : je ne devine pas son sens. Gardé tel quel, à confirmer.");
+    // « Home Win (to) Nil No » : l'équipe ne gagne pas sans encaisser (explication de Mounir, 26/11)
+    { const w = p.match(/^(home|away)\s+win(?:\s+to)?\s+nil\s*[-–—:]?\s*(no|yes|non|oui)?$/);
+      if (w) { const t = w[1] === "home" ? "1" : "2"; return { market_code: "WTN", market_param: null, selection: /^(no|non)$/.test(w[2] ?? "") ? `${t}|Non` : t, label_pick: pickText, ok: true }; } }
+    // « Away or 2.5 » : victoire à l'extérieur et plus de 2,5 buts (lecture de Mounir, 26/11)
+    { const o = p.match(/^(home|away|1|2)\s+(?:or|ou)\s+(?:over\s*|\+\s*|plus de\s*)?(\d+[.,]5)$/);
+      if (o) return { market_code: "1X2_OU", market_param: Number(o[2].replace(",", ".")), selection: `${/^(home|1)$/.test(o[1]) ? "1" : "2"}|Plus`, label_pick: pickText, ok: true }; }
+    if (/^\d+g[- ]?row\b/.test(p)) return libre("Code de tipster ambigu : je ne devine pas son sens. Gardé tel quel, à confirmer.");
   }
   // Pair ou impair : le choix d'abord (le nom du marché contient souvent les deux mots, « Total pair/impair »)
   const parite = (): "Pair" | "Impair" | null => { for (const t of [p, all]) { if (/\bimpair\b|\bodd\b/.test(t)) return "Impair"; if (/\bpair\b|\beven\b/.test(t)) return "Pair"; } return null; };
