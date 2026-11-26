@@ -55,9 +55,9 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
   const gerable = !isSystem && s.created_by === user!.id;
   const { count: nbPronos } = gerable ? await supabase.from("predictions").select("id", { count: "exact", head: true }).eq("source_id", id) : { count: 0 };
 
-  // Tipster IA (23/11) : ses tickets réels, simples et combinés, dans sa bankroll ; visibles par l'administrateur seul
+  // Tipster IA (23/11) : ses tickets réels, simples et combinés, dans sa bankroll ; visibles par tous les testeurs depuis le 26/11
   let tickets: Ticket[] | null = null;
-  if (estIA(s.nom) && (await supabase.rpc("is_admin")).data) {
+  if (estIA(s.nom)) {
     const court = s.nom.replace(/ · tipster IA$/, "");
     const { data } = await createAdminClient().from("bets").select("id, type, statut, mise, gain_net, cote_totale, placed_at, bet_selections(market_code, market_param, selection, cote, resultat, match:matches(home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom)))")
       .like("raw_text", `[tipster IA ${court}]%`).neq("statut", "annule").order("placed_at", { ascending: false }).limit(300);

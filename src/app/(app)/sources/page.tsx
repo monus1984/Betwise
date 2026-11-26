@@ -36,8 +36,8 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
   const mine = all.filter((s) => s.type === "perso" && s.created_by === user!.id);
   const model = all.filter((s) => s.type === "modele_betwise");
   const others = all.filter((s) => s.type !== "perso" && s.type !== "modele_betwise");
-  const { data: admin } = await supabase.rpc("is_admin");
-  const ia = admin ? others.filter((s) => estIA(s.nom)) : [];
+  // Labo IA ouvert à tous les testeurs (26/11, demande de Mounir) ; la Console reste réservée à l'administrateur
+  const ia = others.filter((s) => estIA(s.nom));
   const humaines = others.filter((s) => !estIA(s.nom));
   const suivies = [...mine, ...humaines.filter((s) => followed.has(s.id) || s.created_by === user!.id), ...model];
   const aDecouvrir = humaines.filter((s) => s.visibilite === "partagee" && !followed.has(s.id) && s.created_by !== user!.id);
