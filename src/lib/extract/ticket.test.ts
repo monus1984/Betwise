@@ -403,6 +403,9 @@ describe("captures du 26/11", () => {
     expect(normalizePick("", "Union par 2 ou +", "Union SG", "Lech")).toMatchObject({ market_code: "AH", market_param: -1.5, selection: "1", ok: true });
     expect(normalizePick("", "(0:2)2", "CSKA Sofia", "Trabzonspor")).toMatchObject({ market_code: "EH", market_param: -2, selection: "2", ok: true });
   });
+  it("« Home or GG » : on garde le résultat (choix du 26/11)", () => {
+    expect(normalizePick("", "Home or GG", "Freiburg", "FC Twente")).toMatchObject({ market_code: "1X2", selection: "1", ok: true });
+  });
   it("ne devine pas : « l'un ou l'autre », codes ambigus, renvois vers un groupe", () => {
     expect(normalizePick("", "Away or 2.5", "Dinamo Zagreb", "Leverkusen")).toMatchObject({ market_code: "LIBRE", ok: false });
     expect(normalizePick("", "3G-Row No", "Crystal Palace", "Sociedad")).toMatchObject({ market_code: "LIBRE", ok: false });

@@ -19,8 +19,8 @@ describe("écritures anglaises des tipsters", () => {
 });
 
 describe("lectures fausses corrigées", () => {
-  it("« ou les deux marquent » n'est plus lu comme « les deux marquent »", () => {
-    for (const p of ["Away or GG", "1 or GG", "Arsenal ou les deux marquent"]) expect(lit(p)).toMatchObject({ market_code: "LIBRE", ok: false });
+  it("« ou les deux marquent » : on garde le résultat, jamais « les deux marquent » (26/11)", () => {
+    for (const p of ["Away or GG", "1 or GG", "Arsenal ou les deux marquent"]) expect(lit(p)).toMatchObject({ market_code: "1X2", ok: true });
   });
   it("« Corners 1X2 » n'est plus lu comme le résultat du match", () => {
     expect(lit("1", "Corners 1X2")).toMatchObject({ market_code: "CORN_1X2", selection: "1", ok: true });

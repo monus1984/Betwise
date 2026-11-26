@@ -187,6 +187,12 @@ export function normalizePick(marketText: string, pickText: string, home: string
     if (cs && (!m || /score|correct|exact|prediction|prono/.test(m)) && !/mi[- ]?temps|half|\bht\b|\b2e\b|1(?:ère|re)/.test(m)) return { market_code: "CS", market_param: null, selection: `${cs[1]}-${cs[2]}`, label_pick: `Score exact ${cs[1]}-${cs[2]}`, ok: true }; }
   // « Arsenal ou les deux marquent », « Away or GG » : gagne si l'un OU l'autre arrive. Aucun marché suivi ne le règle ;
   // le lire comme « les deux marquent » le ferait perdre à tort. Gardé tel quel, à confirmer.
+  // Choix de Mounir (26/11) : on garde la partie « résultat » (« Home or GG » → victoire de l'équipe à domicile).
+  if (/\b(ou|or)\b/.test(p) && /\bgg\b|btts|(les )?(2|deux) (équipes )?marquent/.test(p) && !/&|\bet\b/.test(p)) {
+    const gauche = p.split(/\s+(?:ou|or)\s+/).find((x) => !/\bgg\b|btts|marquent/.test(x))?.trim();
+    const r = gauche ? normalizePick("", gauche, home, away, team, alias) : null;
+    if (r?.ok && r.market_code === "1X2") return { ...r, label_pick: pickText };
+  }
   if (/\b(ou|or)\b/.test(p) && /\bgg\b|btts|(les )?(2|deux) (équipes )?marquent/.test(p) && !/&|\bet\b/.test(p))
     return { market_code: "LIBRE", market_param: null, selection: pickText, label_pick: pickText, ok: false, reason: "« Résultat ou les deux marquent » : pari « l’un ou l’autre », pas suivi automatiquement. Gardé tel quel, à confirmer et régler à la main." };
   // Options de paiement anticipé (« 1up », « 2up » : payé dès que l'équipe mène d'un ou deux buts) : le pari de base est lu,
