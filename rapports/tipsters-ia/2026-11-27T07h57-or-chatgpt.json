@@ -1,0 +1,234 @@
+{
+  "profil": "or-chatgpt",
+  "nom": "ChatGPT",
+  "modele": "openai/gpt-6.2-sol",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "ed0c1a59a9ad17f5",
+  "duree_s": 34,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 775
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 814
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 587
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 657
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 401
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M19"
+      },
+      "ms": 438
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M20"
+      },
+      "ms": 787
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M23"
+      },
+      "ms": 407
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 583
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M29"
+      },
+      "ms": 949
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M35"
+      },
+      "ms": 730
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M4",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M28",
+        "famille": "resultat"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M29",
+        "famille": "buts"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M35",
+        "famille": "resultat"
+      },
+      "ms": 10
+    }
+  ],
+  "jetons": {
+    "entree": 80407,
+    "sortie": 1598,
+    "cacheLu": 30232,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 102012,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M3.265",
+      "mise": 850,
+      "probabilite": 0.7,
+      "raison": "Al-Gharafa marque au moins deux buts, à 1,38 (06 h 00). Al-Sailiya a encaissé 35 buts en 10 journées, dont 18 en cinq réceptions. Le marché projette 2,32 buts pour Al-Gharafa et situe cette ligne à 67,4 %. Al-Gharafa vient d'en marquer trois contre Al-Arabi, mais sa moyenne récente n'est que de 1,4 : l'ajustement reste modeste. Ce pari n'exige pas de victoire."
+    },
+    {
+      "option": "M17.248",
+      "mise": 950,
+      "probabilite": 0.73,
+      "raison": "Groningen marque au moins deux buts, à 1,32 (04 h 28). Willem II a encaissé 25 buts en sept déplacements et compte quatre absents signalés, dont Hoogma et Lachkar. Groningen a marqué 14 fois en sept réceptions et le marché lui projette 2,44 buts, avec un repère de 70 % sur cette ligne. Son 1–3 contre Heerenveen et ses cinq matchs sans victoire incitent à préférer le total d'équipe au résultat."
+    },
+    {
+      "option": "M29.218",
+      "mise": 850,
+      "probabilite": 0.82,
+      "raison": "Au plus trois buts entre Leganés et Sabadell, à 1,22 (04 h 59). Les huit déplacements de Sabadell totalisent quatre buts marqués et neuf encaissés ; Leganés a marqué neuf fois en sept réceptions. Le marché projette 2,27 buts au total et donne 80,4 % à cette ligne. Le récent 3–1 de Leganés à Andorre montre pourquoi je préfère la marge d'un but par rapport au moins de 2,5."
+    },
+    {
+      "option": "M35.131",
+      "mise": 700,
+      "probabilite": 0.62,
+      "raison": "Southampton ou nul, à 1,58 (06 h 00). Southampton est invaincu en huit réceptions (sept victoires, cinq buts encaissés). Cela justifie de relever le repère sans marge de 57,4 %, sans extrapoler le sans-faute : Middlesbrough est leader, a évité la défaite dans six de ses huit déplacements et reste favori du marché. Le nul est couvert ; la mise reste la plus faible de la sélection."
+    }
+  ],
+  "abstention": "Pas de combiné : je préfère garder les risques séparés. J'écarte NAC Breda et Heracles faute de données cohérentes ou complètes au classement pour l'équipe adverse ou le favori. Je laisse aussi Werder–Mönchengladbach de côté avant les compositions : le modèle et le marché divergent nettement sur la victoire du Werder, et Njinmah est incertain. Je ne retiens pas Al-Qadisiyah : la projection offensive est haute au regard des huit buts encaissés par Al-Fayha en six déplacements.",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M3.265",
+      "pari": "Al-Gharafa : plus de 1,5 buts",
+      "cote": 1.38,
+      "mise": 900,
+      "probabilite": 0.7,
+      "raison": "Al-Gharafa marque au moins deux buts, à 1,38 (06 h 00). Al-Sailiya a encaissé 35 buts en 10 journées, dont 18 en cinq réceptions. Le marché projette 2,32 buts pour Al-Gharafa et situe cette ligne à 67,4 %. Al-Gharafa vient d'en marquer trois contre Al-Arabi, mais sa moyenne récente n'est que de 1,4 : l'ajustement reste modeste. Ce pari n'exige pas de victoire."
+    },
+    {
+      "id": "M17.248",
+      "pari": "Groningen : plus de 1,5 buts",
+      "cote": 1.32,
+      "mise": 1000,
+      "probabilite": 0.73,
+      "raison": "Groningen marque au moins deux buts, à 1,32 (04 h 28). Willem II a encaissé 25 buts en sept déplacements et compte quatre absents signalés, dont Hoogma et Lachkar. Groningen a marqué 14 fois en sept réceptions et le marché lui projette 2,44 buts, avec un repère de 70 % sur cette ligne. Son 1–3 contre Heerenveen et ses cinq matchs sans victoire incitent à préférer le total d'équipe au résultat."
+    },
+    {
+      "id": "M29.218",
+      "pari": "Moins de 3,5 buts",
+      "cote": 1.22,
+      "mise": 900,
+      "probabilite": 0.82,
+      "raison": "Au plus trois buts entre Leganés et Sabadell, à 1,22 (04 h 59). Les huit déplacements de Sabadell totalisent quatre buts marqués et neuf encaissés ; Leganés a marqué neuf fois en sept réceptions. Le marché projette 2,27 buts au total et donne 80,4 % à cette ligne. Le récent 3–1 de Leganés à Andorre montre pourquoi je préfère la marge d'un but par rapport au moins de 2,5."
+    },
+    {
+      "id": "M35.131",
+      "pari": "Southampton ou nul",
+      "cote": 1.58,
+      "mise": 700,
+      "probabilite": 0.62,
+      "raison": "Southampton ou nul, à 1,58 (06 h 00). Southampton est invaincu en huit réceptions (sept victoires, cinq buts encaissés). Cela justifie de relever le repère sans marge de 57,4 %, sans extrapoler le sans-faute : Middlesbrough est leader, a évité la défaite dans six de ses huit déplacements et reste favori du marché. Le nul est couvert ; la mise reste la plus faible de la sélection."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M3.265",
+    "M17.248",
+    "M29.218",
+    "M35.131"
+  ]
+}

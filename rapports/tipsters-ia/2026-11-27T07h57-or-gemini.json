@@ -1,0 +1,393 @@
+{
+  "profil": "or-gemini",
+  "nom": "Gemini",
+  "modele": "google/gemini-4-carbon",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "ed0c1a59a9ad17f5",
+  "duree_s": 256,
+  "tours": 6,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 590
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 578
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 415
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 417
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 397
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 397
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 240
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M20"
+      },
+      "ms": 400
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M18"
+      },
+      "ms": 625
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M19"
+      },
+      "ms": 471
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M21"
+      },
+      "ms": 804
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M23"
+      },
+      "ms": 618
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M24"
+      },
+      "ms": 416
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M26"
+      },
+      "ms": 482
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 424
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M30"
+      },
+      "ms": 575
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 523
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 857
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 392
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 508
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M31"
+      },
+      "ms": 428
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M32"
+      },
+      "ms": 394
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M33"
+      },
+      "ms": 452
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M35"
+      },
+      "ms": 411
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 22
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 17
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 21
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 17
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M20"
+      },
+      "ms": 18
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M23"
+      },
+      "ms": 21
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M24"
+      },
+      "ms": 25
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M32"
+      },
+      "ms": 18
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M8",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "resultat",
+        "match": "M21"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M30",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "resultat",
+        "match": "M31"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "famille": "buts",
+        "match": "M33"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M35",
+        "famille": "resultat"
+      },
+      "ms": 8
+    }
+  ],
+  "jetons": {
+    "entree": 530627,
+    "sortie": 3380,
+    "cacheLu": 277728,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 93937.85,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "raison": "En Saudi Pro League (14h20), Al-Qadisiyah FC est 2e (28 pts en 12 matchs, à 2 longueurs du leader Al-Hilal), possède la 2e meilleure attaque (32 buts) et la 3e meilleure défense (12 encaissés), et reste sur 4 victoires lors de ses 5 derniers matchs (2,7 buts marqués/match). Aucun absent n'est signalé. En face, Al-Fayha (13e, 11 pts) n'a remporté aucun de ses 6 déplacements cette saison (0V, 3N, 3D, 4 buts marqués) et avait lourdement chuté lors de sa dernière venue ici (5-0). Les buts attendus par le marché (3,35 contre 0,89) confirment un écart très net propice à un succès par au moins 2 buts d'écart.",
+      "mise": 2500,
+      "option": "M4.6",
+      "probabilite": 0.68
+    },
+    {
+      "option": "M13.103",
+      "raison": "En 2. Bundesliga (17h30), Bochum (11e, 3e meilleure défense du championnat avec 15 buts encaissés en 12 journées, aucun absent signalé) reçoit Darmstadt (16e et barragiste) qui affiche un bilan catastrophique hors de ses bases : 5 défaites en 5 déplacements cette saison, avec 1 seul but marqué pour 15 encaissés. Comme les confrontations directes comportent plusieurs partages des points (5 nuls sur les 10 dernières), le choix du remboursé si nul (DNB) sécurise parfaitement ce net avantage territorial.",
+      "probabilite": 0.72,
+      "mise": 2000
+    },
+    {
+      "probabilite": 0.71,
+      "mise": 2000,
+      "option": "M23.2",
+      "raison": "En Eerste Divisie néerlandaise (19h00), Heracles domine largement le championnat : 1er avec 41 points en 16 journées, meilleure attaque (48 buts, soit 3,0 par match) et meilleure défense (17 buts encaissés). Invaincu sur ses 5 derniers matchs (4 victoires) et très performant à l'extérieur (5 victoires, 2 nuls et 1 seule défaite en 8 voyages, 23 buts inscrits), le leader se déplace sans aucun absent annoncé chez la réserve de l'Ajax (buts attendus par le marché : 2,83 pour Heracles contre 1,26)."
+    },
+    {
+      "option": "M24.90",
+      "mise": 2000,
+      "raison": "Toujours en Eerste Divisie (19h00), Almere City FC est 2e du classement (22 pts en 10 matchs, meilleure défense avec seulement 7 buts encaissés, 4 victoires sur les 5 derniers matchs et 3V-1N-1D à l'extérieur avec 14 buts marqués pour 5 concédés). Il affronte la lanterne rouge Jong Utrecht (20e avec 7 pts, 23 buts encaissés en 10 matchs, 3 défaites en 5 réceptions). De plus, Almere a remporté les 6 dernières confrontations directes (8 victoires sur les 10 dernières). L'option DNB à 1,42 protège efficacement un éventuel nul en déplacement.",
+      "probabilite": 0.66
+    },
+    {
+      "probabilite": 0.73,
+      "option": "M33.254",
+      "mise": 2000,
+      "raison": "En Espagne (20h00), opposition très ouverte entre Levante (15e, 27 buts cumulés en 6 réceptions cette saison soit 4,5 buts/match à domicile) et le Racing Santander (7e, co-pire défense du championnat avec 32 buts encaissés en 13 journées et 19 buts concédés en 6 déplacements, reste sur un 3-2 contre la Real Sociedad). Le marché attend environ 3,6 buts et le modèle BETWISE grimpe même à 4,33 buts attendus (80,3 % pour le Plus de 2,5 buts)."
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M4.6",
+      "pari": "Al-Qadisiyah FC gagne par 2 buts ou plus",
+      "cote": 1.47,
+      "mise": 2500,
+      "probabilite": 0.68,
+      "raison": "En Saudi Pro League (14h20), Al-Qadisiyah FC est 2e (28 pts en 12 matchs, à 2 longueurs du leader Al-Hilal), possède la 2e meilleure attaque (32 buts) et la 3e meilleure défense (12 encaissés), et reste sur 4 victoires lors de ses 5 derniers matchs (2,7 buts marqués/match). Aucun absent n'est signalé. En face, Al-Fayha (13e, 11 pts) n'a remporté aucun de ses 6 déplacements cette saison (0V, 3N, 3D, 4 buts marqués) et avait lourdement chuté lors de sa dernière venue ici (5-0). Les buts attendus par le marché (3,35 contre 0,89) confirment un écart très net propice à un succès par au moins 2 buts d'écart."
+    },
+    {
+      "id": "M13.103",
+      "pari": "VfL Bochum (remboursé si nul)",
+      "cote": 1.33,
+      "mise": 2000,
+      "probabilite": 0.72,
+      "raison": "En 2. Bundesliga (17h30), Bochum (11e, 3e meilleure défense du championnat avec 15 buts encaissés en 12 journées, aucun absent signalé) reçoit Darmstadt (16e et barragiste) qui affiche un bilan catastrophique hors de ses bases : 5 défaites en 5 déplacements cette saison, avec 1 seul but marqué pour 15 encaissés. Comme les confrontations directes comportent plusieurs partages des points (5 nuls sur les 10 dernières), le choix du remboursé si nul (DNB) sécurise parfaitement ce net avantage territorial."
+    },
+    {
+      "id": "M23.2",
+      "pari": "Heracles",
+      "cote": 1.38,
+      "mise": 2000,
+      "probabilite": 0.71,
+      "raison": "En Eerste Divisie néerlandaise (19h00), Heracles domine largement le championnat : 1er avec 41 points en 16 journées, meilleure attaque (48 buts, soit 3,0 par match) et meilleure défense (17 buts encaissés). Invaincu sur ses 5 derniers matchs (4 victoires) et très performant à l'extérieur (5 victoires, 2 nuls et 1 seule défaite en 8 voyages, 23 buts inscrits), le leader se déplace sans aucun absent annoncé chez la réserve de l'Ajax (buts attendus par le marché : 2,83 pour Heracles contre 1,26)."
+    },
+    {
+      "id": "M24.90",
+      "pari": "Almere City FC (remboursé si nul)",
+      "cote": 1.42,
+      "mise": 2000,
+      "probabilite": 0.66,
+      "raison": "Toujours en Eerste Divisie (19h00), Almere City FC est 2e du classement (22 pts en 10 matchs, meilleure défense avec seulement 7 buts encaissés, 4 victoires sur les 5 derniers matchs et 3V-1N-1D à l'extérieur avec 14 buts marqués pour 5 concédés). Il affronte la lanterne rouge Jong Utrecht (20e avec 7 pts, 23 buts encaissés en 10 matchs, 3 défaites en 5 réceptions). De plus, Almere a remporté les 6 dernières confrontations directes (8 victoires sur les 10 dernières). L'option DNB à 1,42 protège efficacement un éventuel nul en déplacement."
+    },
+    {
+      "id": "M33.254",
+      "pari": "Plus de 2,5 buts",
+      "cote": 1.42,
+      "mise": 2000,
+      "probabilite": 0.73,
+      "raison": "En Espagne (20h00), opposition très ouverte entre Levante (15e, 27 buts cumulés en 6 réceptions cette saison soit 4,5 buts/match à domicile) et le Racing Santander (7e, co-pire défense du championnat avec 32 buts encaissés en 13 journées et 19 buts concédés en 6 déplacements, reste sur un 3-2 contre la Real Sociedad). Le marché attend environ 3,6 buts et le modèle BETWISE grimpe même à 4,33 buts attendus (80,3 % pour le Plus de 2,5 buts)."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [
+    {
+      "option": "combiné M5.94 + M20.1 + M23.2",
+      "motif": "sélection déjà jouée en simple : elle compterait deux fois"
+    }
+  ],
+  "enregistres": [
+    "M4.6",
+    "M13.103",
+    "M23.2",
+    "M24.90",
+    "M33.254"
+  ]
+}

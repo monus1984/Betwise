@@ -1,17 +1,18 @@
-<!-- jour: 2026-11-26 version: tipster-ia-v4 -->
-CARNET DE BORD BETWISE — Règles du moment (20 paris réglés : 13G, 6P, 1R, bankroll 99 618 FCFA)
+<!-- jour: 2026-11-27 version: tipster-ia-v4 -->
+CARNET DE BORD BETWISE — Règles du moment (25 paris réglés : 15G, 9P, 1R, bankroll 93 938 FCFA)
 
-1. Bilan et ajustements après 20 paris :
-- Marchés les plus performants : DNB (3G, 1R, 0P), Double Chance (2G, 0P) et Over 2,5 ciblés (2G, 0P).
-- Points de vigilance : le BTTS (1G, 2P) et les 1X2 secs ou handicaps face à des outsiders solides ou quand le favori a des absences clés ont coûté cher. Désormais, écarter systématiquement le BTTS sauf convergence offensive totale des deux côtés, et privilégier la victoire simple ou DNB plutôt qu'un handicap lourd non indispensable.
+1. Bilan factuel et cap méthodologique :
+- Marchés très solides : DNB (5G, 1R, 0P, +34 %), Double Chance (2G, 0P, +36 %) et Over ciblés (2G, 0P, +39 %).
+- Points faibles identifiés : le 1X2 sec (2G, 5P, -56 %), souvent piégé par des nuls en coupes d'Europe, et le BTTS (1G, 2P, -51 %).
+- Pas de changement brusque de règles avant 40 paris réglés, mais application stricte de nos points forts : privilégier DNB, Double Chance et Over buts sur championnats domestiques lisibles plutôt que multiplier les 1X2 secs risqués.
 
 2. Sélection et analyse :
-- Toujours consulter la fiche complète (enjeu, forme, domicile/extérieur, absents, compositions si publiées, tendances de buts) et les cotes 1xBet réelles.
-- Un seul pari simple par match au plus. Garder de la marge sur la limite quotidienne (8 paris) le matin lors des soirées européennes pour pouvoir aviser avec les compositions officielles du soir.
-- Fuir les favoris en méforme ou minés par les blessures/rotations avant un choc de championnat.
+- Toujours vérifier la fiche complète (enjeu, forme récente, bilans domicile/extérieur, absents, compositions si publiées, buts attendus) et les cotes réelles 1xBet.
+- Écarter les favoris sans victoire récente ou minés par de nombreuses absences clés.
+- Garder de la marge sur le plafond de 8 paris lors du passage matinal afin de pouvoir profiter des compositions officielles en soirée sur les grandes affiches.
 
-3. Choix des options et gestion des mises :
-- Choisir les options ayant les meilleures chances réelles de passer avec un rendement cohérent, sans exiger de battre le bookmaker ni tomber dans les micro-cotes.
-- Combinés (2 ou 3 sélections indépendantes, cote 1,50 à 3,00) : associer uniquement des bases très propres de matchs indépendants.
-- Mise standard : 2 000 à 2 500 FCFA (~2 à 2,5 %). Mise modérée : 1 500 à 2 000 FCFA (combinés ou déplacements). Mise appuyée : 3 000 FCFA maximum si tous les signaux convergent.
-- Prochain point méthode à 40 paris réglés.
+3. Gestion des mises et combinés :
+- Un pari simple maximum par match ; un match ne figure qu'une fois dans un combiné.
+- Combinés (cote totale 1,50 à 3,00) : uniquement 2 ou 3 sélections indépendantes à haute probabilité.
+- Mise standard : 2 000 FCFA (~2,1 % de la bankroll). Mise modérée : 1 500 FCFA (combinés ou déplacements). Mise appuyée : 2 500 FCFA maximum si tous les indicateurs convergent.
+- Prochain bilan complet à 40 paris réglés.

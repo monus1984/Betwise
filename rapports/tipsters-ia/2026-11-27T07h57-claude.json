@@ -1,0 +1,155 @@
+{
+  "profil": "claude",
+  "nom": "Claude",
+  "modele": "claude-sonnet-5-5",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "ed0c1a59a9ad17f5",
+  "duree_s": 33,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 6
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M19"
+      },
+      "ms": 831
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M19",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 1009
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M28",
+        "famille": "buts"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 822
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "buts"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M28",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M19",
+        "famille": "resultat"
+      },
+      "ms": 2
+    }
+  ],
+  "jetons": {
+    "entree": 130974,
+    "sortie": 3804,
+    "cacheLu": 11544,
+    "cacheEcrit": 2886
+  },
+  "erreur": null,
+  "bankroll": 98355,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M28.13",
+      "mise": 2000,
+      "probabilite": 0.85,
+      "raison": "Werder – Gladbach : marché 2,09 à 1,20 buts, modèle 1,76 à 1,35. Gladbach +2,5 ne perd que si Werder gagne par 3 buts ou plus (marché 82,3 %, modèle 89,1 %). Werder a 8 absents (Njinmah incertain). Gladbach est 18e et encaisse beaucoup (15 buts en 5 matchs à l'extérieur), ce qui est le risque. Je suis entre le marché et le modèle."
+    },
+    {
+      "option": "M17.11",
+      "mise": 1500,
+      "probabilite": 0.71,
+      "raison": "Groningen – Willem II : marché 2,44 à 0,95 buts. Willem II +2,5 ne perd que si Groningen gagne par 3 buts ou plus (marché 72,6 %). Groningen n'a pas gagné sur ses 5 derniers matchs (0 V, 4 D) et en a encaissé 31 en 13. Willem II est très fragile à l'extérieur (25 buts encaissés en 7 matchs), donc je reste proche du marché et je mise peu."
+    },
+    {
+      "option": "M19.11",
+      "mise": 1000,
+      "probabilite": 0.6,
+      "raison": "Belouizdad – Douane (retour de Coupe de la Confédération, aller 0-0). Marché 2,71 à 0,42 buts. Douane +2,5 ne perd que si Belouizdad gagne par 3 buts ou plus (marché 57,8 %). Je n'ai ni forme ni compositions, donc mise minimale et probabilité proche du marché."
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M28.13",
+      "pari": "Borussia Mönchengladbach handicap +2,5",
+      "cote": 1.14,
+      "mise": 2000,
+      "probabilite": 0.85,
+      "raison": "Werder – Gladbach : marché 2,09 à 1,20 buts, modèle 1,76 à 1,35. Gladbach +2,5 ne perd que si Werder gagne par 3 buts ou plus (marché 82,3 %, modèle 89,1 %). Werder a 8 absents (Njinmah incertain). Gladbach est 18e et encaisse beaucoup (15 buts en 5 matchs à l'extérieur), ce qui est le risque. Je suis entre le marché et le modèle."
+    },
+    {
+      "id": "M17.11",
+      "pari": "Willem II handicap +2,5",
+      "cote": 1.3,
+      "mise": 1500,
+      "probabilite": 0.71,
+      "raison": "Groningen – Willem II : marché 2,44 à 0,95 buts. Willem II +2,5 ne perd que si Groningen gagne par 3 buts ou plus (marché 72,6 %). Groningen n'a pas gagné sur ses 5 derniers matchs (0 V, 4 D) et en a encaissé 31 en 13. Willem II est très fragile à l'extérieur (25 buts encaissés en 7 matchs), donc je reste proche du marché et je mise peu."
+    },
+    {
+      "id": "M19.11",
+      "pari": "AC Douane handicap +2,5",
+      "cote": 1.46,
+      "mise": 1000,
+      "probabilite": 0.6,
+      "raison": "Belouizdad – Douane (retour de Coupe de la Confédération, aller 0-0). Marché 2,71 à 0,42 buts. Douane +2,5 ne perd que si Belouizdad gagne par 3 buts ou plus (marché 57,8 %). Je n'ai ni forme ni compositions, donc mise minimale et probabilité proche du marché."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M28.13",
+    "M17.11",
+    "M19.11"
+  ]
+}

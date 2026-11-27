@@ -1,0 +1,357 @@
+{
+  "profil": "or-grok",
+  "nom": "Grok",
+  "modele": "x-ai/grok-4.7",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "ed0c1a59a9ad17f5",
+  "duree_s": 251,
+  "tours": 7,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 5
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 412
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M20"
+      },
+      "ms": 402
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M23"
+      },
+      "ms": 237
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M5"
+      },
+      "ms": 602
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 496
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 557
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M4"
+      },
+      "ms": 425
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 419
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 396
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 612
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M5",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M18"
+      },
+      "ms": 995
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 949
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 644
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M30"
+      },
+      "ms": 394
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M35"
+      },
+      "ms": 406
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M20",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M28",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M30",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M24"
+      },
+      "ms": 900
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M21"
+      },
+      "ms": 601
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M8"
+      },
+      "ms": 485
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M24",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M23",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M33"
+      },
+      "ms": 435
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 647
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M36"
+      },
+      "ms": 503
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M4",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M28",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "buts"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M30",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M1"
+      },
+      "ms": 476
+    }
+  ],
+  "jetons": {
+    "entree": 365860,
+    "sortie": 18500,
+    "cacheLu": 255488,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 104384.25,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M13.103",
+      "mise": 2500,
+      "probabilite": 0.66,
+      "raison": "Darmstadt est 16e, barragiste, 0 victoire, 0 nul et 5 défaites à l'extérieur (1 but, 15 encaissés). Bochum est 11e, 3e défense (15 buts en 12). Le marché donne la victoire de Bochum à 54,3 % et le DNB 1,33 à 70,7 %. Je reste à 66 % : Bochum n'a qu'1 victoire à domicile en 6 et les confrontations comptent 5 nuls sur 10. Le pari est remboursé si nul. Compositions non publiées, aucun absent signalé."
+    },
+    {
+      "option": "M30.106",
+      "mise": 2200,
+      "probabilite": 0.63,
+      "raison": "Kortrijk est 18e, relégable, 4 points en 12, 8 points de retard, 0 victoire et 4 défaites sur 5, 0,3 but, seulement 4 buts en 12 matchs, et 0 victoire à l'extérieur (1 but, 12 encaissés en 6). Leuven est 13e, 2 victoires sur 5. Marché : victoire Leuven 50,5 %, DNB 1,47 à 67 %. Je reste à 63 % : Leuven ne marque qu'1,0 but sur 5 et les confrontations penchent plutôt Kortrijk (4/9). Remboursé si nul."
+    },
+    {
+      "option": "M24.90",
+      "mise": 1800,
+      "probabilite": 0.6,
+      "raison": "Almere est 2e, 22 points en 10, 15 points devant Jong Utrecht (20e, 7 points). Almere : 4 victoires sur 5, 2,2 buts et 0,7 encaissé, meilleure défense (7 buts), 3 victoires à l'extérieur en 5, 8 victoires sur 10 confrontations dont 6 de suite. Marché : victoire 49,3 %, DNB 1,42 à 63,6 %. Je reste à 60 % : défaite 1-4 contre NAC le 20/11, Jong Utrecht marque 1,6, compositions non publiées. Remboursé si nul."
+    }
+  ],
+  "abstention": "\"Pas de quota. Laiss\\u00e9s : Qadisiyah (1X2 1,15 et DNB 1,02, trop courts ; domicile seulement 3V 2D), Cluj (DNB 1,15 refus\\u00e9, confrontations \\u00e0 4 nuls), Groningen (0 victoire sur 5, DNB 1,13), Br\\u00f8ndby (2V 3D, ext\\u00e9rieur 2V 4D, lui-m\\u00eame proche du barrage), Werder (8 absents, mod\\u00e8le DNB 61,5 % contre march\\u00e9 73 %), Gharafa (H2H 5-5, forme seulement 2V/5, DNB 1,18), Heracles (classement Jong Ajax incoh\\u00e9rent, 0 point en 0 match), NAC (DNB 1,10, 1,9 encaiss\\u00e9). Aucun over ni BTTS : compositions non publi\\u00e9es.\"",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M13.103",
+      "pari": "VfL Bochum (remboursé si nul)",
+      "cote": 1.33,
+      "mise": 2500,
+      "probabilite": 0.66,
+      "raison": "Darmstadt est 16e, barragiste, 0 victoire, 0 nul et 5 défaites à l'extérieur (1 but, 15 encaissés). Bochum est 11e, 3e défense (15 buts en 12). Le marché donne la victoire de Bochum à 54,3 % et le DNB 1,33 à 70,7 %. Je reste à 66 % : Bochum n'a qu'1 victoire à domicile en 6 et les confrontations comptent 5 nuls sur 10. Le pari est remboursé si nul. Compositions non publiées, aucun absent signalé."
+    },
+    {
+      "id": "M30.106",
+      "pari": "OH Leuven (remboursé si nul)",
+      "cote": 1.47,
+      "mise": 2200,
+      "probabilite": 0.63,
+      "raison": "Kortrijk est 18e, relégable, 4 points en 12, 8 points de retard, 0 victoire et 4 défaites sur 5, 0,3 but, seulement 4 buts en 12 matchs, et 0 victoire à l'extérieur (1 but, 12 encaissés en 6). Leuven est 13e, 2 victoires sur 5. Marché : victoire Leuven 50,5 %, DNB 1,47 à 67 %. Je reste à 63 % : Leuven ne marque qu'1,0 but sur 5 et les confrontations penchent plutôt Kortrijk (4/9). Remboursé si nul."
+    },
+    {
+      "id": "M24.90",
+      "pari": "Almere City FC (remboursé si nul)",
+      "cote": 1.42,
+      "mise": 1800,
+      "probabilite": 0.6,
+      "raison": "Almere est 2e, 22 points en 10, 15 points devant Jong Utrecht (20e, 7 points). Almere : 4 victoires sur 5, 2,2 buts et 0,7 encaissé, meilleure défense (7 buts), 3 victoires à l'extérieur en 5, 8 victoires sur 10 confrontations dont 6 de suite. Marché : victoire 49,3 %, DNB 1,42 à 63,6 %. Je reste à 60 % : défaite 1-4 contre NAC le 20/11, Jong Utrecht marque 1,6, compositions non publiées. Remboursé si nul."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [
+    {
+      "option": "combiné M13.103 + M30.106",
+      "motif": "sélection déjà jouée en simple : elle compterait deux fois"
+    }
+  ],
+  "enregistres": [
+    "M13.103",
+    "M30.106",
+    "M24.90"
+  ]
+}
