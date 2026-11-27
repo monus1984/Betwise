@@ -301,6 +301,8 @@ export function normalizePick(marketText: string, pickText: string, home: string
     { const h = p.match(/^(?:ht|mt|1(?:ère|re) mi-temps)\s*[:\-]?\s*(1x|x1|2x|x2|12|1|x|2)$/);
       if (h) { const v = h[1]; return v.length === 2 ? { market_code: "HT_DC", market_param: null, selection: /1/.test(v) && /x/.test(v) ? "1N" : /2/.test(v) && /x/.test(v) ? "N2" : "12", label_pick: pickText, ok: true }
         : { market_code: "HT_1X2", market_param: null, selection: v === "x" ? "N" : v, label_pick: pickText, ok: true }; } }
+    // « Lokomotiv Sofia – 1X » : l'équipe nommée seule, gagne ou nul (27/11)
+    if (teamSide && /^(1x|x1)$/.test(p)) return { market_code: "DC", market_param: null, selection: teamSide === "1" ? "1N" : "N2", label_pick: `${team} ou nul`, ok: true };
     // « Win or Draw », « Win/Draw » avec l'équipe nommée à part : double chance
     if (teamSide && /^(?:win or draw|win\/draw|victoire ou nul|gagne ou nul)$/.test(p)) return { market_code: "DC", market_param: null, selection: teamSide === "1" ? "1N" : "N2", label_pick: `${team} ou nul`, ok: true };
     // « To Score 2 » avec l'équipe nommée à part : au moins 2 buts de cette équipe
@@ -959,6 +961,18 @@ export function parseFrDate(s: string | null): string | null {
 export function parsePublished(s: string | null, now = Date.now()): string | null {
   const abs = parseFrDate(s);
   if (abs || !s) return abs;
+  // « Hier à 13:08 », « Yesterday at 1:08 PM », « Aujourd'hui à 9 h 15 », « jeudi à 13:08 » (Facebook, 27/11)
+  { const t = s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const h = t.match(/(\d{1,2})\s*(?:[:h]\s*(\d{2}))?\s*(am|pm)?/);
+    const jours = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"], en = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    let recul: number | null = /\b(hier|yesterday)\b/.test(t) ? 1 : /\b(aujourd'?hui|today)\b/.test(t) ? 0 : null;
+    if (recul === null) { const j = jours.findIndex((x) => t.includes(x)); const e = en.findIndex((x) => t.includes(x)); const k = j >= 0 ? j : e;
+      if (k >= 0 && /\ba\b|\bat\b/.test(t)) recul = ((new Date(now).getUTCDay() - k + 7) % 7) || 7; }
+    if (recul !== null && h) {
+      let hh = Number(h[1]); if (h[3] === "pm" && hh < 12) hh += 12; if (h[3] === "am" && hh === 12) hh = 0;
+      const d = new Date(now); d.setUTCDate(d.getUTCDate() - recul); d.setUTCHours(hh, Number(h[2] ?? 0), 0, 0);
+      return d.toISOString();
+    } }
   const r = s.toLowerCase().match(/(\d+)\s*(min|mn|h|heures?|j|jours?|d)\b/);
   if (!r) return null;
   const n = Number(r[1]), ms = /^m/.test(r[2]) ? 60000 : /^h/.test(r[2]) ? 3600000 : 86400000;

@@ -1,7 +1,7 @@
 import { bestMatch, canon } from "./ticket";
 import { teamSimilarity } from "../odds-api/client";
 import { describe, expect, it } from "vitest";
-import { libelleBrut, normalizePick, parseFrDate } from "./ticket";
+import { libelleBrut, normalizePick, parseFrDate, parsePublished } from "./ticket";
 import { matchSource } from "./source-match";
 
 const CP = ["Crystal Palace", "Liverpool"] as const;
@@ -391,6 +391,19 @@ describe("pronos de pages Facebook (23/11)", () => {
     expect(teamSimilarity("Bayern Munich F.", "FC Bayern München")).toBe(0);
     expect(teamSimilarity("Arsenal", "Arsenal W")).toBe(0);
     expect(teamSimilarity(canon("Copenhague"), "FC København")).toBe(1);
+  });
+});
+
+describe("captures du 27/11", () => {
+  it("« Équipe – 1X » : gagne ou nul", () => {
+    expect(normalizePick("", "1X", "Lokomotiv Sofia", "Adversaire", "Lokomotiv Sofia")).toMatchObject({ market_code: "DC", selection: "1N", ok: true });
+  });
+  it("lit « Hier à 13:08 », « yesterday at 1:08 PM », « jeudi à 13:08 »", () => {
+    const now = Date.parse("2026-11-27T08:00:00Z");
+    expect(parsePublished("HIER À 13:08", now)).toBe("2026-11-26T13:08:00.000Z");
+    expect(parsePublished("Yesterday at 1:08 PM", now)).toBe("2026-11-26T13:08:00.000Z");
+    expect(parsePublished("jeudi à 13:08", now)).toBe("2026-11-26T13:08:00.000Z");
+    expect(parsePublished("17 h", now)).toBe("2026-11-26T15:00:00.000Z");
   });
 });
 
