@@ -43,21 +43,47 @@ export type BetRow = {
   }[];
 };
 
-type MatchLite = { kickoff_at: string; statut?: string; home: Named; away: Named; score_home?: number | null; score_away?: number | null; ht_home?: number | null; ht_away?: number | null; minute?: number | null };
+type MatchLite = { kickoff_at: string; statut?: string; home: Named; away: Named; score_home?: number | null; score_away?: number | null; ht_home?: number | null; ht_away?: number | null; minute?: number | null; details?: { evts?: Evt[] } | null };
 
-/** En direct (27/11) : score, minute et ce que donnerait la ligne si le match s'arrêtait maintenant. */
-function Direct({ m, market, param, sel }: { m: MatchLite; market: string; param: number | null; sel: string }) {
-  if (m.score_home == null || m.score_away == null) return null;
-  const enCours = m.statut === "en_cours";
-  if (!enCours && m.statut !== "termine") return null;
-  const r = enCours ? issue(market, param, sel, { h: m.score_home, a: m.score_away, hth: m.ht_home ?? null, hta: m.ht_away ?? null }) : null;
-  const etat = r === "gagne" ? ["passe pour l'instant", "text-gain-ink bg-gain-soft"] : r === "perdu" ? ["ne passe pas pour l'instant", "text-loss-ink bg-loss-soft"] : r === "rembourse" ? ["remboursé pour l'instant", "text-draw-ink bg-draw-soft"] : null;
+type Evt = { t: "but" | "pen" | "csc" | "pen_rate" | "jaune" | "rouge"; n: string | null; e: "1" | "2"; m: number };
+const JOURS = ["Dim.", "Lun.", "Mar.", "Mer.", "Jeu.", "Ven.", "Sam."];
+const dateCourte = (iso: string) => { const d = new Date(iso); return `${JOURS[d.getUTCDay()]} ${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")} ${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`; };
+const nomCourt = (n: string) => n.replace(/^(?:[A-ZÀ-Ý]\.\s*)+/, (x) => x.replace(/\s+/g, ""));
+
+/** État de la ligne : réglée, ou ce qu'elle donnerait si le match s'arrêtait maintenant (couleur, comme chez Betclic). */
+function etatLigne(resultat: string, m: MatchLite | null, market: string, param: number | null, sel: string): "gagne" | "perdu" | "rembourse" | null {
+  if (resultat === "gagne" || resultat === "perdu" || resultat === "rembourse") return resultat;
+  if (!m || m.score_home == null || m.score_away == null || (m.statut !== "en_cours" && m.statut !== "termine")) return null;
+  return issue(market, param, sel, { h: m.score_home, a: m.score_away, hth: m.ht_home ?? null, hta: m.ht_away ?? null });
+}
+
+/** Le match sous la ligne (27/11, d'après Betclic) : date, équipes de part et d'autre du score, minute, buteurs. */
+function BoiteMatch({ m }: { m: MatchLite }) {
+  const enCours = m.statut === "en_cours", fini = m.statut === "termine";
+  const sc = m.score_home != null && m.score_away != null && (enCours || fini);
+  const buts = (m.details?.evts ?? []).filter((e) => e.t === "but" || e.t === "pen" || e.t === "csc");
+  const parCote = (c: "1" | "2") => {
+    const l = new Map<string, number[]>();
+    for (const e of buts) { const pour = e.t === "csc" ? (e.e === "1" ? "2" : "1") : e.e; if (pour !== c) continue; const n = `${nomCourt(e.n ?? "?")}${e.t === "csc" ? " (csc)" : e.t === "pen" ? " (pen.)" : ""}`; l.set(n, [...(l.get(n) ?? []), e.m]); }
+    return [...l.entries()].map(([n, ms]) => `${n} ${ms.map((x) => `${x}′`).join(", ")}`);
+  };
+  const g = (n: number | null | undefined, o: number | null | undefined) => (sc && n != null && o != null && n < o ? "text-ink-muted" : "text-ink");
   return (
-    <span className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[12px]">
-      <span className={`rounded-md px-1.5 py-0.5 font-bold tabular-nums ${enCours ? "bg-loss text-on-fill" : "bg-surface-2 text-ink"}`}>{m.score_home} – {m.score_away}</span>
-      {enCours ? <span className="font-semibold text-loss-ink">{m.minute ? `${m.minute}′` : "en direct"}</span> : <span className="text-ink-muted">terminé</span>}
-      {etat && <span className={`rounded-md px-1.5 py-0.5 font-medium ${etat[1]}`}>{etat[0]}</span>}
-    </span>
+    <div className="mt-2 rounded-xl border border-line bg-canvas px-3 py-2">
+      <p className="text-center text-[11.5px] text-ink-muted">{enCours ? <span className="font-semibold text-loss-ink">● En direct{m.minute ? ` · ${m.minute}′` : ""}</span> : dateCourte(m.kickoff_at)}</p>
+      <div className="mt-1 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <span className={`truncate text-right text-[14px] font-semibold ${g(m.score_home, m.score_away)}`}>{one(m.home)?.nom ?? ""}</span>
+        <span className={`rounded-lg px-2.5 py-1 text-[15px] font-bold tabular-nums ${enCours ? "bg-loss text-on-fill" : "bg-surface-2 text-ink"}`}>{sc ? `${m.score_home} - ${m.score_away}` : "–"}</span>
+        <span className={`truncate text-[14px] font-semibold ${g(m.score_away, m.score_home)}`}>{one(m.away)?.nom ?? ""}</span>
+      </div>
+      {buts.length > 0 && (
+        <div className="mt-1 grid grid-cols-[1fr_auto_1fr] gap-2 text-[11.5px] text-ink-muted">
+          <span className="text-right">{parCote("1").map((x) => <span key={x} className="block">{x}</span>)}</span>
+          <span className="w-12" />
+          <span>{parCote("2").map((x) => <span key={x} className="block">{x}</span>)}</span>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -100,22 +126,30 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
         </div>
       </div>
 
-      <ul className="space-y-2">
+      <ul className="divide-y divide-line">
         {bet.bet_selections.map((s) => {
           const m = one(s.match);
-          const label = m ? `${one(m.home)?.nom ?? ""} – ${one(m.away)?.nom ?? ""}` : s.match_libre ?? "Match non identifié";
+          const param = s.market_param === null ? null : Number(s.market_param);
+          const h = m ? one(m.home)?.nom ?? "Équipe 1" : "Équipe 1", a = m ? one(m.away)?.nom ?? "Équipe 2" : "Équipe 2";
+          const etat = etatLigne(s.resultat, m, s.market_code, param, s.selection);
+          const definitif = s.resultat !== "en_attente";
+          const ton = etat === "gagne" ? "text-gain-ink" : etat === "perdu" ? "text-loss-ink" : etat === "rembourse" ? "text-draw-ink" : "text-ink";
+          const dit = etat ? `${definitif ? "" : "pour l'instant : "}${etat === "gagne" ? "passe" : etat === "perdu" ? "ne passe pas" : "remboursé"}` : "en attente";
           return (
-            <li key={s.id} className="flex items-start justify-between gap-3 text-sm">
-              <div className="min-w-0">
-                <p className="truncate font-medium">{s.resultat === "gagne" ? <span className="text-gain-ink">✓ </span> : s.resultat === "perdu" ? <span className="text-loss-ink">✗ </span> : s.resultat === "rembourse" ? <span className="text-draw-ink">↩ </span> : null}{label}</p>
-                {m && s.resultat === "en_attente" && <Direct m={m} market={s.market_code} param={s.market_param === null ? null : Number(s.market_param)} sel={s.selection} />}
-                <div className="text-xs text-slate-500">
-                  {pickLabel(s.market_code, s.market_param === null ? null : Number(s.market_param), s.selection, m ? one(m.home)?.nom ?? "Équipe 1" : "Équipe 1", m ? one(m.away)?.nom ?? "Équipe 2" : "Équipe 2")} · cote {Number(s.cote).toFixed(2)}{bet.statut === "en_cours" && s.resultat === "en_attente" && (s.market_code === "LIBRE" || !m) ? <> · <Link href={`/paris/${bet.id}`} className="font-medium text-draw-ink underline">à régler à la main</Link></> : null} · <OriginPicker selectionId={s.id} current={s.origin_source_id} currentName={one(s.origin)?.nom ?? "—"} sources={sources} />
+            <li key={s.id} className="py-3 first:pt-1">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className={`text-[16px] font-bold leading-snug ${ton}`} aria-label={`${pickLabel(s.market_code, param, s.selection, h, a)}, ${dit}`}>{definitif ? (etat === "gagne" ? "✓ " : etat === "perdu" ? "✗ " : "↩ ") : null}{pickLabel(s.market_code, param, s.selection, h, a)}</p>
+                  {!m && <p className="text-[13px] text-ink-soft">{s.match_libre ?? "Match non identifié"}</p>}
                 </div>
+                <span className="shrink-0 text-[18px] font-bold italic tabular-nums">{Number(s.cote).toFixed(2).replace(".", ",")}</span>
               </div>
-              {s.risque_calcule && (
-                <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] ${RISK_CLASS[s.risque_calcule]}`}>{RISK_LABEL[s.risque_calcule]}</span>
-              )}
+              {m && <BoiteMatch m={m} />}
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11.5px] text-ink-muted">
+                <OriginPicker selectionId={s.id} current={s.origin_source_id} currentName={one(s.origin)?.nom ?? "—"} sources={sources} />
+                {bet.statut === "en_cours" && s.resultat === "en_attente" && (s.market_code === "LIBRE" || !m) && <Link href={`/paris/${bet.id}`} className="font-medium text-draw-ink underline">à régler à la main</Link>}
+                {s.risque_calcule && <span className={`rounded-full border px-2 py-0.5 text-[10.5px] ${RISK_CLASS[s.risque_calcule]}`}>{RISK_LABEL[s.risque_calcule]}</span>}
+              </div>
             </li>
           );
         })}
