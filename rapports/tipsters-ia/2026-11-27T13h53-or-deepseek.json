@@ -1,0 +1,126 @@
+{
+  "profil": "or-deepseek",
+  "nom": "DeepSeek",
+  "modele": "deepseek/deepseek-v4.1-flash-1017",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "efd9a870fc5d11c6",
+  "duree_s": 58,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M27"
+      },
+      "ms": 624
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M21"
+      },
+      "ms": 563
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 561
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M25"
+      },
+      "ms": 537
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M24"
+      },
+      "ms": 664
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M26"
+      },
+      "ms": 369
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 746
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M23"
+      },
+      "ms": 359
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M21",
+        "famille": "tout"
+      },
+      "ms": 12
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M25",
+        "famille": "tout"
+      },
+      "ms": 15
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M26",
+        "famille": "tout"
+      },
+      "ms": 15
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M23",
+        "famille": "tout"
+      },
+      "ms": 11
+    }
+  ],
+  "jetons": {
+    "entree": 127798,
+    "sortie": 6592,
+    "cacheLu": 18304,
+    "cacheEcrit": 0
+  },
+  "erreur": "décision illisible (JSON invalide)",
+  "bankroll": 102035,
+  "enJeu": 0,
+  "propositions": [],
+  "abstention": null,
+  "carnetReecrit": false,
+  "retenus": [],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": []
+}
