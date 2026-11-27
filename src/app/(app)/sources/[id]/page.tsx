@@ -59,7 +59,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
   let tickets: Ticket[] | null = null;
   if (estIA(s.nom)) {
     const court = s.nom.replace(/ · tipster IA$/, "");
-    const { data } = await createAdminClient().from("bets").select("id, type, statut, mise, gain_net, cote_totale, placed_at, bet_selections(market_code, market_param, selection, cote, resultat, match:matches(home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom)))")
+    const { data } = await createAdminClient().from("bets").select("id, type, statut, mise, gain_net, cote_totale, placed_at, bet_selections(market_code, market_param, selection, cote, resultat, match:matches(kickoff_at, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom)))")
       .like("raw_text", `[tipster IA ${court}]%`).neq("statut", "annule").order("placed_at", { ascending: false }).limit(300);
     tickets = (data ?? []) as unknown as Ticket[];
   }
@@ -256,7 +256,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
 }
 
 type Ticket = { id: string; type: string; statut: string; mise: number; gain_net: number | null; cote_totale: number | null; placed_at: string;
-  bet_selections: { market_code: string; market_param: number | null; selection: string; cote: number; resultat: string | null; match: { home: { nom: string } | null; away: { nom: string } | null } | null }[] };
+  bet_selections: { market_code: string; market_param: number | null; selection: string; cote: number; resultat: string | null; match: { kickoff_at: string | null; home: { nom: string } | null; away: { nom: string } | null } | null }[] };
 const BANKROLL_DEPART = 100_000;
 const fcfa = (x: number) => `${Math.round(x).toLocaleString("fr-FR")} F`;
 const RES: Record<string, string> = { gagne: "Gagné", perdu: "Perdu", rembourse: "Remboursé", en_cours: "En cours", cashout: "Cash-out" };
@@ -287,7 +287,14 @@ function TicketsIA({ tickets }: { tickets: Ticket[] }) {
             <ul className="mt-0.5 space-y-0.5">
               {t.bet_selections.map((x, i) => {
                 const h = x.match?.home?.nom ?? "?", a = x.match?.away?.nom ?? "?";
-                return <li key={i} className="text-[12px] text-ink-soft">{h} – {a} : {pickLabel(x.market_code, x.market_param === null ? null : Number(x.market_param), x.selection, h, a)} @ {Number(x.cote).toFixed(2).replace(".", ",")}{x.resultat && x.resultat !== "en_attente" ? ` · ${RES[x.resultat] ?? x.resultat}` : ""}</li>;
+                // Équipes bien visibles et heure du match (27/11)
+                const k = x.match?.kickoff_at ? new Date(x.match.kickoff_at).toLocaleString("fr-FR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" }) : null;
+                return (
+                  <li key={i} className="pt-1">
+                    <p className="text-[14px] font-semibold leading-snug">{h} – {a}{k && <span className="ml-1.5 whitespace-nowrap text-[12px] font-normal text-ink-muted">{k}</span>}</p>
+                    <p className="text-[12.5px] text-ink-soft">{pickLabel(x.market_code, x.market_param === null ? null : Number(x.market_param), x.selection, h, a)} @ {Number(x.cote).toFixed(2).replace(".", ",")}{x.resultat && x.resultat !== "en_attente" ? ` · ${RES[x.resultat] ?? x.resultat}` : ""}</p>
+                  </li>
+                );
               })}
             </ul>
             <p className="text-[11px] text-ink-muted">{new Date(t.placed_at).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}</p>
