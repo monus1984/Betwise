@@ -105,19 +105,18 @@ describe("la rédaction de Betster (25/11)", () => {
     picks, source: "marche", butsAttendus: 2.9, kickoff: "2026-11-26T20:00:00Z",
     absents: [{ equipe: "Bayern Munich", joueurs: ["H. Kane", "M. Olise", "J. Musiala", "L. Díaz"] }],
   });
-  it("sur un choix de résultat : classement, forme, absents, puis le choix en une phrase", () => {
-    const r = buildRecit(entree([pick("DC", null, "N2", 0.82, 1.25), pick("1X2", null, "2", 0.55, 1.9)])).redaction;
-    expect(r.length).toBeLessThanOrEqual(5);
-    expect(r[0]).toBe("Bayern Munich est 1er, Lille OSC 9e : l'écart au classement est net.");
-    expect(r).toContain("Bayern Munich est invaincu à l'extérieur cette saison (5 V, 1 N).");
-    expect(r).toContain("Bayern Munich sera privé de H. Kane, M. Olise, J. Musiala et L. Díaz.");
-    expect(r[r.length - 1]).toBe("Je ne vois pas Bayern Munich perdre : nul ou Bayern Munich (82 chances sur 100 d'après les cotes).");
+  it("v2 : accroche, un paragraphe par équipe, puis le choix (et la sécurité quand on joue la double chance)", () => {
+    const r = buildRecit(entree([pick("DC", null, "N2", 0.82, 1.25), pick("1X2", null, "2", 0.55, 1.9), pick("1X2", null, "1", 0.22, 4.2)])).redaction;
+    expect(r[0]).toBe("Léger avantage pour Bayern Munich face à Lille OSC.");
+    expect(r[1]).toContain("9e du championnat avec 15 points en 12 matchs, 18 buts marqués pour 19 encaissés.");
+    expect(r[2]).toContain("Bayern Munich est invaincu à l'extérieur cette saison : 5 victoires, 1 nul et 0 défaite en 6 matchs.");
+    expect(r[2]).toContain("Absents : H. Kane, M. Olise, J. Musiala et L. Díaz.");
+    expect(r[r.length - 1]).toBe("Je vois Bayern Munich gagner, mais je joue la sécurité : nul ou Bayern Munich (82 chances sur 100 d'après les cotes).");
   });
-  it("sur un choix de buts : marqués et encaissés, puis le choix", () => {
+  it("v2 sur les buts : marqués et encaissés de chaque équipe, puis le choix", () => {
     const r = buildRecit(entree([pick("BTTS", null, "Oui", 0.62, 1.6)])).redaction;
-    expect(r).toContain("Bayern Munich a marqué à chacun de ses 4 derniers matchs.");
+    expect(r.join(" ")).toContain("Il a marqué à chacun de ses 4 derniers matchs.");
     expect(r[r.length - 1]).toBe("Des buts de chaque côté : les deux équipes marquent (62 chances sur 100 d'après les cotes).");
-    expect(r.join(" ")).not.toMatch(/sur 4 de ses 4/);
   });
   it("sans cote, donne les faits et ne tranche pas", () => {
     const r = buildRecit(entree([])).redaction;

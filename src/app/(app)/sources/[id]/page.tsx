@@ -91,6 +91,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
       />
       {!isSystem && <Link href={`/import?source=${id}`} className="mt-3 flex items-center justify-center rounded-xl border border-line bg-surface py-2.5 text-[13px] font-medium">Charger un ticket de cette source</Link>}
       {!isSystem && <SourceLink sourceId={id} type={s.type} url={linkOf(s)} saved={!!s.lien} canEdit={s.created_by === user!.id || (s.visibilite === "partagee" && !s.lien)} />}
+      {gerable && <GererSource id={id} nom={s.nom} type={s.type} visibilite={s.visibilite as "privee" | "partagee"} pronos={nbPronos ?? 0} autres={(autresSrc ?? []).filter((x) => !estIA(x.nom))} />}
       {sp.existante && <p className="mb-4 rounded-lg border border-info/30 bg-info-soft p-3 text-sm text-info-ink">Cette source existait déjà en partagé : tu la suis maintenant, son historique est commun.</p>}
       {sp.ajout && !sp.doublon && <p className="mb-4 rounded-lg border border-gain/30 bg-gain-soft p-3 text-sm text-gain-ink">Prono enregistré.</p>}
       {sp.doublon && <p className="mb-4 rounded-lg border border-draw/40 bg-draw-soft p-3 text-sm text-draw-ink">Ce prono existait déjà pour cette source (même match, marché et sélection le même jour) : rien n’a été ajouté.</p>}
@@ -253,7 +254,6 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
           </ul>
         )}
       </section>
-      {gerable && <GererSource id={id} nom={s.nom} type={s.type} visibilite={s.visibilite as "privee" | "partagee"} pronos={nbPronos ?? 0} autres={(autresSrc ?? []).filter((x) => !estIA(x.nom))} />}
     </>
   );
 }

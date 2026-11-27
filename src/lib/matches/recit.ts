@@ -317,79 +317,85 @@ function phraseChoix(c: Choix, home: string, away: string, source: "marche" | "m
   return `${t} (${p}).`;
 }
 
+/**
+ * Rédaction de Betster, v2 (27/11) : sur le modèle des vidéos de pronostiqueurs, en paragraphes courts.
+ * 1. L'accroche : qui a l'avantage. 2. L'équipe qui reçoit : terrain, classement, buts, absents.
+ * 3. L'équipe qui se déplace : idem. 4. Un fait de plus (série en confrontations, calendrier). 5. Le choix, et pourquoi
+ * on joue la sécurité quand c'est le cas. Chaque chiffre vient des données ; rien n'est inventé.
+ */
 export function redaction(input: RecitInput, verdict: Choix | null): string[] {
-  const { home, away, rangs, passes, h2h, absents, calendrier, kickoff, butsAttendus, source } = input;
-  const c: { poids: number; t: string }[] = [];
-  const vise = equipeVisee(verdict, home, away);
-  const surLesButs = !!verdict && ["OU", "BTTS", "TT1", "TT2", "DC_OU", "1X2_OU", "OU_BTTS"].includes(verdict.market);
+  const { home, away, rangs, passes, h2h, absents, calendrier, kickoff, butsAttendus, source, picks } = input;
   const h = rangs.home, a = rangs.away;
+  const surLesButs = !!verdict && ["OU", "BTTS", "TT1", "TT2", "DC_OU", "1X2_OU", "OU_BTTS"].includes(verdict.market);
+  const p1 = picks.find((x) => x.market === "1X2" && x.sel === "1")?.p ?? null, p2 = picks.find((x) => x.market === "1X2" && x.sel === "2")?.p ?? null;
+  const out: string[] = [];
 
-  // Le contexte : l'écart au classement, ou deux équipes qui se tiennent
-  if (h && a && h.groupe === a.groupe && h.joues >= 5) {
-    const [fort, faible] = h.rang < a.rang ? [[home, h], [away, a]] as const : [[away, a], [home, h]] as const;
-    if (Math.abs(h.rang - a.rang) >= 8) c.push({ poids: 7, t: `${fort[0]} est ${ord(fort[1].rang)}, ${faible[0]} ${ord(faible[1].rang)} : l'écart au classement est net.` });
-    else if (Math.abs(h.points - a.points) <= 2) c.push({ poids: 4, t: `Les deux équipes se tiennent en ${pl(Math.abs(h.points - a.points), "point")} au classement.` });
-  }
-  for (const [nom, r] of [[home, h], [away, a]] as const) {
-    const z = r?.zone ? zoneFr(r.zone) : null;
-    if (z && r && r.joues >= 5 && !surLesButs) c.push({ poids: 3, t: `${nom} est ${ord(r.rang)}, ${z}.` });
+  // 1. L'accroche
+  if (surLesButs && butsAttendus !== null && butsAttendus >= 2.9) out.push(`${home} – ${away} : je m'attends à des buts, les cotes en annoncent environ ${dec(butsAttendus)}.`);
+  else if (surLesButs && butsAttendus !== null && butsAttendus <= 2.2) out.push(`${home} – ${away} : un match qui s'annonce fermé, environ ${dec(butsAttendus)} buts selon les cotes.`);
+  else if (p1 !== null && p2 !== null) {
+    const [fav, aut, p] = p1 >= p2 ? [home, away, p1] : [away, home, p2];
+    out.push(p >= 0.6 ? `Avantage net pour ${fav} face à ${aut}.` : p >= 0.45 ? `Léger avantage pour ${fav} face à ${aut}.` : `Match ouvert entre ${home} et ${away}.`);
   }
 
-  // La forme de chaque équipe : le fait le plus net, un par équipe
-  for (const [nom, r, b, chez] of [[home, h, bilanRecent(home, passes), "domicile"], [away, a, bilanRecent(away, passes), "exterieur"]] as const) {
-    const f = formeDe(r);
+  // 2 et 3. Chaque équipe
+  const equipe = (nom: string, r: StandingRow | null, chez: "domicile" | "exterieur") => {
+    const ph: string[] = [];
     const t = chez === "domicile" ? r?.domicile : r?.exterieur;
-    const ou = chez === "domicile" ? "à domicile" : "à l'extérieur";
-    const estVise = vise?.nom === nom, estAdv = vise?.adv === nom;
-    if (surLesButs) {
-      if (b.n >= 4 && b.marque >= b.n - 1) c.push({ poids: 7, t: b.marque === b.n ? `${nom} a marqué à chacun de ses ${b.n} derniers matchs.` : `${nom} a marqué sur ${b.marque} de ses ${b.n} derniers matchs.` });
-      else if (b.n >= 4 && b.marque <= 1) c.push({ poids: 7, t: `${nom} n'a marqué que sur ${b.marque} de ses ${b.n} derniers matchs.` });
-      if (b.n >= 4 && b.encaisse >= b.n - 1) c.push({ poids: 6, t: b.encaisse === b.n ? `${nom} a encaissé à chacun de ses ${b.n} derniers matchs.` : `${nom} a encaissé sur ${b.encaisse} de ses ${b.n} derniers matchs.` });
-      else if (b.n >= 4 && b.encaisse <= 1) c.push({ poids: 6, t: `${nom} n'a encaissé que sur ${b.encaisse} de ses ${b.n} derniers matchs.` });
-      if (b.n >= 5 && b.plus25 >= b.n - 1) c.push({ poids: 5, t: `Plus de 2,5 buts dans ${b.plus25} des ${b.n} derniers matchs de ${nom}.` });
-      else if (b.n >= 5 && b.plus25 <= 1) c.push({ poids: 5, t: `Moins de 3 buts dans ${b.n - b.plus25} des ${b.n} derniers matchs de ${nom}.` });
-      continue;
+    const ou = chez === "domicile" ? "chez lui" : "à l'extérieur";
+    if (t && t.j >= 3) {
+      const ton = t.p === 0 ? `invaincu ${ou}` : t.g === 0 ? `toujours sans victoire ${ou}` : t.g >= t.j * 0.6 ? `très solide ${ou}` : t.p >= t.j * 0.6 ? `en difficulté ${ou}` : null;
+      const bilan = `${pl(t.g, "victoire")}, ${pl(t.n, "nul")} et ${pl(t.p, "défaite")} en ${pl(t.j, "match")}`;
+      ph.push(ton ? `${nom} est ${ton} cette saison : ${bilan}.` : `${nom} ${ou} cette saison : ${bilan}.`);
+    } else {
+      const f = formeDe(r);
+      if (f) ph.push(`${nom} sur ses ${f.k} derniers matchs : ${pl(f.v, "victoire")}, ${pl(f.nul, "nul")} et ${pl(f.d, "défaite")}.`);
     }
-    if (f && f.v >= f.k - 1) c.push({ poids: 7 + (estVise ? 1 : 0), t: `${nom} reste sur ${f.v} victoires sur ses ${f.k} derniers matchs de championnat.` });
-    else if (f && f.v === 0) c.push({ poids: 7 + (estAdv ? 1 : 0), t: `${nom} n'a gagné aucun de ses ${f.k} derniers matchs de championnat${f.d >= f.k - 1 ? ` (${pl(f.d, "défaite")})` : ""}.` });
-    else if (f && f.d === 0 && f.k >= 4) c.push({ poids: 5 + (estVise ? 1 : 0), t: `${nom} n'a pas perdu sur ses ${f.k} derniers matchs de championnat.` });
-    else if (f) c.push({ poids: 2, t: `${nom} : ${pl(f.v, "victoire")}, ${pl(f.nul, "nul")}, ${pl(f.d, "défaite")} sur ses ${f.k} derniers matchs de championnat.` });
-    if (t && t.j >= 4 && t.p === 0) c.push({ poids: 6 + (estVise ? 1 : 0), t: `${nom} est invaincu ${ou} cette saison (${t.g} V, ${t.n} N).` });
-    else if (t && t.j >= 4 && t.g === 0) c.push({ poids: 6 + (estAdv ? 1 : 0), t: `${nom} n'a pas encore gagné ${ou} cette saison (${t.n} N, ${t.p} D).` });
-    else if (t && t.j >= 5 && t.g >= t.j - 1) c.push({ poids: 5, t: `${nom} ${ou} : ${t.g} victoires en ${t.j} matchs.` });
-  }
+    if (r && r.joues >= 4) {
+      const z = zoneFr(r.zone);
+      ph.push(`${ord(r.rang)} du championnat avec ${pl(r.points, "point")} en ${pl(r.joues, "match")}, ${pl(r.bp, "but")} marqué${r.bp > 1 ? "s" : ""} pour ${r.bc} encaissé${r.bc > 1 ? "s" : ""}${z ? `, ${z}` : ""}.`);
+    }
+    if (surLesButs) {
+      const b = bilanRecent(nom, passes);
+      if (b.n >= 4 && (b.marque >= b.n - 1 || b.marque <= 1)) ph.push(b.marque === b.n ? `Il a marqué à chacun de ses ${b.n} derniers matchs.` : `Il a marqué sur ${b.marque} de ses ${b.n} derniers matchs.`);
+      if (b.n >= 4 && (b.encaisse >= b.n - 1 || b.encaisse <= 1)) ph.push(b.encaisse === b.n ? `Il a encaissé à chacun de ses ${b.n} derniers matchs.` : `Il a encaissé sur ${b.encaisse} de ses ${b.n} derniers matchs.`);
+    }
+    const abs = (absents ?? []).filter((x) => coteDe(x.equipe, home, away) === (chez === "domicile" ? "1" : "2")).flatMap((x) => x.joueurs);
+    if (abs.length) ph.push(`${abs.length > 1 ? "Absents" : "Absent"} : ${lister(abs)}.`);
+    if (ph.length) out.push(ph.slice(0, 4).join(" "));
+  };
+  equipe(home, h, "domicile");
+  equipe(away, a, "exterieur");
 
-  // Les absents, les confrontations, le calendrier, les buts attendus
-  // Les absents, nommés avec le nom BETWISE de l'équipe ; une longue liste ne pèse pas plus qu'un fait de forme
-  for (const x of absents ?? []) if (x.joueurs.length) c.push({ poids: 4 + Math.min(x.joueurs.length, 3), t: `${coteDe(x.equipe, home, away) === "1" ? home : away} sera privé de ${lister(x.joueurs)}.` });
+  // 4. Un fait de plus, le plus parlant
   const faces = h2h && h2h.length >= 3 ? h2h : passes.filter((p) => joue(p, home) && joue(p, away));
-  if (faces.length >= 3 && !surLesButs) {
+  let plus: string | null = null;
+  if (faces.length >= 3) {
     const vainqueur = (p: Passe) => (p.sh > p.sa ? p.home : p.sa > p.sh ? p.away : null);
     const premier = vainqueur(faces[0]);
     let serie = 0;
     if (premier) for (const p of faces) { if (vainqueur(p) !== premier) break; serie++; }
-    if (premier && serie >= 3) c.push({ poids: 6, t: `${premier} a gagné les ${serie} dernières confrontations.` });
+    if (surLesButs) { const k = Math.min(faces.length, 5), deux = faces.slice(0, k).filter((p) => p.sh > 0 && p.sa > 0).length; if (deux >= k - 1 || deux <= 1) plus = `Les deux équipes ont marqué dans ${deux} de leurs ${k} dernières confrontations.`; }
+    else if (premier && serie >= 3) plus = `${premier} a gagné les ${serie} dernières confrontations.`;
   }
-  if (faces.length >= 3 && surLesButs) {
-    const k = Math.min(faces.length, 5), deux = faces.slice(0, k).filter((p) => p.sh > 0 && p.sa > 0).length;
-    if (deux >= k - 1 || deux <= 1) c.push({ poids: 5, t: `Les deux équipes ont marqué dans ${deux} de leurs ${k} dernières confrontations.` });
-  }
-  if (calendrier && kickoff) {
+  if (!plus && calendrier && kickoff) {
     const k = Date.parse(kickoff);
     for (const [nom, l] of [[home, calendrier.home], [away, calendrier.away]] as const) {
       const x = l.find((y) => y.avant && k - Date.parse(y.date) < 3.5 * 86_400_000);
-      if (x) c.push({ poids: 4, t: `${nom} a joué il y a ${pl(Math.max(1, Math.round((k - Date.parse(x.date)) / 86_400_000)), "jour")} (${x.comp}) : peu de récupération.` });
+      if (x && !plus) plus = `${nom} a joué il y a ${pl(Math.max(1, Math.round((k - Date.parse(x.date)) / 86_400_000)), "jour")} (${x.comp}) : peu de récupération.`;
     }
   }
-  if (butsAttendus !== null && surLesButs) c.push({ poids: 4, t: `Les cotes annoncent environ ${dec(butsAttendus)} buts.` });
-  else if (butsAttendus !== null && (butsAttendus >= 3.2 || butsAttendus <= 2)) c.push({ poids: 3, t: `Les cotes annoncent ${butsAttendus >= 3.2 ? "un match ouvert" : "un match fermé"}, environ ${dec(butsAttendus)} buts.` });
+  if (plus) out.push(plus);
 
-  // 4 faits au plus, les plus nets, dans l'ordre du raisonnement ; puis le choix
-  const garde = new Set(c.map((x, i) => ({ x, i })).sort((p, q) => q.x.poids - p.x.poids).slice(0, 4).map((p) => p.i));
-  const faits = c.filter((_, i) => garde.has(i)).map((x) => x.t);
-  if (verdict) faits.push(phraseChoix(verdict, home, away, source));
-  else if (faits.length) faits.push("Pas encore de cote sur ce match : je ne tranche pas.");
-  return faits;
+  // 5. Le choix
+  if (verdict) {
+    const v = equipeVisee(verdict, home, away);
+    const pGagne = v ? (v.cote === "1" ? p1 : p2) : null;
+    const prudent = (verdict.market === "DC" || verdict.market === "DNB") && v && pGagne !== null && pGagne >= 0.45;
+    const proba = `${Math.round(verdict.p * 100)} chances sur 100${source === "modele" ? " d'après le modèle" : " d'après les cotes"}`;
+    out.push(prudent ? `Je vois ${v!.nom} gagner, mais je joue la sécurité : ${verdict.market === "DNB" ? `${v!.nom}, remboursé si nul` : verdict.sel === "1N" ? `${home} ou nul` : `nul ou ${away}`} (${proba}).` : phraseChoix(verdict, home, away, source));
+  } else if (out.length) out.push("Pas encore de cote sur ce match : je ne tranche pas.");
+  return out;
 }
 
 export function buildRecit(input: RecitInput): Recit {

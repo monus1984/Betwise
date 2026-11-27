@@ -46,7 +46,7 @@ export function MatchRecit({ match, cles = [], redaction = [], etapes, verdict, 
       {redaction.length > 0 ? (
         <div className={`rounded-xl border p-3 transition-colors ${lu === 0 ? "border-brand bg-brand/5" : "border-line bg-surface"}`}>
           <p className="text-[11px] font-semibold text-brand">Betster résume</p>
-          <p className="mt-1 text-[14px] leading-snug">{redaction.join(" ")}</p>
+          <div className="mt-1 space-y-1.5 text-[14px] leading-snug">{redaction.map((t, i) => <p key={i} className={i === redaction.length - 1 ? "font-semibold" : ""}>{t}</p>)}</div>
         </div>
       ) : etapes.length === 0 ? (
         <p className="rounded-xl border border-line bg-surface p-3 text-sm text-ink-muted">Pas encore assez de données sur ces deux équipes (classement, derniers matchs). Le choix ci-dessous repose sur les cotes seules.</p>

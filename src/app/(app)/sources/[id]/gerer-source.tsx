@@ -15,7 +15,7 @@ export function GererSource({ id, nom, type, visibilite, pronos, autres = [] }: 
   const [pending, start] = useTransition();
   const router = useRouter();
   return (
-    <section className="mt-5 rounded-xl border border-line bg-surface p-4" aria-label="Gérer cette source">
+    <section className="mt-3 rounded-xl border border-line bg-surface p-4" aria-label="Gérer cette source">
       <h2 className="text-sm font-semibold">Gérer cette source</h2>
       {mode === "rien" && (
         <div className="mt-2 flex gap-2">
