@@ -1,0 +1,170 @@
+{
+  "profil": "or-deepseek",
+  "nom": "DeepSeek",
+  "modele": "deepseek/deepseek-v4.1-flash-1017",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "80d8792b165ad005",
+  "duree_s": 44,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 1572
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 626
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 458
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 451
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 1685
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 476
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 399
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 854
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 17
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 20
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 17
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 16
+    }
+  ],
+  "jetons": {
+    "entree": 122295,
+    "sortie": 6049,
+    "cacheLu": 16128,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 102035,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M10.1",
+      "mise": 4000,
+      "probabilite": 0.58,
+      "raison": "Werder 6e (18 pts en 10) est INVANCU à domicile : 4 v., 1 n., 0 d., 14 buts marqués / 5 encaissés, et arrive sur un 4-0 contre Hambourg (1,7 à la maison). Gladbach est 18e (4 pts en 10), avec l'une des deux pires défenses du championnat (26 encaissés en 10), 1 v. / 4 d. à l'extérieur avec 15 buts encaissés en 5 déplacements et seulement 1,2 but marqué par match sur les 5 derniers. C'est exactement mon schéma de cœur (crise profonde contre équipe en forme à domicile). Réserve assumée : 8 absents côté Werder (dont Njinmah incertain) et un modèle un peu plus prudent (46 %) que le marché — d'où une mise contenue, pas un « certain »."
+    },
+    {
+      "option": "M12.2",
+      "mise": 3500,
+      "probabilite": 0.47,
+      "raison": "Venezia est dernière (20e, 6 pts en 12) et s'effondre : 1 v. / 4 d. sur les 5 derniers, 0,7 but marqué pour 2,1 encaissé, 25 buts encaissés en 12, et 2 v. / 4 d. à domicile (11 encaissés en 6). Bologna en face est sur 4 v. / 0 d. sur 5, et surtout 4 v. / 2 d. à l'extérieur (10 marqués / 6 encaissés) : c'est une des meilleures équipes de Serie A en déplacement. Modèle à 49 % (marché 39 %). Le point faible : Bologna marque peu (1,4/match) et a 5 absents, donc je reste sous 50 %."
+    },
+    {
+      "option": "M14.1",
+      "mise": 3500,
+      "probabilite": 0.5,
+      "raison": "Kortrijk est 18e (4 pts en 12), 0 v. / 4 d. sur les 5 derniers, 0,3 but marqué par match, 24 encaissés en 12 — et à l'extérieur : 0 v., 1 n., 5 d., avec 1 SEUL but marqué en 6 déplacements pour 12 encaissés. Aucun absent signalé des deux côtés. OH Leuven, 13e, est correct à domicile (2 v., 2 n., 2 d.) et n'a besoin que d'un match sérieux contre l'attaque la plus stéri"
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": false,
+  "retenus": [
+    {
+      "id": "M10.1",
+      "pari": "SV Werder Bremen",
+      "cote": 1.7,
+      "mise": 4000,
+      "probabilite": 0.58,
+      "raison": "Werder 6e (18 pts en 10) est INVANCU à domicile : 4 v., 1 n., 0 d., 14 buts marqués / 5 encaissés, et arrive sur un 4-0 contre Hambourg (1,7 à la maison). Gladbach est 18e (4 pts en 10), avec l'une des deux pires défenses du championnat (26 encaissés en 10), 1 v. / 4 d. à l'extérieur avec 15 buts encaissés en 5 déplacements et seulement 1,2 but marqué par match sur les 5 derniers. C'est exactement mon schéma de cœur (crise profonde contre équipe en forme à domicile). Réserve assumée : 8 absents côté Werder (dont Njinmah incertain) et un modèle un peu plus prudent (46 %) que le marché — d'où une mise contenue, pas un « certain »."
+    },
+    {
+      "id": "M12.2",
+      "pari": "Bologna FC 1909",
+      "cote": 2.49,
+      "mise": 3500,
+      "probabilite": 0.47,
+      "raison": "Venezia est dernière (20e, 6 pts en 12) et s'effondre : 1 v. / 4 d. sur les 5 derniers, 0,7 but marqué pour 2,1 encaissé, 25 buts encaissés en 12, et 2 v. / 4 d. à domicile (11 encaissés en 6). Bologna en face est sur 4 v. / 0 d. sur 5, et surtout 4 v. / 2 d. à l'extérieur (10 marqués / 6 encaissés) : c'est une des meilleures équipes de Serie A en déplacement. Modèle à 49 % (marché 39 %). Le point faible : Bologna marque peu (1,4/match) et a 5 absents, donc je reste sous 50 %."
+    },
+    {
+      "id": "M14.1",
+      "pari": "OH Leuven",
+      "cote": 2.02,
+      "mise": 3500,
+      "probabilite": 0.5,
+      "raison": "Kortrijk est 18e (4 pts en 12), 0 v. / 4 d. sur les 5 derniers, 0,3 but marqué par match, 24 encaissés en 12 — et à l'extérieur : 0 v., 1 n., 5 d., avec 1 SEUL but marqué en 6 déplacements pour 12 encaissés. Aucun absent signalé des deux côtés. OH Leuven, 13e, est correct à domicile (2 v., 2 n., 2 d.) et n'a besoin que d'un match sérieux contre l'attaque la plus stéri"
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M10.1",
+    "M12.2",
+    "M14.1"
+  ]
+}

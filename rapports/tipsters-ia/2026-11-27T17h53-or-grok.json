@@ -1,0 +1,15 @@
+{
+  "profil": "or-grok",
+  "nom": "Grok",
+  "modele": "x-ai/grok-4.7",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "80d8792b165ad005",
+  "saute": "déjà passé aujourd'hui (3 pari(s)) : pas d'appel (économie)",
+  "tours": 0,
+  "jetons": null,
+  "retenus": [],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": []
+}
