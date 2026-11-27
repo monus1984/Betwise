@@ -1,0 +1,40 @@
+{
+  "quand": "2026-11-27T13:52:00.555Z",
+  "essai": false,
+  "jour": "2026-11-27",
+  "matchs": 29,
+  "avecCotes": 29,
+  "candidats": 2890,
+  "selectionsSansCote1xBet": 2997,
+  "relevesTropEloignes": 288,
+  "dejaAujourdhui": 0,
+  "choix": [
+    {
+      "match": "Levante UD – Real Racing Club de Santander",
+      "comp": "PD",
+      "kickoff": "2026-11-27T20:00:00+00:00",
+      "market": "OU",
+      "param": 3.5,
+      "sel": "Plus",
+      "cote": 2.08,
+      "p": 0.481,
+      "pModele": 0.628,
+      "valeur": 0.061,
+      "profil": "risque",
+      "mise": 1500,
+      "coteRelevee": "2026-11-27T09:04:25+00:00",
+      "referenceRelevee": "2026-11-27T09:04:25+00:00",
+      "raison": "Probabilité 48 % selon les cotes de référence, 63 % selon le modèle. 1xBet paie 2,08 pour une cote juste de 1,96 : écart de +6,1 %."
+    }
+  ],
+  "bilan": {
+    "bankroll": 105044,
+    "net": 5044,
+    "enJeu": 1500,
+    "regles": 9,
+    "gagnes": 6,
+    "roi": 0.34786206896551725
+  },
+  "resume": "Tipster à règles fixes (témoin sans IA). Paris simples sur cote 1xBet, seulement quand le prix dépasse la valeur juste. Bankroll virtuelle : 105 044 FCFA (départ 100 000), 9 paris réglés dont 6 gagnés, rendement 34,8 %, 1 500 FCFA en jeu. Mis à jour le 27/11/2026 13:52:00.",
+  "candidatsVus": 203
+}
