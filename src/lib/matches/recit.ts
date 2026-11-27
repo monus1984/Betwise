@@ -49,6 +49,8 @@ const dec = (x: number) => x.toFixed(1).replace(".", ",");
 const ord = (n: number) => (n === 1 ? "1er" : `${n}e`);
 const jour = (iso: string) => new Date(iso).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: TZ });
 const pl = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
+/** « passe 80 fois sur 100, risque de perte 20 % » (formulation demandée par Mounir, 27/11) */
+export const passe = (p: number) => { const n = Math.round(p * 100); return `passe ${n} fois sur 100, risque de perte ${100 - n} %`; };
 
 /** Ce que la place au classement donne, dit simplement ; null si on ne sait pas le traduire sans risque d'erreur. */
 export function zoneFr(zone: string | null): string | null {
@@ -262,7 +264,18 @@ function verdictDe({ home, away, picks }: RecitInput): { verdict: Choix | null; 
   };
   const a = de("audacieux"), s = de("sur"), r = de("risque");
   const verdict = a ?? s ?? r;
-  return { verdict, autres: [s, a, r].filter((c): c is Choix => !!c && c !== verdict) };
+  const autres = [s, a, r].filter((c): c is Choix => !!c && c !== verdict);
+  // 2 à 3 alternatives par match (27/11) : on complète avec les paris cotés les plus probables, d'un autre marché que ceux déjà montrés
+  const vue = (x: Pick) => x.book?.cote ?? x.cote;
+  const pris = new Set([verdict, ...autres].filter(Boolean).map((c) => `${c!.market}|${c!.sel}`));
+  const marches = new Set([verdict, ...autres].filter(Boolean).map((c) => c!.market));
+  for (const p of utiles.filter((x) => vue(x) !== null && x.p >= 0.5).sort((x, y) => y.p - x.p)) {
+    if (autres.length >= 3) break;
+    if (pris.has(`${p.market}|${p.sel}`) || marches.has(p.market)) continue;
+    autres.push({ market: p.market, param: p.param, sel: p.sel, label: pickLabel(p.market, p.param, p.sel, home, away), p: p.p, cote: vue(p), categorie: profilDe(p.p, vue(p)) ?? "sur", ou: p.book ? p.book.bookmaker : "médiane" });
+    pris.add(`${p.market}|${p.sel}`); marches.add(p.market);
+  }
+  return { verdict, autres: autres.slice(0, 3) };
 }
 
 
@@ -300,7 +313,7 @@ function equipeVisee(c: Choix | null, home: string, away: string): { nom: string
 
 /** La phrase du choix, dans la voix d'un pronostiqueur, avec la probabilité d'après les cotes. */
 function phraseChoix(c: Choix, home: string, away: string, source: "marche" | "modele" | null): string {
-  const p = `${Math.round(c.p * 100)} chances sur 100${c.cote ? "" : ", estimation"}${source === "modele" ? " d'après le modèle" : " d'après les cotes"}`;
+  const p = `${passe(c.p)}${c.cote ? "" : ", estimation"}${source === "modele" ? ", d'après le modèle" : ""}`;
   const minuscule = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
   const v = equipeVisee(c, home, away);
   const param = c.param !== null ? String(c.param).replace(".", ",") : "";
@@ -392,8 +405,10 @@ export function redaction(input: RecitInput, verdict: Choix | null): string[] {
     const v = equipeVisee(verdict, home, away);
     const pGagne = v ? (v.cote === "1" ? p1 : p2) : null;
     const prudent = (verdict.market === "DC" || verdict.market === "DNB") && v && pGagne !== null && pGagne >= 0.45;
-    const proba = `${Math.round(verdict.p * 100)} chances sur 100${source === "modele" ? " d'après le modèle" : " d'après les cotes"}`;
+    const proba = `${passe(verdict.p)}${source === "modele" ? ", d'après le modèle" : ""}`;
     out.push(prudent ? `Je vois ${v!.nom} gagner, mais je joue la sécurité : ${verdict.market === "DNB" ? `${v!.nom}, remboursé si nul` : verdict.sel === "1N" ? `${home} ou nul` : `nul ou ${away}`} (${proba}).` : phraseChoix(verdict, home, away, source));
+    const alt = verdictDe(input).autres;
+    if (alt.length) out.push(`Autres options : ${alt.map((c) => `${c.label} (${Math.round(c.p * 100)} fois sur 100)`).join(" ; ")}.`);
   } else if (out.length) out.push("Pas encore de cote sur ce match : je ne tranche pas.");
   return out;
 }

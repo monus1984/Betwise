@@ -21,19 +21,18 @@ export function quand(iso: string, maintenant = new Date()): string {
 
 export function briefing(input: { prenom: string; synthese: string; profils: Record<Categorie, PropBrief[]>; pourquoi: Map<string, Pourquoi | null | undefined>; maintenant?: Date }): string[] {
   const blocs = [`Bonjour${input.prenom ? ` ${input.prenom}` : ""} ! ${input.synthese}`.trim()];
-  const vus = new Set<string>();
+  // Toutes les propositions retenues, profil par profil (27/11 : « j'en ai retenu 9 » mais 3 seulement étaient citées)
   for (const k of ORDRE) {
-    // La meilleure proposition du profil, sur un match pas encore cité quand c'est possible
     const l = input.profils[k] ?? [];
-    const x = l.find((o) => !vus.has(o.matchId)) ?? l[0];
-    if (!x) continue;
-    const dejaCite = vus.has(x.matchId);
-    vus.add(x.matchId);
-    const pct = Math.round(x.p * 100);
-    const cote = x.cote ? ` Cote ${x.cote.toFixed(2).replace(".", ",")}${x.bookmaker ? ` chez ${x.bookmaker}` : ""}.` : "";
-    const pq = dejaCite ? null : input.pourquoi.get(x.matchId);
-    const raison = pq ? [pq.enjeu, pq.face, pq.forme].filter(Boolean).slice(0, 1).map((t) => ` ${String(t).replace(/\.$/, "")}.`).join("") : "";
-    blocs.push(`Profil ${PROFIL[k]}. ${x.home} contre ${x.away}, ${quand(x.kickoff, input.maintenant)} : ${x.label}. Probabilité ${pct} %, donc ça ne passe pas environ ${100 - pct} fois sur 100.${cote}${raison}`);
+    if (!l.length) continue;
+    const lignes = l.map((x, n) => {
+      const pct = Math.round(x.p * 100);
+      const cote = x.cote ? `, cote ${x.cote.toFixed(2).replace(".", ",")}${x.bookmaker ? ` chez ${x.bookmaker}` : ""}` : "";
+      const pq = n === 0 ? input.pourquoi.get(x.matchId) : null;
+      const raison = pq ? [pq.enjeu, pq.face, pq.forme].filter(Boolean).slice(0, 1).map((t) => ` ${String(t).replace(/\.$/, "")}.`).join("") : "";
+      return `${x.home} contre ${x.away}, ${quand(x.kickoff, input.maintenant)} : ${x.label}. Ça passe ${pct} fois sur 100, risque de perte ${100 - pct} %${cote}.${raison}`;
+    });
+    blocs.push(`Profil ${PROFIL[k]}, ${l.length} proposition${l.length > 1 ? "s" : ""}. ${lignes.join(" ")}`);
   }
   if (blocs.length === 1) blocs.push("Je n’ai pas de proposition calculée pour l’instant, et je ne t’en invente pas. Les prochains matchs couverts sont affichés plus bas.");
   else blocs[blocs.length - 1] += " Le détail est juste en dessous. Pour me poser une question, touche mon portrait en bas de l’écran.";

@@ -62,13 +62,13 @@ export function MatchRecit({ match, cles = [], redaction = [], etapes, verdict, 
               <p className="min-w-0 flex-1 font-display text-xl font-bold leading-tight">{verdict.label}</p>
               {match.ouvert && <AddToSlip leg={leg(verdict)} />}
             </div>
-            <p className="mt-1 text-sm tabular-nums"><b>{pct(verdict.p)} chances sur 100</b> · {verdict.cote ? "cote " : ""}{cote(verdict)} <span className={`ml-1 rounded-full border px-1.5 py-0.5 text-[10px] ${CAT_STYLE[verdict.categorie]}`}>{CAT_LABEL[verdict.categorie]}</span>{(!verdict.cote || source === "modele") && <span className="ml-1 rounded-full bg-draw-soft px-1.5 py-0.5 text-[10px] font-semibold text-draw-ink">estimation</span>}</p>
+            <p className="mt-1 text-sm tabular-nums"><b>Passe {pct(verdict.p)} fois sur 100</b> · risque de perte {100 - pct(verdict.p)} % · {verdict.cote ? "cote " : ""}{cote(verdict)} <span className={`ml-1 rounded-full border px-1.5 py-0.5 text-[10px] ${CAT_STYLE[verdict.categorie]}`}>{CAT_LABEL[verdict.categorie]}</span>{(!verdict.cote || source === "modele") && <span className="ml-1 rounded-full bg-draw-soft px-1.5 py-0.5 text-[10px] font-semibold text-draw-ink">estimation</span>}</p>
             {autres.length > 0 && (
               <ul className="mt-2 divide-y divide-line border-t border-line">
                 {autres.map((c) => (
                   <li key={`${c.market}${c.param}${c.sel}`} className="flex items-center gap-2 py-1.5 text-[13px]">
-                    <span className="w-16 shrink-0 text-[11px] text-ink-muted">{c.categorie === "sur" ? "Plus probable" : "Plus osé"}</span>
-                    <span className="min-w-0 flex-1"><span className="block leading-snug">{c.label}</span><span className="block text-[11.5px] tabular-nums text-ink-muted">{pct(c.p)} % · {cote(c)}</span></span>
+                    <span className="w-16 shrink-0 text-[11px] text-ink-muted">{c.p > (verdict?.p ?? 0) ? "Plus probable" : c.categorie === "risque" ? "Plus osé" : "Autre option"}</span>
+                    <span className="min-w-0 flex-1"><span className="block leading-snug">{c.label}</span><span className="block text-[11.5px] tabular-nums text-ink-muted">passe {pct(c.p)} fois sur 100 · {cote(c)}</span></span>
                     {match.ouvert && <AddToSlip size="sm" leg={leg(c)} />}
                   </li>
                 ))}

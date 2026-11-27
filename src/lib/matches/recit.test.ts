@@ -111,12 +111,13 @@ describe("la rédaction de Betster (25/11)", () => {
     expect(r[1]).toContain("9e du championnat avec 15 points en 12 matchs, 18 buts marqués pour 19 encaissés.");
     expect(r[2]).toContain("Bayern Munich est invaincu à l'extérieur cette saison : 5 victoires, 1 nul et 0 défaite en 6 matchs.");
     expect(r[2]).toContain("Absents : H. Kane, M. Olise, J. Musiala et L. Díaz.");
-    expect(r[r.length - 1]).toBe("Je vois Bayern Munich gagner, mais je joue la sécurité : nul ou Bayern Munich (82 chances sur 100 d'après les cotes).");
+    expect(r[r.length - 2]).toBe("Je vois Bayern Munich gagner, mais je joue la sécurité : nul ou Bayern Munich (passe 82 fois sur 100, risque de perte 18 %).");
+    expect(r[r.length - 1]).toBe("Autres options : Bayern Munich (55 fois sur 100).");
   });
   it("v2 sur les buts : marqués et encaissés de chaque équipe, puis le choix", () => {
     const r = buildRecit(entree([pick("BTTS", null, "Oui", 0.62, 1.6)])).redaction;
     expect(r.join(" ")).toContain("Il a marqué à chacun de ses 4 derniers matchs.");
-    expect(r[r.length - 1]).toBe("Des buts de chaque côté : les deux équipes marquent (62 chances sur 100 d'après les cotes).");
+    expect(r[r.length - 1]).toBe("Des buts de chaque côté : les deux équipes marquent (passe 62 fois sur 100, risque de perte 38 %).");
   });
   it("sans cote, donne les faits et ne tranche pas", () => {
     const r = buildRecit(entree([])).redaction;
