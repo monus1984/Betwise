@@ -1,0 +1,1595 @@
+{
+  "profil": "or-deepseek",
+  "nom": "DeepSeek",
+  "modele": "deepseek/deepseek-v4.1-flash-1017",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "a9caa57ace0020eb",
+  "duree_s": 73,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 2
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 2792
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 1046
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 880
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 708
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 2076
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 1939
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M10"
+      },
+      "ms": 2006
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 1226
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M11",
+        "famille": "tout"
+      },
+      "ms": 10
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "tout"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M14",
+        "famille": "tout"
+      },
+      "ms": 10
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "tout"
+      },
+      "ms": 12
+    }
+  ],
+  "jetons": {
+    "entree": 122428,
+    "sortie": 7275,
+    "cacheLu": 16896,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 102035,
+  "enJeu": 0,
+  "propositions": "[{\"option\": \"M11.1\", \"mise\": 4000, \"probabilite\": 0.55, \"raison\": \"Werder 6e (18 pts/10) et invaincu à domicile : 4v-1n, 14 buts marqués / 5 encaissés. Gladbach est 18e avec 4 points, 1v-4d à l'extérieur (5 marqués, 15 encaissés) et la défense la plus faible du championnat (26 encaissés en 10). Werder vient de gagner 4-0 contre Hamburger. Les 8 absents de Werder (d",
+  "abstention": null,
+  "carnetReecrit": false,
+  "retenus": [],
+  "combinesRetenus": [],
+  "rejets": [
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    },
+    {
+      "option": "undefined",
+      "motif": "option inconnue : elle n'est pas dans les cotes relevées"
+    }
+  ],
+  "enregistres": []
+}
