@@ -1,0 +1,22 @@
+{
+  "quand": "2026-11-27T07:51:53.820Z",
+  "essai": false,
+  "jour": "2026-11-27",
+  "matchs": 7,
+  "avecCotes": 6,
+  "candidats": 591,
+  "selectionsSansCote1xBet": 627,
+  "relevesTropEloignes": 101,
+  "dejaAujourdhui": 0,
+  "choix": [],
+  "bilan": {
+    "bankroll": 105044,
+    "net": 5044,
+    "enJeu": 0,
+    "regles": 9,
+    "gagnes": 6,
+    "roi": 0.34786206896551725
+  },
+  "resume": "Tipster à règles fixes (témoin sans IA). Paris simples sur cote 1xBet, seulement quand le prix dépasse la valeur juste. Bankroll virtuelle : 105 044 FCFA (départ 100 000), 9 paris réglés dont 6 gagnés, rendement 34,8 %, 0 FCFA en jeu. Mis à jour le 27/11/2026 07:51:53.",
+  "candidatsVus": 203
+}
