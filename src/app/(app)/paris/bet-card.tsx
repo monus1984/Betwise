@@ -1,5 +1,7 @@
 "use client";
 
+import { issue } from "@/lib/mesure/issue";
+
 import { useState, useTransition } from "react";
 import { deleteBet } from "@/lib/bets/actions";
 import { ConfirmResult } from "./confirm-result";
@@ -37,9 +39,27 @@ export type BetRow = {
     risque_calcule: "prudent" | "moyen" | "risque" | null;
     origin_source_id: string;
     origin: Named;
-    match: { kickoff_at: string; statut?: string; home: Named; away: Named } | { kickoff_at: string; statut?: string; home: Named; away: Named }[] | null;
+    match: MatchLite | MatchLite[] | null;
   }[];
 };
+
+type MatchLite = { kickoff_at: string; statut?: string; home: Named; away: Named; score_home?: number | null; score_away?: number | null; ht_home?: number | null; ht_away?: number | null; minute?: number | null };
+
+/** En direct (27/11) : score, minute et ce que donnerait la ligne si le match s'arrêtait maintenant. */
+function Direct({ m, market, param, sel }: { m: MatchLite; market: string; param: number | null; sel: string }) {
+  if (m.score_home == null || m.score_away == null) return null;
+  const enCours = m.statut === "en_cours";
+  if (!enCours && m.statut !== "termine") return null;
+  const r = enCours ? issue(market, param, sel, { h: m.score_home, a: m.score_away, hth: m.ht_home ?? null, hta: m.ht_away ?? null }) : null;
+  const etat = r === "gagne" ? ["passe pour l'instant", "text-gain-ink bg-gain-soft"] : r === "perdu" ? ["ne passe pas pour l'instant", "text-loss-ink bg-loss-soft"] : r === "rembourse" ? ["remboursé pour l'instant", "text-draw-ink bg-draw-soft"] : null;
+  return (
+    <span className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[12px]">
+      <span className={`rounded-md px-1.5 py-0.5 font-bold tabular-nums ${enCours ? "bg-loss text-on-fill" : "bg-surface-2 text-ink"}`}>{m.score_home} – {m.score_away}</span>
+      {enCours ? <span className="font-semibold text-loss-ink">{m.minute ? `${m.minute}′` : "en direct"}</span> : <span className="text-ink-muted">terminé</span>}
+      {etat && <span className={`rounded-md px-1.5 py-0.5 font-medium ${etat[1]}`}>{etat[0]}</span>}
+    </span>
+  );
+}
 
 const STATUT: Record<BetRow["statut"], { label: string; cls: string }> = {
   en_cours: { label: "En cours", cls: "bg-slate-100 text-slate-700" },
@@ -88,6 +108,7 @@ export function BetCard({ bet, sources }: { bet: BetRow; sources: SourceOpt[] })
             <li key={s.id} className="flex items-start justify-between gap-3 text-sm">
               <div className="min-w-0">
                 <p className="truncate font-medium">{s.resultat === "gagne" ? <span className="text-gain-ink">✓ </span> : s.resultat === "perdu" ? <span className="text-loss-ink">✗ </span> : s.resultat === "rembourse" ? <span className="text-draw-ink">↩ </span> : null}{label}</p>
+                {m && s.resultat === "en_attente" && <Direct m={m} market={s.market_code} param={s.market_param === null ? null : Number(s.market_param)} sel={s.selection} />}
                 <div className="text-xs text-slate-500">
                   {pickLabel(s.market_code, s.market_param === null ? null : Number(s.market_param), s.selection, m ? one(m.home)?.nom ?? "Équipe 1" : "Équipe 1", m ? one(m.away)?.nom ?? "Équipe 2" : "Équipe 2")} · cote {Number(s.cote).toFixed(2)}{bet.statut === "en_cours" && s.resultat === "en_attente" && (s.market_code === "LIBRE" || !m) ? <> · <Link href={`/paris/${bet.id}`} className="font-medium text-draw-ink underline">à régler à la main</Link></> : null} · <OriginPicker selectionId={s.id} current={s.origin_source_id} currentName={one(s.origin)?.nom ?? "—"} sources={sources} />
                 </div>

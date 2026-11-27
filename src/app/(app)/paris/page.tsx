@@ -1,3 +1,4 @@
+import { LiveRefresh } from "@/components/live-refresh";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { ParisNav } from "@/components/coach-nav";
@@ -18,7 +19,7 @@ export default async function ParisPage({ searchParams }: { searchParams: Promis
 
   let q = supabase
     .from("bets")
-    .select("id, type, mise, cote_totale, statut, gain_net, placed_at, settled_at, created_at, bookmaker, detail_complet, resultat_propose, gain_propose, bet_selections(id, match_libre, market_code, market_param, selection, cote, resultat, risque_calcule, origin_source_id, origin:sources!bet_selections_origin_source_id_fkey(nom), match:matches(kickoff_at, statut, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe, nom)))")
+    .select("id, type, mise, cote_totale, statut, gain_net, placed_at, settled_at, created_at, bookmaker, detail_complet, resultat_propose, gain_propose, bet_selections(id, match_libre, market_code, market_param, selection, cote, resultat, risque_calcule, origin_source_id, origin:sources!bet_selections_origin_source_id_fkey(nom), match:matches(kickoff_at, statut, score_home, score_away, ht_home, ht_away, minute, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe, nom)))")
     .order("placed_at", { ascending: false })
     .eq("virtuel", tests)
     .limit(tests ? 500 : 50);
@@ -29,8 +30,11 @@ export default async function ParisPage({ searchParams }: { searchParams: Promis
   const { data: { user } } = await supabase.auth.getUser();
   const sources = await loadSourceOptions(supabase, user!.id);
 
+  // Scores en direct (27/11) : la page se met à jour toute seule tant qu'un match d'un pari est en cours
+  const direct = bets.some((b) => b.bet_selections.some((x) => { const m = Array.isArray(x.match) ? x.match[0] : x.match; return m?.statut === "en_cours"; }));
   return (
     <>
+      <LiveRefresh active={direct} seconds={45} />
       <ParisNav current="paris" />
       <PageHeader ajout aide={tests ? "tests" : "paris"} title="Mes paris" subtitle={tests ? "Choix testés sans miser : ta bankroll n’a pas bougé." : filter === "en_cours" ? "En attente de résultat ou de ta confirmation." : "Réglés."} action={<Link href="/bilan">Bilan</Link>} />
       {sp.ajout && <p className="mb-4 rounded-lg border border-gain/30 bg-gain-soft p-3 text-sm text-gain-ink">{tests ? "Test enregistré." : "Pari enregistré."}</p>}
