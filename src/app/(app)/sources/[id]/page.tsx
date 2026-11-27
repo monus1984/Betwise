@@ -53,7 +53,10 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
 
   const isSystem = s.type === "modele_betwise" || s.type === "perso";
   const gerable = !isSystem && s.created_by === user!.id;
-  const { count: nbPronos } = gerable ? await supabase.from("predictions").select("id", { count: "exact", head: true }).eq("source_id", id) : { count: 0 };
+  const [{ count: nbPronos }, { data: autresSrc }] = gerable ? await Promise.all([
+    supabase.from("predictions").select("id", { count: "exact", head: true }).eq("source_id", id),
+    supabase.from("sources").select("id, nom").eq("created_by", user!.id).not("type", "in", "(perso,modele_betwise)").neq("id", id).order("nom"),
+  ]) : [{ count: 0 }, { data: [] as { id: string; nom: string }[] }];
 
   // Tipster IA (23/11) : ses tickets réels, simples et combinés, dans sa bankroll ; visibles par tous les testeurs depuis le 26/11
   let tickets: Ticket[] | null = null;
@@ -250,7 +253,7 @@ export default async function SourcePage({ params, searchParams }: { params: Pro
           </ul>
         )}
       </section>
-      {gerable && <GererSource id={id} nom={s.nom} type={s.type} visibilite={s.visibilite as "privee" | "partagee"} pronos={nbPronos ?? 0} />}
+      {gerable && <GererSource id={id} nom={s.nom} type={s.type} visibilite={s.visibilite as "privee" | "partagee"} pronos={nbPronos ?? 0} autres={(autresSrc ?? []).filter((x) => !estIA(x.nom))} />}
     </>
   );
 }

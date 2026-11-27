@@ -405,7 +405,8 @@ export function buildRecit(input: RecitInput): Recit {
   return { affiche, cles, redaction: redac, etapes, verdict, autres, source: input.source, texte };
 }
 
-export async function loadRecit(db: Db, matchId: string): Promise<(Recit & { matchId: string; home: string; away: string; kickoff: string; comp: string; statut: string }) | null> {
+/** `cacheSeul` (27/11) : dans les listes (Sources › Aujourd'hui), pas d'appel au fournisseur pendant l'affichage. */
+export async function loadRecit(db: Db, matchId: string, cacheSeul = false): Promise<(Recit & { matchId: string; home: string; away: string; kickoff: string; comp: string; statut: string }) | null> {
   const { data } = await db.from("matches")
     .select("id, kickoff_at, statut, home_team_id, away_team_id, af_home_id, af_away_id, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(code_externe)")
     .eq("id", matchId).maybeSingle();
@@ -419,7 +420,7 @@ export async function loadRecit(db: Db, matchId: string): Promise<(Recit & { mat
     db.from("matches").select("kickoff_at, score_home, score_away, details, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom)")
       .eq("statut", "termine").lt("kickoff_at", m.kickoff_at).or(`home_team_id.in.(${ids.join(",")}),away_team_id.in.(${ids.join(",")})`).order("kickoff_at", { ascending: false }).limit(14),
     loadSignals(db as never, [m.id], { bookmakers: true }),
-    getConfrontations(m).catch(() => null),
+    getConfrontations(m, cacheSeul).catch(() => null),
     // Calendrier : matchs des deux équipes de 3 jours avant à 4 jours après, toutes compétitions suivies
     db.from("matches").select("id, kickoff_at, home_team_id, away_team_id, home:teams!matches_home_team_id_fkey(nom), away:teams!matches_away_team_id_fkey(nom), competition:competitions(nom)")
       .neq("id", m.id).neq("statut", "annule").gte("kickoff_at", new Date(k - 3 * J).toISOString()).lte("kickoff_at", new Date(k + 4 * J).toISOString())

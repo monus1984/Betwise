@@ -199,3 +199,11 @@ export async function deleteSource(id: string) {
   revalidatePath("/sources", "layout");
   return { ok: true as const, pronos: Number(data ?? 0) };
 }
+
+/** Fusionner deux sources qui sont le même tipster sous deux noms (27/11) : tout passe dans `into`, `from` disparaît. */
+export async function mergeSources(from: string, into: string) {
+  const { data, error } = await appel("merge_sources", { p_from: from, p_into: into });
+  if (error) return { ok: false as const, error };
+  revalidatePath("/sources", "layout");
+  return { ok: true as const, pronos: Number(data ?? 0) };
+}

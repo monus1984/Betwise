@@ -1,3 +1,4 @@
+import { chrono } from "@/lib/perf";
 import { APP_NAME } from "@/lib/app-name";
 import Link from "next/link";
 import { Sparkline } from "@/components/sparkline";
@@ -33,16 +34,17 @@ const JOUR = 86400000;
  * du jour, puis le Coach (bankroll, budget, vigilance), l'import, ce que disent les tipsters suivis, ce qui attend une action.
  */
 export default async function Home() {
+  const ch = chrono("/");
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await ch.e("auth", supabase.auth.getUser());
 
   // Profil (créé au besoin : couvre un compte Kehiwa qui ouvre BETWISE pour la première fois)
-  const { data: profile } = await supabase.rpc("ensure_profile");
+  const { data: profile } = await ch.e("profil", Promise.resolve(supabase.rpc("ensure_profile")));
 
   // Tout en parallèle, y compris les données des matchs du jour (avant le 22/11, elles attendaient la fin du reste)
   const [{ data: summary }, d, { data: follows }, { data: k }, { data: enCours }, { data: pend }, { data: recents }, { count: nonLues }, { data: bud }, acc] = await Promise.all([
-    supabase.from("my_bankroll_summary").select("*").maybeSingle(),
-    loadDashboard(supabase, null),
+    ch.e("bankroll", Promise.resolve(supabase.from("my_bankroll_summary").select("*").maybeSingle())),
+    ch.e("dashboard", loadDashboard(supabase, null)),
     supabase.from("source_follows").select("source_id, source:sources(id, nom, type)").eq("user_id", user!.id),
     supabase.from("bankrolls").select("verifie_at").eq("active", true).maybeSingle(),
     supabase.from("bets").select("id, resultat_propose, mise, bookmaker").eq("statut", "en_cours").eq("virtuel", false).limit(500),
@@ -51,8 +53,9 @@ export default async function Home() {
     supabase.from("bets").select("mise, statut, gain_net, placed_at, settled_at, nb_selections").eq("virtuel", false).neq("statut", "annule").order("placed_at", { ascending: false }).limit(40),
     supabase.from("notifications").select("id", { count: "exact", head: true }).is("lu_at", null),
     supabase.from("budgets").select("mise_semaine, perte_max_semaine").maybeSingle(),
-    loadAccueil(supabase, user!.id),
+    ch.e("accueil", loadAccueil(supabase, user!.id)),
   ]);
+  ch.fin();
 
   const proposes = new Set((enCours ?? []).filter((b) => b.resultat_propose && b.resultat_propose !== "en_attente").map((b) => b.id));
   type Pend = { bet_id: string; match_id: string | null; bets: { placed_at: string } | { placed_at: string }[]; match: { statut: string; result_at: string | null } | { statut: string; result_at: string | null }[] | null };

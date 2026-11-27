@@ -1,3 +1,4 @@
+import { chrono } from "@/lib/perf";
 import { loadPourquoi, type Pourquoi } from "@/lib/matches/justification";
 /**
  * Données du nouvel accueil (maquettes validées le 19/11, docs/design/accueil/) : l'avis de Betster, les matchs du jour,
@@ -152,15 +153,16 @@ const optionsCommunes = unstable_cache(
 );
 
 export async function loadAccueil(db: Db, userId: string) {
+  const ch = chrono("loadAccueil");
   const jour = jourDe(new Date().toISOString());
   // Matchs du jour (heure d'Abidjan) et ceux encore en cours d'hier soir
   const debut = new Date(Date.now() - 18 * 3600000).toISOString(), fin = new Date(Date.now() + 30 * 3600000).toISOString();
   // Indépendants les uns des autres : lancés ensemble (P1-10, 22/11)
-  const [today, { data }, [optAuj, optDemain]] = await Promise.all([
+  const [today, { data }, [optAuj, optDemain]] = await ch.e("jour", Promise.all([
     loadToday(db, userId),
     db.from("matches").select(MATCH).gte("kickoff_at", debut).lte("kickoff_at", fin).neq("statut", "annule").order("kickoff_at").limit(200),
     Promise.all([optionsCommunes("auj"), optionsCommunes("demain")]),
-  ]);
+  ]));
   // Prédictions du jour : uniquement les matchs pas encore commencés (21/11) ; le direct et les résultats sont dans Matchs
   const pasCommence = (statut: string, kickoff: string) => statut === "programme" && Date.parse(kickoff) > Date.now();
   const tous = ((data ?? []) as unknown as M[]).filter((m) => jourDe(m.kickoff_at) === jour && pasCommence(m.statut, m.kickoff_at));
@@ -168,7 +170,7 @@ export async function loadAccueil(db: Db, userId: string) {
 
   const avisPick = avisDuJour(today.picks);
   const ids = [...new Set([...tous.map((m) => m.id), ...today.picks.map((p) => p.match_id), ...optDemain.options.map((o) => o.matchId)])];
-  const [signals, releves, bc] = await Promise.all([loadSignals(db, ids, { bookmakers: true }), relevesRef(db, ids), relevesBetclic(db, ids)]);
+  const [signals, releves, bc] = await ch.e("signaux", Promise.all([loadSignals(db, ids, { bookmakers: true }), relevesRef(db, ids), relevesBetclic(db, ids)]));
 
   const mesMatchs = new Set(today.theirs.filter((t) => t.type === "pari").map((t) => t.match_id));
   const profilsAuj = parProfil(optAuj.options);
@@ -225,7 +227,8 @@ export async function loadAccueil(db: Db, userId: string) {
 
   // Justification (forme, face-à-face) pour les matchs à venir affichés
   const aJustifier = [...new Set([...cartes.filter((c) => c.statut === "programme" && c.probs).map((c) => c.id), ...demain.map((m) => m.matchId)])].slice(0, 40);
-  const raisons = await loadPourquoi(db, aJustifier);
+  const raisons = await ch.e("pourquoi", loadPourquoi(db, aJustifier));
+  ch.fin();
   for (const c of cartes) c.pourquoi = raisons.get(c.id) ?? null;
   for (const m of demain) m.pourquoi = raisons.get(m.matchId) ?? null;
 

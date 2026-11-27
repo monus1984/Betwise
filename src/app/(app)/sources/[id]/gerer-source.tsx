@@ -2,13 +2,14 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { deleteSource, updateSource } from "@/lib/sources/actions";
+import { deleteSource, mergeSources, updateSource } from "@/lib/sources/actions";
 
 const TYPES: [string, string][] = [["tipster", "Pronostiqueur"], ["page_facebook", "Page Facebook"], ["compte_instagram", "Compte Instagram"], ["canal_telegram", "Canal Telegram"], ["site", "Site de prédictions"]];
 
 /** Renommer, changer le type ou la visibilité d'une source qu'on a créée, ou la supprimer (25/11). */
-export function GererSource({ id, nom, type, visibilite, pronos }: { id: string; nom: string; type: string; visibilite: "privee" | "partagee"; pronos: number }) {
-  const [mode, setMode] = useState<"rien" | "modifier" | "supprimer">("rien");
+export function GererSource({ id, nom, type, visibilite, pronos, autres = [] }: { id: string; nom: string; type: string; visibilite: "privee" | "partagee"; pronos: number; autres?: { id: string; nom: string }[] }) {
+  const [mode, setMode] = useState<"rien" | "modifier" | "supprimer" | "fusionner">("rien");
+  const [cible, setCible] = useState("");
   const [n, setN] = useState(nom), [t, setT] = useState(type), [v, setV] = useState(visibilite);
   const [err, setErr] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -19,7 +20,18 @@ export function GererSource({ id, nom, type, visibilite, pronos }: { id: string;
       {mode === "rien" && (
         <div className="mt-2 flex gap-2">
           <button onClick={() => setMode("modifier")} className="flex-1 rounded-xl border border-line py-2.5 text-[13px] font-medium text-ink-soft">Modifier</button>
+          {autres.length > 0 && <button onClick={() => setMode("fusionner")} className="flex-1 rounded-xl border border-line py-2.5 text-[13px] font-medium text-ink-soft">Fusionner</button>}
           <button onClick={() => setMode("supprimer")} className="flex-1 rounded-xl border border-line py-2.5 text-[13px] font-medium text-loss">Supprimer</button>
+        </div>
+      )}
+      {mode === "fusionner" && (
+        <div className="mt-2 space-y-2.5">
+          <p className="text-[13px] leading-snug">Même tipster sous un autre nom ? Ses pronos et tes paris passent dans la source choisie, et « {nom} » disparaît. Les pronos en double ne sont gardés qu’une fois.</p>
+          <label className="block text-[12px] text-ink-muted">Fusionner dans<select value={cible} onChange={(e) => setCible(e.target.value)} className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-[15px] text-ink"><option value="">Choisir une source…</option>{autres.map((x) => <option key={x.id} value={x.id}>{x.nom}</option>)}</select></label>
+          <div className="flex gap-2">
+            <button onClick={() => setMode("rien")} className="flex-1 rounded-xl border border-line py-2.5 text-[13px] text-ink-soft">Annuler</button>
+            <button disabled={pending || !cible} onClick={() => start(async () => { setErr(null); const r = await mergeSources(id, cible); if (!r.ok) setErr(r.error); else router.push(`/sources/${cible}`); })} className="flex-1 rounded-xl bg-brand py-2.5 text-[13px] font-semibold text-on-fill disabled:opacity-50">{pending ? "…" : "Fusionner"}</button>
+          </div>
         </div>
       )}
       {mode === "modifier" && (

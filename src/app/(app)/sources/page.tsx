@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { linkOf } from "@/lib/sources/link";
 import { PageHeader } from "@/components/page-header";
@@ -57,7 +58,12 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
 
       {vue === "analyse" && <Analyse sources={suivies.filter((x) => x.type !== "modele_betwise")} />}
 
-      {vue === "aujourdhui" && <Aujourdhui sourceIds={[...humaines.filter((x) => followed.has(x.id) || x.created_by === user!.id), ...ia].map((x) => x.id)} proofOf={proofOf} />}
+      {/* Affiché tout de suite, « Aujourd'hui » arrive ensuite (27/11 : la page attendait ~3 s) */}
+      {vue === "aujourdhui" && (
+        <Suspense fallback={<div className="space-y-3" aria-busy="true" aria-label="Chargement des pronos du jour">{[0, 1, 2].map((i) => <div key={i} className="h-28 animate-pulse rounded-xl border border-line bg-surface" />)}</div>}>
+          <Aujourdhui sourceIds={[...humaines.filter((x) => followed.has(x.id) || x.created_by === user!.id), ...ia].map((x) => x.id)} proofOf={proofOf} />
+        </Suspense>
+      )}
 
       {vue === "suivies" && (
         <div className="space-y-4">
@@ -235,7 +241,7 @@ async function Aujourdhui({ sourceIds, proofOf }: { sourceIds: string[]; proofOf
   const tous = [...parMatch.values()].sort((a, b) => new Set(b.map((x) => x.source_id)).size - new Set(a.map((x) => x.source_id)).size).slice(0, 15);
   if (!tous.length) return vide;
   const [recits, signaux] = await Promise.all([
-    Promise.all(tous.map((l) => loadRecit(db as never, l[0].match.id).catch(() => null))),
+    Promise.all(tous.map((l) => loadRecit(db as never, l[0].match.id, true).catch(() => null))),
     loadSignals(db as never, tous.map((l) => l[0].match.id), { bookmakers: true }).catch(() => new Map()),
   ]);
   // Pour chaque match : les pronos avec ce qui les confirme, et la force du match = le plus de voix derrière un même pari
