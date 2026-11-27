@@ -80,7 +80,7 @@ export function SlipBar() {
                   <li key={l.matchId} className="flex items-center gap-2 py-2">
                     <Link href={`/matchs/${l.matchId}`} className="min-w-0 flex-1">
                       <span className="block text-sm font-medium leading-snug">{l.label}</span>
-                      <span className="block text-[11px] leading-snug text-ink-muted">{l.home} – {l.away} · {new Date(l.kickoff).toLocaleString("fr-FR", { weekday: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}</span>
+                      <span className="block text-[11px] leading-snug text-ink-muted"><span className="text-[13px] font-bold text-brand">{l.home} – {l.away}</span> · {new Date(l.kickoff).toLocaleString("fr-FR", { weekday: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" })}</span>
                     </Link>
                     <span className="shrink-0 text-right tabular-nums">
                       <span className="block text-sm font-semibold">{l.estimee ? "≈ " : ""}{C(l.cote)}{l.book && <span className="ml-1 text-[10px] font-normal text-ink-muted">{l.book}</span>}</span>

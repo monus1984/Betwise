@@ -89,7 +89,7 @@ export function Demain({ matchs, titre, total }: { matchs: MatchAVenir[]; titre:
       {matchs.slice(0, 5).map((m) => (
         <article key={m.matchId} className="tile p-3">
           <Link href={`/matchs/${m.matchId}`} className="flex items-center justify-between gap-2">
-            <span className="min-w-0"><span className="block text-[14px] font-semibold leading-tight">{m.home} – {m.away}</span><span className="block text-[11px] text-ink-muted">{COMP_SHORT[m.comp ?? ""] ?? m.comp} · {jourCourt(m.kickoff)} {heure(m.kickoff)}</span></span>
+            <span className="min-w-0"><span className="block text-[15px] font-bold leading-tight text-brand">{m.home} – {m.away}</span><span className="block text-[11px] text-ink-muted">{COMP_SHORT[m.comp ?? ""] ?? m.comp} · {jourCourt(m.kickoff)} {heure(m.kickoff)}</span></span>
             <span aria-hidden className="text-brand">›</span>
           </Link>
           <div className="mt-1 divide-y divide-line">{m.propositions.map((x) => <LigneProposition key={`${x.market}|${x.param}|${x.sel}`} x={x} />)}</div>
