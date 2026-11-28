@@ -1,0 +1,225 @@
+{
+  "profil": "or-chatgpt",
+  "nom": "ChatGPT",
+  "modele": "openai/gpt-6.2-sol",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "77d622dc08c87d5e",
+  "duree_s": 29,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 12
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 335
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 318
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M24"
+      },
+      "ms": 601
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M27"
+      },
+      "ms": 309
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M44"
+      },
+      "ms": 574
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M56"
+      },
+      "ms": 621
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M65"
+      },
+      "ms": 579
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M79"
+      },
+      "ms": 309
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M84"
+      },
+      "ms": 626
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M99"
+      },
+      "ms": 585
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M101"
+      },
+      "ms": 327
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M104"
+      },
+      "ms": 600
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M24",
+        "famille": "buts"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M84",
+        "famille": "buts"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M101",
+        "famille": "resultat"
+      },
+      "ms": 7
+    }
+  ],
+  "jetons": {
+    "entree": 96392,
+    "sortie": 1475,
+    "cacheLu": 47145,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 101958,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M3.1",
+      "mise": 900,
+      "probabilite": 0.72,
+      "raison": "Victoire du Hertha à 1,41 (27/11, 21 h 28). Le leader a gagné ses cinq réceptions ; Karlsruhe n’a gagné aucun de ses cinq déplacements et y a encaissé 13 buts. Le marché projette 2,59 buts pour le Hertha contre 1,09. Je relève légèrement le repère sans marge de 69 %, sans négliger les deux derniers face-à-face nuls."
+    },
+    {
+      "option": "M12.2",
+      "mise": 700,
+      "probabilite": 0.65,
+      "raison": "Victoire de Wolves à 1,54 (27/11, 21 h 08). Wolves a gagné quatre de ses cinq dernières sorties et vient de battre Derby 3–0. Lincoln reste sur cinq défaites et a perdu cinq de ses huit réceptions. Projection de 1,95 but contre 0,81 en faveur de Wolves. Je ne monte que légèrement au-dessus des 62,6 % du marché : Wolves n’a gagné que quatre de ses huit déplacements et compte deux absents signalés."
+    },
+    {
+      "option": "M24.244",
+      "mise": 900,
+      "probabilite": 0.81,
+      "raison": "Al-Hilal marque au moins deux buts à 1,25 (27/11, 22 h 09). Al-Hilal a marqué 19 buts en cinq déplacements ; Al-Ettifaq en a encaissé 13 en six réceptions. Le marché projette 2,95 buts visiteurs et donne 79,3 % à cette ligne. Léger ajustement seulement : cinq déplacements restent un petit échantillon et le onze n’est pas publié."
+    },
+    {
+      "option": "M84.243",
+      "mise": 850,
+      "probabilite": 0.85,
+      "raison": "Le PSV marque au moins deux buts à 1,17 (27/11, 20 h 38). Le leader a marqué 21 buts en six réceptions et Go Ahead en a encaissé 19 en sept déplacements. Le marché projette 3,37 buts pour le PSV et donne 84,9 % à cette ligne. Je reste à ce niveau : le PSV sort d’un 1–5 à Madrid et compte cinq absents signalés."
+    }
+  ],
+  "abstention": "Quatre simples, sans combiné ni objectif de remplir les huit places. Je laisse notamment le Bayern de côté avant les compositions, vu les absences annoncées et les trois jours de récupération. Je ne retiens pas non plus les victoires courtes du PSG et du Real Madrid : BETWISE leur projette nettement moins de buts que le marché.",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M3.1",
+      "pari": "Hertha BSC",
+      "cote": 1.41,
+      "mise": 900,
+      "probabilite": 0.72,
+      "raison": "Victoire du Hertha à 1,41 (27/11, 21 h 28). Le leader a gagné ses cinq réceptions ; Karlsruhe n’a gagné aucun de ses cinq déplacements et y a encaissé 13 buts. Le marché projette 2,59 buts pour le Hertha contre 1,09. Je relève légèrement le repère sans marge de 69 %, sans négliger les deux derniers face-à-face nuls."
+    },
+    {
+      "id": "M12.2",
+      "pari": "Wolves",
+      "cote": 1.54,
+      "mise": 700,
+      "probabilite": 0.65,
+      "raison": "Victoire de Wolves à 1,54 (27/11, 21 h 08). Wolves a gagné quatre de ses cinq dernières sorties et vient de battre Derby 3–0. Lincoln reste sur cinq défaites et a perdu cinq de ses huit réceptions. Projection de 1,95 but contre 0,81 en faveur de Wolves. Je ne monte que légèrement au-dessus des 62,6 % du marché : Wolves n’a gagné que quatre de ses huit déplacements et compte deux absents signalés."
+    },
+    {
+      "id": "M24.244",
+      "pari": "Al-Hilal Saudi FC : plus de 1,5 buts",
+      "cote": 1.25,
+      "mise": 900,
+      "probabilite": 0.81,
+      "raison": "Al-Hilal marque au moins deux buts à 1,25 (27/11, 22 h 09). Al-Hilal a marqué 19 buts en cinq déplacements ; Al-Ettifaq en a encaissé 13 en six réceptions. Le marché projette 2,95 buts visiteurs et donne 79,3 % à cette ligne. Léger ajustement seulement : cinq déplacements restent un petit échantillon et le onze n’est pas publié."
+    },
+    {
+      "id": "M84.243",
+      "pari": "PSV : plus de 1,5 buts",
+      "cote": 1.17,
+      "mise": 900,
+      "probabilite": 0.85,
+      "raison": "Le PSV marque au moins deux buts à 1,17 (27/11, 20 h 38). Le leader a marqué 21 buts en six réceptions et Go Ahead en a encaissé 19 en sept déplacements. Le marché projette 3,37 buts pour le PSV et donne 84,9 % à cette ligne. Je reste à ce niveau : le PSV sort d’un 1–5 à Madrid et compte cinq absents signalés."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M3.1",
+    "M12.2",
+    "M24.244",
+    "M84.243"
+  ]
+}

@@ -1,0 +1,318 @@
+{
+  "profil": "or-gemini",
+  "nom": "Gemini",
+  "modele": "google/gemini-4-carbon",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "77d622dc08c87d5e",
+  "duree_s": 97,
+  "tours": 6,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 12
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 317
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 619
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 316
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 299
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M20"
+      },
+      "ms": 332
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M25"
+      },
+      "ms": 310
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M33"
+      },
+      "ms": 320
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M44"
+      },
+      "ms": 322
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M45"
+      },
+      "ms": 442
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M51"
+      },
+      "ms": 315
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M52"
+      },
+      "ms": 320
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M56"
+      },
+      "ms": 332
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M60"
+      },
+      "ms": 619
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M72"
+      },
+      "ms": 585
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M78"
+      },
+      "ms": 335
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M79"
+      },
+      "ms": 305
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M82"
+      },
+      "ms": 384
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M88"
+      },
+      "ms": 309
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M89"
+      },
+      "ms": 600
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M95"
+      },
+      "ms": 376
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M96"
+      },
+      "ms": 311
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M101"
+      },
+      "ms": 364
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M103"
+      },
+      "ms": 338
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M105"
+      },
+      "ms": 582
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 22
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 16
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M44"
+      },
+      "ms": 16
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M52"
+      },
+      "ms": 17
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M78"
+      },
+      "ms": 20
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M79"
+      },
+      "ms": 21
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M82"
+      },
+      "ms": 23
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M88"
+      },
+      "ms": 20
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 544
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M19"
+      },
+      "ms": 644
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M23"
+      },
+      "ms": 587
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M37"
+      },
+      "ms": 348
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M61"
+      },
+      "ms": 608
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M69"
+      },
+      "ms": 374
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M94"
+      },
+      "ms": 567
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M89"
+      },
+      "ms": 17
+    }
+  ],
+  "jetons": {
+    "entree": 338452,
+    "sortie": 1867,
+    "cacheLu": 123540,
+    "cacheEcrit": 0
+  },
+  "erreur": "API 402 : This request would exceed your available credits given your current in-flight requests. Retry after in-flight requests settle, or add credits.",
+  "bankroll": 94612.85,
+  "enJeu": 2000,
+  "propositions": [],
+  "abstention": null,
+  "carnetReecrit": false,
+  "retenus": [],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": []
+}

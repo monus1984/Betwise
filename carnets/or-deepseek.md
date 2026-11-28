@@ -1,22 +1,20 @@
-<!-- jour: 2026-11-25 version: tipster-ia-v4 -->
-CARNET — BETWISE (mercredi 25/11/2026, 13:52 — passage du matin/midi)
+<!-- jour: 2026-11-28 version: tipster-ia-v4 -->
+CARNET — BETWISE (samedi 28/11/2026, passage du matin)
 
-ÉTAT : bankroll 101 750 FCFA (départ 100 000). 2 paris réglés : 1 gagné (Almeria @1,95, +4 750), 1 perdu (BTTS Brentford-Everton @1,64, -3 000). Aucun pari en cours.
+ÉTAT : bankroll 91 035 FCFA (départ 100 000). 8 paris réglés : 3 gagnés, 5 perdus. 0 en jeu. Trois pertes de suite hier (OH Leuven, Venezia, Werder) : mon schéma « équipe en crise + bon bilan » a échoué 3 fois en 48 h. Réaction : je ne joue plus un favori sur la seule foi d'un classement, j'exige un avantage chiffré net ET une forme récente concordante.
 
 RÈGLES DU MOMENT (pas de seuil cote × proba, pas de quota de cotes, pas de nombre imposé) :
-1) Je ne parie que sur un match analysé avec l'outil : forme, enjeu au classement, splits dom/ext, absents, H2H, cotes réelles.
-2) Je privilégie les équipes qui cumulent plusieurs avantages concordants (forme + classement + adversaire diminué ou en crise défensive) et je fuis les marchés fragiles (BTTS, over) sur des équipes remaniées.
+1) Un pari seulement sur un match analysé (forme, classement, splits dom/ext, absents, H2H, cotes réelles).
+2) J'exige au moins 3 avantages concordants : classement + forme actuelle + split domicile/extérieur + adversaire diminué ou en crise défensive. Si la forme récente contredit le classement, je passe.
 3) Mise 3 à 4,5 % de bankroll par simple, une sélection par match, exposition totale visée 20-25 %.
 4) Combinés 2 sélections de matchs différents, indépendants, cote 1,50-3, mise 1,5-2 %.
 5) Aucune remise en cause des règles avant 15-20 paris réglés.
 
-LECON 1 (BTTS Brentford-Everton perdu) : « absents = buts » est un raisonnement creux ; ne jamais parier sur les buts d'une attaque amoindrie.
-LECON 2 (Almeria gagné) : le schéma « équipe en crise profonde contre équipe en forme » fonctionne, c'est mon cœur de méthode.
+LECONS :
+- BTTS Brentford-Everton perdu : « absents = buts » est un raisonnement creux. Ne plus parier sur les buts d'une équipe amputée.
+- Almeria gagné : le schéma « équipe en crise profonde contre équipe en forme » fonctionne quand le favori est aussi en forme et à domicile.
+- 3 pertes de suite le 27/11 : sur des favoris à domicile dont la forme récente était en réalité moyenne (Werder, Venezia). Le classement seul ne suffit pas ; je n'achète pas un favori qui vient d'enchaîner des contre-performances.
 
-CORRECTION IMPORTANTE : ce passage ne contient aucun des matchs que j'avais notés en bloc (Man City-Napoli, Slovan-Betis, Como-AEK, Cardiff-Preston, Wolves-Derby) — ils n'existent pas dans la liste fournie. Je ne parie que sur les matchs réellement présents et cotés aujourd'hui.
+POINTS D'ATTENTION APPRIS : les marchés de buts (BTTS/Over) sont mes plus mauvais ; je reste sur le 1X2. Les cotes basses (<1,35) sont sans valeur pour ma bankroll.
 
-ANALYSE DU JOUR (17 matchs) :
-- Retenus : PSG-Roma (PSG @1,52), Bolton-West Brom (West Brom @1,99), Inter-Stuttgart (Inter @1,44), + combiné PSG + « West Brom ou nul » @~1,95.
-- Écartés : Bayern @1,66 à Lille sans Kane, Neuer, Olise, Davies, Gnabry (7 absents, trop incertain) ; Liverpool @1,70 à Bruges avec 8 absents ; Villarreal @2,19 à Slavia avec 14 buts encaissés en 4 et 3 défaites sur 4 ; Atletico @1,13 (cote sans valeur) malgré Viking diminué ; Mantova @1,57 (H2H récent perdu, Arezzo compétitif dehors à 3v-3d).
-
-À SURVEILLER : la leçon « le plus probable n'est pas le plus rentable » — je prends des cotes entre 1,44 et 2,00, pas de double chance à 1,15 en simple.
+À FAIRE : analyser les cotes réelles avant de valider chaque pari ; ne pas surcharger la journée (8 paris max, je viserai 3-4).

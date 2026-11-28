@@ -1,0 +1,206 @@
+{
+  "profil": "or-deepseek",
+  "nom": "DeepSeek",
+  "modele": "deepseek/deepseek-v4.1-flash-1017",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "77d622dc08c87d5e",
+  "duree_s": 77,
+  "tours": 5,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 12
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 649
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 648
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M20"
+      },
+      "ms": 658
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M25"
+      },
+      "ms": 651
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M33"
+      },
+      "ms": 675
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M44"
+      },
+      "ms": 345
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M52"
+      },
+      "ms": 614
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M79"
+      },
+      "ms": 307
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M96"
+      },
+      "ms": 594
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M45"
+      },
+      "ms": 552
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M56"
+      },
+      "ms": 343
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M63"
+      },
+      "ms": 595
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M99"
+      },
+      "ms": 334
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M51"
+      },
+      "ms": 620
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 594
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M82"
+      },
+      "ms": 589
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M14"
+      },
+      "ms": 602
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M67"
+      },
+      "ms": 673
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M69"
+      },
+      "ms": 624
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M42"
+      },
+      "ms": 588
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M103"
+      },
+      "ms": 580
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M18"
+      },
+      "ms": 611
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M37"
+      },
+      "ms": 568
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M80"
+      },
+      "ms": 555
+    }
+  ],
+  "jetons": {
+    "entree": 141607,
+    "sortie": 13351,
+    "cacheLu": 38656,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 91035,
+  "enJeu": 0,
+  "propositions": [],
+  "abstention": null,
+  "carnetReecrit": true,
+  "retenus": [],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": []
+}

@@ -1,0 +1,446 @@
+{
+  "profil": "or-grok",
+  "nom": "Grok",
+  "modele": "x-ai/grok-4.7",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "77d622dc08c87d5e",
+  "duree_s": 74,
+  "tours": 6,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 12
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M3"
+      },
+      "ms": 343
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 353
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M16"
+      },
+      "ms": 604
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M27"
+      },
+      "ms": 303
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M43"
+      },
+      "ms": 561
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M56"
+      },
+      "ms": 310
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M84"
+      },
+      "ms": 322
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M88"
+      },
+      "ms": 588
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M101"
+      },
+      "ms": 319
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M44"
+      },
+      "ms": 311
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 589
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M24"
+      },
+      "ms": 328
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M33"
+      },
+      "ms": 330
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M45"
+      },
+      "ms": 342
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M51"
+      },
+      "ms": 311
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M25"
+      },
+      "ms": 348
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M79"
+      },
+      "ms": 369
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M87"
+      },
+      "ms": 575
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M20"
+      },
+      "ms": 317
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M104"
+      },
+      "ms": 365
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M3",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "resultat"
+      },
+      "ms": 8
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M16",
+        "famille": "resultat"
+      },
+      "ms": 8
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M24",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M6",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M88",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M87",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M44",
+        "famille": "resultat"
+      },
+      "ms": 9
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M13"
+      },
+      "ms": 339
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M52"
+      },
+      "ms": 423
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M24",
+        "famille": "tout"
+      },
+      "ms": 17
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M6",
+        "famille": "tout"
+      },
+      "ms": 18
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M87",
+        "famille": "tout"
+      },
+      "ms": 20
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M52",
+        "famille": "resultat"
+      },
+      "ms": 8
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M13",
+        "famille": "resultat"
+      },
+      "ms": 8
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M78"
+      },
+      "ms": 587
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M95"
+      },
+      "ms": 612
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M11"
+      },
+      "ms": 321
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M37"
+      },
+      "ms": 316
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M99"
+      },
+      "ms": 324
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M78",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M95",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M11",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M101",
+        "famille": "resultat"
+      },
+      "ms": 6
+    }
+  ],
+  "jetons": {
+    "entree": 512177,
+    "sortie": 5671,
+    "cacheLu": 312832,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 105209.25,
+  "enJeu": 1800,
+  "propositions": [
+    {
+      "option": "M3.98",
+      "mise": 2500,
+      "probabilite": 0.72,
+      "raison": "Hertha est 1er, 34 points en 12, 10 points d'avance, meilleure attaque (29) et meilleure défense (9), 4 victoires sans défaite sur 5, invaincu à domicile (5V 0N 0D). Karlsruhe est 15e, au contact du barrage, 0 victoire à l'extérieur (0V 2N 3D, 13 buts encaissés) et l'une des deux pires défenses (24). Marché : victoire 69 %, DNB 1,12 à 83,4 %. Je reste à 72 % : les H2H sont partagés (2V, 3N, 1D) et les compositions ne sont pas publiées. Ce n'est pas un pari certain."
+    },
+    {
+      "option": "M16.105",
+      "mise": 2500,
+      "probabilite": 0.7,
+      "raison": "Bursaspor est 1er, 35 points en 15, 2 points d'avance, 4 victoires sans défaite sur 5, 6V 1N 1D à l'extérieur, meilleure défense (12) et 2e attaque (32). Vanspor est 16e, 2 points au-dessus de la relégation, domicile médiocre (3V 1N 4D). Marché : victoire 66,5 %, DNB 1,12 à 83,2 %. Je reste à 70 % : Vanspor a encore 3 victoires sur 5 et un H2H à domicile (3-0), compositions absentes. Ce n'est pas un pari certain."
+    },
+    {
+      "option": "M44.105",
+      "mise": 2200,
+      "probabilite": 0.68,
+      "raison": "Birmingham est 4e, 32 points en 17, 14 points devant Bolton (19e, 18 points), meilleure défense (15), invaincu à domicile (4V 4N 0D), 4 victoires sur 5, dernier match 2-0 à Burnley. Bolton : 1V 3D sur 5, défaite 1-3 contre West Brom, 5 absents. Marché : victoire 65,7 %, DNB 1,13 à 82 %. Je reste à 68 % : les deux ont joué mercredi, H2H partagés (5-4) et compositions absentes. Ce n'est pas un pari certain."
+    },
+    {
+      "option": "M78.94",
+      "mise": 2000,
+      "probabilite": 0.7,
+      "raison": "Al-Ahli est 5e, 24 points, invaincu à domicile (5V 0N 0D, 19-3), 4 victoires sur 5, 6 victoires de suite en H2H. Al Taawon est 17e, relégable, 5 points en 12, 5 points de retard, 0 victoire sur 5 (0,5 but) et 0 victoire à l'extérieur (0V 1N 5D), seulement 6 buts en 12. Marché : victoire 68,7 %, DNB 1,12 à 83,7 %. Je reste à 70 % : compositions absentes, dernier match d'Al-Ahli perdu 2-3 à Al Shamal. Ce n'est pas un pari certain."
+    },
+    {
+      "option": "M11.114",
+      "mise": 1800,
+      "probabilite": 0.62,
+      "raison": "Preston est 22e, relégable, 12 points en 17, 3 points de retard, domicile faible (2V 1N 5D) et 8 absents. Norwich est 11e, 25 points, 4 victoires sans défaite sur 5, 2e attaque (35 buts), 4 victoires à l'extérieur en 8. Marché : victoire 56,6 %, DNB 1,28 à 73,4 %. Je reste à 62 % : Preston vient de gagner 4-0 à Cardiff, H2H équilibrés, Norwich a aussi 4 absents, compositions absentes. Ce n'est pas un pari certain."
+    }
+  ],
+  "abstention": "\"Laiss\\u00e9s : Al-Hilal et Al-Nassr (1X2 1,17-1,18, pas de DNB cot\\u00e9, handicap -1 \\u00e0 1,26 trop bas pour la r\\u00e8gle 12), FCSB (1X2 1,22, pas de DNB, forme moyenne 2V 2D, poule de rel\\u00e9gation), Rapid Vienna (DNB 1,04), Wolves (DNB 1,14, sous 1,15), Leeds (mod\\u00e8le 56 % contre march\\u00e9 65,6 %), Betis (mod\\u00e8le 47 % contre march\\u00e9 61 %), Bayern (7 absents dont Kane, Neuer, Musiala, Olise, d\\u00e9faite 1-2 \\u00e0 Lille mercredi), Inter (DNB 1,08), PSG (Lorient 2e d\\u00e9fense, 4 nuls sur 10 H2H, Champions League mercredi), Charleroi (nul 2-2 samedi, DNB 1,20 pour un \\u00e9cart moins net), Rangers (Falkirk 3e, 5 victoires sur 5), Mainz (0 victoire \\u00e0 domicile, 8 absents d'Union mais H2H contre Mainz), PSV (5-1 perdu \\u00e0 Madrid mardi). Pas d'over ni de BTTS : compositions non publi\\u00e9es. Combin\\u00e9 Hertha+Bursaspor \\u00e0 1,25, hors fourchette 1,50-3. Almere reste en jeu (1 800).\"",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M3.98",
+      "pari": "Hertha BSC (remboursé si nul)",
+      "cote": 1.12,
+      "mise": 2500,
+      "probabilite": 0.72,
+      "raison": "Hertha est 1er, 34 points en 12, 10 points d'avance, meilleure attaque (29) et meilleure défense (9), 4 victoires sans défaite sur 5, invaincu à domicile (5V 0N 0D). Karlsruhe est 15e, au contact du barrage, 0 victoire à l'extérieur (0V 2N 3D, 13 buts encaissés) et l'une des deux pires défenses (24). Marché : victoire 69 %, DNB 1,12 à 83,4 %. Je reste à 72 % : les H2H sont partagés (2V, 3N, 1D) et les compositions ne sont pas publiées. Ce n'est pas un pari certain."
+    },
+    {
+      "id": "M16.105",
+      "pari": "Bursaspor (remboursé si nul)",
+      "cote": 1.12,
+      "mise": 2500,
+      "probabilite": 0.7,
+      "raison": "Bursaspor est 1er, 35 points en 15, 2 points d'avance, 4 victoires sans défaite sur 5, 6V 1N 1D à l'extérieur, meilleure défense (12) et 2e attaque (32). Vanspor est 16e, 2 points au-dessus de la relégation, domicile médiocre (3V 1N 4D). Marché : victoire 66,5 %, DNB 1,12 à 83,2 %. Je reste à 70 % : Vanspor a encore 3 victoires sur 5 et un H2H à domicile (3-0), compositions absentes. Ce n'est pas un pari certain."
+    },
+    {
+      "id": "M44.105",
+      "pari": "Birmingham (remboursé si nul)",
+      "cote": 1.13,
+      "mise": 2200,
+      "probabilite": 0.68,
+      "raison": "Birmingham est 4e, 32 points en 17, 14 points devant Bolton (19e, 18 points), meilleure défense (15), invaincu à domicile (4V 4N 0D), 4 victoires sur 5, dernier match 2-0 à Burnley. Bolton : 1V 3D sur 5, défaite 1-3 contre West Brom, 5 absents. Marché : victoire 65,7 %, DNB 1,13 à 82 %. Je reste à 68 % : les deux ont joué mercredi, H2H partagés (5-4) et compositions absentes. Ce n'est pas un pari certain."
+    },
+    {
+      "id": "M78.94",
+      "pari": "Al-Ahli Jeddah (remboursé si nul)",
+      "cote": 1.12,
+      "mise": 2000,
+      "probabilite": 0.7,
+      "raison": "Al-Ahli est 5e, 24 points, invaincu à domicile (5V 0N 0D, 19-3), 4 victoires sur 5, 6 victoires de suite en H2H. Al Taawon est 17e, relégable, 5 points en 12, 5 points de retard, 0 victoire sur 5 (0,5 but) et 0 victoire à l'extérieur (0V 1N 5D), seulement 6 buts en 12. Marché : victoire 68,7 %, DNB 1,12 à 83,7 %. Je reste à 70 % : compositions absentes, dernier match d'Al-Ahli perdu 2-3 à Al Shamal. Ce n'est pas un pari certain."
+    },
+    {
+      "id": "M11.114",
+      "pari": "Norwich (remboursé si nul)",
+      "cote": 1.28,
+      "mise": 1800,
+      "probabilite": 0.62,
+      "raison": "Preston est 22e, relégable, 12 points en 17, 3 points de retard, domicile faible (2V 1N 5D) et 8 absents. Norwich est 11e, 25 points, 4 victoires sans défaite sur 5, 2e attaque (35 buts), 4 victoires à l'extérieur en 8. Marché : victoire 56,6 %, DNB 1,28 à 73,4 %. Je reste à 62 % : Preston vient de gagner 4-0 à Cardiff, H2H équilibrés, Norwich a aussi 4 absents, compositions absentes. Ce n'est pas un pari certain."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [
+    {
+      "option": "combiné M3.98 + M16.105",
+      "motif": "sélection déjà jouée en simple : elle compterait deux fois"
+    }
+  ],
+  "enregistres": [
+    "M3.98",
+    "M16.105",
+    "M44.105",
+    "M78.94",
+    "M11.114"
+  ]
+}

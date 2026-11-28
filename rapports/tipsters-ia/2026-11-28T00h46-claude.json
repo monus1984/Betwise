@@ -1,0 +1,131 @@
+{
+  "profil": "claude",
+  "nom": "Claude",
+  "modele": "claude-sonnet-5-5",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "77d622dc08c87d5e",
+  "duree_s": 23,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 1
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 15
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M27"
+      },
+      "ms": 919
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M101"
+      },
+      "ms": 645
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M79"
+      },
+      "ms": 653
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 621
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M27",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M101",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M79",
+        "famille": "resultat"
+      },
+      "ms": 7
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "resultat"
+      },
+      "ms": 7
+    }
+  ],
+  "jetons": {
+    "entree": 149843,
+    "sortie": 2908,
+    "cacheLu": 11544,
+    "cacheEcrit": 2886
+  },
+  "erreur": null,
+  "bankroll": 99085,
+  "enJeu": 1000,
+  "propositions": [
+    {
+      "option": "M101.11",
+      "mise": 2000,
+      "probabilite": 0.7,
+      "raison": "Inter – Genoa : marché 2,52 à 0,74 buts, modèle 2,32 à 0,82. Genoa +2,5 ne perd que si Inter gagne par 3 buts ou plus (marché 67,6 %, modèle 73,6 %). Inter a joué mercredi en Ligue des champions et a 3 absents (Bastoni, Bonny, Calhanoglu). Genoa est sur 4 victoires en 5. Le risque : Inter a marqué 19 buts en 6 matchs à domicile. Je suis proche du marché, un peu au-dessus."
+    },
+    {
+      "option": "M79.11",
+      "mise": 2000,
+      "probabilite": 0.78,
+      "raison": "Elche – Atlético : marché 0,91 à 2,24 buts, modèle 1,01 à 2,07. Elche +2,5 ne perd que si l'Atlético gagne par 3 buts ou plus (marché 76,1 %, modèle 81 %). L'Atlético a joué mercredi et a 3 absents (Lookman, Romero, Sørloth). Risque : Elche a encaissé 14 buts en 6 matchs à domicile. Je suis entre le marché et le modèle."
+    }
+  ],
+  "abstention": "Je joue seulement 2 handicaps +2,5 sur les matchs analysés. HSV +2,5 est écarté : le modèle donne 44 % contre 65 % pour le marché. Lincoln +2,5 est écarté : cote de 1,12, trop faible. Les autres matchs ne sont pas analysés.",
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M101.11",
+      "pari": "Genoa CFC handicap +2,5",
+      "cote": 1.36,
+      "mise": 2000,
+      "probabilite": 0.7,
+      "raison": "Inter – Genoa : marché 2,52 à 0,74 buts, modèle 2,32 à 0,82. Genoa +2,5 ne perd que si Inter gagne par 3 buts ou plus (marché 67,6 %, modèle 73,6 %). Inter a joué mercredi en Ligue des champions et a 3 absents (Bastoni, Bonny, Calhanoglu). Genoa est sur 4 victoires en 5. Le risque : Inter a marqué 19 buts en 6 matchs à domicile. Je suis proche du marché, un peu au-dessus."
+    },
+    {
+      "id": "M79.11",
+      "pari": "Elche CF handicap +2,5",
+      "cote": 1.25,
+      "mise": 2000,
+      "probabilite": 0.78,
+      "raison": "Elche – Atlético : marché 0,91 à 2,24 buts, modèle 1,01 à 2,07. Elche +2,5 ne perd que si l'Atlético gagne par 3 buts ou plus (marché 76,1 %, modèle 81 %). L'Atlético a joué mercredi et a 3 absents (Lookman, Romero, Sørloth). Risque : Elche a encaissé 14 buts en 6 matchs à domicile. Je suis entre le marché et le modèle."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M101.11",
+    "M79.11"
+  ]
+}
