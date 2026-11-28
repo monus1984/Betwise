@@ -1,0 +1,261 @@
+{
+  "profil": "or-deepseek",
+  "nom": "DeepSeek",
+  "modele": "deepseek/deepseek-v4.1-flash-1017",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "17748aad742eb625",
+  "duree_s": 44,
+  "tours": 4,
+  "outils": [
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 10
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 607
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M33"
+      },
+      "ms": 646
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M37"
+      },
+      "ms": 691
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M62"
+      },
+      "ms": 434
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M99"
+      },
+      "ms": 636
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M68"
+      },
+      "ms": 422
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M45"
+      },
+      "ms": 405
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M101"
+      },
+      "ms": 479
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M43"
+      },
+      "ms": 476
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M53"
+      },
+      "ms": 430
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M22"
+      },
+      "ms": 340
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 509
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M82"
+      },
+      "ms": 634
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M51"
+      },
+      "ms": 272
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M80"
+      },
+      "ms": 492
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M79"
+      },
+      "ms": 482
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M43",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M79",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M62",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M33",
+        "famille": "resultat"
+      },
+      "ms": 6
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M101",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M51",
+        "famille": "resultat"
+      },
+      "ms": 5
+    }
+  ],
+  "jetons": {
+    "entree": 134501,
+    "sortie": 7305,
+    "cacheLu": 34688,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 91035,
+  "enJeu": 0,
+  "propositions": [
+    {
+      "option": "M62.1",
+      "mise": 4000,
+      "probabilite": 0.62,
+      "raison": "Arouca 5e (20 pts/11) et 2e meilleure défense du championnat (8 buts encaissés), 4 victoires-0 nul-1 défaite à domicile avec 9 buts marqués pour 3 encaissés. Rio Ave 17e, en barrage de maintien, 1 victoire-4 défaites sur les 5 derniers, 0,8 but marqué et 2,2 encaissé par match, et à l'extérieur 1 victoire-4 défaites avec 8 buts encaissés en 5 déplacements. Classement + forme + split dom/ext + défense adverse la plus faible du lot : les 4 avantages concordent."
+    },
+    {
+      "option": "M43.1",
+      "mise": 4000,
+      "probabilite": 0.67,
+      "raison": "Birmingham 4e (32 pts), meilleure défense du Championship (15 buts encaissés en 17), invaincu à domicile (4V-4N-0D) et en forme (4 victoires-1 défaite sur 5, 1,8 but marqué / 0,9 encaissé). Bolton 19e, 1 victoire-3 défaites sur 5 avec 1,9 but encaissé par match et 5 absents annoncés. Le match aller de forme, le classement et l'infirmerie adverse vont dans le même sens ; les cotes 1xBet donnent Birmingham à 1,47 et le modèle ne contredit pas."
+    },
+    {
+      "option": "M79.1",
+      "mise": 4500,
+      "probabilite": 0.74,
+      "raison": "Al-Ahli Jeddah est invaincu à domicile en Saudi Pro League (5 victoires en 5, 19 buts marqués pour 3 encaissés) et reste sur 4 victoires-1 défaite avec 2,6 buts marqués par match, Ivan Toney en forme. Al Taawon est 17e, relégable, sans aucune victoire à l'extérieur (0V-1N-5D, 5 buts marqués en 6 déplacements), 0 victoire sur les 5 derniers et seulement 6 buts en 12 matchs. H2H : Al-Ahli a gagné les 6 dernières confrontations. La cote de 1,40 correspond à un favori très largement supérieur, ce que confirment tous les indicateurs."
+    },
+    {
+      "option": "M101.1",
+      "mise": 3500,
+      "probabilite": 0.63,
+      "raison": "Charleroi 3e (28 pts/12), en forme (3 victoires-1 défaite sur 5, 2,3 buts marqués par match) et très solide chez lui (4V-1N-1D, 17 buts marqués en 6). SK Beveren 10e, 1 victoire-3 défaites sur 5, et surtout aucune victoire à l'extérieur cette saison (0V-1N-5D, 18 buts encaissés en 6 déplacements). Aucun absent signalé des deux côtés, donc pas d'incertitude de dernière minute notable."
+    }
+  ],
+  "abstention": null,
+  "carnetReecrit": true,
+  "retenus": [
+    {
+      "id": "M62.1",
+      "pari": "Arouca",
+      "cote": 1.73,
+      "mise": 4000,
+      "probabilite": 0.62,
+      "raison": "Arouca 5e (20 pts/11) et 2e meilleure défense du championnat (8 buts encaissés), 4 victoires-0 nul-1 défaite à domicile avec 9 buts marqués pour 3 encaissés. Rio Ave 17e, en barrage de maintien, 1 victoire-4 défaites sur les 5 derniers, 0,8 but marqué et 2,2 encaissé par match, et à l'extérieur 1 victoire-4 défaites avec 8 buts encaissés en 5 déplacements. Classement + forme + split dom/ext + défense adverse la plus faible du lot : les 4 avantages concordent."
+    },
+    {
+      "id": "M43.1",
+      "pari": "Birmingham",
+      "cote": 1.47,
+      "mise": 4000,
+      "probabilite": 0.67,
+      "raison": "Birmingham 4e (32 pts), meilleure défense du Championship (15 buts encaissés en 17), invaincu à domicile (4V-4N-0D) et en forme (4 victoires-1 défaite sur 5, 1,8 but marqué / 0,9 encaissé). Bolton 19e, 1 victoire-3 défaites sur 5 avec 1,9 but encaissé par match et 5 absents annoncés. Le match aller de forme, le classement et l'infirmerie adverse vont dans le même sens ; les cotes 1xBet donnent Birmingham à 1,47 et le modèle ne contredit pas."
+    },
+    {
+      "id": "M79.1",
+      "pari": "Al-Ahli Jeddah",
+      "cote": 1.4,
+      "mise": 4500,
+      "probabilite": 0.74,
+      "raison": "Al-Ahli Jeddah est invaincu à domicile en Saudi Pro League (5 victoires en 5, 19 buts marqués pour 3 encaissés) et reste sur 4 victoires-1 défaite avec 2,6 buts marqués par match, Ivan Toney en forme. Al Taawon est 17e, relégable, sans aucune victoire à l'extérieur (0V-1N-5D, 5 buts marqués en 6 déplacements), 0 victoire sur les 5 derniers et seulement 6 buts en 12 matchs. H2H : Al-Ahli a gagné les 6 dernières confrontations. La cote de 1,40 correspond à un favori très largement supérieur, ce que confirment tous les indicateurs."
+    },
+    {
+      "id": "M101.1",
+      "pari": "Charleroi",
+      "cote": 1.6,
+      "mise": 3500,
+      "probabilite": 0.63,
+      "raison": "Charleroi 3e (28 pts/12), en forme (3 victoires-1 défaite sur 5, 2,3 buts marqués par match) et très solide chez lui (4V-1N-1D, 17 buts marqués en 6). SK Beveren 10e, 1 victoire-3 défaites sur 5, et surtout aucune victoire à l'extérieur cette saison (0V-1N-5D, 18 buts encaissés en 6 déplacements). Aucun absent signalé des deux côtés, donc pas d'incertitude de dernière minute notable."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [
+    {
+      "option": "combiné M62.1 + M79.1",
+      "motif": "sélection déjà jouée en simple : elle compterait deux fois"
+    }
+  ],
+  "enregistres": [
+    "M62.1",
+    "M43.1",
+    "M79.1",
+    "M101.1"
+  ]
+}

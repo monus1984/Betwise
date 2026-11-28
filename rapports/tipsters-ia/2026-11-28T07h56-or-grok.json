@@ -1,0 +1,401 @@
+{
+  "profil": "or-grok",
+  "nom": "Grok",
+  "modele": "x-ai/grok-4.7",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "17748aad742eb625",
+  "duree_s": 219,
+  "tours": 9,
+  "outils": [
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 8
+    },
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M56"
+      },
+      "ms": 399
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M89"
+      },
+      "ms": 340
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M96"
+      },
+      "ms": 424
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M53"
+      },
+      "ms": 407
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M28"
+      },
+      "ms": 407
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M22"
+      },
+      "ms": 393
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M33"
+      },
+      "ms": 449
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M45"
+      },
+      "ms": 259
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M47"
+      },
+      "ms": 629
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M78"
+      },
+      "ms": 398
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 284
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M37"
+      },
+      "ms": 320
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M89",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M56",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M33",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M22",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M88"
+      },
+      "ms": 322
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M66"
+      },
+      "ms": 348
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M68"
+      },
+      "ms": 417
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M78"
+      },
+      "ms": 1024
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M41"
+      },
+      "ms": 282
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M83"
+      },
+      "ms": 468
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M86"
+      },
+      "ms": 384
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M103"
+      },
+      "ms": 269
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M97"
+      },
+      "ms": 349
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M60"
+      },
+      "ms": 255
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M71"
+      },
+      "ms": 390
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M78",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M88",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M60",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M71",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M19"
+      },
+      "ms": 840
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M62"
+      },
+      "ms": 597
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M99"
+      },
+      "ms": 259
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M20"
+      },
+      "ms": 422
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M62",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M40"
+      },
+      "ms": 654
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M105"
+      },
+      "ms": 616
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M27"
+      },
+      "ms": 622
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M51"
+      },
+      "ms": 1244
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 650
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M81"
+      },
+      "ms": 456
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M102"
+      },
+      "ms": 350
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M15"
+      },
+      "ms": 475
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M51",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M96",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M17",
+        "famille": "resultat"
+      },
+      "ms": 5
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M101"
+      },
+      "ms": 670
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M80"
+      },
+      "ms": 265
+    }
+  ],
+  "jetons": {
+    "entree": 550790,
+    "sortie": 16597,
+    "cacheLu": 393728,
+    "cacheEcrit": 0
+  },
+  "erreur": "API 402 : This request would exceed your available credits given your current in-flight requests. Retry after in-flight requests settle, or add credits.",
+  "bankroll": 105209.25,
+  "enJeu": 12800,
+  "propositions": [],
+  "abstention": null,
+  "carnetReecrit": false,
+  "retenus": [],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": []
+}

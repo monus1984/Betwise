@@ -1,0 +1,146 @@
+{
+  "profil": "claude",
+  "nom": "Claude",
+  "modele": "claude-sonnet-5-5",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "17748aad742eb625",
+  "duree_s": 26,
+  "tours": 6,
+  "outils": [
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 8
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M27"
+      },
+      "ms": 699
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M41"
+      },
+      "ms": 612
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M60"
+      },
+      "ms": 492
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M12"
+      },
+      "ms": 433
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M41",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M60",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M12",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M27",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M103",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M97"
+      },
+      "ms": 608
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M83"
+      },
+      "ms": 507
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M97",
+        "famille": "resultat"
+      },
+      "ms": 4
+    }
+  ],
+  "jetons": {
+    "entree": 308413,
+    "sortie": 2827,
+    "cacheLu": 17316,
+    "cacheEcrit": 2886
+  },
+  "erreur": null,
+  "bankroll": 99085,
+  "enJeu": 5000,
+  "propositions": [
+    {
+      "option": "M97.11",
+      "mise": 1500,
+      "probabilite": 0.66,
+      "raison": "PSG – Lorient : marché 2,85 à 0,66 buts, modèle 2,4 à 0,8. Lorient +2,5 ne perd que si PSG gagne par 3 buts ou plus (marché 59 %, modèle 72 %). PSG a joué mercredi (2-2 contre la Roma) et a 4 absents dont Doué et Kvaratskhelia. Lorient a la 2e meilleure défense (9 buts encaissés en 11 matchs). Risque : PSG a la meilleure attaque (25 buts en 11 matchs). Je me place entre le marché et le modèle."
+    }
+  ],
+  "abstention": "Je ne joue qu'un pari de plus. HSV +2,5 est tentant mais Bayern est incertain (modèle et marché divergent fortement), et Falkirk +2,5 face à Rangers est trop juste (60 %) avec Rangers qui a battu Falkirk 6-3 et 5-2. Les cotes de Málaga +2,5 (1,10) et Lincoln +2,5 (1,12) sont trop basses.",
+  "carnetReecrit": false,
+  "retenus": [
+    {
+      "id": "M97.11",
+      "pari": "FC Lorient handicap +2,5",
+      "cote": 1.55,
+      "mise": 1500,
+      "probabilite": 0.66,
+      "raison": "PSG – Lorient : marché 2,85 à 0,66 buts, modèle 2,4 à 0,8. Lorient +2,5 ne perd que si PSG gagne par 3 buts ou plus (marché 59 %, modèle 72 %). PSG a joué mercredi (2-2 contre la Roma) et a 4 absents dont Doué et Kvaratskhelia. Lorient a la 2e meilleure défense (9 buts encaissés en 11 matchs). Risque : PSG a la meilleure attaque (25 buts en 11 matchs). Je me place entre le marché et le modèle."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M97.11"
+  ]
+}

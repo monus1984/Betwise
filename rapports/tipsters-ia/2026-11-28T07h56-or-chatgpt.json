@@ -1,0 +1,218 @@
+{
+  "profil": "or-chatgpt",
+  "nom": "ChatGPT",
+  "modele": "openai/gpt-6.2-sol",
+  "promptVersion": "tipster-ia-v4",
+  "essai": false,
+  "dossier": "17748aad742eb625",
+  "duree_s": 24,
+  "tours": 3,
+  "outils": [
+    {
+      "outil": "matchs_a_venir",
+      "entree": {},
+      "ms": 9
+    },
+    {
+      "outil": "mon_historique",
+      "entree": {},
+      "ms": 0
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M27"
+      },
+      "ms": 614
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M42"
+      },
+      "ms": 642
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M51"
+      },
+      "ms": 414
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M71"
+      },
+      "ms": 394
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M78"
+      },
+      "ms": 490
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M96"
+      },
+      "ms": 392
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M97"
+      },
+      "ms": 427
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M103"
+      },
+      "ms": 409
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M64"
+      },
+      "ms": 492
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M6"
+      },
+      "ms": 490
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M17"
+      },
+      "ms": 562
+    },
+    {
+      "outil": "analyser_match",
+      "entree": {
+        "match": "M90"
+      },
+      "ms": 487
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M42",
+        "famille": "buts"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M64",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M78",
+        "famille": "resultat"
+      },
+      "ms": 4
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M96",
+        "famille": "resultat"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M51",
+        "famille": "buts"
+      },
+      "ms": 3
+    },
+    {
+      "outil": "cotes_match",
+      "entree": {
+        "match": "M103",
+        "famille": "resultat"
+      },
+      "ms": 3
+    }
+  ],
+  "jetons": {
+    "entree": 97864,
+    "sortie": 1069,
+    "cacheLu": 43527,
+    "cacheEcrit": 0
+  },
+  "erreur": null,
+  "bankroll": 101958,
+  "enJeu": 3400,
+  "propositions": [
+    {
+      "option": "M64.88",
+      "mise": 850,
+      "probabilite": 0.72,
+      "raison": "Santa Clara ou nul à 1,40 (06 h 01). Santa Clara est 4e, invaincu en cinq déplacements (quatre victoires, deux buts encaissés) et n’a concédé que huit buts en onze journées. Moreirense a perdu deux de ses cinq réceptions. Je relève le repère sans marge de 67,5 %, sans extrapoler le bilan extérieur : cinq matchs restent un petit échantillon et le marché ne projette qu’un léger avantage à Santa Clara (1,19 but contre 1,06)."
+    },
+    {
+      "option": "M96.1",
+      "mise": 750,
+      "probabilite": 0.74,
+      "raison": "Victoire de l’Inter à 1,35 (04 h 34). L’Inter a gagné ses six réceptions et y a marqué 19 buts. Marché et modèle lui donnent une nette avance en buts attendus (2,48 contre 0,73 et 2,32 contre 0,82). Je reste entre leurs estimations de victoire (75,6 % et 69,8 %) : le Genoa a gagné quatre de ses cinq derniers matchs et l’Inter, sans Çalhanoğlu selon la fiche, n’a eu que trois jours de récupération."
+    },
+    {
+      "option": "M103.11",
+      "mise": 550,
+      "probabilite": 0.62,
+      "raison": "Alavés +2,5 buts à 1,90 (03 h 57) : le pari ne perd que si le Real gagne par au moins trois buts. Les trois dernières confrontations listées se sont jouées à un but d’écart et Alavés a encaissé 11 buts en six déplacements. Le modèle projette 2,41 buts pour le Real, contre 3,27 pour le marché. Je reste entre les deux repères pour ce handicap (50,5 % et 72,9 %) : le Real a gagné ses six réceptions en marquant 19 buts, donc l’écart reste plausible."
+    }
+  ],
+  "abstention": "Trois simples, aucun combiné. Je laisse une place libre : pas de mise supplémentaire sur les quatre matchs déjà joués, et je passe notamment sur le Bayern vu les absences offensives signalées et l’absence de compositions confirmées.",
+  "carnetReecrit": false,
+  "retenus": [
+    {
+      "id": "M64.88",
+      "pari": "Santa Clara ou nul",
+      "cote": 1.4,
+      "mise": 900,
+      "probabilite": 0.72,
+      "raison": "Santa Clara ou nul à 1,40 (06 h 01). Santa Clara est 4e, invaincu en cinq déplacements (quatre victoires, deux buts encaissés) et n’a concédé que huit buts en onze journées. Moreirense a perdu deux de ses cinq réceptions. Je relève le repère sans marge de 67,5 %, sans extrapoler le bilan extérieur : cinq matchs restent un petit échantillon et le marché ne projette qu’un léger avantage à Santa Clara (1,19 but contre 1,06)."
+    },
+    {
+      "id": "M96.1",
+      "pari": "FC Internazionale Milano",
+      "cote": 1.35,
+      "mise": 800,
+      "probabilite": 0.74,
+      "raison": "Victoire de l’Inter à 1,35 (04 h 34). L’Inter a gagné ses six réceptions et y a marqué 19 buts. Marché et modèle lui donnent une nette avance en buts attendus (2,48 contre 0,73 et 2,32 contre 0,82). Je reste entre leurs estimations de victoire (75,6 % et 69,8 %) : le Genoa a gagné quatre de ses cinq derniers matchs et l’Inter, sans Çalhanoğlu selon la fiche, n’a eu que trois jours de récupération."
+    },
+    {
+      "id": "M103.11",
+      "pari": "Deportivo Alavés handicap +2,5",
+      "cote": 1.9,
+      "mise": 600,
+      "probabilite": 0.62,
+      "raison": "Alavés +2,5 buts à 1,90 (03 h 57) : le pari ne perd que si le Real gagne par au moins trois buts. Les trois dernières confrontations listées se sont jouées à un but d’écart et Alavés a encaissé 11 buts en six déplacements. Le modèle projette 2,41 buts pour le Real, contre 3,27 pour le marché. Je reste entre les deux repères pour ce handicap (50,5 % et 72,9 %) : le Real a gagné ses six réceptions en marquant 19 buts, donc l’écart reste plausible."
+    }
+  ],
+  "combinesRetenus": [],
+  "rejets": [],
+  "enregistres": [
+    "M64.88",
+    "M96.1",
+    "M103.11"
+  ]
+}
