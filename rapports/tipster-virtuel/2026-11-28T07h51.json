@@ -1,0 +1,57 @@
+{
+  "quand": "2026-11-28T07:51:48.017Z",
+  "essai": false,
+  "jour": "2026-11-28",
+  "matchs": 66,
+  "avecCotes": 64,
+  "candidats": 6363,
+  "selectionsSansCote1xBet": 6629,
+  "relevesTropEloignes": 1080,
+  "dejaAujourdhui": 0,
+  "choix": [
+    {
+      "match": "Hamburger SV – FC Bayern München",
+      "comp": "BL1",
+      "kickoff": "2026-11-28T14:30:00+00:00",
+      "market": "AH",
+      "param": -1.5,
+      "sel": "2",
+      "cote": 1.9,
+      "p": 0.545,
+      "pModele": 0.74,
+      "valeur": 0.11,
+      "profil": "risque",
+      "mise": 3200,
+      "coteRelevee": "2026-11-28T06:01:53+00:00",
+      "referenceRelevee": "2026-11-28T07:01:02.453+00:00",
+      "raison": "Probabilité 55 % selon les cotes de référence, 74 % selon le modèle. 1xBet paie 1,90 pour une cote juste de 1,71 : écart de +11 %."
+    },
+    {
+      "match": "Arouca – Rio Ave",
+      "comp": "PT1",
+      "kickoff": "2026-11-28T15:30:00+00:00",
+      "market": "AH",
+      "param": -1.5,
+      "sel": "1",
+      "cote": 3.18,
+      "p": 0.331,
+      "pModele": null,
+      "valeur": 0.051,
+      "profil": "risque",
+      "mise": 600,
+      "coteRelevee": "2026-11-28T06:01:53+00:00",
+      "referenceRelevee": "2026-11-28T07:11:33.151+00:00",
+      "raison": "Probabilité 33 % selon les cotes de référence. 1xBet paie 3,18 pour une cote juste de 3,03 : écart de +5,1 %."
+    }
+  ],
+  "bilan": {
+    "bankroll": 106664,
+    "net": 6664,
+    "enJeu": 3800,
+    "regles": 10,
+    "gagnes": 7,
+    "roi": 0.4165
+  },
+  "resume": "Tipster à règles fixes (témoin sans IA). Paris simples sur cote 1xBet, seulement quand le prix dépasse la valeur juste. Bankroll virtuelle : 106 664 FCFA (départ 100 000), 10 paris réglés dont 7 gagnés, rendement 41,6 %, 3 800 FCFA en jeu. Mis à jour le 28/11/2026 07:51:47.",
+  "candidatsVus": 203
+}
